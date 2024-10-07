@@ -1,0 +1,624 @@
+\documentclass{article}
+
+
+\usepackage{PRIMEarxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc
+\usepackage{multicol}
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}
+\usepackage{fancyhdr}       % header
+\usepackage{graphicx}       % graphics
+\usepackage{listings}
+\graphicspath{{media/}}     % organize your images and other figures under media/ folder
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{centernot}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{graphicx,wrapfig,lipsum}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+
+\lstset{
+ 	language = C++,
+        backgroundcolor={\color[gray]{.90}},
+}
+
+\newcommand{\argmin}{\mathop{\rm arg~min}\limits}
+\newcommand{\argmax}{\mathop{\rm arg~max}\limits}
+
+\newcommand{\hideaki}[1]{\textcolor{olive}{\small{\bf [Hideaki: #1 ]}}}
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {definition}% name
+  {Definition}% title
+  {%
+    colback=green!5,
+    colframe=green!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {def}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {theorem}% name
+  {Theorem}% title
+  {%
+    colback=blue!5,
+    colframe=blue!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {thm}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {lemma}% name
+  {Lemma}% title
+  {%
+    colback=blue!5,
+    colframe=blue!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {lem}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {assumption}% name
+  {Assumption}% title
+  {%
+    colback=red!5,
+    colframe=red!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {asm}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {protocol}% name
+  {Protocol}% title
+  {%
+    colback=yellow!5,
+    colframe=yellow!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {pro}% prefix
+  
+
+%Header
+\pagestyle{fancy}
+\thispagestyle{empty}
+\rhead{ \textit{ }} 
+
+% Update your Headers here
+%\fancyhead[LO]{Running Title for Header}
+% \fancyhead[RE]{Firstauthor and Secondauthor} % Firstauthor et al. if more than 2 - must use \documentclass[twoside]{article}
+
+
+
+  
+%% Title
+\title{myZKP: Introduction to Zero Knowledge Protocol
+%%%% Cite as
+%%%% Update your official citation here when published 
+%\thanks{\textit{\underline{Citation}}: 
+%\textbf{Authors. Title. Pages.... DOI:000000/11111.}} 
+}
+
+\author{
+    Hideaki Takahashi \\
+    Columbia University \\
+    ht2673@columbia.edu
+%  Affiliation \\
+%  Univ \\
+%  City\\
+%  \texttt{\{Author1, Author2\}email@email} \\
+  %% examples of more authors
+%   \And
+%  Author3 \\
+%  Affiliation \\
+%  Univ \\
+%  City\\
+%  \texttt{email@email} \\
+  %% \AND
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+}
+
+
+\begin{document}
+\maketitle
+
+
+%\begin{abstract}
+
+%\end{abstract}
+
+% keywords can be removed
+%\keywords{Code Obfuscation \and Software Security}
+
+%\begin{multicols}{2}
+
+\section{Basics of Number Theory}
+
+Let $X$ be a set in this section.
+
+\subsection{Computation Rule and Properties}
+
+\begin{definition}{Binary Operation}{}
+A mapping $\circ: X \times X \rightarrow X$ is a binary operation on $X$ if for any pair of elements $(x_1, x_2)$ in $X$, $x_1 \circ x_2$ is also in $X$.
+\end{definition}
+
+Example: Addition (+) on the set of integers is a binary operation. For example, $5 + 3 = 8$, and both $5, 3, 8$ are integers, staying within the set of integers.
+
+\begin{definition}{Associative Property}{}
+A binary operation $\circ$ is associative if $(a \circ b) \circ c = a \circ (b \circ c)$ for all $a, b, c \in X$.
+\end{definition}
+
+Example: Multiplication of real numbers is associative: $(2 \times 3) \times 4 = 2 \times (3 \times 4) = 24$. In a modular context, we also have addition modulo $n$ being associative. For example, for $n = 5$, $(2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4$.
+
+\begin{definition}{Commutative Property}{}
+A binary operation $\circ$ is commutative if $a \circ b = b \circ a$ for all $a, b \in X$.
+\end{definition}
+
+Example: Addition modulo $n$ is also commutative. For $n = 7$, $5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1$.
+
+\subsection{Semigroup, Group, Ring}
+
+\begin{definition}{Semigroup}{}
+A pair $(H, \circ)$, where $H$ is a non-empty set and $\circ$ is an associative binary operation on $H$, is called a semigroup.
+\end{definition}
+
+Example: The set of positive integers under multiplication modulo $n$ forms a semigroup. For instance, with $n = 6$, the elements $\{1, 2, 3, 4, 5\}$ under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.
+
+\begin{definition}{Abelian Semigroup}{}
+A semigroup whose operation is commutative is called an abelian semigroup.
+\end{definition}
+
+Example: The set of natural numbers under addition modulo $n$ forms an abelian semigroup. For $n = 7$, addition modulo 7 is both associative and commutative, so it is an abelian semigroup.
+
+\begin{definition}{Identity Element}{}
+An element $e \in H$ is an identity element of $H$ if it satisfies $e \circ a = a \circ e = a$ for any $a \in H$.
+\end{definition}
+
+Example: 0 is the identity element for addition modulo $n$. For example, $0 + a \bmod 5 = a + 0 \bmod 5 = a$. Similarly, 1 is the identity element for multiplication modulo $n$. For example, $1 \times a \bmod 7 = a \times 1 \bmod 7 = a$.
+
+\begin{definition}{Monoid}{}
+A semigroup with an identity element is called a monoid.
+\end{definition}
+
+Example: The set of non-negative integers under addition modulo $n$ forms a monoid. For $n = 5$, the set $\{0, 1, 2, 3, 4\}$ under addition modulo 5 forms a monoid with 0 as the identity element.
+
+\begin{definition}{Inverse}{}
+For an element $a \in H$, an element $b \in H$ is an inverse of $a$ if $a \circ b = b \circ a = e$, where $e$ is the identity element.
+\end{definition}
+
+Example: In modulo $n$ arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because $3 \times 5 \bmod 7 = 1$, where 1 is the identity element for multiplication.
+
+\begin{definition}{Group}{}
+A monoid in which every element has an inverse is called a group.
+\end{definition}
+
+Example: The set of integers modulo a prime $p$ under multiplication forms a group (Can you prove it?). For instance, in $\mathbb{Z}/5\mathbb{Z}$, every non-zero element $\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}$ has an inverse, making it a group.
+
+\begin{definition}{Order of a Group}{}
+The order of a group is the number of elements in the group.
+\end{definition}
+
+Example: The group of integers modulo 4 under addition has order 4, because the set of elements is $\{0, 1, 2, 3\}$.
+
+\begin{definition}{Ring}{}
+A triple $(R, +, \cdot)$ is a ring if $(R, +)$ is an abelian group, $(R, \cdot)$ is a semigroup, and the distributive property holds: $x \cdot (y + z) = (x \cdot y) + (x \cdot z)$ and $(x + y) \cdot z = (x \cdot z) + (y \cdot z)$ for all $x, y, z \in R$.
+\end{definition}
+
+Example: The set of integers with usual addition and multiplication modulo $n$ forms a ring. For example, in $\mathbb{Z}/6\mathbb{Z}$, addition and multiplication modulo 6 form a ring.
+
+\begin{definition}{Commutative Ring}{}
+A ring is called a commutative ring if its multiplication operation is commutative.
+\end{definition}
+
+The set of real numbers under usual addition and multiplication forms a commutative ring.
+
+\begin{definition}{Field}{}
+A commutative ring with a multiplicative identity element where every non-zero element has a multiplicative inverse is called a field.
+\end{definition}
+
+The set of rational numbers under usual addition and multiplication forms a field.
+
+\begin{definition}{Residue Class}{}
+The residue class of $a$ modulo $m$, denoted as $a + m\mathbb{Z}$, is the set $\{b : b \equiv a \pmod{m}\}$.
+\end{definition}
+
+Example: For $m = 3$, the residue class of 2 is $2 + 3\mathbb{Z} = \{\ldots, -4, -1, 2, 5, 8, \ldots\}$.
+
+\begin{definition}{Inverse of Residue Class}{}
+We denote the set of all residue classes modulo $m$ as $\mathbb{Z} / m\mathbb{Z}$. We say that $a + m\mathbb{Z}$ is invertible in $\mathbb{Z} / m\mathbb{Z}$ if and only if there exists a solution for $ax \equiv 1 \pmod{m}$.
+\end{definition}
+
+\begin{theorem}{}{}
+$a + m\mathbb{Z}$ is invertible in $\mathbb{Z} / m\mathbb{Z}$ if and only if $\gcd(a, m) = 1$.
+\end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: In $\mathbb{Z}/5\mathbb{Z}$, $3 + 5\mathbb{Z}$ is invertible because $\gcd(3, 5) = 1$ ($3\cdot2 \equiv 1 \bmod 5$). However, in $\mathbb{Z}/6\mathbb{Z}$, $3 + 6\mathbb{Z}$ is not invertible because $\gcd(3, 6) = 3 \neq 1$ ($3 \cdot 1 \equiv 3 \bmod 6$, $3 \cdot 2 \equiv 0 \bmod 6$, $3 \cdot 3 \equiv 9 \bmod 6$, $3 \cdot 4 \equiv 0 \bmod 6$ ...).
+
+\begin{definition}{Residue Class Ring}{}
+$(\mathbb{Z} / m \mathbb{Z}, +, \cdot)$ is a commutative ring where $1 + m \mathbb{Z}$ is the multiplicative identity element. This ring is called the residue class ring modulo $m$.
+\end{definition}
+
+$\mathbb{Z}/4\mathbb{Z} = \{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\}$ is a residue class ring modulo 4. We omit 
+
+\begin{definition}{Primitive Residue Class}{}
+A residue class $a + m\mathbb{Z}$ is called primitive if $\gcd(a, m) = 1$.
+\end{definition}
+
+Example: In $\mathbb{Z}/6\mathbb{Z}$, the primitive residue classes are $1 + 6\mathbb{Z}$ and $5 + 6\mathbb{Z}$.
+
+\begin{theorem}{}{}
+A residue ring $\mathbb{Z} / m\mathbb{Z}$ is a field if and only if $m$ is a prime number.
+\end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: For $m = 5$, $\mathbb{Z}/5\mathbb{Z} = \{0 + 5\mathbb{Z}, 1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}$ forms a field because 5 is a prime number, and every non-zero element has a multiplicative inverse. For example, $3 \times 2 \bmod 5 = 1$, so 2 is the inverse of 3 modulo 5.
+
+However, for $m = 6$, $\mathbb{Z}/6\mathbb{Z} = \{0 + 6\mathbb{Z}, 1+ 6\mathbb{Z}, 2+ 6\mathbb{Z}, 3+ 6\mathbb{Z}, 4+ 6\mathbb{Z}, 5+ 6\mathbb{Z}\}$ does not form a field because 6 is not prime, and not all elements have inverses. For instance, there is no inverse for 2, as $\gcd(2, 6) \neq 1$.
+
+\begin{definition}{Primitive Residue Class Group}{}
+The group of all primitive residue classes modulo $m$ is called the primitive residue class group, denoted by $(\mathbb{Z}/m\mathbb{Z})^{\times}$.
+\end{definition}
+
+Example: For $m = 8$, the set of all primitive residue classes is $(\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3 + 8\mathbb{Z}, 5 + 8\mathbb{Z}, 7 + 8\mathbb{Z}\}$. These are the integers less than 8 that are coprime to 8 (i.e., $\gcd(a, 8) = 1$).
+
+Contrast this with $m = 9$. The primitive residue class group is $(\mathbb{Z}/9\mathbb{Z})^{\times} = \{1 + 9\mathbb{Z}, 2 + 9\mathbb{Z}, 4 + 9\mathbb{Z}, 5 + 9\mathbb{Z}, 7 + 9\mathbb{Z}, 8 + 9\mathbb{Z}\}$, as these are the integers less than 9 that are coprime to 9.
+
+
+\begin{definition}{Euler's Totient Function}{}
+Euler's totient function $\phi(m)$ is equal to the order of the primitive residue class group modulo $m$, which is the number of integers less than $m$ and coprime to $m$.
+\end{definition}
+
+Example: For $m = 12$, $\phi(12) = 4$ because there are 4 integers less than 12 that are coprime to 12: $\{1, 5, 7, 11\}$.
+
+For $m = 10$, $\phi(10) = 4$, as there are also 4 integers less than 10 that are coprime to 10: $\{1, 3, 7, 9\}$.
+
+\begin{definition}{Order of an element within a group}{}
+    Order of $g \in G$ is the minimum number of natural number $e$ satisfying $g^{e} = 1$. We denote it as $\hbox{order}_g g$ or $\hbox{order } g$
+\end{definition}
+
+Example: In $(\mathbb{Z}/7\mathbb{Z})^{\times}$, the element 3 has order 6 because $3^6 \bmod 7 = 1$. In other words, $3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1$, and 6 is the smallest such exponent.
+
+\begin{definition}{Subgroup}{}
+    The subset $U \subseteq G$ is a subgroup of $G$ if $U$ itself is a group by the operation of $G$.
+\end{definition}
+
+Example: Consider $(\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}$ under multiplication modulo 8. The subset $\{1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}$ forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse ($7 \times 7 \equiv 1 \bmod 8$).
+
+\begin{definition}{Subgroup generated by $g$}{} The set ${g^{k} : k \in \mathbb{Z}}$, for some element $g \in G$, forms a subgroup of $G$ and is called the subgroup generated by $g$, denoted by $\langle g \rangle$. \end{definition}
+
+Example: Consider the group $(\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}$ under multiplication modulo 7. If we take $g = 3$, then $\langle 3 +7\mathbb{Z} \rangle = \{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 = \{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}$, which forms a subgroup generated by 3. This subgroup contains all elements of $(\mathbb{Z}/7\mathbb{Z})^{\times}$, making 3 a generator of the entire group.
+
+If $g$ has a finite order $e$, we have that $\langle g \rangle = {g^{k}: 0 \leq k \leq e}$, meaning $e$ is the order of $\langle g \rangle$.
+
+\begin{definition}{Cyclic Group}{} A group $G$ is called a cyclic group if there exists an element $g \in G$ such that $G = \langle g \rangle$. In this case, $g$ is called a generator of $G$. \end{definition}
+
+Example: The group $(\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}$ under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because $\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}$. Since 5 generates all the elements of the group, $G$ is cyclic.
+
+\begin{theorem}{}{} If $G$ is a finite cyclic group, it has $\phi(|G|)$ generators, and each generator has order $|G|$. \end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: Consider the group $(\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}$. This group is cyclic, and $\phi(8) = 4$. The generators of this group are $\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}$, each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is $|G| = 4$.
+
+\begin{theorem}{}{} If $G$ is a finite cyclic group, the order of any subgroup of $G$ divides the order of $G$. \end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: Consider the cyclic group $(\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}$ under multiplication modulo 6. If we take the subgroup $\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}$, this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.
+
+\begin{theorem}{Fermat's Little Theorem}{} If $\gcd(a, m) = 1$, then $a^{\phi(m)} \equiv 1 \pmod{m}$. \end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: Take $a = 2$ and $m = 5$. Since $\gcd(2, 5) = 1$, Fermat's Little Theorem tells us that $2^{\phi(5)} = 2^4 \equiv 1 \bmod 5$. Indeed, $2^4 = 16$ and $16 \bmod 5 = 1$.
+
+This theorem suggests that $a^{\phi(m) - 1} + m \mathbb{Z}$ is the inverse residue class of $a + m \mathbb{Z}$.
+
+\begin{theorem}{}{} The order of any element in a group divides the order of the group. \end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, consider the element $3 + 7\mathbb{Z}$. The order of $3 + 7\mathbb{Z}$ is 6, as $3^6 \equiv 1 \bmod 7$. The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.
+
+\begin{theorem}{Generalization of Fermat's Little Theorem}{} For any element $g \in G$, we have $g^{|G|} = 1$. \end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, for any element $g$, such as $g = 3 + 7\mathbb{Z}$, we have $3^6 \equiv 1 \bmod 7$. This holds for any $g \in (\mathbb{Z}/7\mathbb{Z})^{\times}$ because the order of the group is 6. Thus, $g^{|G|} = 1$ is satisfied.
+
+\begin{definition}{Pairing}{}
+Let $G_1$ and $G_2$ be cyclic groups under addition, both of prime order $p$, with generators $P$ and $Q$ respectively:
+
+    \begin{align}
+        G_1 &= \{0, P, 2P, ..., (p-1)P\} \\
+        G_2 &= \{0, Q, 2Q, ..., (p-1)Q\}
+    \end{align}
+
+Let $G_T$ be a cyclic group under multiplication, also of order $p$.
+A pairing is a map $e: G_1 \times G_2 \rightarrow G_T$ that satisfies the following bilinear property:
+
+    \begin{equation}
+        e(aP, bQ) = e(P, Q)^{ab}
+    \end{equation} for all $a, b \in \mathbb{Z}_p$.
+\end{definition}
+
+Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents area. The pairing function $e$ is like calculating the area: If you double the length and triple the width, the area becomes six times larger: $e(2P, 3Q) = e(P, Q)^{6}$
+
+\subsection{Polynomials}
+
+\begin{lemma}{Schwartz - Zippel Lemma}{}
+Let $\mathbb{F}$ be a field and $P: F^m \rightarrow \mathbb{F}$ and $Q: \mathbb{F}^m \rightarrow \mathbb{F}$ be two distinct multivariate polynomials of total degree at most $n$. For any finite subset $\mathbb{S} \subseteq \mathbb{F}$, we have:
+        \begin{equation}
+            Pr_{u \sim \mathbb{S}^{m}}[P(u) = Q(u)] \leq \frac{n}{|\mathbb{S}|}
+        \end{equation}
+where $u$ is drawn uniformly at random from $\mathbb{S}^m$.
+\end{lemma}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relatively small, the probability that the two different polynomials return the same value for a randomly chosen input is negligibly small. In other words, if we observe $P(u) = Q(u)$ for a random input $u$, we can conclude with high probability that $P$ and $Q$ are identical polynomials.
+
+\subsection{Assumptions}
+
+\begin{assumption}{Discrete Logarithm Problem}{} Let $G$ be a finite cyclic group of order $n$, with $\gamma$ as its generator and $1$ as the identity element. For any element $\alpha \in G$, there is currently no known efficient (polynomial-time) algorithm to compute the smallest non-negative integer $x$ such that $\alpha = \gamma^{x}$.
+\end{assumption}
+
+The Discrete Logarithm Problem can be thought of as a one-way function. It's easy to compute $g^{x}$ given $g$ and $x$, but it's computationally difficult to find $x$ given $g$ and $g^{x}$.
+
+\begin{assumption}{Knowledge of Exponent Assumption}{}
+Let $G$ be a cyclic group of prime order $q$ with generator $g \in G$. For any probabilistic polynomial-time algorithm $\mathcal{A}$ that outputs:
+
+\begin{equation}
+\mathcal{A}(g, g^x) = (h, h') \quad s.t. \quad h' = h^x
+\end{equation}
+, there exists an efficient extractor $\mathcal{E}$ such that:
+\begin{equation}
+\mathcal{E}(\mathcal{A}, g, g^x) = y \quad s.t. \quad h = g^y
+\end{equation}
+\end{assumption}
+
+This assumption states that if $\mathcal{A}$ can compute the pair $(g^y, g^{xy})$ from $(g, g^x)$, then $\mathcal{A}$ must "know" the value $y$, in the sense that $\mathcal{E}$ can extract $y$ from $\mathcal{A}$'s internal state.
+The Knowledge of Exponent Assumption is useful for constructing verifiable exponential calculation algorithms. Consider a scenario where Alice has a secret value $a$, and Bob has a secret value $b$. Bob wants to obtain $g^{ab}$. This can be achieved through the following protocol:
+
+\begin{protocol}{Verifiable Exponential Calculation Algorithm}{}
+    \begin{enumerate}
+    \item Bob sends $(g, g'=g^{b})$ to Alice
+    \item Alice sends $(h=g^{a}, h'=g'^{a})$ to Bob
+    \item Bob checks $h^{b} = h'$.
+\end{enumerate}
+\end{protocol}
+
+Thanks to the Discrete Logarithm Assumption and the Knowledge of Exponent Assumption, the following properties hold:
+\begin{itemize}
+\item Alice cannot derive $b$ from $(g, g')$.
+\item Bob cannot derive $a$ from $(h, h')$.
+\item Alice knows a value $a$ such that $h = g^a$. In other words, $h$ is the power of $g$.
+\end{itemize}
+\subsection{Useful Algorithms}
+
+\section{Basic of zk-SNARKs}
+
+We will explore the design of zk-SNARKs by incrementally developing zero-knowledge proof protocols.
+
+\paragraph{Overview}
+
+\paragraph{Goal}
+
+The Prover $\mathcal{A}$ aims to convince a Verifier $\mathcal{B}$ that $\mathcal{A}$ knows a specific polynomial. Let's denote this polynomial of degree $n$ with coefficients in a finite field as:
+
+\begin{equation}
+    P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
+\end{equation}
+
+Assume $P(x)$ has $n$ roots, $a_1, a_2, \ldots, a_n \in \mathbb{F}$, such that $P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)$. The Verifier $\mathcal{B}$ knows $d < n$ roots of $P(x)$, namely $a_1, a_2, \ldots, a_d$. Let $T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)$. Note that the Prover also knows $T(x)$.
+
+The Prover's objective is to convince the Verifier that $\mathcal{A}$ knows a polynomial $H(x) = \frac{P(x)}{T(x)}$.
+
+\subsection{Protocol Ideas}
+
+\paragraph{Naive Approach}
+
+The simplest approach to prove that $\mathcal{A}$ knows $H(x)$ is as follows:
+
+\begin{protocol}{Naive Approach}{}
+\begin{enumerate}
+    \item $\mathcal{B}$ sends all possible values in $\mathbb{F}$ to $\mathcal{A}$.
+    \item $\mathcal{A}$ computes and sends all possible outputs of $H(x)$ and $P(x)$.
+    \item $\mathcal{B}$ checks whether $H(a)T(a) = P(a)$ holds for any $a$ in $\mathbb{F}$.
+\end{enumerate}
+\end{protocol}
+
+This protocol is highly inefficient, requiring $\mathcal{O}(|\mathbb{F}|)$ evaluations and communications.
+
+\paragraph{$+$ Schwartz-Zippel Lemma}
+
+Instead of evaluating polynomials at all values in $\mathbb{F}$, we can leverage the Schwartz-Zippel Lemma: if $H(s) = \frac{P(s)}{T(s)}$ or equivalently $H(s)T(s) = P(s)$ for a random element $s$, we can conclude that $H(x) = \frac{P(x)}{T(x)}$ with high probability. Thus, the Prover $\mathcal{A}$ only needs to send evaluations of $P(s)$ and $H(s)$ for a random input $s$ received from $\mathcal{B}$
+
+\begin{protocol}{$+$ Schwartz-Zippel Lemma}{}
+    \begin{enumerate}
+    \item $\mathcal{B}$ draws random $s$ from $\mathbb{F}$ and sends it to $\mathcal{A}$.
+    \item $\mathcal{A}$ computes $h = H(s)$ and $p = P(s)$ and send them to $\mathcal{B}$.
+    \item $\mathcal{B}$ checks whether $p = t h$, where $t$ denotes $T(s)$.
+\end{enumerate}
+\end{protocol}
+
+This protocol is efficient, requiring only a constant number of evaluations and communications. However, it is vulnerable to a malicious prover who could send an arbitrary value $h'$ and the corresponding $p'$ such that $p' = h't$.
+
+\paragraph{$+$ Discrete Logarithm Assumption}
+
+To address this vulnerability, the Verifier must hide the randomly chosen input $s$ from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine $s$ from $\alpha$, where $\alpha = g^s \bmod p$. Thus, it's safe for the Verifier to send $\alpha$, as the Prover cannot easily derive $s$ from it.
+
+An interesting property of polynomial exponentiation is:
+
+\begin{align}
+    g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{x^2})^{c_2} \cdots (g^{x^n})^{c_n}
+\end{align}
+
+Instead of sending $s$, the Verifier can send $g$, $\alpha = g^s$, and its powers: $\alpha, \alpha^2, \ldots, \alpha^n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
+
+\begin{equation}
+    g^{p} = g^{P(s)} = g^{c_0} \alpha^{c_1} (\alpha^{2})^{c_2} \cdots (\alpha^{n})^{c_n}
+\end{equation}
+
+Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check $p = ht \iff g^p = (g^h)^t$.
+
+\begin{protocol}{$+$ Discrete Logarithm Assumption}{}
+\begin{enumerate}
+    \item $\mathcal{B}$ randomly draw $s$ from $\mathbb{F}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$.
+    \item $\mathcal{A}$ computes and sends $u = g^{p}$ and $v = g^{h}$.
+    \item $\mathcal{B}$ checks whether $u = v^{t}$.
+\end{enumerate}
+\end{protocol}
+
+This approach prevents the Prover from obtaining $s$ or $t = T(s)$, making it impossible to send fake $(h', p')$ such that $p' = h't$.
+
+However, this protocol still has a flaw. Since the Prover can compute $g^t = \alpha^{c_1}(\alpha^2)^{c_2}\cdots(\alpha^d)^{c_d}$, they could send fake values $((g^{t})^{z}, g^{z})$ instead of $(g^p, g^h)$ for an arbitrary value $z$. The verifier's check would still pass, and they could not detect this deception.
+
+\paragraph{$+$ Knowledge of Exponent Assumption}
+
+To address the vulnerability where the verifier $\mathcal{B}$ cannot distinguish if $v (= g^h)$ from the prover is a power of $\alpha = g^s$, we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
+
+\begin{enumerate}
+    \item $\mathcal{B}$ sends both $\alpha$ and $\alpha' = \alpha^r$ for a new random value $r$.
+    \item The prover returns $a = (\alpha^i)^{c_i}$ and $a' = (\alpha'^i)^{c_i}$ for $i = 1, ..., n$.
+    \item $\mathcal{B}$ can conclude that $a$ is a power of $\alpha$ if $a^r = a'$.
+\end{enumerate}
+
+Based on this assumption, we can design an improved protocol:
+
+\begin{protocol}{$+$ Knowledge of Exponent Assumption}{}
+\begin{enumerate}
+    \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$ and $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha^{r} = g^{sr}$.
+    \item $\mathcal{A}$ computes and sends $u = g^{p}$, $v = g^{h}$, and $w = g^{p'}$, where $g^{p'} = g^{P(sr)}$.
+    \item $\mathcal{B}$ checks whether $u^{r} = w$.
+    \item $\mathcal{B}$ checks whether $u = v^{t}$.
+\end{enumerate}
+\end{protocol}
+
+The prover can compute $g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}$) using powers of $\alpha'$. This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
+
+\paragraph{$+$ Zero Knowledge}
+
+To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about $P(x)$ from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value $\delta$:
+
+\begin{protocol}{$+$ Zero Knowledge}{}
+\begin{enumerate}
+    \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$ and $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha^{r} = g^{sr}$.
+    \item $\mathcal{A}$ randomly selects $\delta$ from field $\mathbb{F}$.
+    \item $\mathcal{A}$ computes and sends $u' = (g^{p})^{\delta}$, $v' = (g^{h})^{\delta}$, and $w' = (g^{p'})^{\delta}$.
+    \item $\mathcal{B}$ checks whether $u'^{r} = w'$.
+    \item $\mathcal{B}$ checks whether $u' = v'^{t}$.
+\end{enumerate}
+\end{protocol}
+
+By introducing the random value $\delta$, the verifier can no longer learn anything about $p$, $h$, or $w$, thus achieving zero knowledge.
+
+\paragraph{$+$ Non-interactivity}
+
+The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.
+
+In this approach, a trusted third party generates the random values $s$ and $r$. These values are then obfuscated and distributed as follows:
+
+\begin{enumerate}
+    \item \textbf{Proof Key}: Provided to the prover \begin{enumerate}
+        \item $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$
+        \item $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha' = g^{sr}$
+        \end{enumerate}
+    \item \textbf{Verification Key}: Distributed to verifiers \begin{enumerate}
+        \item $g^{r}$
+        \item $g^{T(s)}$
+    \end{enumerate}
+\end{enumerate}
+
+After distribution, the original $s$ and $r$ values are securely destroyed.
+
+Then, the non-interactive protocol consists of two main parts: proof generation and verification.
+
+\begin{protocol}{$+$ Non-Interactive: Proof}{}
+    \begin{enumerate}
+        \item $\mathcal{A}$ receives the proof key
+        \item $\mathcal{A}$ randomly selects $\delta$ from field $\mathbb{F}$.
+        \item $\mathcal{A}$ broadcast the proof $\pi = (u' = (g^{p})^{\delta}, v' = (g^{h})^{\delta}, w' = (g^{p'})^{\delta})$
+    \end{enumerate}
+\end{protocol}
+
+\begin{protocol}{$+$ Non-Interactive: Verification}{}
+    \begin{enumerate}
+        \item $\mathcal{B}$ receives the verification key
+        \item $\mathcal{B}$ checks whether $u'^{r} = w'$.
+        \item $\mathcal{B}$ checks whether $u' = v'^{t}$.
+    \end{enumerate}
+\end{protocol}
+
+\subsection{Arithmetization}
+
+\section{Basic of zk-STARKs}
+
+\section{Circom: Domestic Specific Language for ZKP}
+
+%Bibliography
+\bibliographystyle{unsrt}  
+\bibliography{references}  
+%\end{multicols}
+
+
+\appendix
+
+
+\end{document}
