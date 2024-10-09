@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram name="ページ1" id="wBYSGC_C_Osr-C-wnUIG">
-    <mxGraphModel dx="840" dy="546" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="412" dy="267" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -44,7 +44,7 @@
           <mxGeometry x="267" y="191" width="28" height="28" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-14" value="Proving Key" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
-          <mxGeometry x="237" y="172" width="90" height="30" as="geometry" />
+          <mxGeometry x="235" y="172" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-15" value="Verification Key" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="334" y="221" width="110" height="30" as="geometry" />
