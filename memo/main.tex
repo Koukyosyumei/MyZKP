@@ -28,6 +28,7 @@
 \usepackage{color}
 \usepackage{xcolor}
 \usepackage{tcolorbox}
+\usepackage{bm}
 
 \lstset{
  	language = C++,
@@ -62,6 +63,18 @@
     fonttitle=\bfseries,
   }% options
   {thm}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {proposition}% name
+  {Proposition}% title
+  {%
+    colback=blue!5,
+    colframe=blue!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {prop}% prefix
 
 \tcbuselibrary{theorems}
 \newtcbtheorem
@@ -165,6 +178,10 @@
 %\keywords{Code Obfuscation \and Software Security}
 
 %\begin{multicols}{2}
+
+\textbf{\textcolor{red}{THIS MANUSCRIPT IS WIP. IT IS LIKELY TO CONTAIN MANY WRONG INFORMATION}}
+
+\tableofcontents
 
 \section{Basics of Number Theory}
 
@@ -397,6 +414,48 @@ Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents ar
 
 \subsection{Polynomials}
 
+\begin{theorem}{Lagrange Interpolation}{}
+    A $n$-degre polynomial $P(x)$ that goes through different $n + 1$ points $\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\}$ is uniquely represented as follows:
+
+    \begin{equation}
+        P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
+    \end{equation}, where $f_i(x) = \prod_{k \neq i} (x - x_k)$
+\end{theorem}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+For example, the quadratic polynomial that goes through $\{(1, 0), (2, 3), (3, 8)\}$ is as follows:
+
+\begin{equation*}
+    P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1
+\end{equation*}
+
+Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.
+
+\begin{proposition}{Homomorphisms of Lagrange Interpolation}{}
+Let $L(v)$ and $L(w)$ be the polynomial resulting from Lagrange Interpolation on the output ($y$) vector $v$ and $w$ for the same inputs ($x$). Then, the following properties hold:
+
+\begin{itemize}
+    \item Additivity: $L(v + w) = L(v) + L(w)$ for any vectors $v$ and $w$
+    \item Scalar multiplication: $L(\gamma v) = \gamma L(v)$ for any scalar $\gamma$ and vector $v$
+\end{itemize}
+\end{proposition}
+
+\begin{proof}
+    
+Let $v = (v_1, \ldots, v_n)$ and $w = (w_1, \ldots, w_n)$ be vectors, and $x_1, \ldots, x_n$ be the interpolation points.
+
+\begin{align*}
+    L(v + w) &= \sum_{i=1}^n (v_i + w_i) \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \sum_{i=1}^n v_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} + \sum_{i=1}^n w_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = L(v) + L(w) \\
+    L(\gamma v) &= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \gamma \sum_{i=1}^n v_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \gamma L(v)
+\end{align*}
+\end{proof}
+
+
+
+
 \begin{lemma}{Schwartz - Zippel Lemma}{}
 Let $\mathbb{F}$ be a field and $P: F^m \rightarrow \mathbb{F}$ and $Q: \mathbb{F}^m \rightarrow \mathbb{F}$ be two distinct multivariate polynomials of total degree at most $n$. For any finite subset $\mathbb{S} \subseteq \mathbb{F}$, we have:
         \begin{equation}
@@ -410,6 +469,8 @@ where $u$ is drawn uniformly at random from $\mathbb{S}^m$.
 \end{proof}
 
 This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relatively small, the probability that the two different polynomials return the same value for a randomly chosen input is negligibly small. In other words, if we observe $P(u) = Q(u)$ for a random input $u$, we can conclude with high probability that $P$ and $Q$ are identical polynomials.
+
+\subsection{Elliptic curve}
 
 \subsection{Assumptions}
 
@@ -451,13 +512,215 @@ Thanks to the Discrete Logarithm Assumption and the Knowledge of Exponent Assump
 
 \section{Basic of zk-SNARKs}
 
-We will explore the design of zk-SNARKs by incrementally developing zero-knowledge proof protocols.
+Based on~\cite{petkus2019and}, we will explore the design of zk-SNARKs by incrementally developing zero-knowledge proof protocols.
 
 \paragraph{Overview}
 
-\paragraph{Goal}
+\subsection{Arithmetization}
 
-The Prover $\mathcal{A}$ aims to convince a Verifier $\mathcal{B}$ that $\mathcal{A}$ knows a specific polynomial. Let's denote this polynomial of degree $n$ with coefficients in a finite field as:
+The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.
+
+To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.
+
+However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression $z = x \land y$ can be represented as $x(x-1) = 0$, $y(y-1) = 0$, and $z = xy$ in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.
+
+\subsubsection{Rank-1 Constraint System (R1CS)}
+
+There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as \underline{a set of equality constraints, each involving only one multiplication}. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:
+
+\begin{definition}{R1CS}{}
+
+An R1CS structure $\mathcal{S}$ consists of:
+\begin{itemize}
+\item Size bounds $m, d, \ell \in \mathbb{N}$ where $d > \ell$
+\item Three matrices $O, L, R \in \mathbb{F}^{m\times d}$ with at most $ \Omega(\max(m, d))$ non-zero entries in total
+\end{itemize}
+
+An R1CS instance includes a public input $p \in \mathbb{F}^\ell$, while an R1CS witness is a vector $w \in \mathbb{F}^{d - \ell - 1}$.
+A structure-instance tuple $(S, p)$ is satisfied by a witness $w$ if:
+\begin{equation}
+(L \cdot a) \circ (R \cdot a) - O \cdot a = \mathbf{0}
+\end{equation}
+where $a = (1, w, p) \in \mathbb{F}^d$, $\cdot$ denotes matrix-vector multiplication, and $\circ$ is the Hadamard product.
+
+\end{definition}
+
+The intuitive interpretation of each matrix is as follows:
+
+\begin{itemize}
+\item $L$: Encodes the left input of each gate
+\item $R$: Encodes the right input of each gate
+\item $O$: Encodes the output of each gate
+\item The leading 1 in the witness vector allows for constant terms
+\end{itemize}
+
+\paragraph{Single Multiplication}
+
+Let's consider a simple example where we want to prove $z = x \cdot y$, with $z = 3690$, $x = 82$, and $y = 45$.
+
+\begin{itemize}
+    \item \textbf{Witness vector}: $(1, z, x, y) = (1, 3690, 82, 45)$
+    \item \textbf{Number of witnesses}: $m = 4$
+    \item \textbf{Number of constraints}: $d = 1$
+\end{itemize}
+
+The R1CS constraint for $z = x \cdot y$ is satisfied when:
+
+\begin{align*}
+&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot a) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot a) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot a \\
+=&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix}) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix}) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix} \\
+=& 82 \cdot 45 - 3690 \\
+=& 3690 - 3690 \\
+=& 0
+\end{align*}
+
+This example demonstrates how R1CS encodes a simple multiplication constraint:
+\begin{itemize}
+\item $L = \begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix}$ selects $x$ (left input)
+\item $R = \begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix}$ selects $y$ (right input)
+\item $O = \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix}$ selects $z$ (output)
+\end{itemize}
+
+\paragraph{Multiple Constraints}
+
+Let's examine a more complex example: $r = a \cdot b \cdot c \cdot d$. Since R1CS requires that each constraint contain only one multiplication, we need to break this down into multiple constraints:
+
+\begin{align*}
+v_1 &= a \cdot b \\
+v_2 &= c \cdot d \\
+r &= v_1 \cdot v_2
+\end{align*}
+
+Note that alternative representations are possible, such as $v_1 = ab, v_2 = v_1c, r = v_2d$. In this example, we use 7 variables $(r, a, b, c, d, v_1, v_2)$, so the dimension of the witness vector will be $m = 8$ (including the constant 1). We have three constraints, so $n = 3$.
+To construct the matrices $L$, $R$, and $O$, we can interpret the constraints as linear combinations:
+
+\begin{align*}
+v_1 &= (0 \cdot 1 + 0 \cdot r + 1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot b \\
+v_2 &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot d \\
+r &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot v_1 + 0 \cdot v_2) \cdot v_2
+\end{align*}
+
+Thus, we can construct $L$, $R$, and $O$ as follows:
+
+\begin{equation*}
+L = \begin{bmatrix}
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+\end{equation*}
+\begin{equation*}
+R = \begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation*}
+\begin{equation*}
+O = \begin{bmatrix}
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\end{equation*}
+
+Where the columns in each matrix correspond to $(1, r, a, b, c, d, v_1, v_2)$.
+
+\paragraph{Addition with a Constant}
+
+Let's examine the case $z = x \cdot y + 3$. We can represent this as $-3 + z = x \cdot y$. For the witness vector $(1, z, x, y)$, we have:
+
+\begin{align*}
+L &= \begin{bmatrix}
+0 & 0 & 1 & 0
+\end{bmatrix} \\
+R &= \begin{bmatrix}
+0 & 0 & 0 & 1
+\end{bmatrix} \\
+O &= \begin{bmatrix}
+-3 & 1 & 0 & 0
+\end{bmatrix}
+\end{align*}
+
+Note that the constant 3 appears in the $O$ matrix with a negative sign, effectively moving it to the left side of the equation
+
+\paragraph{Multiplication with a Constant}
+
+Now, let's consider $z = 3x^2 + y$. The requirement of "one multiplication per constraint" doesn't apply to multiplication with a constant, as we can treat it as repeated addition.
+
+\begin{align*}
+L &= \begin{bmatrix}
+0 & 0 & 3 & 0
+\end{bmatrix} \\
+R &= \begin{bmatrix}
+0 & 0 & 1 & 0
+\end{bmatrix} \\
+O &= \begin{bmatrix}
+0 & 1 & 0 & -1
+\end{bmatrix}
+\end{align*}
+
+\subsubsection{Quadratic Arithmetic Program (QAP)}
+Recall that the prover aims to demonstrate knowledge of a witness $w$ without revealing it. This is equivalent to knowing a vector $a$ that satisfies $(L \cdot a) \circ (R \cdot a) = O \cdot a$, where $\circ$ denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires $\Omega(d)$ operations, where $d$ is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with $\Omega(1)$ evaluations.
+
+Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence $Av = Bu$, where:
+
+\begin{align*}
+A = \begin{bmatrix}
+2 & 5 \\
+3 & 1 \\
+\end{bmatrix},
+B = \begin{bmatrix}
+4 & 1 \\
+2 & 3 \\
+\end{bmatrix},
+v = \begin{bmatrix}
+3 \\ 1
+\end{bmatrix},
+u = \begin{bmatrix}
+2 \\ 2
+\end{bmatrix}
+\end{align*}
+The equivalence check can be represented as:
+\begin{equation*}
+\begin{bmatrix}
+2 \\ 3
+\end{bmatrix} \cdot 3 + \begin{bmatrix}
+5 \\ 1
+\end{bmatrix} \cdot 1 = \begin{bmatrix}
+4 \\ 2
+\end{bmatrix} \cdot 2 + \begin{bmatrix}
+1 \\ 3
+\end{bmatrix} \cdot 2
+\end{equation*}
+This matrix-vector equality check is equivalent to the following polynomial equality check:
+\begin{equation*}
+3 \cdot L([(1, 2), (2, 3)]) + 1 \cdot L([(1, 5), (2, 1)]) = 2 \cdot L([(1, 4), (2, 2)]) + 2 \cdot L([(1, 1), (2, 3)])
+\end{equation*}
+where $L$ denotes Lagrange Interpolation. In $\mathbb{F}_{11}$ (field with 11 elements), we have:
+\begin{align*}
+L([(1, 2), (2, 3)]) &= x + 1 \\
+L([(1, 5), (2, 1)]) &= 7x + 9 \\
+L([(1, 4), (2, 2)]) &= 9x + 6 \\
+L([(1, 1), (2, 3)]) &= 2x + 10
+\end{align*}
+The Schwartz-Zippel Lemma states that we need only one evaluation at a random point to check the equivalence of polynomials with high probability.
+However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. Thus, we don't have $\ell(x) \cdot r(x) = o(x)$, where $\ell(x)$, $r(x)$, and $o(x)$ are the polynomials resulting from the Lagrange interpolation of $L \cdot a$, $R \cdot a$, and $O \cdot a$ respectively. While $\ell(x)$, $r(x)$, and $o(x)$ are of degree at most $d-1$, $\ell(x) \cdot r(x)$ is of degree at most $2d-2$.
+To address this discrepancy, we introduce a degree $d$ polynomial $t(x) = \prod_{i=1}^{d} (x - i)$. We can then rewrite the equation as:
+\begin{equation}
+\ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
+\end{equation}
+where $h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}$. This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
+
+\subsection{Polynomial Commitment}
+
+Before dealing with all of $\ell(x)$, $r(x)$, and $o(x)$ at once, we design a protocol that allows the Prover $\mathcal{A}$ to convince the Verifier $\mathcal{B}$ that $\mathcal{A}$ knows a specific polynomial. Let's denote this polynomial of degree $n$ with coefficients in a finite field as:
 
 \begin{equation}
     P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
@@ -466,8 +729,6 @@ The Prover $\mathcal{A}$ aims to convince a Verifier $\mathcal{B}$ that $\mathca
 Assume $P(x)$ has $n$ roots, $a_1, a_2, \ldots, a_n \in \mathbb{F}$, such that $P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)$. The Verifier $\mathcal{B}$ knows $d < n$ roots of $P(x)$, namely $a_1, a_2, \ldots, a_d$. Let $T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)$. Note that the Prover also knows $T(x)$.
 
 The Prover's objective is to convince the Verifier that $\mathcal{A}$ knows a polynomial $H(x) = \frac{P(x)}{T(x)}$.
-
-\subsection{Protocol Ideas}
 
 \paragraph{Naive Approach}
 
@@ -573,9 +834,9 @@ By introducing the random value $\delta$, the verifier can no longer learn anyth
 
 The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.
 
-In this approach, a trusted third party generates the random values $s$ and $r$. These values are then obfuscated and distributed as follows:
-
+\begin{protocol}{$+$ Non-Interactive: Trusted Setup}{}
 \begin{enumerate}
+    \item \textbf{Secret Seed}: A trusted third party generates the random values $s$ and $r$
     \item \textbf{Proof Key}: Provided to the prover \begin{enumerate}
         \item $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$
         \item $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha' = g^{sr}$
@@ -584,9 +845,11 @@ In this approach, a trusted third party generates the random values $s$ and $r$.
         \item $g^{r}$
         \item $g^{T(s)}$
     \end{enumerate}
+    \item After distribution, the original $s$ and $r$ values are securely destroyed.
 \end{enumerate}
+\end{protocol}
 
-After distribution, the original $s$ and $r$ values are securely destroyed.
+
 
 Then, the non-interactive protocol consists of two main parts: proof generation and verification.
 
@@ -598,19 +861,25 @@ Then, the non-interactive protocol consists of two main parts: proof generation 
     \end{enumerate}
 \end{protocol}
 
+Since $r$ is not shared and already destroyed, the verifier $\mathcal{B}$ cannot calculate $u'^{r}$ to check $u'^{r} = w'$. Instead, the verifier can use a paring with bilinear mapping; $u'^{r} = w'$ is equivalent to $e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)$.
+
 \begin{protocol}{$+$ Non-Interactive: Verification}{}
     \begin{enumerate}
-        \item $\mathcal{B}$ receives the verification key
-        \item $\mathcal{B}$ checks whether $u'^{r} = w'$.
+        \item $\mathcal{B}$ receives the verification key.
+        \item $\mathcal{B}$ receives the proof $\pi$.
+        \item $\mathcal{B}$ checks whether $e(u', g^{r}) = e(w', g)$.
         \item $\mathcal{B}$ checks whether $u' = v'^{t}$.
     \end{enumerate}
 \end{protocol}
 
-\subsection{Arithmetization}
+\subsection{Putting it all together}
+
+\subsection{(Advanced) Rigorous Design of Groth16}
+
+\subsection{Circom: Domestic Specific Language for zk-SNARKs}
 
 \section{Basic of zk-STARKs}
 
-\section{Circom: Domestic Specific Language for ZKP}
 
 %Bibliography
 \bibliographystyle{unsrt}  
