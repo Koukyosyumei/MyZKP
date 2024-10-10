@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram name="ページ1" id="wBYSGC_C_Osr-C-wnUIG">
-    <mxGraphModel dx="875" dy="568" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="750" dy="487" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -80,7 +80,7 @@
           <mxGeometry y="300" width="230" height="240" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-25" value="&lt;b&gt;snarkjs&lt;/b&gt;&lt;div&gt;(Crypto Compiler)&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-          <mxGeometry x="130" y="322" width="70" height="70" as="geometry" />
+          <mxGeometry x="130" y="318" width="70" height="70" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-26" value="" style="shape=datastore;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="20" y="469" width="24" height="40" as="geometry" />
@@ -117,7 +117,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-37" value="Proof" style="shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="252" y="327" width="66" height="65" as="geometry" />
+          <mxGeometry x="252" y="323" width="66" height="65" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-39" value="Verification Code&lt;div&gt;(e.g. Solidity)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="368" y="425" width="102" height="60" as="geometry" />
@@ -133,7 +133,7 @@
             <mxPoint x="330" y="363" as="sourcePoint" />
             <mxPoint x="380" y="443" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="340" y="360" />
+              <mxPoint x="340" y="356" />
               <mxPoint x="340" y="460" />
             </Array>
           </mxGeometry>
@@ -163,7 +163,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-46" value="Prover" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="134" y="511" width="60" height="30" as="geometry" />
+          <mxGeometry x="141" y="501" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="P9_0h6CCMoPjBfBq-7Ps-47" value="Verifier" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="390" y="506" width="60" height="30" as="geometry" />
@@ -183,6 +183,9 @@
         </mxCell>
         <mxCell id="WaR9Pl7D-EfiIoN3fVG2-3" value="Witness Generation&lt;div&gt;Program&lt;/div&gt;&lt;div&gt;(C / wasm)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="14" y="392.5" width="86" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="WaR9Pl7D-EfiIoN3fVG2-9" value="Witness&lt;div&gt;(Concrete values of variables)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="116" y="415" width="102" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
