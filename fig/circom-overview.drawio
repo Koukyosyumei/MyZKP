@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram name="ページ1" id="wBYSGC_C_Osr-C-wnUIG">
-    <mxGraphModel dx="1427" dy="390" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1702" dy="568" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -171,7 +171,7 @@
         <mxCell id="WaR9Pl7D-EfiIoN3fVG2-1" value="Witness Generation&lt;div&gt;Program&lt;/div&gt;&lt;div&gt;(C / wasm)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="406" y="71" width="86" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="WaR9Pl7D-EfiIoN3fVG2-2" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.148;entryY=0.375;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="WaR9Pl7D-EfiIoN3fVG2-1">
+        <mxCell id="WaR9Pl7D-EfiIoN3fVG2-2" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.148;entryY=0.375;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;shape=link;" edge="1" parent="1" source="WaR9Pl7D-EfiIoN3fVG2-1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="440" as="sourcePoint" />
             <mxPoint x="38.95999999999981" y="389.9999999999999" as="targetPoint" />
