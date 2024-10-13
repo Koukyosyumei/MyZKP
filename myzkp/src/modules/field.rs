@@ -4,7 +4,7 @@ use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct FieldElement {
+pub struct FieldElement {
     val: BigInt,
     k_modulus: BigInt,
 }
@@ -22,27 +22,23 @@ impl FieldElement {
     }
 
     // Zero element.
-    fn zero(k_modulus: Option<BigInt>) -> Self {
+    pub fn zero(k_modulus: Option<BigInt>) -> Self {
         FieldElement::new(BigInt::zero(), k_modulus)
     }
 
     // Unit element.
-    fn one(k_modulus: Option<BigInt>) -> Self {
+    pub fn one(k_modulus: Option<BigInt>) -> Self {
         FieldElement::new(BigInt::one(), k_modulus)
     }
 
     // Typecasting from an integer or another FieldElement.
-    fn typecast<T: Into<BigInt>>(
-        other: T,
-        k_modulus: &BigInt,
-        generator_val: &BigInt,
-    ) -> FieldElement {
+    fn typecast<T: Into<BigInt>>(other: T, k_modulus: &BigInt) -> FieldElement {
         let val: BigInt = other.into();
         FieldElement::new(val, Some(k_modulus.clone()))
     }
 
     // Inverse of the element using extended Euclidean algorithm.
-    fn inverse(&self) -> Self {
+    pub fn inverse(&self) -> Self {
         let (mut t, mut new_t) = (BigInt::zero(), BigInt::one());
         let (mut r, mut new_r) = (self.k_modulus.clone(), self.val.clone());
         while !new_r.is_zero() {
