@@ -31,6 +31,9 @@
 \usepackage{tcolorbox}
 \usepackage{bm}
 
+% Packages required for the code listing
+\usepackage{listings}
+
 \lstset{
  	language = C++,
         backgroundcolor={\color[gray]{.90}},
@@ -124,12 +127,49 @@
     fonttitle=\bfseries,
   }% options
   {pro}% prefix
-  
 
 %Header
 \pagestyle{fancy}
 \thispagestyle{empty}
 \rhead{ \textit{ }} 
+
+% Define colors for the code
+\definecolor{commentgreen}{rgb}{0,0.5,0}
+\definecolor{stringred}{rgb}{0.6,0,0}
+\definecolor{keywordblue}{rgb}{0,0,0.75}
+\definecolor{backgray}{rgb}{0.95,0.95,0.95}
+
+% Define Rust language style
+\lstdefinelanguage{Rust}{
+    morekeywords={
+        as, break, const, continue, crate, else, enum, extern, false, fn, for, if, impl, in, let, loop, match, mod, move, mut, pub, ref, return, self, Self, static, struct, super, trait, true, type, unsafe, use, where, while, async, await, dyn
+    },
+    sensitive=true,
+    morecomment=[l]{//},     % Line comments
+    morecomment=[s]{/*}{*/}, % Block comments
+    morestring=[b]"          % Strings in double quotes
+}
+
+% Define the style for the listings
+\lstset{
+    language=Rust,
+    backgroundcolor=\color{backgray},   % Set background color
+    basicstyle=\ttfamily\footnotesize,  % Set font style and size
+    keywordstyle=\color{keywordblue}\bfseries, % Keywords in blue and bold
+    commentstyle=\color{commentgreen}\itshape, % Comments in green and italic
+    stringstyle=\color{stringred},      % Strings in red
+    numbers=left,                       % Line numbers on the left
+    numberstyle=\tiny\color{gray},      % Line number style
+    stepnumber=1,                       % Step between line numbers
+    numbersep=5pt,                      % Space between numbers and code
+    showstringspaces=false,             % Don't show spaces in strings
+    tabsize=4,                          % Tab width
+    captionpos=b,                       % Caption position
+    breaklines=true,                    % Break long lines
+    breakatwhitespace=false,            % Don't break at whitespace
+    frame=single,                       % Frame around the code
+    framerule=0.8pt,                    % Thickness of the frame
+}
 
 % Update your Headers here
 %\fancyhead[LO]{Running Title for Header}
@@ -139,7 +179,7 @@
 
   
 %% Title
-\title{MyZKP: Introduction to Zero Knowledge Protocol
+\title{Building Zero-Knowledge Proofs from Scratch
 %%%% Cite as
 %%%% Update your official citation here when published 
 %\thanks{\textit{\underline{Citation}}: 
