@@ -9,14 +9,21 @@ pub struct FieldElement {
     k_modulus: BigInt,
 }
 
+const DEFAULT_K_MODULES: i64 = 3_i64 * (1 << 30) + 1;
+
 impl FieldElement {
     // Constructor with optional k_modulus and generator_val.
     fn new(val: BigInt, k_modulus: Option<BigInt>) -> Self {
-        let default_k_modulus = (3_i64 * (1 << 30) + 1).to_bigint().unwrap();
-        let k_modulus = k_modulus.unwrap_or(default_k_modulus.clone());
+        let default_k_modulus = (DEFAULT_K_MODULES).to_bigint().unwrap();
+        let k_modulus = k_modulus.unwrap_or(default_k_modulus);
+
+        let mut val_sanitized = val % &k_modulus;
+        if val_sanitized < 0_i32.to_bigint().unwrap() {
+            val_sanitized += k_modulus.clone();
+        }
 
         FieldElement {
-            val: val % &k_modulus,
+            val: val_sanitized,
             k_modulus,
         }
     }
@@ -41,7 +48,14 @@ impl FieldElement {
     pub fn inverse(&self) -> Self {
         let (mut t, mut new_t) = (BigInt::zero(), BigInt::one());
         let (mut r, mut new_r) = (self.k_modulus.clone(), self.val.clone());
+        if r < 0_i32.to_bigint().unwrap() {
+            r = r + self.k_modulus.clone();
+        }
+        if new_r < 0_i32.to_bigint().unwrap() {
+            new_r = new_r + self.k_modulus.clone();
+        }
         while !new_r.is_zero() {
+            // println!("{} {}", r, new_r);
             let quotient = &r / &new_r;
             (t, new_t) = (new_t.clone(), &t - &quotient * &new_t);
             (r, new_r) = (new_r.clone(), &r - &quotient * &new_r);
@@ -244,7 +258,7 @@ mod tests {
         let fe_neg = -fe1;
         assert_eq!(
             fe_neg.val,
-            (0.to_bigint().unwrap() - 10.to_bigint().unwrap()) % fe_neg.k_modulus
+            ((-10 + DEFAULT_K_MODULES).to_bigint().unwrap()) % fe_neg.k_modulus
         );
     }
 

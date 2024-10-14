@@ -1,4 +1,5 @@
 use num_bigint::ToBigInt;
+use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 // Assuming FieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
@@ -75,6 +76,7 @@ impl Polynomial {
         let numerators = Polynomial::from_monomials(x_values);
 
         for j in 0..x_values.len() {
+            // \Pi_{j \neq i} (x_j - x_i)
             let mut denominator = FieldElement::one(None);
             for i in 0..x_values.len() {
                 if i != j {
@@ -83,8 +85,8 @@ impl Polynomial {
             }
             let cur_poly = numerators
                 .clone()
-                .div(Polynomial::from_monomials(&[x_values[j].clone()]));
-            lagrange_polys.push(cur_poly.scalar_mul(&denominator));
+                .div(Polynomial::from_monomials(&[x_values[j].clone()]).scalar_mul(&denominator));
+            lagrange_polys.push(cur_poly);
         }
 
         let mut result = Polynomial {
@@ -113,6 +115,44 @@ impl Polynomial {
             });
         }
         poly
+    }
+}
+
+impl fmt::Display for Polynomial {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut terms = Vec::new();
+
+        for (i, coeff) in self.poly.iter().enumerate() {
+            if coeff != &FieldElement::zero(None) {
+                let term = if i == 0 {
+                    // Constant term
+                    format!("{}", coeff)
+                } else if i == 1 {
+                    // Linear term (e.g., 3x)
+                    if coeff == &FieldElement::one(None) {
+                        format!("{}", self.var)
+                    } else {
+                        format!("{}{}", coeff, self.var)
+                    }
+                } else {
+                    // Higher degree terms (e.g., 3x^2)
+                    if coeff == &FieldElement::one(None) {
+                        format!("{}^{}", self.var, i)
+                    } else {
+                        format!("{}{}^{}", coeff, self.var, i)
+                    }
+                };
+                terms.push(term);
+            }
+        }
+
+        // If there are no non-zero terms, return "0"
+        if terms.is_empty() {
+            write!(f, "0")
+        } else {
+            // Join the terms with " + " and print the result
+            write!(f, "{}", terms.join(" + "))
+        }
     }
 }
 
@@ -196,22 +236,25 @@ impl Div for Polynomial {
 
     /// Division of two polynomials, returns quotient.
     fn div(self, other: Polynomial) -> Polynomial {
-        let mut remainder = self.poly.clone();
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
+        let mut divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
         let mut quotient =
             vec![FieldElement::zero(None); self.degree() as usize - other.degree() as usize + 1];
 
-        let divisor_lead_inv = other.poly.last().unwrap().inverse();
-
-        while remainder.len() >= other.poly.len() {
-            let lead_term = remainder.last().unwrap().clone() * divisor_lead_inv.clone();
-            let deg_diff = remainder.len() - other.poly.len();
+        let mut i = 0_i32;
+        while remainder_coeffs.len() >= divisor_coeffs.len() && i < 20 {
+            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
 
-            for i in 0..other.poly.len() {
-                remainder[deg_diff + i] =
-                    remainder[deg_diff + i].clone() - (lead_term.clone() * other.poly[i].clone());
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
+                    - (lead_term.clone() * divisor_coeffs[i].clone());
             }
-            remainder = Self::trim_trailing_zeros(remainder.clone());
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+            i += 1;
         }
 
         Polynomial {
@@ -376,9 +419,9 @@ mod tests {
         let quotient = poly1 / poly2;
         let expected_quotient = Polynomial {
             poly: vec![
-                FieldElement::from(1_i32.to_bigint().unwrap()),
                 FieldElement::from(2_i32.to_bigint().unwrap()),
-            ], // 1 + 2x
+                FieldElement::from(1_i32.to_bigint().unwrap()),
+            ], // 2 + x
             var: "x".to_string(),
         };
         //let expected_remainder = Polynomial {
@@ -424,17 +467,17 @@ mod tests {
             FieldElement::from(3_i32.to_bigint().unwrap()),
         ];
         let y_values = vec![
-            FieldElement::from(2_i32.to_bigint().unwrap()),
+            FieldElement::from(0_i32.to_bigint().unwrap()),
             FieldElement::from(3_i32.to_bigint().unwrap()),
-            FieldElement::from(5_i32.to_bigint().unwrap()),
+            FieldElement::from(8_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::interpolate(&x_values, &y_values);
         let expected = Polynomial {
             poly: vec![
-                FieldElement::from(1_i32.to_bigint().unwrap()),
+                FieldElement::from(-1_i32.to_bigint().unwrap()),
                 FieldElement::from(0_i32.to_bigint().unwrap()),
                 FieldElement::from(1_i32.to_bigint().unwrap()),
-            ], // x^2 + 1
+            ], // x^2 - 1
             var: "x".to_string(),
         };
         assert_eq!(result, expected);
@@ -447,11 +490,12 @@ mod tests {
             FieldElement::from(3_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::from_monomials(&points);
+        // (x - 2) * (x - 3) = x^2 - 5x + 6
         let expected = Polynomial {
             poly: vec![
-                FieldElement::from(-6_i32.to_bigint().unwrap()), // constant term
-                FieldElement::from(5_i32.to_bigint().unwrap()),  // x term
-                FieldElement::from(1_i32.to_bigint().unwrap()),  // x^2 term
+                FieldElement::from(6_i32.to_bigint().unwrap()), // constant term
+                FieldElement::from(-5_i32.to_bigint().unwrap()), // x term
+                FieldElement::from(1_i32.to_bigint().unwrap()), // x^2 term
             ],
             var: "x".to_string(),
         };
