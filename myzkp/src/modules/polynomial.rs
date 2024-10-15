@@ -2,13 +2,14 @@ use num_bigint::ToBigInt;
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-// Assuming ModuloFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
-use crate::modules::field::ModuloFieldElement;
+// Assuming FiniteFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
+use crate::modules::field::Field;
+use crate::modules::field::FiniteFieldElement;
 
-/// Polynomial struct representing a polynomial over ModuloFieldElement.
+/// Polynomial struct representing a polynomial over FiniteFieldElement.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial {
-    pub poly: Vec<ModuloFieldElement>,
+    pub poly: Vec<FiniteFieldElement>,
     pub var: String, // Variable for representation, default to 'x'
 }
 
@@ -17,17 +18,17 @@ impl Polynomial {
     pub fn x() -> Self {
         Polynomial {
             poly: vec![
-                ModuloFieldElement::zero(None),
-                ModuloFieldElement::one(None),
+                FiniteFieldElement::zero(None),
+                FiniteFieldElement::one(None),
             ],
             var: "x".to_string(),
         }
     }
 
     /// Removes trailing zeroes from a polynomial's coefficients.
-    fn trim_trailing_zeros(poly: Vec<ModuloFieldElement>) -> Vec<ModuloFieldElement> {
+    fn trim_trailing_zeros(poly: Vec<FiniteFieldElement>) -> Vec<FiniteFieldElement> {
         let mut trimmed = poly;
-        while trimmed.last() == Some(&ModuloFieldElement::zero(None)) {
+        while trimmed.last() == Some(&FiniteFieldElement::zero(None)) {
             trimmed.pop();
         }
         trimmed
@@ -44,16 +45,16 @@ impl Polynomial {
     }
 
     /// Returns the nth coefficient.
-    pub fn nth_coefficient(&self, n: usize) -> ModuloFieldElement {
+    pub fn nth_coefficient(&self, n: usize) -> FiniteFieldElement {
         if n > self.degree() as usize {
-            ModuloFieldElement::zero(None)
+            FiniteFieldElement::zero(None)
         } else {
             self.poly[n].clone()
         }
     }
 
     /// Scalar multiplication of a polynomial.
-    pub fn scalar_mul(&self, scalar: &ModuloFieldElement) -> Polynomial {
+    pub fn scalar_mul(&self, scalar: &FiniteFieldElement) -> Polynomial {
         Polynomial {
             poly: self
                 .poly
@@ -65,8 +66,8 @@ impl Polynomial {
     }
 
     /// Evaluate the polynomial at a given point.
-    pub fn eval(&self, point: &ModuloFieldElement) -> ModuloFieldElement {
-        let mut result = ModuloFieldElement::zero(None);
+    pub fn eval(&self, point: &FiniteFieldElement) -> FiniteFieldElement {
+        let mut result = FiniteFieldElement::zero(None);
         for coef in self.poly.iter().rev() {
             result = result * point.clone() + coef.clone();
         }
@@ -75,15 +76,15 @@ impl Polynomial {
 
     /// Lagrange interpolation to compute polynomials.
     pub fn interpolate(
-        x_values: &[ModuloFieldElement],
-        y_values: &[ModuloFieldElement],
+        x_values: &[FiniteFieldElement],
+        y_values: &[FiniteFieldElement],
     ) -> Polynomial {
         let mut lagrange_polys = vec![];
         let numerators = Polynomial::from_monomials(x_values);
 
         for j in 0..x_values.len() {
             // \Pi_{j \neq i} (x_j - x_i)
-            let mut denominator = ModuloFieldElement::one(None);
+            let mut denominator = FiniteFieldElement::one(None);
             for i in 0..x_values.len() {
                 if i != j {
                     denominator = denominator * (x_values[j].clone() - x_values[i].clone());
@@ -106,16 +107,16 @@ impl Polynomial {
     }
 
     /// Helper to create polynomial from a single monomial.
-    pub fn from_monomials(x_values: &[ModuloFieldElement]) -> Polynomial {
+    pub fn from_monomials(x_values: &[FiniteFieldElement]) -> Polynomial {
         let mut poly = Polynomial {
-            poly: vec![ModuloFieldElement::one(None)],
+            poly: vec![FiniteFieldElement::one(None)],
             var: "x".to_string(),
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
                 poly: vec![
-                    ModuloFieldElement::zero(None) - x.clone(),
-                    ModuloFieldElement::one(None),
+                    FiniteFieldElement::zero(None) - x.clone(),
+                    FiniteFieldElement::one(None),
                 ],
                 var: "x".to_string(),
             });
@@ -129,20 +130,20 @@ impl fmt::Display for Polynomial {
         let mut terms = Vec::new();
 
         for (i, coeff) in self.poly.iter().enumerate() {
-            if coeff != &ModuloFieldElement::zero(None) {
+            if coeff != &FiniteFieldElement::zero(None) {
                 let term = if i == 0 {
                     // Constant term
                     format!("{}", coeff)
                 } else if i == 1 {
                     // Linear term (e.g., 3x)
-                    if coeff == &ModuloFieldElement::one(None) {
+                    if coeff == &FiniteFieldElement::one(None) {
                         format!("{}", self.var)
                     } else {
                         format!("{}{}", coeff, self.var)
                     }
                 } else {
                     // Higher degree terms (e.g., 3x^2)
-                    if coeff == &ModuloFieldElement::one(None) {
+                    if coeff == &FiniteFieldElement::one(None) {
                         format!("{}^{}", self.var, i)
                     } else {
                         format!("{}{}^{}", coeff, self.var, i)
@@ -170,7 +171,7 @@ impl Add for Polynomial {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = ModuloFieldElement::zero(None);
+        let zero = FiniteFieldElement::zero(None);
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -191,7 +192,7 @@ impl Sub for Polynomial {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = ModuloFieldElement::zero(None);
+        let zero = FiniteFieldElement::zero(None);
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -223,7 +224,7 @@ impl Mul for Polynomial {
     /// Multiplication of two polynomials.
     fn mul(self, other: Polynomial) -> Polynomial {
         let mut result = vec![
-            ModuloFieldElement::zero(None);
+            FiniteFieldElement::zero(None);
             self.degree() as usize + other.degree() as usize + 1
         ];
 
@@ -249,7 +250,7 @@ impl Div for Polynomial {
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
         let mut quotient = vec![
-            ModuloFieldElement::zero(None);
+            FiniteFieldElement::zero(None);
             self.degree() as usize - other.degree() as usize + 1
         ];
 
@@ -295,22 +296,22 @@ mod tests {
     fn test_polynomial_addition() {
         let poly1 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(5_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(5_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -321,22 +322,22 @@ mod tests {
     fn test_polynomial_subtraction() {
         let poly1 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(4_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(5_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(5_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -347,15 +348,15 @@ mod tests {
     fn test_polynomial_negation() {
         let poly = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(4_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(-3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(-4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(-3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(-4_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -366,23 +367,23 @@ mod tests {
     fn test_polynomial_multiplication() {
         let poly1 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
             ], // 1 + 2x
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
             ], // 2 + 3x
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()), // constant term
-                ModuloFieldElement::from(7_i32.to_bigint().unwrap()), // x term
-                ModuloFieldElement::from(6_i32.to_bigint().unwrap()), // x^2 term
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()), // constant term
+                FiniteFieldElement::from(7_i32.to_bigint().unwrap()), // x term
+                FiniteFieldElement::from(6_i32.to_bigint().unwrap()), // x^2 term
             ],
             var: "x".to_string(),
         };
@@ -393,16 +394,16 @@ mod tests {
     fn test_polynomial_scalar_multiplication() {
         let poly = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
             ], // 1 + 2x
             var: "x".to_string(),
         };
-        let scalar = ModuloFieldElement::from(3_i32.to_bigint().unwrap());
+        let scalar = FiniteFieldElement::from(3_i32.to_bigint().unwrap());
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(6_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(6_i32.to_bigint().unwrap()),
             ], // 3 + 6x
             var: "x".to_string(),
         };
@@ -413,29 +414,29 @@ mod tests {
     fn test_polynomial_division() {
         let poly1 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
             ], // 2 + 3x + x^2
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
             ], // 1 + x
             var: "x".to_string(),
         };
         let quotient = poly1 / poly2;
         let expected_quotient = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
             ], // 2 + x
             var: "x".to_string(),
         };
         //let expected_remainder = Polynomial {
-        //    poly: vec![ModuloFieldElement::from(1_i32.to_bigint().unwrap())], // remainder is 1
+        //    poly: vec![FiniteFieldElement::from(1_i32.to_bigint().unwrap())], // remainder is 1
         //    var: "x".to_string(),
         //};
         assert_eq!(quotient, expected_quotient);
@@ -446,13 +447,13 @@ mod tests {
     fn test_polynomial_evaluation() {
         let poly = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
             ], // 2 + 3x
             var: "x".to_string(),
         };
-        let point = ModuloFieldElement::from(2_i32.to_bigint().unwrap());
-        let expected = ModuloFieldElement::from(8_i32.to_bigint().unwrap()); // 2 + 3 * 2 = 8
+        let point = FiniteFieldElement::from(2_i32.to_bigint().unwrap());
+        let expected = FiniteFieldElement::from(8_i32.to_bigint().unwrap()); // 2 + 3 * 2 = 8
         assert_eq!(poly.eval(&point), expected);
     }
 
@@ -460,9 +461,9 @@ mod tests {
     fn test_polynomial_degree() {
         let poly = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(0_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
             ], // 1 + 0x + 3x^2
             var: "x".to_string(),
         };
@@ -472,21 +473,21 @@ mod tests {
     #[test]
     fn test_polynomial_lagrange_interpolation() {
         let x_values = vec![
-            ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
-            ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-            ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
         ];
         let y_values = vec![
-            ModuloFieldElement::from(0_i32.to_bigint().unwrap()),
-            ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
-            ModuloFieldElement::from(8_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(8_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::interpolate(&x_values, &y_values);
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(-1_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(0_i32.to_bigint().unwrap()),
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(-1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
             ], // x^2 - 1
             var: "x".to_string(),
         };
@@ -496,16 +497,16 @@ mod tests {
     #[test]
     fn test_polynomial_from_monomials() {
         let points = vec![
-            ModuloFieldElement::from(2_i32.to_bigint().unwrap()),
-            ModuloFieldElement::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::from_monomials(&points);
         // (x - 2) * (x - 3) = x^2 - 5x + 6
         let expected = Polynomial {
             poly: vec![
-                ModuloFieldElement::from(6_i32.to_bigint().unwrap()), // constant term
-                ModuloFieldElement::from(-5_i32.to_bigint().unwrap()), // x term
-                ModuloFieldElement::from(1_i32.to_bigint().unwrap()), // x^2 term
+                FiniteFieldElement::from(6_i32.to_bigint().unwrap()), // constant term
+                FiniteFieldElement::from(-5_i32.to_bigint().unwrap()), // x term
+                FiniteFieldElement::from(1_i32.to_bigint().unwrap()), // x^2 term
             ],
             var: "x".to_string(),
         };

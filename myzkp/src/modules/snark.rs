@@ -1,41 +1,41 @@
-use crate::modules::field::ModuloFieldElement;
+use crate::modules::field::FiniteFieldElement;
 use crate::modules::polynomial::Polynomial;
 
 pub struct SNARK {
-    g: ModuloFieldElement,
+    g: FiniteFieldElement,
     t: Polynomial,
     n: i32,
 }
 
 pub struct ProofKey {
-    alpha: ModuloFieldElement,
-    alpha_seq: Vec<ModuloFieldElement>,
-    alpha_prime: ModuloFieldElement,
-    alpha_prime_seq: Vec<ModuloFieldElement>,
+    alpha: FiniteFieldElement,
+    alpha_seq: Vec<FiniteFieldElement>,
+    alpha_prime: FiniteFieldElement,
+    alpha_prime_seq: Vec<FiniteFieldElement>,
 }
 
 pub struct VerificationKey {
-    gr: ModuloFieldElement,
-    gts: ModuloFieldElement,
+    gr: FiniteFieldElement,
+    gts: FiniteFieldElement,
 }
 
 pub struct Proof {
-    u_prime: ModuloFieldElement,
-    v_prime: ModuloFieldElement,
-    w_prime: ModuloFieldElement,
+    u_prime: FiniteFieldElement,
+    v_prime: FiniteFieldElement,
+    w_prime: FiniteFieldElement,
 }
 
 /// Function simulating bilinear pairing on two group elements.
-//fn simulate_bilinear_pairing(g1: ModuloFieldElement, g2: ModuloFieldElement) -> ModuloFieldElement {
+//fn simulate_bilinear_pairing(g1: FiniteFieldElement, g2: FiniteFieldElement) -> FiniteFieldElement {
 //    // Pairing function e(g1, g2) = g1.element^g2.element mod modulus
 //    g1.element.pow(g2.element.value.to_u64_digits()[0]) // Simplified pairing logic
 //}
 
 impl SNARK {
     pub fn trusted_setup(&self) -> (ProofKey, VerificationKey) {
-        let excluded_elements: Vec<ModuloFieldElement> = vec![];
-        let s = ModuloFieldElement::random_element(&excluded_elements);
-        let r = ModuloFieldElement::random_element(&excluded_elements);
+        let excluded_elements: Vec<FiniteFieldElement> = vec![];
+        let s = FiniteFieldElement::random_element(&excluded_elements);
+        let r = FiniteFieldElement::random_element(&excluded_elements);
 
         let alpha = self.g.pow(s.clone());
         let alpha_prime = self.g.pow(s.clone() * r.clone()); // g^(sr)
@@ -60,8 +60,8 @@ impl SNARK {
     }
 
     pub fn prove(&self, proof_key: &ProofKey, p: &Polynomial, h: &Polynomial) -> Proof {
-        let excluded_elements: Vec<ModuloFieldElement> = vec![];
-        let delta = ModuloFieldElement::random_element(&excluded_elements);
+        let excluded_elements: Vec<FiniteFieldElement> = vec![];
+        let delta = FiniteFieldElement::random_element(&excluded_elements);
 
         let mut gp = self.g.pow(p.poly[0].clone());
         for i in 1..p.poly.len() {

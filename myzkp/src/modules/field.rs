@@ -3,15 +3,32 @@ use num_traits::{One, Signed, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+const DEFAULT_K_MODULES: i64 = 3_i64 * (1 << 30) + 1;
+
+pub trait Field:
+    Sized
+    + Clone
+    + PartialEq
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Mul<Output = Self>
+    + Div<Output = Self>
+    + Neg<Output = Self>
+{
+    // A commutative ring with a multiplicative identity element
+    // where every non-zero element has a multiplicative inverse is called a field.
+    fn one(modulus: Option<BigInt>) -> Self;
+    fn zero(modulus: Option<BigInt>) -> Self;
+    fn inverse(&self) -> Self;
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuloFieldElement {
+pub struct FiniteFieldElement {
     value: BigInt,
     modulus: BigInt,
 }
 
-const DEFAULT_K_MODULES: i64 = 3_i64 * (1 << 30) + 1;
-
-impl ModuloFieldElement {
+impl FiniteFieldElement {
     // Constructor with optional modulus and generator_value.
     fn new(value: BigInt, modulus: Option<BigInt>) -> Self {
         let default_modulus = (DEFAULT_K_MODULES).to_bigint().unwrap();
@@ -22,30 +39,59 @@ impl ModuloFieldElement {
             value_sanitized += modulus.clone();
         }
 
-        ModuloFieldElement {
+        FiniteFieldElement {
             value: value_sanitized,
             modulus,
         }
     }
 
-    // Zero element.
-    pub fn zero(modulus: Option<BigInt>) -> Self {
-        ModuloFieldElement::new(BigInt::zero(), modulus)
+    // Check the order of an element.
+    fn is_order(&self, n: u64) -> bool {
+        assert!(n >= 1);
+        let identity = FiniteFieldElement::one(Some(self.modulus.clone()));
+        let mut h = identity.clone();
+        for _ in 1..n {
+            h = h * self.clone();
+            if h == identity {
+                return false;
+            }
+        }
+        h * self.clone() == identity
     }
 
-    // Unit element.
-    pub fn one(modulus: Option<BigInt>) -> Self {
-        ModuloFieldElement::new(BigInt::one(), modulus)
+    // Serialize method.
+    fn serialize(&self) -> String {
+        self.value.to_string()
     }
 
-    // Typecasting from an integer or another ModuloFieldElement.
-    fn typecast<T: Into<BigInt>>(other: T, modulus: &BigInt) -> ModuloFieldElement {
-        let value: BigInt = other.into();
-        ModuloFieldElement::new(value, Some(modulus.clone()))
+    // Random element excluding a set of elements.
+    pub fn random_element(exclude_elements: &[FiniteFieldElement]) -> Self {
+        let modulus = (DEFAULT_K_MODULES).to_bigint().unwrap();
+        let mut rng = rand::thread_rng();
+        let mut fe = FiniteFieldElement::new(
+            rng.gen_bigint_range(&BigInt::zero(), &modulus),
+            Some(modulus.clone()),
+        );
+        while exclude_elements.contains(&fe) {
+            fe = FiniteFieldElement::new(
+                rng.gen_bigint_range(&BigInt::zero(), &modulus),
+                Some(modulus.clone()),
+            );
+        }
+        fe
+    }
+}
+
+impl Field for FiniteFieldElement {
+    fn zero(modulus: Option<BigInt>) -> Self {
+        FiniteFieldElement::new(BigInt::zero(), modulus)
     }
 
-    // Inverse of the element using extended Euclidean algorithm.
-    pub fn inverse(&self) -> Self {
+    fn one(modulus: Option<BigInt>) -> Self {
+        FiniteFieldElement::new(BigInt::one(), modulus)
+    }
+
+    fn inverse(&self) -> Self {
         let mut t = BigInt::zero();
         let mut new_t = BigInt::one();
         let mut r = self.modulus.clone();
@@ -82,97 +128,61 @@ impl ModuloFieldElement {
             t += &self.modulus;
         }
 
-        ModuloFieldElement::new(t, Some(self.modulus.clone()))
-    }
-
-    // Check the order of an element.
-    fn is_order(&self, n: u64) -> bool {
-        assert!(n >= 1);
-        let identity = ModuloFieldElement::one(Some(self.modulus.clone()));
-        let mut h = identity.clone();
-        for _ in 1..n {
-            h = h * self.clone();
-            if h == identity {
-                return false;
-            }
-        }
-        h * self.clone() == identity
-    }
-
-    // Serialize method.
-    fn serialize(&self) -> String {
-        self.value.to_string()
-    }
-
-    // Random element excluding a set of elements.
-    pub fn random_element(exclude_elements: &[ModuloFieldElement]) -> Self {
-        let modulus = (DEFAULT_K_MODULES).to_bigint().unwrap();
-        let mut rng = rand::thread_rng();
-        let mut fe = ModuloFieldElement::new(
-            rng.gen_bigint_range(&BigInt::zero(), &modulus),
-            Some(modulus.clone()),
-        );
-        while exclude_elements.contains(&fe) {
-            fe = ModuloFieldElement::new(
-                rng.gen_bigint_range(&BigInt::zero(), &modulus),
-                Some(modulus.clone()),
-            );
-        }
-        fe
+        FiniteFieldElement::new(t, Some(self.modulus.clone()))
     }
 }
 
 // Display trait implementation for pretty printing.
-impl fmt::Display for ModuloFieldElement {
+impl fmt::Display for FiniteFieldElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let repr_value = (&self.value + &self.modulus / 2) % &self.modulus - &self.modulus / 2;
         write!(f, "{}", repr_value)
     }
 }
 
-// Arithmetic operations implementation for ModuloFieldElement.
-impl Add for ModuloFieldElement {
+// Arithmetic operations implementation for FiniteFieldElement.
+impl Add for FiniteFieldElement {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        ModuloFieldElement::new(
+        FiniteFieldElement::new(
             (&self.value + &other.value) % &self.modulus,
             Some(self.modulus.clone()),
         )
     }
 }
 
-impl Sub for ModuloFieldElement {
+impl Sub for FiniteFieldElement {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        ModuloFieldElement::new(
+        FiniteFieldElement::new(
             (&self.value - &other.value) % &self.modulus,
             Some(self.modulus.clone()),
         )
     }
 }
 
-impl Mul for ModuloFieldElement {
+impl Mul for FiniteFieldElement {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        ModuloFieldElement::new(
+        FiniteFieldElement::new(
             (&self.value * &other.value) % &self.modulus,
             Some(self.modulus.clone()),
         )
     }
 }
 
-impl Neg for ModuloFieldElement {
+impl Neg for FiniteFieldElement {
     type Output = Self;
 
     fn neg(self) -> Self {
-        ModuloFieldElement::zero(Some(self.modulus.clone())) - self
+        FiniteFieldElement::zero(Some(self.modulus.clone())) - self
     }
 }
 
-impl Div for ModuloFieldElement {
+impl Div for FiniteFieldElement {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
@@ -180,9 +190,9 @@ impl Div for ModuloFieldElement {
     }
 }
 
-impl ModuloFieldElement {
+impl FiniteFieldElement {
     pub fn mul_scalar(&self, n: i64) -> Self {
-        ModuloFieldElement::new(
+        FiniteFieldElement::new(
             (&self.value * n.to_bigint().unwrap()) % &self.modulus,
             Some(self.modulus.clone()),
         )
@@ -191,7 +201,7 @@ impl ModuloFieldElement {
     pub fn pow_scalar(&self, mut n: u64) -> Self {
         assert!(n >= 0);
         let mut cur_pow = self.clone();
-        let mut res = ModuloFieldElement::one(Some(self.modulus.clone()));
+        let mut res = FiniteFieldElement::one(Some(self.modulus.clone()));
         while n > 0 {
             if n % 2 != 0 {
                 res = res * cur_pow.clone();
@@ -202,10 +212,10 @@ impl ModuloFieldElement {
         res
     }
 
-    pub fn pow(&self, n: ModuloFieldElement) -> Self {
+    pub fn pow(&self, n: FiniteFieldElement) -> Self {
         assert!(n.value.is_positive());
         let mut cur_pow = self.clone();
-        let mut res = ModuloFieldElement::one(Some(self.modulus.clone()));
+        let mut res = FiniteFieldElement::one(Some(self.modulus.clone()));
         let mut n_val = n.value;
         while n_val.is_positive() && !n_val.is_zero() {
             if n_val.clone() % 2 != BigInt::zero() {
@@ -218,10 +228,10 @@ impl ModuloFieldElement {
     }
 }
 
-// Implement conversion from BigInt for ModuloFieldElement.
-impl From<BigInt> for ModuloFieldElement {
+// Implement conversion from BigInt for FiniteFieldElement.
+impl From<BigInt> for FiniteFieldElement {
     fn from(value: BigInt) -> Self {
-        ModuloFieldElement::new(value, None)
+        FiniteFieldElement::new(value, None)
     }
 }
 
@@ -232,21 +242,21 @@ mod tests {
 
     #[test]
     fn test_new_default_modulus() {
-        let fe = ModuloFieldElement::new(10.to_bigint().unwrap(), None);
+        let fe = FiniteFieldElement::new(10.to_bigint().unwrap(), None);
         assert_eq!(fe.value, 10.to_bigint().unwrap());
         assert_eq!(fe.modulus, (3_i64 * (1 << 30) + 1).to_bigint().unwrap());
     }
 
     #[test]
     fn test_new_custom_modulus() {
-        let fe = ModuloFieldElement::new(10.to_bigint().unwrap(), Some(7.to_bigint().unwrap()));
+        let fe = FiniteFieldElement::new(10.to_bigint().unwrap(), Some(7.to_bigint().unwrap()));
         assert_eq!(fe.value, 10.to_bigint().unwrap() % 7.to_bigint().unwrap());
         assert_eq!(fe.modulus, 7.to_bigint().unwrap());
     }
 
     #[test]
     fn test_zero() {
-        let fe_zero = ModuloFieldElement::zero(None);
+        let fe_zero = FiniteFieldElement::zero(None);
         assert_eq!(fe_zero.value, BigInt::zero());
         assert_eq!(
             fe_zero.modulus,
@@ -256,38 +266,38 @@ mod tests {
 
     #[test]
     fn test_one() {
-        let fe_one = ModuloFieldElement::one(None);
+        let fe_one = FiniteFieldElement::one(None);
         assert_eq!(fe_one.value, BigInt::one());
         assert_eq!(fe_one.modulus, (3_i64 * (1 << 30) + 1).to_bigint().unwrap());
     }
 
     #[test]
     fn test_addition() {
-        let fe1 = ModuloFieldElement::new(10.to_bigint().unwrap(), None);
-        let fe2 = ModuloFieldElement::new(15.to_bigint().unwrap(), None);
+        let fe1 = FiniteFieldElement::new(10.to_bigint().unwrap(), None);
+        let fe2 = FiniteFieldElement::new(15.to_bigint().unwrap(), None);
         let fe3 = fe1 + fe2;
         assert_eq!(fe3.value, (10 + 15).to_bigint().unwrap() % fe3.modulus);
     }
 
     #[test]
     fn test_subtraction() {
-        let fe1 = ModuloFieldElement::new(20.to_bigint().unwrap(), None);
-        let fe2 = ModuloFieldElement::new(15.to_bigint().unwrap(), None);
+        let fe1 = FiniteFieldElement::new(20.to_bigint().unwrap(), None);
+        let fe2 = FiniteFieldElement::new(15.to_bigint().unwrap(), None);
         let fe3 = fe1 - fe2;
         assert_eq!(fe3.value, (20 - 15).to_bigint().unwrap() % fe3.modulus);
     }
 
     #[test]
     fn test_multiplication() {
-        let fe1 = ModuloFieldElement::new(5.to_bigint().unwrap(), None);
-        let fe2 = ModuloFieldElement::new(4.to_bigint().unwrap(), None);
+        let fe1 = FiniteFieldElement::new(5.to_bigint().unwrap(), None);
+        let fe2 = FiniteFieldElement::new(4.to_bigint().unwrap(), None);
         let fe3 = fe1 * fe2;
         assert_eq!(fe3.value, (5 * 4).to_bigint().unwrap() % fe3.modulus);
     }
 
     #[test]
     fn test_inverse() {
-        let fe1 = ModuloFieldElement::new(7.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
+        let fe1 = FiniteFieldElement::new(7.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
         let fe_inv = fe1.inverse();
         assert_eq!(fe_inv.value, 5.to_bigint().unwrap());
         assert_eq!((fe1 * fe_inv).value, 1.to_bigint().unwrap());
@@ -295,7 +305,7 @@ mod tests {
 
     #[test]
     fn test_negation() {
-        let fe1 = ModuloFieldElement::new(10.to_bigint().unwrap(), None);
+        let fe1 = FiniteFieldElement::new(10.to_bigint().unwrap(), None);
         let fe_neg = -fe1;
         assert_eq!(
             fe_neg.value,
@@ -305,8 +315,8 @@ mod tests {
 
     #[test]
     fn test_division() {
-        let fe1 = ModuloFieldElement::new(12.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
-        let fe2 = ModuloFieldElement::new(3.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
+        let fe1 = FiniteFieldElement::new(12.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
+        let fe2 = FiniteFieldElement::new(3.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
         let fe_div = fe1 / fe2.clone();
         assert_eq!(
             fe_div.value,
@@ -316,7 +326,7 @@ mod tests {
 
     #[test]
     fn test_exponentiation() {
-        let fe1 = ModuloFieldElement::new(3.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
+        let fe1 = FiniteFieldElement::new(3.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
         let fe_exp = fe1.pow_scalar(4);
         assert_eq!(
             fe_exp.value,
@@ -326,7 +336,7 @@ mod tests {
 
     #[test]
     fn test_is_order() {
-        let fe1 = ModuloFieldElement::new(2.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
+        let fe1 = FiniteFieldElement::new(2.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
         assert!(fe1.is_order(8));
         assert!(!fe1.is_order(3));
     }
@@ -334,10 +344,10 @@ mod tests {
     #[test]
     fn test_random_element() {
         let excluded_elements = vec![
-            ModuloFieldElement::new(2.to_bigint().unwrap(), None),
-            ModuloFieldElement::new(3.to_bigint().unwrap(), None),
+            FiniteFieldElement::new(2.to_bigint().unwrap(), None),
+            FiniteFieldElement::new(3.to_bigint().unwrap(), None),
         ];
-        let fe_random = ModuloFieldElement::random_element(&excluded_elements);
+        let fe_random = FiniteFieldElement::random_element(&excluded_elements);
         assert!(!excluded_elements.contains(&fe_random));
     }
 }
