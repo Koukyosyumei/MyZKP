@@ -9,6 +9,7 @@ pub trait Field:
     Sized
     + Clone
     + PartialEq
+    + fmt::Display
     + Add<Output = Self>
     + Sub<Output = Self>
     + Mul<Output = Self>

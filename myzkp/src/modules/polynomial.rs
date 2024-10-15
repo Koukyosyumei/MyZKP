@@ -8,27 +8,24 @@ use crate::modules::field::FiniteFieldElement;
 
 /// Polynomial struct representing a polynomial over FiniteFieldElement.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Polynomial {
-    pub poly: Vec<FiniteFieldElement>,
+pub struct Polynomial<F: Field> {
+    pub poly: Vec<F>,
     pub var: String, // Variable for representation, default to 'x'
 }
 
-impl Polynomial {
+impl<F: Field> Polynomial<F> {
     /// Creates a polynomial representing the variable `x`.
     pub fn x() -> Self {
         Polynomial {
-            poly: vec![
-                FiniteFieldElement::zero(None),
-                FiniteFieldElement::one(None),
-            ],
+            poly: vec![F::zero(None), F::one(None)],
             var: "x".to_string(),
         }
     }
 
     /// Removes trailing zeroes from a polynomial's coefficients.
-    fn trim_trailing_zeros(poly: Vec<FiniteFieldElement>) -> Vec<FiniteFieldElement> {
+    fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
         let mut trimmed = poly;
-        while trimmed.last() == Some(&FiniteFieldElement::zero(None)) {
+        while trimmed.last() == Some(&F::zero(None)) {
             trimmed.pop();
         }
         trimmed
@@ -45,16 +42,16 @@ impl Polynomial {
     }
 
     /// Returns the nth coefficient.
-    pub fn nth_coefficient(&self, n: usize) -> FiniteFieldElement {
+    pub fn nth_coefficient(&self, n: usize) -> F {
         if n > self.degree() as usize {
-            FiniteFieldElement::zero(None)
+            F::zero(None)
         } else {
             self.poly[n].clone()
         }
     }
 
     /// Scalar multiplication of a polynomial.
-    pub fn scalar_mul(&self, scalar: &FiniteFieldElement) -> Polynomial {
+    pub fn scalar_mul(&self, scalar: &F) -> Polynomial<F> {
         Polynomial {
             poly: self
                 .poly
@@ -66,8 +63,8 @@ impl Polynomial {
     }
 
     /// Evaluate the polynomial at a given point.
-    pub fn eval(&self, point: &FiniteFieldElement) -> FiniteFieldElement {
-        let mut result = FiniteFieldElement::zero(None);
+    pub fn eval(&self, point: &F) -> F {
+        let mut result = F::zero(None);
         for coef in self.poly.iter().rev() {
             result = result * point.clone() + coef.clone();
         }
@@ -75,16 +72,13 @@ impl Polynomial {
     }
 
     /// Lagrange interpolation to compute polynomials.
-    pub fn interpolate(
-        x_values: &[FiniteFieldElement],
-        y_values: &[FiniteFieldElement],
-    ) -> Polynomial {
+    pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
         let mut lagrange_polys = vec![];
         let numerators = Polynomial::from_monomials(x_values);
 
         for j in 0..x_values.len() {
             // \Pi_{j \neq i} (x_j - x_i)
-            let mut denominator = FiniteFieldElement::one(None);
+            let mut denominator = F::one(None);
             for i in 0..x_values.len() {
                 if i != j {
                     denominator = denominator * (x_values[j].clone() - x_values[i].clone());
@@ -107,17 +101,14 @@ impl Polynomial {
     }
 
     /// Helper to create polynomial from a single monomial.
-    pub fn from_monomials(x_values: &[FiniteFieldElement]) -> Polynomial {
+    pub fn from_monomials(x_values: &[F]) -> Polynomial<F> {
         let mut poly = Polynomial {
-            poly: vec![FiniteFieldElement::one(None)],
+            poly: vec![F::one(None)],
             var: "x".to_string(),
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
-                poly: vec![
-                    FiniteFieldElement::zero(None) - x.clone(),
-                    FiniteFieldElement::one(None),
-                ],
+                poly: vec![F::zero(None) - x.clone(), F::one(None)],
                 var: "x".to_string(),
             });
         }
@@ -125,25 +116,25 @@ impl Polynomial {
     }
 }
 
-impl fmt::Display for Polynomial {
+impl<F: Field> fmt::Display for Polynomial<F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut terms = Vec::new();
 
         for (i, coeff) in self.poly.iter().enumerate() {
-            if coeff != &FiniteFieldElement::zero(None) {
+            if coeff != &F::zero(None) {
                 let term = if i == 0 {
                     // Constant term
                     format!("{}", coeff)
                 } else if i == 1 {
                     // Linear term (e.g., 3x)
-                    if coeff == &FiniteFieldElement::one(None) {
+                    if coeff == &F::one(None) {
                         format!("{}", self.var)
                     } else {
                         format!("{}{}", coeff, self.var)
                     }
                 } else {
                     // Higher degree terms (e.g., 3x^2)
-                    if coeff == &FiniteFieldElement::one(None) {
+                    if coeff == &F::one(None) {
                         format!("{}^{}", self.var, i)
                     } else {
                         format!("{}{}^{}", coeff, self.var, i)
@@ -164,14 +155,14 @@ impl fmt::Display for Polynomial {
 }
 
 // Arithmetic operations implementation for Polynomial.
-impl Add for Polynomial {
+impl<F: Field> Add for Polynomial<F> {
     type Output = Self;
 
-    fn add(self, other: Self) -> Polynomial {
+    fn add(self, other: Self) -> Polynomial<F> {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = FiniteFieldElement::zero(None);
+        let zero = F::zero(None);
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -185,14 +176,14 @@ impl Add for Polynomial {
     }
 }
 
-impl Sub for Polynomial {
+impl<F: Field> Sub for Polynomial<F> {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Polynomial {
+    fn sub(self, other: Self) -> Polynomial<F> {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = FiniteFieldElement::zero(None);
+        let zero = F::zero(None);
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -206,11 +197,11 @@ impl Sub for Polynomial {
     }
 }
 
-impl Neg for Polynomial {
+impl<F: Field> Neg for Polynomial<F> {
     type Output = Self;
 
     /// Negation of a polynomial.
-    fn neg(self) -> Polynomial {
+    fn neg(self) -> Polynomial<F> {
         Polynomial {
             poly: self.poly.iter().map(|x| -x.clone()).collect(),
             var: self.var.clone(),
@@ -218,15 +209,12 @@ impl Neg for Polynomial {
     }
 }
 
-impl Mul for Polynomial {
+impl<F: Field> Mul for Polynomial<F> {
     type Output = Self;
 
     /// Multiplication of two polynomials.
-    fn mul(self, other: Polynomial) -> Polynomial {
-        let mut result = vec![
-            FiniteFieldElement::zero(None);
-            self.degree() as usize + other.degree() as usize + 1
-        ];
+    fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
 
         for (i, a) in self.poly.iter().enumerate() {
             for (j, b) in other.poly.iter().enumerate() {
@@ -240,19 +228,17 @@ impl Mul for Polynomial {
     }
 }
 
-impl Div for Polynomial {
+impl<F: Field> Div for Polynomial<F> {
     type Output = Self;
 
     /// Division of two polynomials, returns quotient.
-    fn div(self, other: Polynomial) -> Polynomial {
+    fn div(self, other: Polynomial<F>) -> Polynomial<F> {
         let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
         let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient = vec![
-            FiniteFieldElement::zero(None);
-            self.degree() as usize - other.degree() as usize + 1
-        ];
+        let mut quotient =
+            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
 
         let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() && i < 20 {
