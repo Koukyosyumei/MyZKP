@@ -258,19 +258,6 @@ impl<F: Field> Div for Polynomial<F> {
             poly: Self::trim_trailing_zeros(quotient),
             var: self.var.clone(),
         }
-
-        /*
-        (
-            Polynomial {
-                poly: Self::trim_trailing_zeros(quotient),
-                var: self.var.clone(),
-            },
-            Polynomial {
-                poly: remainder,
-                var: self.var.clone(),
-            },
-        )
-        */
     }
 }
 
@@ -299,13 +286,6 @@ impl<F: Field> Rem for Polynomial<F> {
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
             i += 1;
         }
-
-        /*
-        Polynomial {
-            poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
-        }
-        */
 
         Polynomial {
             poly: remainder_coeffs,
