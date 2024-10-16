@@ -124,3 +124,87 @@ impl<F: Field> Mul<BigInt> for EllipticCurvePoint<F> {
     }
 }
     */
+
+/*
+use num_bigint::{BigInt, RandBigInt, ToBigInt};
+use num_traits::{One, Signed, Zero};
+use std::fmt;
+use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use crate::modules::field::Field;
+use crate::modules::field::FiniteFieldElement;
+use crate::modules::polynomial::Polynomial;
+
+impl<F: Field> EllipticCurvePoint<F> {
+    // ... (existing methods)
+
+    pub fn scalar_mul(&self, scalar: &BigInt) -> Self {
+        let mut result = EllipticCurvePoint::point_at_infinity(self.curve.clone());
+        let mut temp = self.clone();
+        let mut n = scalar.clone();
+
+        while n > BigInt::zero() {
+            if n.is_odd() {
+                result = result + temp.clone();
+            }
+            temp = temp.clone() + temp.clone();
+            n >>= 1;
+        }
+
+        result
+    }
+
+    pub fn miller_function(&self, q: &Self, m: &BigInt) -> Polynomial<F> {
+        let mut f = Polynomial::from_constant(F::one(None));
+        let mut t = self.clone();
+
+        for i in (1..m.bits()).rev() {
+            let line = line_function(&t, &t);
+            let vertical = vertical_line(&(t.clone() + t.clone()));
+            f = f.clone() * f.clone() * line / vertical;
+
+            if m.bit(i) {
+                let line = line_function(&t, self);
+                let vertical = vertical_line(&(t.clone() + self.clone()));
+                f = f * line / vertical;
+                t = t + self.clone();
+            }
+
+            t = t + t;
+        }
+
+        f.eval(&q.x.unwrap()) / f.eval(&(q + self.inverse()).x.unwrap())
+    }
+}
+
+fn line_function<F: Field>(p: &EllipticCurvePoint<F>, q: &EllipticCurvePoint<F>) -> Polynomial<F> {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return Polynomial::from_constant(F::one(None));
+    }
+
+    if p == q {
+        let m = ((p.x.clone().unwrap() * p.x.clone().unwrap()).mul_scalar(3_i64) + p.curve.a.clone())
+            / (p.y.clone().unwrap().mul_scalar(2_i64));
+        let c = p.y.clone().unwrap() - m.clone() * p.x.clone().unwrap();
+        Polynomial::from_coefficients(vec![c, m, F::one(None).neg()])
+    } else {
+        let m = (q.y.clone().unwrap() - p.y.clone().unwrap()) / (q.x.clone().unwrap() - p.x.clone().unwrap());
+        let c = p.y.clone().unwrap() - m.clone() * p.x.clone().unwrap();
+        Polynomial::from_coefficients(vec![c, m, F::one(None).neg()])
+    }
+}
+
+fn vertical_line<F: Field>(p: &EllipticCurvePoint<F>) -> Polynomial<F> {
+    if p.is_point_at_infinity() {
+        Polynomial::from_constant(F::one(None))
+    } else {
+        Polynomial::from_coefficients(vec![p.x.clone().unwrap().neg(), F::one(None)])
+    }
+}
+
+pub fn weil_pairing<F: Field>(p: &EllipticCurvePoint<F>, q: &EllipticCurvePoint<F>, m: &BigInt) -> F {
+    let fp = p.miller_function(q, m);
+    let fq = q.miller_function(p, m);
+    fp / fq
+}
+*/

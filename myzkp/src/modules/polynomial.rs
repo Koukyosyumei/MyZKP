@@ -77,7 +77,6 @@ impl<F: Field> Polynomial<F> {
         let numerators = Polynomial::from_monomials(x_values);
 
         for j in 0..x_values.len() {
-            // \Pi_{j \neq i} (x_j - x_i)
             let mut denominator = F::one(None);
             for i in 0..x_values.len() {
                 if i != j {
@@ -241,7 +240,7 @@ impl<F: Field> Div for Polynomial<F> {
             vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
 
         let mut i = 0_i32;
-        while remainder_coeffs.len() >= divisor_coeffs.len() && i < 20 {
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
             let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
@@ -274,7 +273,7 @@ impl<F: Field> Rem for Polynomial<F> {
             vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
 
         let mut i = 0_i32;
-        while remainder_coeffs.len() >= divisor_coeffs.len() && i < 20 {
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
             let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
