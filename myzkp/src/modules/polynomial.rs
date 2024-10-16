@@ -1,6 +1,6 @@
 use num_bigint::ToBigInt;
 use std::fmt;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 // Assuming FiniteFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
 use crate::modules::field::Field;
@@ -274,6 +274,46 @@ impl<F: Field> Div for Polynomial<F> {
     }
 }
 
+impl<F: Field> Rem for Polynomial<F> {
+    type Output = Self;
+
+    /// Division of two polynomials, returns quotient.
+    fn rem(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
+        let mut quotient =
+            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+
+        let mut i = 0_i32;
+        while remainder_coeffs.len() >= divisor_coeffs.len() && i < 20 {
+            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
+            quotient[deg_diff] = lead_term.clone();
+
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
+                    - (lead_term.clone() * divisor_coeffs[i].clone());
+            }
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+            i += 1;
+        }
+
+        /*
+        Polynomial {
+            poly: Self::trim_trailing_zeros(quotient),
+            var: self.var.clone(),
+        }
+        */
+
+        Polynomial {
+            poly: remainder_coeffs,
+            var: self.var.clone(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -400,10 +440,10 @@ mod tests {
     fn test_polynomial_division() {
         let poly1 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
                 FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
                 FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-            ], // 2 + 3x + x^2
+            ], // 3 + 3x + x^2
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
@@ -413,7 +453,7 @@ mod tests {
             ], // 1 + x
             var: "x".to_string(),
         };
-        let quotient = poly1 / poly2;
+        let quotient = poly1.clone() / poly2.clone();
         let expected_quotient = Polynomial {
             poly: vec![
                 FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
@@ -421,12 +461,13 @@ mod tests {
             ], // 2 + x
             var: "x".to_string(),
         };
-        //let expected_remainder = Polynomial {
-        //    poly: vec![FiniteFieldElement::from(1_i32.to_bigint().unwrap())], // remainder is 1
-        //    var: "x".to_string(),
-        //};
+        let remainder = poly1.clone() % poly2.clone();
+        let expected_remainder = Polynomial {
+            poly: vec![FiniteFieldElement::from(1_i32.to_bigint().unwrap())], // remainder is 1
+            var: "x".to_string(),
+        };
         assert_eq!(quotient, expected_quotient);
-        // assert_eq!(remainder, expected_remainder);
+        assert_eq!(remainder, expected_remainder);
     }
 
     #[test]
