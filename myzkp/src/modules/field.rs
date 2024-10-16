@@ -19,8 +19,11 @@ pub trait Field:
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
     fn one(modulus: Option<BigInt>) -> Self;
-    fn zero(modulus: Option<BigInt>) -> Self;
     fn inverse(&self) -> Self;
+
+    // Utility functions
+    fn zero(modulus: Option<BigInt>) -> Self;
+    fn mul_scalar(&self, n: i64) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -90,6 +93,13 @@ impl Field for FiniteFieldElement {
 
     fn one(modulus: Option<BigInt>) -> Self {
         FiniteFieldElement::new(BigInt::one(), modulus)
+    }
+
+    fn mul_scalar(&self, n: i64) -> Self {
+        FiniteFieldElement::new(
+            (&self.value * n.to_bigint().unwrap()) % &self.modulus,
+            Some(self.modulus.clone()),
+        )
     }
 
     fn inverse(&self) -> Self {
@@ -192,13 +202,6 @@ impl Div for FiniteFieldElement {
 }
 
 impl FiniteFieldElement {
-    pub fn mul_scalar(&self, n: i64) -> Self {
-        FiniteFieldElement::new(
-            (&self.value * n.to_bigint().unwrap()) % &self.modulus,
-            Some(self.modulus.clone()),
-        )
-    }
-
     pub fn pow_scalar(&self, mut n: u64) -> Self {
         assert!(n >= 0);
         let mut cur_pow = self.clone();
