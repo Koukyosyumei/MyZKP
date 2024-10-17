@@ -263,10 +263,8 @@ fn test_weil_pairing() {
         order.clone(),
         modulus.clone(),
     );
-    assert_eq!(fp_qs.value, 103.to_bigint().unwrap());
-
     let fp_s = miller(p.clone(), s.clone(), order.clone(), modulus.clone());
+    assert_eq!(fp_qs.value, 103.to_bigint().unwrap());
     assert_eq!(fp_s.value, 219.to_bigint().unwrap());
-
     assert_eq!((fp_qs / fp_s).value, 473.to_bigint().unwrap());
 }
