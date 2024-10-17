@@ -28,15 +28,15 @@ pub trait Field:
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FiniteFieldElement {
-    value: BigInt,
-    modulus: BigInt,
+    pub value: BigInt,
+    pub modulus: BigInt,
 }
 
 impl FiniteFieldElement {
     // Constructor with optional modulus and generator_value.
-    fn new(value: BigInt, modulus: Option<BigInt>) -> Self {
+    pub fn new(value: BigInt, modulus_: Option<BigInt>) -> Self {
         let default_modulus = (DEFAULT_K_MODULES).to_bigint().unwrap();
-        let modulus = modulus.unwrap_or(default_modulus);
+        let modulus = modulus_.unwrap_or(default_modulus);
 
         let mut value_sanitized = value % &modulus;
         if value_sanitized < 0_i32.to_bigint().unwrap() {
