@@ -6,7 +6,7 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use crate::modules::field::Field;
 use crate::modules::field::FiniteFieldElement;
 
-/// Polynomial struct representing a polynomial over FiniteFieldElement.
+/// Polynomial struct representing a polynomial over Field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial<F: Field> {
     pub poly: Vec<F>,
