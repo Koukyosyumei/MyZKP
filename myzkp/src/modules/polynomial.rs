@@ -50,18 +50,6 @@ impl<F: Field> Polynomial<F> {
         }
     }
 
-    /// Scalar multiplication of a polynomial.
-    pub fn scalar_mul(&self, scalar: &F) -> Polynomial<F> {
-        Polynomial {
-            poly: self
-                .poly
-                .iter()
-                .map(|x| x.clone() * scalar.clone())
-                .collect(),
-            var: self.var.clone(),
-        }
-    }
-
     /// Evaluate the polynomial at a given point.
     pub fn eval(&self, point: &F) -> F {
         let mut result = F::zero(None);
@@ -85,7 +73,7 @@ impl<F: Field> Polynomial<F> {
             }
             let cur_poly = numerators
                 .clone()
-                .div(Polynomial::from_monomials(&[x_values[j].clone()]).scalar_mul(&denominator));
+                .div(Polynomial::from_monomials(&[x_values[j].clone()]) * denominator);
             lagrange_polys.push(cur_poly);
         }
 
@@ -94,7 +82,7 @@ impl<F: Field> Polynomial<F> {
             var: "x".to_string(),
         };
         for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
-            result = result + lagrange_poly.scalar_mul(&y_values[j]);
+            result = result + lagrange_poly.clone() * y_values[j].clone();
         }
         result
     }
@@ -208,7 +196,7 @@ impl<F: Field> Neg for Polynomial<F> {
     }
 }
 
-impl<F: Field> Mul for Polynomial<F> {
+impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
     type Output = Self;
 
     /// Multiplication of two polynomials.
@@ -222,6 +210,21 @@ impl<F: Field> Mul for Polynomial<F> {
         }
         Polynomial {
             poly: Self::trim_trailing_zeros(result),
+            var: self.var.clone(),
+        }
+    }
+}
+
+impl<F: Field> Mul<F> for Polynomial<F> {
+    type Output = Self;
+
+    fn mul(self, scalar: F) -> Polynomial<F> {
+        Polynomial {
+            poly: self
+                .poly
+                .iter()
+                .map(|x| x.clone() * scalar.clone())
+                .collect(),
             var: self.var.clone(),
         }
     }
@@ -412,7 +415,7 @@ mod tests {
             ], // 3 + 6x
             var: "x".to_string(),
         };
-        assert_eq!(poly.scalar_mul(&scalar), expected);
+        assert_eq!(poly * scalar, expected);
     }
 
     #[test]

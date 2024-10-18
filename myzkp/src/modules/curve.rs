@@ -60,32 +60,10 @@ impl<F: Field> EllipticCurvePoint<F> {
         let y2 = other.y.clone().unwrap();
 
         if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()).mul_scalar(3_i64) + self.curve.a.clone())
-                / (y1.clone().mul_scalar(2_i64))
+            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
         } else {
             (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
         }
-    }
-
-    pub fn mul_scalar(&self, scalar: BigInt) -> Self {
-        if scalar.is_zero() {
-            // Return the point at infinity for scalar * 0
-            return EllipticCurvePoint::point_at_infinity(self.curve.clone());
-        }
-
-        let mut result = EllipticCurvePoint::point_at_infinity(self.curve.clone());
-        let mut current = self.clone(); // Start with the current point
-        let mut scalar_bits = scalar.clone();
-
-        while scalar_bits > BigInt::zero() {
-            if &scalar_bits & BigInt::one() == BigInt::one() {
-                result = result + current.clone(); // Add the current point if the bit is 1
-            }
-            current = current.clone() + current.clone(); // Double the point
-            scalar_bits >>= 1; // Move to the next bit
-        }
-
-        result
     }
 }
 
@@ -134,6 +112,31 @@ impl<F: Field> Add for EllipticCurvePoint<F> {
 
             return EllipticCurvePoint::new(x3, y3, self.curve.clone());
         }
+    }
+}
+
+impl<F: Field> Mul<BigInt> for EllipticCurvePoint<F> {
+    type Output = Self;
+
+    fn mul(self, scalar: BigInt) -> Self {
+        if scalar.is_zero() {
+            // Return the point at infinity for scalar * 0
+            return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+        }
+
+        let mut result = EllipticCurvePoint::point_at_infinity(self.curve.clone());
+        let mut current = self.clone(); // Start with the current point
+        let mut scalar_bits = scalar.clone();
+
+        while scalar_bits > BigInt::zero() {
+            if &scalar_bits & BigInt::one() == BigInt::one() {
+                result = result + current.clone(); // Add the current point if the bit is 1
+            }
+            current = current.clone() + current.clone(); // Double the point
+            scalar_bits >>= 1; // Move to the next bit
+        }
+
+        result
     }
 }
 
@@ -222,15 +225,15 @@ pub fn weil_pairing<F: Field>(
         modulus.clone(),
     );
     let fp_s = miller(p.clone(), s_value.clone(), m.clone(), modulus.clone());
-    let fq_qs = miller(
+    let fq_ps = miller(
         q.clone(),
-        q.clone() - s_value.clone(),
+        p.clone() - s_value.clone(),
         m.clone(),
         modulus.clone(),
     );
     let fq_s = miller(q.clone(), -s_value.clone(), m.clone(), modulus.clone());
 
-    return (fp_qs / fp_s) * (fq_qs / fq_s);
+    return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 
 #[test]
@@ -267,4 +270,48 @@ fn test_weil_pairing() {
     assert_eq!(fp_qs.value, 103.to_bigint().unwrap());
     assert_eq!(fp_s.value, 219.to_bigint().unwrap());
     assert_eq!((fp_qs / fp_s).value, 473.to_bigint().unwrap());
+
+    let fq_ps = miller(
+        q.clone(),
+        p.clone() - s.clone(),
+        order.clone(),
+        modulus.clone(),
+    );
+    let fq_s = miller(q.clone(), -s.clone(), order.clone(), modulus.clone());
+    assert_eq!(fq_ps.value, 284.to_bigint().unwrap());
+    assert_eq!(fq_s.value, 204.to_bigint().unwrap());
+    assert_eq!((fq_ps / fq_s).value, 88.to_bigint().unwrap());
+
+    let w = weil_pairing(
+        p.clone(),
+        q.clone(),
+        order.clone(),
+        Some(s.clone()),
+        modulus.clone(),
+    );
+    assert_eq!(w.value, 242.to_bigint().unwrap());
+
+    let p_prime = EllipticCurvePoint::new(
+        FiniteFieldElement::new(617_i64.to_bigint().unwrap(), modulus.clone()),
+        FiniteFieldElement::new(5_i64.to_bigint().unwrap(), modulus.clone()),
+        curve.clone(),
+    );
+    let q_prime = EllipticCurvePoint::new(
+        FiniteFieldElement::new(121_i64.to_bigint().unwrap(), modulus.clone()),
+        FiniteFieldElement::new(244_i64.to_bigint().unwrap(), modulus.clone()),
+        curve.clone(),
+    );
+
+    let w_prime = weil_pairing(
+        p_prime.clone(),
+        q_prime.clone(),
+        order.clone(),
+        Some(s.clone()),
+        modulus.clone(),
+    );
+    assert_eq!(w_prime.value, 512.to_bigint().unwrap());
+
+    assert_eq!(p.clone() * 3.to_bigint().unwrap(), p_prime.clone());
+    assert_eq!(q.clone() * 4.to_bigint().unwrap(), q_prime.clone());
+    assert_eq!(w.pow(12.to_bigint().unwrap()), w_prime);
 }

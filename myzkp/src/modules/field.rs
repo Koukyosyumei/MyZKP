@@ -13,6 +13,7 @@ pub trait Field:
     + Add<Output = Self>
     + Sub<Output = Self>
     + Mul<Output = Self>
+    + Mul<i64, Output = Self>
     + Div<Output = Self>
     + Neg<Output = Self>
 {
@@ -23,7 +24,7 @@ pub trait Field:
 
     // Utility functions
     fn zero(modulus: Option<BigInt>) -> Self;
-    fn mul_scalar(&self, n: i64) -> Self;
+    fn pow(&self, n: BigInt) -> Self;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -95,13 +96,6 @@ impl Field for FiniteFieldElement {
         FiniteFieldElement::new(BigInt::one(), modulus)
     }
 
-    fn mul_scalar(&self, n: i64) -> Self {
-        FiniteFieldElement::new(
-            (&self.value * n.to_bigint().unwrap()) % &self.modulus,
-            Some(self.modulus.clone()),
-        )
-    }
-
     fn inverse(&self) -> Self {
         let mut t = BigInt::zero();
         let mut new_t = BigInt::one();
@@ -141,6 +135,20 @@ impl Field for FiniteFieldElement {
 
         FiniteFieldElement::new(t, Some(self.modulus.clone()))
     }
+
+    fn pow(&self, mut n: BigInt) -> Self {
+        assert!(!n.is_negative());
+        let mut cur_pow = self.clone();
+        let mut res = FiniteFieldElement::one(Some(self.modulus.clone()));
+        while n.is_positive() && !n.is_zero() {
+            if n.clone() % 2 != BigInt::zero() {
+                res = res * cur_pow.clone();
+            }
+            n /= 2;
+            cur_pow = cur_pow.clone() * cur_pow;
+        }
+        res
+    }
 }
 
 // Display trait implementation for pretty printing.
@@ -174,12 +182,23 @@ impl Sub for FiniteFieldElement {
     }
 }
 
-impl Mul for FiniteFieldElement {
+impl Mul<FiniteFieldElement> for FiniteFieldElement {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
         FiniteFieldElement::new(
             (&self.value * &other.value) % &self.modulus,
+            Some(self.modulus.clone()),
+        )
+    }
+}
+
+impl Mul<i64> for FiniteFieldElement {
+    type Output = Self;
+
+    fn mul(self, n: i64) -> Self {
+        FiniteFieldElement::new(
+            (&self.value * n.to_bigint().unwrap()) % &self.modulus,
             Some(self.modulus.clone()),
         )
     }
@@ -198,37 +217,6 @@ impl Div for FiniteFieldElement {
 
     fn div(self, other: Self) -> Self {
         self * other.inverse()
-    }
-}
-
-impl FiniteFieldElement {
-    pub fn pow_scalar(&self, mut n: u64) -> Self {
-        assert!(n >= 0);
-        let mut cur_pow = self.clone();
-        let mut res = FiniteFieldElement::one(Some(self.modulus.clone()));
-        while n > 0 {
-            if n % 2 != 0 {
-                res = res * cur_pow.clone();
-            }
-            n /= 2;
-            cur_pow = cur_pow.clone() * cur_pow;
-        }
-        res
-    }
-
-    pub fn pow(&self, n: FiniteFieldElement) -> Self {
-        assert!(n.value.is_positive());
-        let mut cur_pow = self.clone();
-        let mut res = FiniteFieldElement::one(Some(self.modulus.clone()));
-        let mut n_val = n.value;
-        while n_val.is_positive() && !n_val.is_zero() {
-            if n_val.clone() % 2 != BigInt::zero() {
-                res = res * cur_pow.clone();
-            }
-            n_val = n_val / 2_i64.to_bigint().unwrap();
-            cur_pow = cur_pow.clone() * cur_pow;
-        }
-        res
     }
 }
 
@@ -331,7 +319,7 @@ mod tests {
     #[test]
     fn test_exponentiation() {
         let fe1 = FiniteFieldElement::new(3.to_bigint().unwrap(), Some(17.to_bigint().unwrap()));
-        let fe_exp = fe1.pow_scalar(4);
+        let fe_exp = fe1.pow(4.to_bigint().unwrap());
         assert_eq!(
             fe_exp.value,
             3.to_bigint().unwrap().pow(4) % 17.to_bigint().unwrap()
