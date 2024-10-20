@@ -17,7 +17,7 @@ impl<F: Field> Polynomial<F> {
     /// Creates a polynomial representing the variable `x`.
     pub fn x() -> Self {
         Polynomial {
-            poly: vec![F::zero(None), F::one(None)],
+            poly: vec![F::zero(), F::one()],
             var: "x".to_string(),
         }
     }
@@ -25,7 +25,7 @@ impl<F: Field> Polynomial<F> {
     /// Removes trailing zeroes from a polynomial's coefficients.
     fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
         let mut trimmed = poly;
-        while trimmed.last() == Some(&F::zero(None)) {
+        while trimmed.last() == Some(&F::zero()) {
             trimmed.pop();
         }
         trimmed
@@ -44,7 +44,7 @@ impl<F: Field> Polynomial<F> {
     /// Returns the nth coefficient.
     pub fn nth_coefficient(&self, n: usize) -> F {
         if n > self.degree() as usize {
-            F::zero(None)
+            F::zero()
         } else {
             self.poly[n].clone()
         }
@@ -52,7 +52,7 @@ impl<F: Field> Polynomial<F> {
 
     /// Evaluate the polynomial at a given point.
     pub fn eval(&self, point: &F) -> F {
-        let mut result = F::zero(None);
+        let mut result = F::zero();
         for coef in self.poly.iter().rev() {
             result = result * point.clone() + coef.clone();
         }
@@ -65,7 +65,7 @@ impl<F: Field> Polynomial<F> {
         let numerators = Polynomial::from_monomials(x_values);
 
         for j in 0..x_values.len() {
-            let mut denominator = F::one(None);
+            let mut denominator = F::one();
             for i in 0..x_values.len() {
                 if i != j {
                     denominator = denominator * (x_values[j].clone() - x_values[i].clone());
@@ -90,12 +90,12 @@ impl<F: Field> Polynomial<F> {
     /// Helper to create polynomial from a single monomial.
     pub fn from_monomials(x_values: &[F]) -> Polynomial<F> {
         let mut poly = Polynomial {
-            poly: vec![F::one(None)],
+            poly: vec![F::one()],
             var: "x".to_string(),
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
-                poly: vec![F::zero(None) - x.clone(), F::one(None)],
+                poly: vec![F::zero() - x.clone(), F::one()],
                 var: "x".to_string(),
             });
         }
@@ -108,20 +108,20 @@ impl<F: Field> fmt::Display for Polynomial<F> {
         let mut terms = Vec::new();
 
         for (i, coeff) in self.poly.iter().enumerate() {
-            if coeff != &F::zero(None) {
+            if coeff != &F::zero() {
                 let term = if i == 0 {
                     // Constant term
                     format!("{}", coeff)
                 } else if i == 1 {
                     // Linear term (e.g., 3x)
-                    if coeff == &F::one(None) {
+                    if coeff == &F::one() {
                         format!("{}", self.var)
                     } else {
                         format!("{}{}", coeff, self.var)
                     }
                 } else {
                     // Higher degree terms (e.g., 3x^2)
-                    if coeff == &F::one(None) {
+                    if coeff == &F::one() {
                         format!("{}^{}", self.var, i)
                     } else {
                         format!("{}{}^{}", coeff, self.var, i)
@@ -149,7 +149,7 @@ impl<F: Field> Add for Polynomial<F> {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = F::zero(None);
+        let zero = F::zero();
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -170,7 +170,7 @@ impl<F: Field> Sub for Polynomial<F> {
         let max_len = std::cmp::max(self.poly.len(), other.poly.len());
         let mut result = Vec::with_capacity(max_len);
 
-        let zero = F::zero(None);
+        let zero = F::zero();
 
         for i in 0..max_len {
             let a = self.poly.get(i).unwrap_or(&zero);
@@ -201,7 +201,7 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
 
     /// Multiplication of two polynomials.
     fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
+        let mut result = vec![F::zero(); self.degree() as usize + other.degree() as usize + 1];
 
         for (i, a) in self.poly.iter().enumerate() {
             for (j, b) in other.poly.iter().enumerate() {
@@ -239,8 +239,7 @@ impl<F: Field> Div for Polynomial<F> {
         let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient =
-            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
         let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() {
@@ -272,8 +271,7 @@ impl<F: Field> Rem for Polynomial<F> {
         let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient =
-            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
         let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() {

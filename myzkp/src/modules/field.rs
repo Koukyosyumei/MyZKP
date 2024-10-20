@@ -3,27 +3,16 @@ use num_traits::{One, Signed, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use crate::modules::ring::Ring;
+
 pub const DEFAULT_K_MODULES: i128 = 3_i128 * (1 << 30) + 1;
 
-pub trait Field:
-    Sized
-    + Clone
-    + PartialEq
-    + fmt::Display
-    + Add<Output = Self>
-    + Sub<Output = Self>
-    + Mul<Output = Self>
-    + Mul<i64, Output = Self>
-    + Div<Output = Self>
-    + Neg<Output = Self>
-{
+pub trait Field: Ring + Div<Output = Self> {
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
-    fn one() -> Self;
     fn inverse(&self) -> Self;
 
     // Utility functions
-    fn zero() -> Self;
     fn pow(&self, n: BigInt) -> Self;
 }
 
@@ -80,8 +69,7 @@ impl<const MODULUS: i128> FiniteFieldElement<MODULUS> {
         fe
     }
 }
-
-impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
+impl<const MODULUS: i128> Ring for FiniteFieldElement<MODULUS> {
     fn zero() -> Self {
         FiniteFieldElement::<MODULUS>::new(BigInt::zero())
     }
@@ -89,7 +77,9 @@ impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
     fn one() -> Self {
         FiniteFieldElement::<MODULUS>::new(BigInt::one())
     }
+}
 
+impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
     fn inverse(&self) -> Self {
         let modulus = MODULUS.to_bigint().unwrap();
         let mut t = BigInt::zero();
