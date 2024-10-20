@@ -1,11 +1,8 @@
-use num_bigint::{BigInt, RandBigInt, ToBigInt};
-use num_traits::{One, Signed, Zero};
-use std::fmt;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use num_bigint::BigInt;
+use num_traits::{One, Zero};
+use std::ops::{Add, Mul, Neg, Sub};
 
 use crate::modules::field::Field;
-use crate::modules::field::FiniteFieldElement;
-use crate::modules::polynomial::Polynomial;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EllipticCurve<F: Field> {
@@ -104,7 +101,7 @@ impl<F: Field> Add for EllipticCurvePoint<F> {
             let x1 = self.x.clone().unwrap();
             let y1 = self.y.clone().unwrap();
             let x2 = other.x.clone().unwrap();
-            let y2 = other.y.clone().unwrap();
+            // let y2 = other.y.clone().unwrap();
 
             // let m = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
             let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
@@ -166,16 +163,15 @@ pub fn get_lambda<F: Field>(
     p: EllipticCurvePoint<F>,
     q: EllipticCurvePoint<F>,
     r: EllipticCurvePoint<F>,
-    modulus: Option<BigInt>,
 ) -> F {
     let p_x = p.x.clone().unwrap();
     let p_y = p.y.clone().unwrap();
     let q_x = q.x.clone().unwrap();
-    let q_y = q.y.clone().unwrap();
+    // let q_y = q.y.clone().unwrap();
     let r_x = r.x.clone().unwrap();
     let r_y = r.y.clone().unwrap();
 
-    if (p == q && p_y.clone() == F::zero(modulus)) || (p != q && p_x.clone() == q_x.clone()) {
+    if (p == q && p_y.clone() == F::zero()) || (p != q && p_x.clone() == q_x.clone()) {
         return r_x.clone() - p_x.clone();
     }
     let slope = p.line_slope(q.clone());
@@ -184,25 +180,19 @@ pub fn get_lambda<F: Field>(
     return numerator / denominator;
 }
 
-pub fn miller<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    m: BigInt,
-    modulus: Option<BigInt>,
-) -> F {
+pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: BigInt) -> F {
     if p == q {
-        F::one(modulus.clone());
+        F::one();
     }
 
-    let mut f = F::one(modulus.clone());
+    let mut f = F::one();
     let mut t = p.clone();
 
     for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone())
-            * (get_lambda(t.clone(), t.clone(), q.clone(), modulus.clone()));
+        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
         t = t.clone() + t.clone();
         if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone(), modulus.clone()));
+            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
             t = t.clone() + p.clone();
         }
     }
@@ -215,103 +205,82 @@ pub fn weil_pairing<F: Field>(
     q: EllipticCurvePoint<F>,
     m: BigInt,
     s: Option<EllipticCurvePoint<F>>,
-    modulus: Option<BigInt>,
 ) -> F {
     let s_value = s.unwrap();
-    let fp_qs = miller(
-        p.clone(),
-        q.clone() + s_value.clone(),
-        m.clone(),
-        modulus.clone(),
-    );
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone(), modulus.clone());
-    let fq_ps = miller(
-        q.clone(),
-        p.clone() - s_value.clone(),
-        m.clone(),
-        modulus.clone(),
-    );
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone(), modulus.clone());
+    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
+    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
+    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
+    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
 
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 
-#[test]
-fn test_weil_pairing() {
-    let modulus = Some(631_i64.to_bigint().unwrap());
-    let a = FiniteFieldElement::new(30_i64.to_bigint().unwrap(), modulus.clone());
-    let b = FiniteFieldElement::new(34_i64.to_bigint().unwrap(), modulus.clone());
-    let curve = EllipticCurve { a, b };
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::modules::field::FiniteFieldElement;
+    use num_bigint::ToBigInt;
 
-    let p = EllipticCurvePoint::new(
-        FiniteFieldElement::new(36_i64.to_bigint().unwrap(), modulus.clone()),
-        FiniteFieldElement::new(60_i64.to_bigint().unwrap(), modulus.clone()),
-        curve.clone(),
-    );
-    let q = EllipticCurvePoint::new(
-        FiniteFieldElement::new(121_i64.to_bigint().unwrap(), modulus.clone()),
-        FiniteFieldElement::new(387_i64.to_bigint().unwrap(), modulus.clone()),
-        curve.clone(),
-    );
-    let s = EllipticCurvePoint::new(
-        FiniteFieldElement::new(0_i64.to_bigint().unwrap(), modulus.clone()),
-        FiniteFieldElement::new(36_i64.to_bigint().unwrap(), modulus.clone()),
-        curve.clone(),
-    );
-    let order = 5.to_bigint().unwrap();
+    #[test]
+    fn test_weil_pairing() {
+        const MODULUS: i128 = 631_i128;
+        let a = FiniteFieldElement::<{ MODULUS }>::from(30_i64);
+        let b = FiniteFieldElement::<{ MODULUS }>::from(34_i64);
+        let curve = EllipticCurve { a, b };
 
-    let fp_qs = miller(
-        p.clone(),
-        q.clone() + s.clone(),
-        order.clone(),
-        modulus.clone(),
-    );
-    let fp_s = miller(p.clone(), s.clone(), order.clone(), modulus.clone());
-    assert_eq!(fp_qs.value, 103.to_bigint().unwrap());
-    assert_eq!(fp_s.value, 219.to_bigint().unwrap());
-    assert_eq!((fp_qs / fp_s).value, 473.to_bigint().unwrap());
+        let p = EllipticCurvePoint::new(
+            FiniteFieldElement::<{ MODULUS }>::from(36_i64),
+            FiniteFieldElement::<{ MODULUS }>::from(60_i64),
+            curve.clone(),
+        );
+        let q = EllipticCurvePoint::new(
+            FiniteFieldElement::<{ MODULUS }>::from(121_i64),
+            FiniteFieldElement::<{ MODULUS }>::from(387_i64),
+            curve.clone(),
+        );
+        let s = EllipticCurvePoint::new(
+            FiniteFieldElement::<{ MODULUS }>::from(0_i64),
+            FiniteFieldElement::<{ MODULUS }>::from(36_i64),
+            curve.clone(),
+        );
+        let order = 5.to_bigint().unwrap();
 
-    let fq_ps = miller(
-        q.clone(),
-        p.clone() - s.clone(),
-        order.clone(),
-        modulus.clone(),
-    );
-    let fq_s = miller(q.clone(), -s.clone(), order.clone(), modulus.clone());
-    assert_eq!(fq_ps.value, 284.to_bigint().unwrap());
-    assert_eq!(fq_s.value, 204.to_bigint().unwrap());
-    assert_eq!((fq_ps / fq_s).value, 88.to_bigint().unwrap());
+        let fp_qs = miller(p.clone(), q.clone() + s.clone(), order.clone());
+        let fp_s = miller(p.clone(), s.clone(), order.clone());
+        assert_eq!(fp_qs.value, 103_i32.to_bigint().unwrap());
+        assert_eq!(fp_s.value, 219_i32.to_bigint().unwrap());
+        assert_eq!((fp_qs / fp_s).value, 473_i32.to_bigint().unwrap());
 
-    let w = weil_pairing(
-        p.clone(),
-        q.clone(),
-        order.clone(),
-        Some(s.clone()),
-        modulus.clone(),
-    );
-    assert_eq!(w.value, 242.to_bigint().unwrap());
+        let fq_ps = miller(q.clone(), p.clone() - s.clone(), order.clone());
+        let fq_s = miller(q.clone(), -s.clone(), order.clone());
+        assert_eq!(fq_ps.value, 284_i32.to_bigint().unwrap());
+        assert_eq!(fq_s.value, 204_i32.to_bigint().unwrap());
+        assert_eq!((fq_ps / fq_s).value, 88_i32.to_bigint().unwrap());
 
-    let p_prime = EllipticCurvePoint::new(
-        FiniteFieldElement::new(617_i64.to_bigint().unwrap(), modulus.clone()),
-        FiniteFieldElement::new(5_i64.to_bigint().unwrap(), modulus.clone()),
-        curve.clone(),
-    );
-    let q_prime = EllipticCurvePoint::new(
-        FiniteFieldElement::new(121_i64.to_bigint().unwrap(), modulus.clone()),
-        FiniteFieldElement::new(244_i64.to_bigint().unwrap(), modulus.clone()),
-        curve.clone(),
-    );
+        let w = weil_pairing(p.clone(), q.clone(), order.clone(), Some(s.clone()));
+        assert_eq!(w.value, 242.to_bigint().unwrap());
 
-    let w_prime = weil_pairing(
-        p_prime.clone(),
-        q_prime.clone(),
-        order.clone(),
-        Some(s.clone()),
-        modulus.clone(),
-    );
-    assert_eq!(w_prime.value, 512.to_bigint().unwrap());
+        let p_prime = EllipticCurvePoint::new(
+            FiniteFieldElement::<{ MODULUS }>::from(617_i64),
+            FiniteFieldElement::<{ MODULUS }>::from(5_i64),
+            curve.clone(),
+        );
+        let q_prime = EllipticCurvePoint::new(
+            FiniteFieldElement::<{ MODULUS }>::from(121_i64),
+            FiniteFieldElement::<{ MODULUS }>::from(244_i64),
+            curve.clone(),
+        );
 
-    assert_eq!(p.clone() * 3.to_bigint().unwrap(), p_prime.clone());
-    assert_eq!(q.clone() * 4.to_bigint().unwrap(), q_prime.clone());
-    assert_eq!(w.pow(12.to_bigint().unwrap()), w_prime);
+        let w_prime = weil_pairing(
+            p_prime.clone(),
+            q_prime.clone(),
+            order.clone(),
+            Some(s.clone()),
+        );
+        assert_eq!(w_prime.value, 512_i32.to_bigint().unwrap());
+
+        assert_eq!(p.clone() * 3_i32.to_bigint().unwrap(), p_prime.clone());
+        assert_eq!(q.clone() * 4_i32.to_bigint().unwrap(), q_prime.clone());
+        assert_eq!(w.pow(12_i32.to_bigint().unwrap()), w_prime);
+    }
 }

@@ -292,7 +292,6 @@ impl<F: Field> Rem for Polynomial<F> {
 mod tests {
     use super::*;
     use crate::modules::field::{FiniteFieldElement, DEFAULT_K_MODULES};
-    use num_bigint::ToBigInt;
 
     #[test]
     fn test_polynomial_addition() {

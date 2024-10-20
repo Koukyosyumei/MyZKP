@@ -18,7 +18,7 @@ pub trait Field: Ring + Div<Output = Self> {
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct FiniteFieldElement<const MODULUS: i128> {
-    value: BigInt,
+    pub value: BigInt,
 }
 
 impl<const MODULUS: i128> FiniteFieldElement<MODULUS> {
