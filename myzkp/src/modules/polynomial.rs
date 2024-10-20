@@ -1,10 +1,8 @@
-use num_bigint::ToBigInt;
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 // Assuming FiniteFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
 use crate::modules::field::Field;
-use crate::modules::field::FiniteFieldElement;
 
 /// Polynomial struct representing a polynomial over Field.
 #[derive(Debug, Clone, PartialEq)]
@@ -241,7 +239,6 @@ impl<F: Field> Div for Polynomial<F> {
 
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
-        let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() {
             let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
@@ -252,7 +249,6 @@ impl<F: Field> Div for Polynomial<F> {
                     - (lead_term.clone() * divisor_coeffs[i].clone());
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-            i += 1;
         }
 
         Polynomial {
@@ -273,7 +269,6 @@ impl<F: Field> Rem for Polynomial<F> {
 
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
-        let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() {
             let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
@@ -284,7 +279,6 @@ impl<F: Field> Rem for Polynomial<F> {
                     - (lead_term.clone() * divisor_coeffs[i].clone());
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-            i += 1;
         }
 
         Polynomial {
@@ -297,27 +291,29 @@ impl<F: Field> Rem for Polynomial<F> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::modules::field::{FiniteFieldElement, DEFAULT_K_MODULES};
+    use num_bigint::ToBigInt;
 
     #[test]
     fn test_polynomial_addition() {
         let poly1 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(5_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(5_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -328,22 +324,22 @@ mod tests {
     fn test_polynomial_subtraction() {
         let poly1 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(4_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(5_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(5_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -354,15 +350,15 @@ mod tests {
     fn test_polynomial_negation() {
         let poly = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(4_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(-3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(-4_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(-3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(-4_i32.to_bigint().unwrap()),
             ],
             var: "x".to_string(),
         };
@@ -373,23 +369,23 @@ mod tests {
     fn test_polynomial_multiplication() {
         let poly1 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
             ], // 1 + 2x
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
             ], // 2 + 3x
             var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()), // constant term
-                FiniteFieldElement::from(7_i32.to_bigint().unwrap()), // x term
-                FiniteFieldElement::from(6_i32.to_bigint().unwrap()), // x^2 term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()), // constant term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(7_i32.to_bigint().unwrap()), // x term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(6_i32.to_bigint().unwrap()), // x^2 term
             ],
             var: "x".to_string(),
         };
@@ -400,16 +396,16 @@ mod tests {
     fn test_polynomial_scalar_multiplication() {
         let poly = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
             ], // 1 + 2x
             var: "x".to_string(),
         };
-        let scalar = FiniteFieldElement::from(3_i32.to_bigint().unwrap());
+        let scalar = FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap());
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(6_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(6_i32.to_bigint().unwrap()),
             ], // 3 + 6x
             var: "x".to_string(),
         };
@@ -420,30 +416,32 @@ mod tests {
     fn test_polynomial_division() {
         let poly1 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
             ], // 3 + 3x + x^2
             var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
             ], // 1 + x
             var: "x".to_string(),
         };
         let quotient = poly1.clone() / poly2.clone();
         let expected_quotient = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
             ], // 2 + x
             var: "x".to_string(),
         };
         let remainder = poly1.clone() % poly2.clone();
         let expected_remainder = Polynomial {
-            poly: vec![FiniteFieldElement::from(1_i32.to_bigint().unwrap())], // remainder is 1
+            poly: vec![FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(
+                1_i32.to_bigint().unwrap(),
+            )], // remainder is 1
             var: "x".to_string(),
         };
         assert_eq!(quotient, expected_quotient);
@@ -454,13 +452,14 @@ mod tests {
     fn test_polynomial_evaluation() {
         let poly = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
             ], // 2 + 3x
             var: "x".to_string(),
         };
-        let point = FiniteFieldElement::from(2_i32.to_bigint().unwrap());
-        let expected = FiniteFieldElement::from(8_i32.to_bigint().unwrap()); // 2 + 3 * 2 = 8
+        let point = FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap());
+        let expected =
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(8_i32.to_bigint().unwrap()); // 2 + 3 * 2 = 8
         assert_eq!(poly.eval(&point), expected);
     }
 
@@ -468,9 +467,9 @@ mod tests {
     fn test_polynomial_degree() {
         let poly = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(0_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
             ], // 1 + 0x + 3x^2
             var: "x".to_string(),
         };
@@ -480,21 +479,21 @@ mod tests {
     #[test]
     fn test_polynomial_lagrange_interpolation() {
         let x_values = vec![
-            FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
-            FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
         ];
         let y_values = vec![
-            FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
-            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
-            FiniteFieldElement::from(8_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(0_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(8_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::interpolate(&x_values, &y_values);
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(-1_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(0_i32.to_bigint().unwrap()),
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(-1_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(0_i32.to_bigint().unwrap()),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()),
             ], // x^2 - 1
             var: "x".to_string(),
         };
@@ -504,16 +503,16 @@ mod tests {
     #[test]
     fn test_polynomial_from_monomials() {
         let points = vec![
-            FiniteFieldElement::from(2_i32.to_bigint().unwrap()),
-            FiniteFieldElement::from(3_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(2_i32.to_bigint().unwrap()),
+            FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(3_i32.to_bigint().unwrap()),
         ];
         let result = Polynomial::from_monomials(&points);
         // (x - 2) * (x - 3) = x^2 - 5x + 6
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::from(6_i32.to_bigint().unwrap()), // constant term
-                FiniteFieldElement::from(-5_i32.to_bigint().unwrap()), // x term
-                FiniteFieldElement::from(1_i32.to_bigint().unwrap()), // x^2 term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(6_i32.to_bigint().unwrap()), // constant term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(-5_i32.to_bigint().unwrap()), // x term
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from(1_i32.to_bigint().unwrap()), // x^2 term
             ],
             var: "x".to_string(),
         };
