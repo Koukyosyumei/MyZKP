@@ -199,9 +199,9 @@ impl<const MODULUS: i128> Div for FiniteFieldElement<MODULUS> {
 }
 
 // Implement conversion from BigInt for FiniteFieldElement<MODULUS>.
-impl<const MODULUS: i128> From<BigInt> for FiniteFieldElement<MODULUS> {
-    fn from(value: BigInt) -> Self {
-        FiniteFieldElement::<MODULUS>::new(value)
+impl<const MODULUS: i128, M: Into<BigInt>> From<M> for FiniteFieldElement<MODULUS> {
+    fn from(value: M) -> Self {
+        FiniteFieldElement::<MODULUS>::new(value.into())
     }
 }
 
