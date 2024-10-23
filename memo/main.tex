@@ -312,6 +312,27 @@ A triple $(R, +, \cdot)$ is a ring if $(R, +)$ is an abelian group, $(R, \cdot)$
 
 Example: The set of integers with usual addition and multiplication modulo $n$ forms a ring. For example, in $\mathbb{Z}/6\mathbb{Z}$, addition and multiplication modulo 6 form a ring.
 
+\begin{lstlisting}[language=Rust, caption=Implementation of Ring]
+use std::fmt;
+use std::ops::{Add, Mul, Neg, Sub};
+
+pub trait Ring:
+    Sized
+    + Clone
+    + PartialEq
+    + fmt::Display
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Mul<Output = Self>
+    + Mul<i64, Output = Self>
+    + Neg<Output = Self>
+{
+    // A ring is an algebraic structure with addition and multiplication
+    fn zero() -> Self;
+    fn one() -> Self;
+}
+\end{lstlisting}
+
 \begin{definition}{Commutative Ring}{}
 A ring is called a commutative ring if its multiplication operation is commutative.
 \end{definition}
@@ -323,6 +344,14 @@ A commutative ring with a multiplicative identity element where every non-zero e
 \end{definition}
 
 The set of rational numbers under usual addition and multiplication forms a field.
+
+\begin{lstlisting}[language=Rust, caption=Implementation of Field]
+use crate::modules::ring::Ring;
+
+pub trait Field: Ring + Div<Output = Self> {
+    fn inverse(&self) -> Self;
+}
+\end{lstlisting}
 
 \begin{definition}{Residue Class}{}
 The residue class of $a$ modulo $m$, denoted as $a + m\mathbb{Z}$, is the set $\{b : b \equiv a \pmod{m}\}$.
@@ -492,24 +521,6 @@ Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, consider the element 
 
 Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, for any element $g$, such as $g = 3 + 7\mathbb{Z}$, we have $3^6 \equiv 1 \bmod 7$. This holds for any $g \in (\mathbb{Z}/7\mathbb{Z})^{\times}$ because the order of the group is 6. Thus, $g^{|G|} = 1$ is satisfied.
 
-\begin{definition}{Pairing}{}
-Let $G_1$ and $G_2$ be cyclic groups under addition, both of prime order $p$, with generators $P$ and $Q$ respectively:
-
-    \begin{align}
-        G_1 &= \{0, P, 2P, ..., (p-1)P\} \\
-        G_2 &= \{0, Q, 2Q, ..., (p-1)Q\}
-    \end{align}
-
-Let $G_T$ be a cyclic group under multiplication, also of order $p$.
-A pairing is a map $e: G_1 \times G_2 \rightarrow G_T$ that satisfies the following bilinear property:
-
-    \begin{equation}
-        e(aP, bQ) = e(P, Q)^{ab}
-    \end{equation} for all $a, b \in \mathbb{Z}_p$.
-\end{definition}
-
-Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents area. The pairing function $e$ is like calculating the area: If you double the length and triple the width, the area becomes six times larger: $e(2P, 3Q) = e(P, Q)^{6}$
-
 \paragraph{Exercise}
 
 \subsection{Polynomials}
@@ -520,8 +531,18 @@ Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents ar
 
 Example: In $\mathbb{Z}[x]$, we have polynomials such as $2x^3 + x + 1$, $x$, and $1$. In $\mathbb{R}[x]$, we have polynomials like $\pi x^2 - \sqrt{2}x + e$.
 
+\begin{lstlisting}[language=Rust, caption=Polynomial]
+/// Polynomial struct representing a polynomial over Field.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Polynomial<F: Field> {
+    pub poly: Vec<F>,
+    pub var: String,
+}
+\end{lstlisting}
+
+
 \begin{definition}{Degree}{}
-    The degree of a non-zero polynomial $f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0$, denoted as $\deg f$, is the largest integer $n$ such that $a_n \neq 0$. The zero polynomial is defined to have degree $-\infty$.
+    The degree of a non-zero polynomial $f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0$, denoted as $\deg f$, is the largest integer $n$ such that $a_n \neq 0$. The zero polynomial is defined to have degree $-1$.
 \end{definition}
 
 Example: 
@@ -530,9 +551,31 @@ Example:
     \item $\deg(2x^3 + x + 1) = 3$
     \item $\deg(x) = 1$
     \item $\deg(1) = 0$
-    \item $\deg(0) = -\infty$
+    \item $\deg(0) = -1$
 \end{itemize}
 
+\begin{lstlisting}[language=Rust, caption=Degree of Polynomials]
+impl<F: Field> Polynomial<F> {
+    /// Removes trailing zeroes from a polynomial's coefficients.
+    fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
+        let mut trimmed = poly;
+        while trimmed.last() == Some(&F::zero(None)) {
+            trimmed.pop();
+        }
+        trimmed
+    }
+
+    /// Returns the degree of the polynomial.
+    pub fn degree(&self) -> isize {
+        let trimmed = Self::trim_trailing_zeros(self.poly.clone());
+        if trimmed.is_empty() {
+            -1
+        } else {
+            (trimmed.len() - 1) as isize
+        }
+    }
+}
+\end{lstlisting}
 
 \begin{definition}{Sum of polynomials}{}
     For polynomials $f(x) = \sum_{i=0}^n a_i x^i$ and $g(x) = \sum_{i=0}^m b_i x^i$, their sum is defined as:
@@ -542,12 +585,56 @@ Example:
 
 Example: Let $f(x) = 2x^2 + 3x + 1$ and $g(x) = x^3 - x + 4$. Then, $(f + g)(x) = x^3 + 2x^2 + 2x + 5$
 
+\begin{lstlisting}[language=Rust, caption=Sum of Polynomials]
+impl<F: Field> Add for Polynomial<F> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Polynomial<F> {
+        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero(None);
+
+        for i in 0..max_len {
+            let a = self.poly.get(i).unwrap_or(&zero);
+            let b = other.poly.get(i).unwrap_or(&zero);
+            result.push(a.clone() + b.clone());
+        }
+        Polynomial {
+            poly: Self::trim_trailing_zeros(result),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
+
 \begin{definition}{Product of polynomials}{}
     For polynomials $f(x) = \sum_{i=0}^n a_i x^i$ and $g(x) = \sum_{j=0}^m b_j x^j$, their product is defined as:
     $(fg)(x) = \sum_{k=0}^{n+m} c_k x^k$, where $c_k = \sum_{i+j=k} a_i b_j$
 \end{definition}
 
 Example: Let $f(x) = x + 1$ and $g(x) = x^2 - 1$. Then, $(fg)(x) = x^3 + x^2 - x - 1$
+
+\begin{lstlisting}[language=Rust, caption=Product of polynomials]
+impl<F: Field> Mul for Polynomial<F> {
+    type Output = Self;
+
+    /// Multiplication of two polynomials.
+    fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
+
+        for (i, a) in self.poly.iter().enumerate() {
+            for (j, b) in other.poly.iter().enumerate() {
+                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+            }
+        }
+        Polynomial {
+            poly: Self::trim_trailing_zeros(result),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
 
 Let $K$ be a field.
 
@@ -570,6 +657,42 @@ We can also define division in the polynomial ring $K[x]$.
 $q$ is called the quotient of $f$ divided by $g$, and $r$ is called the remainder; we write $r = f \bmod g$.
 
 Example: In $\mathbb{R}[x]$, let $f(x) = x^3 + 2x^2 - x + 3$ and $g(x) = x^2 + 1$.  Then $f = qg + r$ where $q(x) = x + 2$ and $r(x) = -3x + 1$.
+
+
+\begin{lstlisting}[language=Rust, caption=Division of polynomials]
+impl<F: Field> Div for Polynomial<F> {
+    type Output = Self;
+
+    /// Division of two polynomials, returns quotient.
+    fn div(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
+        let mut quotient =
+            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+
+        let mut i = 0_i32;
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
+            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
+            quotient[deg_diff] = lead_term.clone();
+
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
+                    - (lead_term.clone() * divisor_coeffs[i].clone());
+            }
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+            i += 1;
+        }
+
+        Polynomial {
+            poly: Self::trim_trailing_zeros(quotient),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
 
 \begin{corollary}{}{}
     Let $f \in K[x]$ be a non-zero polynomial, and $a \in K$ such that $f(a) = 0$. Then, there exists a polynomial $q \in K[x]$ such that $f(x) = (x - a)q(x)$. In other words, $(x - a)$ is a factor of $f(x)$.
@@ -598,6 +721,35 @@ For example, the quadratic polynomial that goes through $\{(1, 0), (2, 3), (3, 8
 
 Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.
 
+\begin{lstlisting}[language=Rust, caption=Lagrange Interpolation]
+pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
+    let mut lagrange_polys = vec![];
+    let numerators = Polynomial::from_monomials(x_values);
+
+    for j in 0..x_values.len() {
+        let mut denominator = F::one(None);
+        for i in 0..x_values.len() {
+            if i != j {
+                denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+            }
+        }
+        let cur_poly = numerators
+            .clone()
+            .div(Polynomial::from_monomials(&[x_values[j].clone()]).scalar_mul(&denominator));
+        lagrange_polys.push(cur_poly);
+    }
+
+    let mut result = Polynomial {
+        poly: vec![],
+        var: "x".to_string(),
+    };
+    for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
+        result = result + lagrange_poly.scalar_mul(&y_values[j]);
+    }
+    result
+}
+\end{lstlisting}
+
 \begin{proposition}{Homomorphisms of Lagrange Interpolation}{}
 Let $L(v)$ and $L(w)$ be the polynomial resulting from Lagrange Interpolation on the output ($y$) vector $v$ and $w$ for the same inputs ($x$). Then, the following properties hold:
 
@@ -619,7 +771,7 @@ Let $v = (v_1, \ldots, v_n)$ and $w = (w_1, \ldots, w_n)$ be vectors, and $x_1, 
 
 \paragraph{Exercise}
 
-\subsection{Finite Field}
+\subsection{Galois Field}
 
 We will now discuss the construction of finite fields with $p^n$ elements, where $p$ is a prime number and $n$ is a positive integer. These fields are also known as Galois fields, denoted as $GF(p^n)$. It is evident that $\mathbb{Z}/p\mathbb{Z}$ is isomorphic to $GF(p)$.
 
@@ -685,7 +837,7 @@ This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relative
 \subsection{Elliptic curve}
 
 \begin{definition}{Elliptic Curve}{}
-    An elliptic curve $E$ over a finite field $\mathbb{F}{p}$ is defined by the equation:
+    An elliptic curve $E$ over a finite field $\mathbb{F}_{p}$ is defined by the equation:
 
     \begin{equation}
         y^2 = x^3 + a x + b
@@ -693,16 +845,35 @@ This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relative
     where $(a, b \in \mathbb{F}_{p})$ and the discriminant $\Delta_{E} = 4a^3 + 27b^2 \neq 0$.
 \end{definition}
 
+\begin{lstlisting}[language=Rust, caption=Implementation of Elliptic Curve]
+use crate::modules::field::Field;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurve<F: Field> {
+    pub a: F,
+    pub b: F,
+}
+\end{lstlisting}
+
 \begin{definition}{$\mathbb{F}{p}$-Rational Point}{}
-An $\mathbb{F}{p}$-rational point on an elliptic curve $E$ is a point $(x, y)$ where both $x$ and $y$ are elements of $\mathbb{F}_{p}$ and satisfy the curve equation, or the point at infinity $\mathcal{O}$.
+An $\mathbb{F}_{p}$-rational point on an elliptic curve $E$ is a point $(x, y)$ where both $x$ and $y$ are elements of $\mathbb{F}_{p}$ and satisfy the curve equation, or the point at infinity $\mathcal{O}$.
 \end{definition}
 
-Example: For $E: y^2 = x^3 + 3x + 4$ over $\mathbb{F}{7}$, the $\mathbb{F}{7}$-rational points are:
+Example: For $E: y^2 = x^3 + 3x + 4$ over $\mathbb{F}_{7}$, the $\mathbb{F}_{7}$-rational points are:
 ${(0, 2), (0, 5), (1, 1), (1, 6), (2, 2), (2, 5), (5, 1), (5, 6), \mathcal{O}}$
 
 \begin{definition}{The point at infinity}{}
-The point at infinity, denoted $\mathcal{O}$, is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.
+The point at infinity denoted $\mathcal{O}$, is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.
 \end{definition}
+
+\begin{lstlisting}[language=Rust, caption=Implementation of Rational Point]
+#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurvePoint<F: Field> {
+    pub x: Option<F>,
+    pub y: Option<F>,
+    pub curve: EllipticCurve<F>,
+}
+\end{lstlisting}
 
 \begin{definition}{Addition on Elliptic Curve}{}
 For an elliptic curve $E: y^2 = x^3 + ax + b$, the addition of points $P$ and $Q$ to get $R = P + Q$ is defined as follows:
@@ -723,26 +894,100 @@ For an elliptic curve $E: y^2 = x^3 + ax + b$, the addition of points $P$ and $Q
 
 Example: On $E: y^2 = x^3 + 2x + 3$ over $\mathbb{F}_{7}$, let $P = (5, 1)$ and $Q = (4, 4)$. Then, $P + Q = (0, 5)$, where $\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7$.
 
+\begin{lstlisting}[language=Rust, caption=Implementation of Addition on Elliptic Curve]
+impl<F: Field> EllipticCurvePoint<F> {
+    fn new(x: F, y: F, curve: EllipticCurve<F>) -> Self {
+        EllipticCurvePoint {
+            x: Some(x),
+            y: Some(y),
+            curve: curve,
+        }
+    }
+
+    pub fn point_at_infinity(curve: EllipticCurve<F>) -> Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            curve: curve,
+        }
+    }
+
+    pub fn is_point_at_infinity(&self) -> bool {
+        self.x.is_none() || self.y.is_none()
+    }
+
+    pub fn line_slope(&self, other: Self) -> F {
+        let x1 = self.x.clone().unwrap();
+        let y1 = self.y.clone().unwrap();
+        let x2 = other.x.clone().unwrap();
+        let y2 = other.y.clone().unwrap();
+
+        if self.x.clone() == other.x.clone() {
+            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
+        } else {
+            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        }
+    }
+}
+
+impl<F: Field> Add for EllipticCurvePoint<F> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        if self.is_point_at_infinity() {
+            return other;
+        }
+        if other.is_point_at_infinity() {
+            return self;
+        }
+
+        let m = self.line_slope(other.clone());
+
+        if self.x == other.x {
+            if self.y != other.y {
+                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+            } else {
+                let x1 = self.x.clone().unwrap();
+                let y1 = self.y.clone().unwrap();
+
+                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
+                let y3 = m * (x1 - x3.clone()) - y1;
+
+                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+            }
+        } else {
+            let x1 = self.x.clone().unwrap();
+            let y1 = self.y.clone().unwrap();
+            let x2 = other.x.clone().unwrap();
+            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
+            let y3 = m * (x1 - x3.clone()) - y1;
+
+            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+        }
+    }
+}
+\end{lstlisting}
+
 \begin{definition}{Mordell-Weil Group}{}
 The Mordell-Weil group of an elliptic curve $E$ is the group of rational points on $E$ under the addition operation defined above.
 \end{definition}
 
-Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}{11}$, the Mordell-Weil group is the set of all $\mathbb{F}{11}$-rational points on $E$ with the elliptic curve addition operation.
+Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}_{11}$, the Mordell-Weil group is the set of all $\mathbb{F}_{11}$-rational points on $E$ with the elliptic curve addition operation.
 
 \begin{definition}{Group Order}{}
-The group order of an elliptic curve $E$ over $\mathbb{F}{p}$, denoted $\#E(\mathbb{F}{p})$, is the number of $\mathbb{F}_{p}$-rational points on $E$, including the point at infinity.
+The group order of an elliptic curve $E$ over $\mathbb{F}_{p}$, denoted $\#E(\mathbb{F}_{p})$, is the number of $\mathbb{F}_{p}$-rational points on $E$, including the point at infinity.
 \end{definition}
-Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}{11}$, $\#E(\mathbb{F}{11}) = 13$.
+Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}_{11}$, $\#E(\mathbb{F}_{11}) = 13$.
 
 \begin{theorem}{Hasse-Weil}{}
-Let $\#E(\mathbb{F}{p})$ be the group order of the elliptic curve $E$ over $\mathbb{F}{p}$. Then:
+Let $\#E(\mathbb{F}_{p})$ be the group order of the elliptic curve $E$ over $\mathbb{F}_{p}$. Then:
 
         \begin{equation}
             p + 1 - 2 \sqrt{p} \leq \#E \leq p + 1 + 2 \sqrt{p}
         \end{equation}
 \end{theorem}
 
-For an elliptic curve over $\mathbb{F}{23}$, the Hasse-Weil theorem guarantees that: 
+For an elliptic curve over $\mathbb{F}_{23}$, the Hasse-Weil theorem guarantees that: 
 
 \begin{equation*}
 23 + 1 - 2 \sqrt{23} \simeq 14.42 \#E(\mathbb{F}_{23}) \geq 23 + 1 + 2 \sqrt{23} \simeq 33.58
@@ -755,6 +1000,204 @@ The order of a point $P$ on an elliptic curve is the smallest positive integer $
 Example: On $E: y^2 = x^3 + 2x + 2$ over $\mathbb{F}_{17}$, the point $P = (5, 1)$ has order 18 because $18P = \mathcal{O}$, and no smaller positive multiple of $P$ equals $\mathcal{O}$.
 
 The intuitive view is that if you continue to add points to themselves (doubling, tripling, etc.), the lines drawn between the prior point and the next point will eventually become more vertical. When the line becomes vertical, it does not intersect the elliptic curve at any finite point. In elliptic curve geometry, a vertical line is considered to "intersect" the curve at a special place called the "point at infinity," This point is like a north pole in geographic terms: no matter which direction you go, if the line becomes vertical (reaching infinitely high), it converges to this point.
+
+\begin{definition}{Field Extension}{}
+    Let $F$ and $L$ be fields. If $F \subseteq L$ and the operations of $F$ are the same as those of $L$, we call $L$ a field extension of $F$. This is denoted as $L/F$.
+\end{definition}
+
+A field extension $L/F$ naturally gives $L$ the structure of a vector space over $F$. The dimension of this vector space is called the degree of the extension.
+
+Examples:
+\begin{itemize}
+    \item $\mathbb{C}/\mathbb{R}$ is a field extension with basis $\{1, i\}$ and degree 2.
+    \item $\mathbb{R}/\mathbb{Q}$ is an infinite degree extension.
+    \item $\mathbb{Q}(\sqrt{2})/\mathbb{Q}$ is a degree 2 extension with basis $\{1, \sqrt{2}\}$.
+\end{itemize}
+
+\begin{definition}{Algebraic Extension}{}
+    A field extension $L/K$ is called algebraic if every element $\alpha \in L$ is algebraic over $K$, i.e., $\alpha$ is the root of some non-zero polynomial with coefficients in $K$.
+
+    For an algebraic element $\alpha \in L$ over $K$, we denote by $K(\alpha)$ the smallest field containing both $K$ and $\alpha$.
+\end{definition}
+
+\begin{itemize}
+    \item $\mathbb{C}/\mathbb{R}$ is algebraic: any $z = a + bi \in \mathbb{C}$ is a root of $x^2 - 2ax + (a^2 + b^2) \in \mathbb{R}[x]$.
+    \item $\mathbb{Q}(\sqrt[3]{2})/\mathbb{Q}$ is algebraic: $\sqrt[3]{2}$ is a root of $x^3 - 2 \in \mathbb{Q}[x]$.
+    \item $\mathbb{R}/\mathbb{Q}$ is not algebraic (a field extension that is not algebraic is called \textit{transcendental}).
+\end{itemize}
+
+\begin{definition}{Field of Rational Functions}{}
+Let $K$ be a field and $X$ be indeterminate. The field of rational functions over $K$, denoted $K(X)$, is defined as:
+
+\begin{equation*}
+    K(X) = \left\{ \frac{f(X)}{g(X)} \,\middle|\, f(X), g(X) \in K[X], g(X) \neq 0 \right\}
+\end{equation*}
+
+where $K[X]$ is the ring of polynomials in $X$ with coefficients in $K$.
+\end{definition}
+
+$K(X)$ can be viewed as the field obtained by adjoining a letter $X$ to $K$. This construction generalizes to multiple variables, e.g., $K(X,Y)$.
+
+The concept of a function field naturally arises in the context of algebraic curves, particularly elliptic curves. Intuitively, the function field encapsulates the algebraic structure of rational functions on the curve.
+
+We first construct the coordinate ring for an elliptic curve $E: y^2 = x^3 + ax + b$. Consider functions $X: E \to K$ and $Y: E \to K$ that extract the $x$ and $y$ coordinates, respectively, from an arbitrary point $P \in E$. These functions generate the polynomial ring $K[X,Y]$, subject to the relation $Y^2 = X^3 + aX + b$.
+
+To put it simply, the function field is a field that consists of all functions that determine the value based on the point on the curve.
+
+\begin{definition}{Coordinate Ring of an Elliptic Curve}{}
+The \textbf{coordinate ring} of an elliptic curve $E: y^2 = x^3 + ax + b$ over a field $K$ is defined as:
+\begin{equation}
+    K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
+\end{equation}
+\end{definition}
+
+In other words, we can view $K[E]$ as a ring representing all polynomial functions on $E$. Recall that $K[X, Y]$ is the polynomial ring in two variables $X$ and $Y$ over the field K, meaning that it contains all polynomials in $X$ and $Y$ with coefficients from $K$. Then, the notation $K[X, Y]/(Y^2 - X^3 - aX - b)$ denotes the quotient ring obtained by taking $K[X, Y]$ and "modding out" by the ideal $(Y^2 - X^3 - aX - b)$.
+
+For example, for an elliptic curve $E: y^2 = x^3 - x$ over $\mathbb{Q}$, some elements of the coordinate ring $\mathbb{Q}[E]$ include:
+
+\begin{itemize}
+    \item Constants: $3, -2, \frac{1}{7}, \ldots$
+    \item Linear functions: $X, Y, 2X+3Y, \ldots$
+    \item Quadratic functions: $X^2, XY, Y^2 (= X^3 - X), \ldots$
+    \item Higher-degree functions: $X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots$
+\end{itemize}
+
+Then, the function field is defined as follows:
+
+\begin{definition}{Function Field of an Elliptic Curve}{}
+Let $E: y^2 = x^3 + ax + b$ be an elliptic curve over a field $K$. The \textbf{function field} of $E$, denoted $K(E)$, is defined as:
+\begin{equation}
+    K(E) = \left\{\frac{f}{g} \,\middle|\, f, g \in K[E], g \neq 0 \right\}
+\end{equation}
+where $K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)$ is the coordinate ring of $E$.
+\end{definition}
+
+$K(E)$ can be viewed as the field of all rational functions on $E$.
+
+\begin{definition}{Zero of a Function}{}
+Let $h \in K(E)$ be a non-zero function. A point $P \in E$ is called a \textbf{zero} of $h$ if $h(P) = 0$.
+\end{definition}
+
+\begin{definition}{Pole of a Function}
+Let $h \in K(E)$ be a non-zero function. A point $P \in E$ is called a \textbf{pole} of $h$ if $h$ is not defined at $P$ or, equivalently if $1/h$ has a zero at $P$.
+\end{definition}
+
+Consider the elliptic curve $E: Y^2 = X^3 - X$ over a field $K$ of characteristic $\neq 2, 3$. Let $P_{-1} = (-1, 0)$, $P_0 = (0, 0)$, and $P_1 = (1, 0)$ be the points where $Y = 0$.
+
+\begin{itemize}
+    \item The function $Y \in K(E)$ has three simple zeros: $P_{-1}$, $P_0$, and $P_1$.
+    \item The function $X \in K(E)$ has a double zero at $P_0$ (since $P_0 = -P_0$).
+    \item The function $X - 1 \in K(E)$ has a simple zero at $P_1$.
+    \item The function $X^2 - 1 \in K(E)$ has two simple zeros at $P_{-1}$ and $P_1$.
+    \item The function $\frac{Y}{X} \in K(E)$ has a simple zero at $P_{-1}$ and a simple pole at $P_0$.
+\end{itemize}
+
+An important property of functions in $K(E)$ is that they have the same number of zeros and poles when counted with multiplicity. This is a consequence of a more general result known as the Degree-Genus Formula.
+
+\begin{theorem}{Degree-Genus Formula for Elliptic Curves}{}
+Let $f \in K(E)$ be a non-zero rational function on an elliptic curve $E$. Then:
+\begin{equation}
+    \sum_{P \in E} ord_{P(f)} = 0
+\end{equation}
+where $ord_{P(f)}$ denotes the order of $f$ at $P$, which is positive for zeros and negative for poles.
+\end{theorem}
+
+This theorem implies that the total number of zeros (counting multiplicity) equals the total number of poles for any non-zero function in $K(E)$.
+
+We now introduce a powerful tool for analyzing functions on elliptic curves: the concept of divisors.
+
+\begin{definition}{Divisor of a Function on an Elliptic Curve}{}
+Let $E: Y^2 = X^3 + AX + B$ be an elliptic curve over a field $K$, and let $f \in K(E)$ be a non-zero rational function on $E$. The \textbf{divisor} of $f$, denoted $div(f)$, is defined as:
+    \begin{equation}
+        div(f) = \sum_{P \in E} ord_P(f) [P]
+    \end{equation}
+, where $ord_P(f)$ is the order of $f$ at $P$ (positive for zeros, negative for poles), and the sum is taken over all points $P \in E$, including the point at infinity. This sum has only finitely many non-zero terms.
+\end{definition}
+
+Note that this $\sum_{P \in E}$ is a symbolic summation, and we do not calculate the concrete value of a divisor.
+
+Consider the elliptic curve $E: Y^2 = X^3 - X$ over $\mathbb{Q}$.
+\begin{itemize}
+    \item For $f = X$, we have $div(X) = 2[(0,0)] - 2[\mathcal{O}]$.
+    \item For $g = Y$, we have $div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]$.
+    \item For $h = \frac{X-1}{Y}$, we have $div(h) = [(1,0)] - [(-1,0)]$.
+\end{itemize}
+
+The concept of divisors can be extended to the elliptic curve itself:
+
+\begin{definition}{Divisor on an Elliptic Curve}{}
+A \textbf{divisor} $D$ on an elliptic curve $E$ is a formal sum
+    \begin{equation}
+        D = \sum_{P \in E} n_P [P]
+    \end{equation}
+where $n_P \in \mathbb{Z}$ and $n_P = 0$ for all but finitely many $P$.
+\end{definition}
+
+On the curve $E: Y^2 = X^3 - X$:
+\begin{itemize}
+    \item $D_1 = 3[(0,0)] - 2[(1,1)] - [(2,\sqrt{6})]$ is a divisor.
+    \item $D_2 = [(1,0)] + [(-1,0)] - 2[\mathcal{O}]$ is a divisor.
+    \item $D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]$ is a divisor (where $E[2]$ are the 2-torsion points).
+\end{itemize}
+
+To quantify the properties of divisors, we introduce two important metrics:
+
+\begin{definition}{Degree of a Divisor}{}
+The \textbf{degree} of a divisor $D = \sum_{P \in E} n_P [P]$ is defined as:
+    \begin{equation}
+        deg(D) = \sum_{P \in E} n_P
+    \end{equation}
+\end{definition}
+
+\begin{definition}{Sum of a Divisor}{}
+The \textbf{sum} of a divisor $D = \sum_{P \in E} n_P [P]$ is defined as:
+    \begin{equation}
+        Sum(D) = \sum_{P \in E} n_P P
+    \end{equation}
+where $n_P P$ denotes the point addition of $P$ to itself $n_P$ times in the group law of $E$.
+\end{definition}
+
+For the divisors in the previous example:
+\begin{itemize}
+    \item $deg(D_1) = 3 - 2 - 1 = 0$
+    \item $deg(D_2) = 1 + 1 - 2 = 0$
+    \item $deg(D_3) = 4 - 4 = 0$
+    \item $Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}$ (since $(1,0)$ and $(-1,0)$ are 2-torsion points)
+\end{itemize}
+
+The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:
+
+\begin{theorem}{}{}
+Let $E$ be an elliptic curve over a field $K$.
+\begin{enumerate}
+    \item If $f, f' \in K(E)$ are non-zero rational functions on $E$ with $div(f) = div(f')$, then there exists a non-zero constant $c \in K^*$ such that $f = cf'$.
+    \item A divisor $D$ on $E$ is the divisor of a rational function on $E$ if and only if $deg(D) = 0$ and $Sum(D) = \mathcal{O}$.
+\end{enumerate}
+\end{theorem}
+
+On $E: Y^2 = X^3 - X$:
+\begin{itemize}
+    \item The function $f = \frac{Y}{X}$ has $div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]$. Note that $deg(div(f)) = 0$ and $Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}$.
+    \item The divisor $D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]$ has $deg(D) = 0$, but $Sum(D) \neq \mathcal{O}$. Therefore, $D$ is not the divisor of any rational function on $E$.
+\end{itemize}
+
+\begin{definition}{Pairing}{}
+Let $G_1$ and $G_2$ be cyclic groups under addition, both of prime order $p$, with generators $P$ and $Q$ respectively:
+
+    \begin{align}
+        G_1 &= \{0, P, 2P, ..., (p-1)P\} \\
+        G_2 &= \{0, Q, 2Q, ..., (p-1)Q\}
+    \end{align}
+
+Let $G_T$ be a cyclic group under multiplication, also of order $p$.
+A pairing is a map $e: G_1 \times G_2 \rightarrow G_T$ that satisfies the following bilinear property:
+
+    \begin{equation}
+        e(aP, bQ) = e(P, Q)^{ab}
+    \end{equation} for all $a, b \in \mathbb{Z}_p$.
+\end{definition}
+
+Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents area. The pairing function $e$ is like calculating the area: If you double the length and triple the width, the area becomes six times larger: $e(2P, 3Q) = e(P, Q)^{6}$
 
 \paragraph{Exercise}
 
