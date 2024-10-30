@@ -16,6 +16,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // Utility functions
     fn pow(&self, n: BigInt) -> Self;
     fn from_value<M: Into<BigInt>>(value: M) -> Self;
+    fn random_element(exclude_elements: &[Self]) -> Self;
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -57,19 +58,6 @@ impl<const MODULUS: i128> FiniteFieldElement<MODULUS> {
         self.value.to_string()
     }
     */
-
-    // Random element excluding a set of elements.
-    pub fn random_element(exclude_elements: &[FiniteFieldElement<MODULUS>]) -> Self {
-        let modulus = MODULUS.to_bigint().unwrap();
-        let mut rng = rand::thread_rng();
-        let mut fe =
-            FiniteFieldElement::<MODULUS>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
-        while exclude_elements.contains(&fe) {
-            fe =
-                FiniteFieldElement::<MODULUS>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
-        }
-        fe
-    }
 }
 impl<const MODULUS: i128> Ring for FiniteFieldElement<MODULUS> {
     fn zero() -> Self {
@@ -139,6 +127,19 @@ impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
 
     fn from_value<M: Into<BigInt>>(value: M) -> Self {
         FiniteFieldElement::<MODULUS>::new(value.into())
+    }
+
+    // Random element excluding a set of elements.
+    fn random_element(exclude_elements: &[FiniteFieldElement<MODULUS>]) -> Self {
+        let modulus = MODULUS.to_bigint().unwrap();
+        let mut rng = rand::thread_rng();
+        let mut fe =
+            FiniteFieldElement::<MODULUS>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
+        while exclude_elements.contains(&fe) {
+            fe =
+                FiniteFieldElement::<MODULUS>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
+        }
+        fe
     }
 }
 
