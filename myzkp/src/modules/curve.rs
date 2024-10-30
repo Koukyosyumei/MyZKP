@@ -224,23 +224,23 @@ mod tests {
     #[test]
     fn test_weil_pairing() {
         const MODULUS: i128 = 631_i128;
-        let a = FiniteFieldElement::<{ MODULUS }>::from(30_i64);
-        let b = FiniteFieldElement::<{ MODULUS }>::from(34_i64);
+        let a = FiniteFieldElement::<{ MODULUS }>::from_value(30_i64);
+        let b = FiniteFieldElement::<{ MODULUS }>::from_value(34_i64);
         let curve = EllipticCurve { a, b };
 
         let p = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from(36_i64),
-            FiniteFieldElement::<{ MODULUS }>::from(60_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(36_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(60_i64),
             curve.clone(),
         );
         let q = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from(121_i64),
-            FiniteFieldElement::<{ MODULUS }>::from(387_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(121_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(387_i64),
             curve.clone(),
         );
         let s = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from(0_i64),
-            FiniteFieldElement::<{ MODULUS }>::from(36_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(0_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(36_i64),
             curve.clone(),
         );
         let order = 5.to_bigint().unwrap();
@@ -261,13 +261,13 @@ mod tests {
         assert_eq!(w.value, 242.to_bigint().unwrap());
 
         let p_prime = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from(617_i64),
-            FiniteFieldElement::<{ MODULUS }>::from(5_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(617_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(5_i64),
             curve.clone(),
         );
         let q_prime = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from(121_i64),
-            FiniteFieldElement::<{ MODULUS }>::from(244_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(121_i64),
+            FiniteFieldElement::<{ MODULUS }>::from_value(244_i64),
             curve.clone(),
         );
 

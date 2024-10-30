@@ -1,19 +1,21 @@
 use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::{One, Signed, Zero};
 use std::fmt;
+use std::hash::Hash;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use crate::modules::ring::Ring;
 
 pub const DEFAULT_K_MODULES: i128 = 3_i128 * (1 << 30) + 1;
 
-pub trait Field: Ring + Div<Output = Self> {
+pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
     fn inverse(&self) -> Self;
 
     // Utility functions
     fn pow(&self, n: BigInt) -> Self;
+    fn from_value<M: Into<BigInt>>(value: M) -> Self;
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -134,6 +136,10 @@ impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
         }
         res
     }
+
+    fn from_value<M: Into<BigInt>>(value: M) -> Self {
+        FiniteFieldElement::<MODULUS>::new(value.into())
+    }
 }
 
 // Display trait implementation for pretty printing.
@@ -195,13 +201,6 @@ impl<const MODULUS: i128> Div for FiniteFieldElement<MODULUS> {
 
     fn div(self, other: Self) -> Self {
         self * other.inverse()
-    }
-}
-
-// Implement conversion from BigInt for FiniteFieldElement<MODULUS>.
-impl<const MODULUS: i128, M: Into<BigInt>> From<M> for FiniteFieldElement<MODULUS> {
-    fn from(value: M) -> Self {
-        FiniteFieldElement::<MODULUS>::new(value.into())
     }
 }
 
