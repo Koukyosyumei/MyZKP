@@ -85,13 +85,12 @@ pub fn malicious_schwartz_zippel_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::FiniteFieldElement;
+    use crate::modules::field::{FiniteFieldElement, ModDEFAULT};
     use crate::modules::polynomial::Polynomial;
 
     #[test]
     fn test_sz_protocol() {
-        const MODULUS: i128 = 3 * (1 << 30) + 1;
-        type F = FiniteFieldElement<MODULUS>;
+        type F = FiniteFieldElement<ModDEFAULT>;
 
         // Create polynomials P(x) and T(x)
         let p = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2), F::from_value(3)]);
