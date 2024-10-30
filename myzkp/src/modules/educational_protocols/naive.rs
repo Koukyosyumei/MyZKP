@@ -3,24 +3,24 @@ use std::collections::HashMap;
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 
-struct Prover<F: Field> {
-    p: Polynomial<F>,
-    t: Polynomial<F>,
-    h: Polynomial<F>,
+pub struct Prover<F: Field> {
+    pub p: Polynomial<F>,
+    pub t: Polynomial<F>,
+    pub h: Polynomial<F>,
 }
 
-struct Verifier<F: Field> {
-    t: Polynomial<F>,
-    known_roots: Vec<F>,
+pub struct Verifier<F: Field> {
+    pub t: Polynomial<F>,
+    pub known_roots: Vec<F>,
 }
 
 impl<F: Field> Prover<F> {
-    fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
+    pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
         Prover { p, t, h }
     }
 
-    fn compute_all_values(&self, modulus: i128) -> (HashMap<F, F>, HashMap<F, F>) {
+    pub fn compute_all_values(&self, modulus: i128) -> (HashMap<F, F>, HashMap<F, F>) {
         let mut h_values = HashMap::new();
         let mut p_values = HashMap::new();
 
@@ -35,12 +35,12 @@ impl<F: Field> Prover<F> {
 }
 
 impl<F: Field> Verifier<F> {
-    fn new(known_roots: Vec<F>) -> Self {
+    pub fn new(known_roots: Vec<F>) -> Self {
         let t = Polynomial::from_monomials(&known_roots);
         Verifier { t, known_roots }
     }
 
-    fn verify(&self, h_values: &HashMap<F, F>, p_values: &HashMap<F, F>) -> bool {
+    pub fn verify(&self, h_values: &HashMap<F, F>, p_values: &HashMap<F, F>) -> bool {
         for (x, h_x) in h_values {
             let t_x = self.t.eval(x);
             let p_x = p_values.get(x).unwrap();
@@ -53,7 +53,7 @@ impl<F: Field> Verifier<F> {
     }
 }
 
-fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modulus: i128) -> bool {
+pub fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modulus: i128) -> bool {
     // Step 1: Verifier sends all possible values (implicitly done by Prover computing all values)
 
     // Step 2: Prover computes and sends all possible outputs
@@ -61,4 +61,32 @@ fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modulus:
 
     // Step 3: Verifier checks whether H(a)T(a) = P(a) holds for any a in F
     verifier.verify(&h_values, &p_values)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::modules::field::FiniteFieldElement;
+    use crate::modules::polynomial::Polynomial;
+
+    #[test]
+    fn test_naive_protocol() {
+        const DEFAULT_MODULES: i128 = 31_i128;
+
+        type F = FiniteFieldElement<DEFAULT_MODULES>;
+
+        // Create a polynomial P(x) = (x - 1)(x - 2)(x - 3)(x - 4)(x - 5)
+        let roots: Vec<F> = (1..=5).map(|i| F::from_value(i)).collect();
+        let p = Polynomial::from_monomials(&roots);
+
+        // Verifier knows the first 3 roots
+        let known_roots: Vec<F> = roots[0..3].to_vec();
+        let t = Polynomial::from_monomials(&known_roots);
+
+        let prover = Prover::new(p.clone(), t.clone());
+        let verifier = Verifier::new(known_roots);
+
+        let result = naive_protocol(&prover, &verifier, DEFAULT_MODULES);
+        assert!(result);
+    }
 }
