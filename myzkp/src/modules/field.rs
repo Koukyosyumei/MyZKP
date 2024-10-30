@@ -14,6 +14,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     fn inverse(&self) -> Self;
 
     // Utility functions
+    fn get_value(&self) -> BigInt;
     fn pow(&self, n: BigInt) -> Self;
     fn from_value<M: Into<BigInt>>(value: M) -> Self;
     fn random_element(exclude_elements: &[Self]) -> Self;
@@ -70,6 +71,9 @@ impl<const MODULUS: i128> Ring for FiniteFieldElement<MODULUS> {
 }
 
 impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
+    fn get_value(&self) -> BigInt {
+        self.value.clone()
+    }
     fn inverse(&self) -> Self {
         let modulus = MODULUS.to_bigint().unwrap();
         let mut t = BigInt::zero();
