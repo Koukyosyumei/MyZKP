@@ -20,7 +20,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     fn random_element(exclude_elements: &[Self]) -> Self;
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash)]
 pub struct FiniteFieldElement<const MODULUS: i128> {
     pub value: BigInt,
 }
@@ -29,11 +29,23 @@ impl<const MODULUS: i128> FiniteFieldElement<MODULUS> {
     // Constructor with optional modulus and generator_value.
     pub fn new(value: BigInt) -> Self {
         let modulus = MODULUS.to_bigint().unwrap();
-        let mut value_sanitized = value % &modulus;
+        let value_sanitized = value % &modulus;
+
+        //if value_sanitized < 0_i32.to_bigint().unwrap() {
+        //    value_sanitized += modulus.clone();
+        //}
+
+        FiniteFieldElement {
+            value: value_sanitized,
+        }
+    }
+
+    pub fn sanitize(&self) -> Self {
+        let modulus = MODULUS.to_bigint().unwrap();
+        let mut value_sanitized = self.value.clone() % &modulus;
         if value_sanitized < 0_i32.to_bigint().unwrap() {
             value_sanitized += modulus.clone();
         }
-
         FiniteFieldElement {
             value: value_sanitized,
         }
@@ -115,18 +127,25 @@ impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
         FiniteFieldElement::<MODULUS>::new(t)
     }
 
-    fn pow(&self, mut n: BigInt) -> Self {
-        assert!(!n.is_negative());
-        let mut cur_pow = self.clone();
-        let mut res = FiniteFieldElement::one();
-        while n.is_positive() && !n.is_zero() {
-            if n.clone() % 2 != BigInt::zero() {
-                res = res * cur_pow.clone();
-            }
-            n /= 2;
-            cur_pow = cur_pow.clone() * cur_pow;
+    fn pow(&self, n: BigInt) -> Self {
+        let mut exponent = n;
+        let mut base = self.clone();
+
+        if exponent.is_negative() {
+            // x^{-n} = (x^{-1})^{n}
+            base = base.inverse();
+            exponent = -exponent;
         }
-        res
+
+        let mut result = FiniteFieldElement::one();
+        while exponent.is_positive() && !exponent.is_zero() {
+            if exponent.clone() % 2 != BigInt::zero() {
+                result = result * base.clone();
+            }
+            exponent /= 2;
+            base = base.clone() * base;
+        }
+        result
     }
 
     fn from_value<M: Into<BigInt>>(value: M) -> Self {
@@ -150,11 +169,19 @@ impl<const MODULUS: i128> Field for FiniteFieldElement<MODULUS> {
 // Display trait implementation for pretty printing.
 impl<const MODULUS: i128> fmt::Display for FiniteFieldElement<MODULUS> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let modulus = MODULUS.to_bigint().unwrap();
-        let repr_value = (&self.value + &modulus / 2) % &modulus - &modulus / 2;
-        write!(f, "{}", repr_value)
+        //let modulus = MODULUS.to_bigint().unwrap();
+        //let repr_value = (&self.value + &modulus / 2) % &modulus - &modulus / 2;
+        write!(f, "{}", &self.value)
     }
 }
+
+impl<const MODULUS: i128> PartialEq for FiniteFieldElement<MODULUS> {
+    fn eq(&self, other: &Self) -> bool {
+        self.sanitize().value == other.sanitize().value
+    }
+}
+
+impl<const MODULUS: i128> Eq for FiniteFieldElement<MODULUS> {}
 
 // Arithmetic operations implementation for FiniteFieldElement<MODULUS>.
 impl<const MODULUS: i128> Add for FiniteFieldElement<MODULUS> {
@@ -282,7 +309,7 @@ mod tests {
         let fe_neg = -fe1;
         assert_eq!(
             fe_neg.value,
-            ((-10_i128 + DEFAULT_K_MODULES).to_bigint().unwrap()) % DEFAULT_K_MODULES
+            ((-10_i128).to_bigint().unwrap()) % DEFAULT_K_MODULES
         );
     }
 
@@ -322,5 +349,13 @@ mod tests {
         ];
         let fe_random = FiniteFieldElement::random_element(&excluded_elements);
         assert!(!excluded_elements.contains(&fe_random));
+    }
+
+    #[test]
+    fn test_eq() {
+        assert_eq!(
+            FiniteFieldElement::<31>::new(-23.to_bigint().unwrap()),
+            FiniteFieldElement::<31>::new(8.to_bigint().unwrap())
+        )
     }
 }

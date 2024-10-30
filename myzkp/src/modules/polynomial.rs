@@ -489,7 +489,7 @@ mod tests {
         let result = Polynomial::interpolate(&x_values, &y_values);
         let expected = Polynomial {
             poly: vec![
-                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from_value(-1_i32),
+                FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from_value(-1_i32).sanitize(),
                 FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from_value(0_i32),
                 FiniteFieldElement::<{ DEFAULT_K_MODULES }>::from_value(1_i32),
             ], // x^2 - 1

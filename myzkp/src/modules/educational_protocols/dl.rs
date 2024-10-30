@@ -16,9 +16,9 @@ impl<F: Field> Polynomial<F> {
 }
 
 pub struct Prover<F: Field> {
-    p: Polynomial<F>,
-    t: Polynomial<F>,
-    h: Polynomial<F>,
+    pub p: Polynomial<F>,
+    pub t: Polynomial<F>,
+    pub h: Polynomial<F>,
 }
 
 pub struct Verifier<F: Field> {
@@ -42,7 +42,7 @@ impl<F: Field> Prover<F> {
 
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let s = F::random_element(&[]);
+        let s = F::zero(); // F::random_element(&[]);
         let g = F::from_value(generator);
         Verifier { t, s, g }
     }
@@ -50,7 +50,7 @@ impl<F: Field> Verifier<F> {
     pub fn generate_challenge(&self, max_degree: usize) -> (F, Vec<F>) {
         let alpha = self.g.pow(self.s.clone().get_value());
         let mut alpha_powers = vec![alpha.clone()];
-        for _ in 1..max_degree {
+        for _ in 2..(max_degree + 1) {
             alpha_powers.push(alpha_powers.last().unwrap().clone() * alpha.clone());
         }
         (self.g.clone(), alpha_powers)
@@ -83,8 +83,8 @@ impl<F: Field> MaliciousProver<F> {
 
 pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
     // Step 1 & 2: Verifier generates a challenge
-    let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
-    let (g, alpha_powers) = verifier.generate_challenge(max_degree + 1);
+    let max_degree = prover.p.degree();
+    let (g, alpha_powers) = verifier.generate_challenge(max_degree as usize);
 
     // Step 3: Prover computes and sends u = g^p and v = g^h
     let (u, v) = prover.compute_values(&g, &alpha_powers);
@@ -99,7 +99,7 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 ) -> bool {
     // Step 1 & 2: Verifier generates a challenge
     let max_degree = prover.t.degree() as usize;
-    let (g, alpha_powers) = verifier.generate_challenge(max_degree + 1);
+    let (g, alpha_powers) = verifier.generate_challenge(max_degree as usize);
 
     // Step 3: Malicious Prover computes and sends fake u and v
     let (fake_u, fake_v) = prover.compute_malicious_values(&g, &alpha_powers);

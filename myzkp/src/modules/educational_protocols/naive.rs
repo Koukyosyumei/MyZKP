@@ -44,7 +44,6 @@ impl<F: Field> Verifier<F> {
         for (x, h_x) in h_values {
             let t_x = self.t.eval(x);
             let p_x = p_values.get(x).unwrap();
-
             if h_x.clone() * t_x != *p_x {
                 return false;
             }
