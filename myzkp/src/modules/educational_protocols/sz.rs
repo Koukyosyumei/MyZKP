@@ -1,25 +1,23 @@
-use rand::Rng;
-
-use crate::modules::field::{Field, FiniteFieldElement};
+use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 
-struct Prover<F: Field> {
-    p: Polynomial<F>,
-    t: Polynomial<F>,
-    h: Polynomial<F>,
+pub struct Prover<F: Field> {
+    pub p: Polynomial<F>,
+    pub t: Polynomial<F>,
+    pub h: Polynomial<F>,
 }
 
-struct Verifier<F: Field> {
-    t: Polynomial<F>,
+pub struct Verifier<F: Field> {
+    pub t: Polynomial<F>,
 }
 
 impl<F: Field> Prover<F> {
-    fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
+    pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
         Prover { p, t, h }
     }
 
-    fn compute_values(&self, s: &F) -> (F, F) {
+    pub fn compute_values(&self, s: &F) -> (F, F) {
         let h_s = self.h.eval(s);
         let p_s = self.p.eval(s);
         (h_s, p_s)
@@ -27,32 +25,31 @@ impl<F: Field> Prover<F> {
 }
 
 impl<F: Field> Verifier<F> {
-    fn new(t: Polynomial<F>) -> Self {
+    pub fn new(t: Polynomial<F>) -> Self {
         Verifier { t }
     }
 
-    fn generate_challenge(&self, modulus: i128) -> F {
-        let mut rng = rand::thread_rng();
-        F::from_value(rng.gen_range(0..modulus))
+    pub fn generate_challenge(&self) -> F {
+        F::random_element(&[])
     }
 
-    fn verify(&self, s: &F, h: &F, p: &F) -> bool {
+    pub fn verify(&self, s: &F, h: &F, p: &F) -> bool {
         let t_s = self.t.eval(s);
         h.clone() * t_s == *p
     }
 }
 
 // Simulating a malicious prover
-struct MaliciousProver<F: Field> {
+pub struct MaliciousProver<F: Field> {
     t: Polynomial<F>,
 }
 
 impl<F: Field> MaliciousProver<F> {
-    fn new(t: Polynomial<F>) -> Self {
+    pub fn new(t: Polynomial<F>) -> Self {
         MaliciousProver { t }
     }
 
-    fn compute_malicious_values(&self, s: &F) -> (F, F) {
+    pub fn compute_malicious_values(&self, s: &F) -> (F, F) {
         let h_prime = F::random_element(&[]);
         let t_s = self.t.eval(s);
         let p_prime = h_prime.clone() * t_s;
@@ -60,13 +57,9 @@ impl<F: Field> MaliciousProver<F> {
     }
 }
 
-fn schwartz_zippel_protocol<F: Field>(
-    prover: &Prover<F>,
-    verifier: &Verifier<F>,
-    modulus: i128,
-) -> bool {
+pub fn schwartz_zippel_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
     // Step 1: Verifier generates a random challenge
-    let s = verifier.generate_challenge(modulus);
+    let s = verifier.generate_challenge();
 
     // Step 2: Prover computes and sends h and p
     let (h, p) = prover.compute_values(&s);
@@ -75,7 +68,7 @@ fn schwartz_zippel_protocol<F: Field>(
     verifier.verify(&s, &h, &p)
 }
 
-fn malicious_schwartz_zippel_protocol<F: Field>(
+pub fn malicious_schwartz_zippel_protocol<F: Field>(
     prover: &MaliciousProver<F>,
     verifier: &Verifier<F>,
 ) -> bool {
