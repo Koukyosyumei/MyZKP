@@ -66,13 +66,21 @@ pub fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modu
 mod tests {
     use super::*;
     use crate::modules::field::FiniteFieldElement;
+    use crate::modules::field::ModulusValue;
     use crate::modules::polynomial::Polynomial;
+    use num_bigint::BigInt;
 
     #[test]
     fn test_naive_protocol() {
-        const DEFAULT_MODULES: i128 = 31_i128;
+        #[derive(Debug, Hash, Clone)]
+        struct Mod31;
+        impl ModulusValue for Mod31 {
+            fn modulus() -> BigInt {
+                BigInt::from(31)
+            }
+        }
 
-        type F = FiniteFieldElement<DEFAULT_MODULES>;
+        type F = FiniteFieldElement<Mod31>;
 
         // Create a polynomial P(x) = (x - 1)(x - 2)(x - 3)(x - 4)(x - 5)
         let roots: Vec<F> = (1..=5).map(|i| F::from_value(i)).collect();
@@ -85,7 +93,7 @@ mod tests {
         let prover = Prover::new(p.clone(), t.clone());
         let verifier = Verifier::new(known_roots);
 
-        let result = naive_protocol(&prover, &verifier, DEFAULT_MODULES);
+        let result = naive_protocol(&prover, &verifier, 31);
         assert!(result);
     }
 }
