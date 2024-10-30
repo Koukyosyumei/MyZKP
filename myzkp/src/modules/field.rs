@@ -1,6 +1,7 @@
 use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::{One, Signed, Zero};
 use std::fmt;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::marker::PhantomData;
@@ -23,15 +24,13 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     fn random_element(exclude_elements: &[Self]) -> Self;
 }
 
-pub struct Modulus<M>(PhantomData<M>);
-
 #[derive(Debug, Clone)]
 pub struct FiniteFieldElement<M> {
     pub value: BigInt,
     _phantom: PhantomData<M>,
 }
 
-pub trait ModulusValue: Clone + Hash {
+pub trait ModulusValue: Debug + Clone + Hash {
     fn modulus() -> BigInt;
 }
 
@@ -252,7 +251,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
     }
 }
 
-#[derive(Hash, Clone)]
+#[derive(Debug, Hash, Clone)]
 pub struct ModDEFAULT;
 impl ModulusValue for ModDEFAULT {
     fn modulus() -> BigInt {
@@ -274,7 +273,7 @@ mod tests {
         assert_eq!(fe.value, 10.to_bigint().unwrap());
     }
 
-    #[derive(Hash, Clone)]
+    #[derive(Debug, Hash, Clone)]
     struct Mod7;
     impl ModulusValue for Mod7 {
         fn modulus() -> BigInt {
@@ -324,7 +323,7 @@ mod tests {
         assert_eq!(fe3.value, (5 * 4).to_bigint().unwrap());
     }
 
-    #[derive(Hash, Clone)]
+    #[derive(Debug, Hash, Clone)]
     struct Mod17;
     impl ModulusValue for Mod17 {
         fn modulus() -> BigInt {

@@ -218,29 +218,36 @@ pub fn weil_pairing<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::FiniteFieldElement;
+    use crate::modules::field::{FiniteFieldElement, ModulusValue};
     use num_bigint::ToBigInt;
 
     #[test]
     fn test_weil_pairing() {
-        const MODULUS: i128 = 631_i128;
-        let a = FiniteFieldElement::<{ MODULUS }>::from_value(30_i64);
-        let b = FiniteFieldElement::<{ MODULUS }>::from_value(34_i64);
+        #[derive(Debug, Hash, Clone)]
+        struct Mod631;
+        impl ModulusValue for Mod631 {
+            fn modulus() -> BigInt {
+                BigInt::from(631)
+            }
+        }
+
+        let a = FiniteFieldElement::<Mod631>::from_value(30_i64);
+        let b = FiniteFieldElement::<Mod631>::from_value(34_i64);
         let curve = EllipticCurve { a, b };
 
         let p = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from_value(36_i64),
-            FiniteFieldElement::<{ MODULUS }>::from_value(60_i64),
+            FiniteFieldElement::<Mod631>::from_value(36_i64),
+            FiniteFieldElement::<Mod631>::from_value(60_i64),
             curve.clone(),
         );
         let q = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from_value(121_i64),
-            FiniteFieldElement::<{ MODULUS }>::from_value(387_i64),
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(387_i64),
             curve.clone(),
         );
         let s = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from_value(0_i64),
-            FiniteFieldElement::<{ MODULUS }>::from_value(36_i64),
+            FiniteFieldElement::<Mod631>::from_value(0_i64),
+            FiniteFieldElement::<Mod631>::from_value(36_i64),
             curve.clone(),
         );
         let order = 5.to_bigint().unwrap();
@@ -264,13 +271,13 @@ mod tests {
         assert_eq!(w.sanitize().value, 242.to_bigint().unwrap());
 
         let p_prime = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from_value(617_i64),
-            FiniteFieldElement::<{ MODULUS }>::from_value(5_i64),
+            FiniteFieldElement::<Mod631>::from_value(617_i64),
+            FiniteFieldElement::<Mod631>::from_value(5_i64),
             curve.clone(),
         );
         let q_prime = EllipticCurvePoint::new(
-            FiniteFieldElement::<{ MODULUS }>::from_value(121_i64),
-            FiniteFieldElement::<{ MODULUS }>::from_value(244_i64),
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(244_i64),
             curve.clone(),
         );
 
@@ -282,8 +289,8 @@ mod tests {
         );
         assert_eq!(w_prime.sanitize().value, 512_i32.to_bigint().unwrap());
 
-        //assert_eq!(p.clone() * 3_i32.to_bigint().unwrap(), p_prime.clone());
-        //assert_eq!(q.clone() * 4_i32.to_bigint().unwrap(), q_prime.clone());
+        assert_eq!(p.clone() * 3_i32.to_bigint().unwrap(), p_prime.clone());
+        assert_eq!(q.clone() * 4_i32.to_bigint().unwrap(), q_prime.clone());
         assert_eq!(
             w.pow(12_i32.to_bigint().unwrap()).sanitize(),
             w_prime.sanitize()
