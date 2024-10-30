@@ -5,6 +5,7 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::str::FromStr;
 
 use crate::modules::ring::Ring;
 
@@ -251,22 +252,25 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
     }
 }
 
+#[derive(Hash, Clone)]
+pub struct ModDEFAULT;
+impl ModulusValue for ModDEFAULT {
+    fn modulus() -> BigInt {
+        BigInt::from_str(
+            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+        )
+        .unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use num_bigint::ToBigInt;
 
-    #[derive(Hash, Clone)]
-    struct ModDEFAULT;
-    impl ModulusValue for ModDEFAULT {
-        fn modulus() -> BigInt {
-            BigInt::from(DEFAULT_K_MODULES)
-        }
-    }
-
     #[test]
     fn test_new_default_modulus() {
-        let fe = FiniteFieldElement::<ModDEFAULT>::new(10.to_bigint().unwrap());
+        let fe = FiniteFieldElement::<ModDEFAULT>::from_value(10);
         assert_eq!(fe.value, 10.to_bigint().unwrap());
     }
 
@@ -280,7 +284,7 @@ mod tests {
 
     #[test]
     fn test_new_custom_modulus() {
-        let fe = FiniteFieldElement::<Mod7>::new(10.to_bigint().unwrap());
+        let fe = FiniteFieldElement::<Mod7>::from_value(10);
         assert_eq!(fe.value, 10.to_bigint().unwrap() % 7.to_bigint().unwrap());
     }
 
@@ -298,38 +302,39 @@ mod tests {
 
     #[test]
     fn test_addition() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::new(10.to_bigint().unwrap());
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::new(15.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(10);
+        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(15);
         let fe3 = fe1 + fe2;
-        assert_eq!(
-            fe3.value,
-            (10 + 15).to_bigint().unwrap() % DEFAULT_K_MODULES
-        );
+        assert_eq!(fe3.value, (10 + 15).to_bigint().unwrap());
     }
 
     #[test]
     fn test_subtraction() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::new(20.to_bigint().unwrap());
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::new(15.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(20);
+        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(15);
         let fe3 = fe1 - fe2;
-        assert_eq!(
-            fe3.value,
-            (20 - 15).to_bigint().unwrap() % DEFAULT_K_MODULES
-        );
+        assert_eq!(fe3.value, (20 - 15).to_bigint().unwrap());
     }
 
     #[test]
     fn test_multiplication() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::new(5.to_bigint().unwrap());
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::new(4.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(5);
+        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(4);
         let fe3 = fe1 * fe2;
-        assert_eq!(fe3.value, (5 * 4).to_bigint().unwrap() % DEFAULT_K_MODULES);
+        assert_eq!(fe3.value, (5 * 4).to_bigint().unwrap());
     }
 
-    /*
+    #[derive(Hash, Clone)]
+    struct Mod17;
+    impl ModulusValue for Mod17 {
+        fn modulus() -> BigInt {
+            BigInt::from(17)
+        }
+    }
+
     #[test]
     fn test_inverse() {
-        let fe1 = FiniteFieldElement::<17>::new(7.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<Mod17>::from_value(7);
         let fe_inv = fe1.inverse();
         assert_eq!(fe_inv.value, 5.to_bigint().unwrap());
         assert_eq!((fe1 * fe_inv).value, 1.to_bigint().unwrap());
@@ -337,7 +342,7 @@ mod tests {
 
     #[test]
     fn test_negation() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::new(10.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(10);
         let fe_neg = -fe1;
         assert_eq!(
             fe_neg.value,
@@ -347,8 +352,8 @@ mod tests {
 
     #[test]
     fn test_division() {
-        let fe1 = FiniteFieldElement::<17>::new(12.to_bigint().unwrap());
-        let fe2 = FiniteFieldElement::<17>::new(3.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<Mod17>::from_value(12);
+        let fe2 = FiniteFieldElement::<Mod17>::from_value(3);
         let fe_div = fe1 / fe2.clone();
         assert_eq!(
             fe_div.value,
@@ -358,7 +363,7 @@ mod tests {
 
     #[test]
     fn test_exponentiation() {
-        let fe1 = FiniteFieldElement::<17>::new(3.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<Mod17>::from_value(3);
         let fe_exp = fe1.pow(4.to_bigint().unwrap());
         assert_eq!(
             fe_exp.value,
@@ -368,7 +373,7 @@ mod tests {
 
     #[test]
     fn test_is_order() {
-        let fe1 = FiniteFieldElement::<17>::new(2.to_bigint().unwrap());
+        let fe1 = FiniteFieldElement::<Mod17>::from_value(2);
         assert!(fe1.is_order(8));
         assert!(!fe1.is_order(3));
     }
@@ -376,19 +381,26 @@ mod tests {
     #[test]
     fn test_random_element() {
         let excluded_elements = vec![
-            FiniteFieldElement::<ModDEFAULT>::new(2.to_bigint().unwrap()),
-            FiniteFieldElement::<ModDEFAULT>::new(3.to_bigint().unwrap()),
+            FiniteFieldElement::<ModDEFAULT>::from_value(2),
+            FiniteFieldElement::<ModDEFAULT>::from_value(3),
         ];
         let fe_random = FiniteFieldElement::random_element(&excluded_elements);
         assert!(!excluded_elements.contains(&fe_random));
     }
 
+    #[derive(Debug, Hash, Clone)]
+    struct Mod31;
+    impl ModulusValue for Mod31 {
+        fn modulus() -> BigInt {
+            BigInt::from(31)
+        }
+    }
+
     #[test]
     fn test_eq() {
         assert_eq!(
-            FiniteFieldElement::<31>::new(-23.to_bigint().unwrap()),
-            FiniteFieldElement::<31>::new(8.to_bigint().unwrap())
+            FiniteFieldElement::<Mod31>::from_value(-23),
+            FiniteFieldElement::<Mod31>::from_value(8)
         )
     }
-    */
 }
