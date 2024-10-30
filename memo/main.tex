@@ -1713,10 +1713,10 @@ An interesting property of polynomial exponentiation is:
     g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{x^2})^{c_2} \cdots (g^{x^n})^{c_n}
 \end{align}
 
-Instead of sending $s$, the Verifier can send $g$, $\alpha = g^s$, and its powers: $\alpha, \alpha^2, \ldots, \alpha^n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
+Instead of sending $s$, the Verifier can send $g$, $\alpha_{i} = g^{(s^i)}$, and its powers: $\alpha_1, \alpha_2, \ldots, \alpha_n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
 
 \begin{equation}
-    g^{p} = g^{P(s)} = g^{c_0} \alpha^{c_1} (\alpha^{2})^{c_2} \cdots (\alpha^{n})^{c_n}
+    g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
 \end{equation}
 
 Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check $p = ht \iff g^p = (g^h)^t$.
@@ -1724,7 +1724,7 @@ Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check
 \begin{protocol}{$+$ Discrete Logarithm Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly draw $s$ from $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$, where $\alpha = g^{s}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$ and $v = g^{h}$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
 \end{enumerate}
@@ -1732,7 +1732,7 @@ Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check
 
 This approach prevents the Prover from obtaining $s$ or $t = T(s)$, making it impossible to send fake $(h', p')$ such that $p' = h't$.
 
-However, this protocol still has a flaw. Since the Prover can compute $g^t = \alpha^{c_1}(\alpha^2)^{c_2}\cdots(\alpha^d)^{c_d}$, they could send fake values $((g^{t})^{z}, g^{z})$ instead of $(g^p, g^h)$ for an arbitrary value $z$. The verifier's check would still pass, and they could not detect this deception.
+However, this protocol still has a flaw. Since the Prover can compute $g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}$, they could send fake values $((g^{t})^{z}, g^{z})$ instead of $(g^p, g^h)$ for an arbitrary value $z$. The verifier's check would still pass, and they could not detect this deception.
 
 \paragraph{$+$ Knowledge of Exponent Assumption}
 
@@ -1740,7 +1740,7 @@ To address the vulnerability where the verifier $\mathcal{B}$ cannot distinguish
 
 \begin{enumerate}
     \item $\mathcal{B}$ sends both $\alpha$ and $\alpha' = \alpha^r$ for a new random value $r$.
-    \item The prover returns $a = (\alpha^i)^{c_i}$ and $a' = (\alpha'^i)^{c_i}$ for $i = 1, ..., n$.
+    \item The prover returns $a = (\alpha_i)^{c_i}$ and $a' = (\alpha'_i)^{c_i}$ for $i = 1, ..., n$.
     \item $\mathcal{B}$ can conclude that $a$ is a power of $\alpha$ if $a^r = a'$.
 \end{enumerate}
 
@@ -1749,7 +1749,7 @@ Based on this assumption, we can design an improved protocol:
 \begin{protocol}{$+$ Knowledge of Exponent Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$ and $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha^{r} = g^{sr}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$ and $\{\alpha', \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha_{r} = g^{sr}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$, $v = g^{h}$, and $w = g^{p'}$, where $g^{p'} = g^{P(sr)}$.
     \item $\mathcal{B}$ checks whether $u^{r} = w$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
@@ -1783,8 +1783,8 @@ The previously described protocol requires each verifier to generate unique rand
 \begin{enumerate}
     \item \textbf{Secret Seed}: A trusted third party generates the random values $s$ and $r$
     \item \textbf{Proof Key}: Provided to the prover \begin{enumerate}
-        \item $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$
-        \item $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha' = g^{sr}$
+        \item $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$, where $\alpha_{i} = g_{(s^i)}$
+        \item $\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha' = g^{(sr)^i}$
         \end{enumerate}
     \item \textbf{Verification Key}: Distributed to verifiers \begin{enumerate}
         \item $g^{r}$
