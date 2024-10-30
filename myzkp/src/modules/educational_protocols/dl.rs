@@ -1,6 +1,8 @@
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
-use num_bigint::ToBigInt;
+use num_bigint::{BigInt, RandBigInt, ToBigInt};
+use num_traits::Zero;
+use std::str::FromStr;
 
 impl<F: Field> Polynomial<F> {
     fn eval_with_powers(&self, g: &F, alpha_powers: &[F]) -> F {
@@ -20,9 +22,9 @@ impl<F: Field> Polynomial<F> {
 }
 
 pub struct Prover<F: Field> {
-    p: Polynomial<F>,
-    t: Polynomial<F>,
-    h: Polynomial<F>,
+    pub p: Polynomial<F>,
+    pub t: Polynomial<F>,
+    pub h: Polynomial<F>,
 }
 
 pub struct Verifier<F: Field> {
@@ -48,7 +50,11 @@ impl<F: Field> Prover<F> {
 
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let s = F::from_value(1477); // 1477 bad, 1476 ok
+        let mut rng = rand::thread_rng();
+        let s = F::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+        ));
         let g = F::from_value(generator);
         println!("inv of g: {} ({})", g.inverse(), g);
         Verifier { t, s, g }
@@ -150,15 +156,14 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::FiniteFieldElement;
+    use crate::modules::field::{FiniteFieldElement, ModDEFAULT};
     use crate::modules::polynomial::Polynomial;
 
     #[test]
     fn test_dl_protocol() {
-        const MODULUS: i128 = 3 * (1 << 30) + 1;
         const GENERATOR: i128 = 5; // A primitive root modulo MODULUS
 
-        type F = FiniteFieldElement<MODULUS>;
+        type F = FiniteFieldElement<ModDEFAULT>;
 
         // Create polynomials P(x) and T(x)
         let p =
@@ -175,6 +180,6 @@ mod tests {
         // Malicious protocol
         let malicious_prover = MaliciousProver::new(t);
         let malicious_result = malicious_discrete_log_protocol(&malicious_prover, &verifier);
-        //assert!(malicious_result);
+        assert!(malicious_result);
     }
 }
