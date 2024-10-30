@@ -7,14 +7,11 @@ use std::str::FromStr;
 impl<F: Field> Polynomial<F> {
     fn eval_with_powers(&self, g: &F, alpha_powers: &[F]) -> F {
         let mut result = F::one();
-        println!("f: {}", result);
         for (i, coef) in self.poly.iter().enumerate() {
             if i == 0 {
                 result = result * g.pow(coef.clone().get_value());
-                println!("coef: {}, result: {}", coef.get_value(), result);
             } else {
                 result = result * alpha_powers[i - 1].pow(coef.clone().get_value());
-                println!("coef: {}, result: {}", coef.get_value(), result);
             }
         }
         result
@@ -35,9 +32,7 @@ pub struct Verifier<F: Field> {
 
 impl<F: Field> Prover<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
-        println!("p={}, t={}", p, t);
         let h = p.clone() / t.clone();
-        println!("h={}", h);
         Prover { p, t, h }
     }
 
@@ -56,46 +51,22 @@ impl<F: Field> Verifier<F> {
             &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
         ));
         let g = F::from_value(generator);
-        println!("inv of g: {} ({})", g.inverse(), g);
         Verifier { t, s, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> (F, Vec<F>) {
-        //let alpha = self.g.pow(self.s.clone().get_value());
         let mut alpha_powers = vec![];
         for i in 1..(max_degree + 1) {
             alpha_powers.push(
                 self.g
                     .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
             );
-            println!(
-                "aa: {}",
-                self.g.pow(
-                    (self.s.clone() - F::one() - F::one())
-                        .clone()
-                        .pow(i.to_bigint().unwrap())
-                        .get_value()
-                )
-            );
-            println!(
-                "ab: {}",
-                self.g.pow(
-                    (self.s.clone() - F::one())
-                        .clone()
-                        .pow(i.to_bigint().unwrap())
-                        .get_value()
-                )
-            );
-            println!("ap: {}", alpha_powers.last().unwrap());
-            //alpha_powers.push(alpha_powers.last().unwrap().clone() * alpha.clone());
         }
         (self.g.clone(), alpha_powers)
     }
 
     pub fn verify(&self, u: &F, v: &F) -> bool {
         let t_s = self.t.eval(&self.s);
-        println!("s={}, t={}, t_s={}", self.s, self.t, t_s);
-        println!("u={}, v.pow.t_s={}", u, &v.pow(t_s.get_value()));
         u == &v.pow(t_s.get_value())
     }
 }
@@ -122,17 +93,10 @@ impl<F: Field> MaliciousProver<F> {
 pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
     // Step 1 & 2: Verifier generates a challenge
     let max_degree = prover.p.degree();
-    println!("md: {}", max_degree);
     let (g, alpha_powers) = verifier.generate_challenge(max_degree as usize);
-    println!("g: {}", g);
-    for a in &alpha_powers {
-        println!("a: {}", a);
-    }
 
     // Step 3: Prover computes and sends u = g^p and v = g^h
     let (u, v) = prover.compute_values(&g, &alpha_powers);
-    println!("u: {}", u);
-    println!("v: {}", v);
 
     // Step 4: Verifier checks whether u = v^t
     verifier.verify(&u, &v)
