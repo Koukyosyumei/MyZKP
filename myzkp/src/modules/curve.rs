@@ -218,18 +218,16 @@ pub fn weil_pairing<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::{FiniteFieldElement, ModulusValue};
-    use num_bigint::ToBigInt;
+    use crate::{
+        define_myzkp_modulus_type,
+        modules::field::{FiniteFieldElement, ModulusValue},
+    };
+    use num_bigint::{BigInt, ToBigInt};
+    use std::str::FromStr;
 
     #[test]
     fn test_weil_pairing() {
-        #[derive(Debug, Hash, Clone)]
-        struct Mod631;
-        impl ModulusValue for Mod631 {
-            fn modulus() -> BigInt {
-                BigInt::from(631)
-            }
-        }
+        define_myzkp_modulus_type!(Mod631, "631");
 
         let a = FiniteFieldElement::<Mod631>::from_value(30_i64);
         let b = FiniteFieldElement::<Mod631>::from_value(34_i64);

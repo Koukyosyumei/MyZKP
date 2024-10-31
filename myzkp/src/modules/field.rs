@@ -10,8 +10,6 @@ use std::str::FromStr;
 
 use crate::modules::ring::Ring;
 
-pub const DEFAULT_K_MODULES: i128 = 3_i128 * (1 << 30) + 1;
-
 pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
@@ -251,34 +249,38 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
     }
 }
 
-#[derive(Debug, Hash, Clone)]
-pub struct ModDEFAULT;
-impl ModulusValue for ModDEFAULT {
-    fn modulus() -> BigInt {
-        BigInt::from_str(
-            "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-        )
-        .unwrap()
-    }
+#[macro_export]
+macro_rules! define_myzkp_modulus_type {
+    ($name:ident, $modulus:expr) => {
+        #[derive(Debug, Hash, Clone)]
+        pub struct $name;
+
+        impl ModulusValue for $name {
+            fn modulus() -> BigInt {
+                BigInt::from_str($modulus).unwrap()
+            }
+        }
+    };
 }
+
+define_myzkp_modulus_type!(
+    ModEIP197,
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+);
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use num_bigint::ToBigInt;
 
+    define_myzkp_modulus_type!(Mod7, "7");
+    define_myzkp_modulus_type!(Mod17, "17");
+    define_myzkp_modulus_type!(Mod31, "31");
+
     #[test]
     fn test_new_default_modulus() {
-        let fe = FiniteFieldElement::<ModDEFAULT>::from_value(10);
+        let fe = FiniteFieldElement::<ModEIP197>::from_value(10);
         assert_eq!(fe.value, 10.to_bigint().unwrap());
-    }
-
-    #[derive(Debug, Hash, Clone)]
-    struct Mod7;
-    impl ModulusValue for Mod7 {
-        fn modulus() -> BigInt {
-            BigInt::from(7)
-        }
     }
 
     #[test]
@@ -289,46 +291,38 @@ mod tests {
 
     #[test]
     fn test_zero() {
-        let fe_zero = FiniteFieldElement::<ModDEFAULT>::zero();
+        let fe_zero = FiniteFieldElement::<ModEIP197>::zero();
         assert_eq!(fe_zero.value, BigInt::zero());
     }
 
     #[test]
     fn test_one() {
-        let fe_one = FiniteFieldElement::<ModDEFAULT>::one();
+        let fe_one = FiniteFieldElement::<ModEIP197>::one();
         assert_eq!(fe_one.value, BigInt::one());
     }
 
     #[test]
     fn test_addition() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(10);
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(15);
+        let fe1 = FiniteFieldElement::<ModEIP197>::from_value(10);
+        let fe2 = FiniteFieldElement::<ModEIP197>::from_value(15);
         let fe3 = fe1 + fe2;
         assert_eq!(fe3.value, (10 + 15).to_bigint().unwrap());
     }
 
     #[test]
     fn test_subtraction() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(20);
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(15);
+        let fe1 = FiniteFieldElement::<ModEIP197>::from_value(20);
+        let fe2 = FiniteFieldElement::<ModEIP197>::from_value(15);
         let fe3 = fe1 - fe2;
         assert_eq!(fe3.value, (20 - 15).to_bigint().unwrap());
     }
 
     #[test]
     fn test_multiplication() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(5);
-        let fe2 = FiniteFieldElement::<ModDEFAULT>::from_value(4);
+        let fe1 = FiniteFieldElement::<ModEIP197>::from_value(5);
+        let fe2 = FiniteFieldElement::<ModEIP197>::from_value(4);
         let fe3 = fe1 * fe2;
         assert_eq!(fe3.value, (5 * 4).to_bigint().unwrap());
-    }
-
-    #[derive(Debug, Hash, Clone)]
-    struct Mod17;
-    impl ModulusValue for Mod17 {
-        fn modulus() -> BigInt {
-            BigInt::from(17)
-        }
     }
 
     #[test]
@@ -341,12 +335,9 @@ mod tests {
 
     #[test]
     fn test_negation() {
-        let fe1 = FiniteFieldElement::<ModDEFAULT>::from_value(10);
+        let fe1 = FiniteFieldElement::<ModEIP197>::from_value(10);
         let fe_neg = -fe1;
-        assert_eq!(
-            fe_neg.value,
-            ((-10_i128).to_bigint().unwrap()) % DEFAULT_K_MODULES
-        );
+        assert_eq!(fe_neg.value, ((-10_i128).to_bigint().unwrap()));
     }
 
     #[test]
@@ -380,19 +371,11 @@ mod tests {
     #[test]
     fn test_random_element() {
         let excluded_elements = vec![
-            FiniteFieldElement::<ModDEFAULT>::from_value(2),
-            FiniteFieldElement::<ModDEFAULT>::from_value(3),
+            FiniteFieldElement::<ModEIP197>::from_value(2),
+            FiniteFieldElement::<ModEIP197>::from_value(3),
         ];
         let fe_random = FiniteFieldElement::random_element(&excluded_elements);
         assert!(!excluded_elements.contains(&fe_random));
-    }
-
-    #[derive(Debug, Hash, Clone)]
-    struct Mod31;
-    impl ModulusValue for Mod31 {
-        fn modulus() -> BigInt {
-            BigInt::from(31)
-        }
     }
 
     #[test]
