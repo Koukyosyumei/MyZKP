@@ -120,14 +120,14 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::{FiniteFieldElement, ModDEFAULT};
+    use crate::modules::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::polynomial::Polynomial;
 
     #[test]
     fn test_dl_protocol() {
         const GENERATOR: i128 = 5; // A primitive root modulo MODULUS
 
-        type F = FiniteFieldElement<ModDEFAULT>;
+        type F = FiniteFieldElement<ModEIP197>;
 
         // Create polynomials P(x) and T(x)
         let p =

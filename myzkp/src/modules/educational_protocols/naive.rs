@@ -65,20 +65,17 @@ pub fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::FiniteFieldElement;
-    use crate::modules::field::ModulusValue;
     use crate::modules::polynomial::Polynomial;
+    use crate::{
+        define_myzkp_modulus_type,
+        modules::field::{FiniteFieldElement, ModulusValue},
+    };
     use num_bigint::BigInt;
+    use std::str::FromStr;
 
     #[test]
     fn test_naive_protocol() {
-        #[derive(Debug, Hash, Clone)]
-        struct Mod31;
-        impl ModulusValue for Mod31 {
-            fn modulus() -> BigInt {
-                BigInt::from(31)
-            }
-        }
+        define_myzkp_modulus_type!(Mod31, "31");
 
         type F = FiniteFieldElement<Mod31>;
 
