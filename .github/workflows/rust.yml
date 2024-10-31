@@ -21,4 +21,5 @@ jobs:
         cd myzkp
         cargo build --verbose
     - name: Run tests
+      working-directory: ${{github.workspace}}/myzkp
       run: cargo test --verbose
