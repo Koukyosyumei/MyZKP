@@ -4,20 +4,6 @@ use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::Zero;
 use std::str::FromStr;
 
-impl<F: Field> Polynomial<F> {
-    fn eval_with_powers(&self, g: &F, alpha_powers: &[F]) -> F {
-        let mut result = F::one();
-        for (i, coef) in self.poly.iter().enumerate() {
-            if i == 0 {
-                result = result * g.pow(coef.clone().get_value());
-            } else {
-                result = result * alpha_powers[i - 1].pow(coef.clone().get_value());
-            }
-        }
-        result
-    }
-}
-
 pub struct Prover<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
@@ -36,9 +22,9 @@ impl<F: Field> Prover<F> {
         Prover { p, t, h }
     }
 
-    pub fn compute_values(&self, g: &F, alpha_powers: &[F]) -> (F, F) {
-        let g_p = self.p.eval_with_powers(g, alpha_powers);
-        let g_h = self.h.eval_with_powers(g, alpha_powers);
+    pub fn compute_values(&self, alpha_powers: &[F]) -> (F, F) {
+        let g_p = self.p.eval_with_powers(alpha_powers);
+        let g_h = self.h.eval_with_powers(alpha_powers);
         (g_p, g_h)
     }
 }
@@ -54,15 +40,15 @@ impl<F: Field> Verifier<F> {
         Verifier { t, s, g }
     }
 
-    pub fn generate_challenge(&self, max_degree: usize) -> (F, Vec<F>) {
+    pub fn generate_challenge(&self, max_degree: usize) -> Vec<F> {
         let mut alpha_powers = vec![];
-        for i in 1..(max_degree + 1) {
+        for i in 0..(max_degree + 1) {
             alpha_powers.push(
                 self.g
                     .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
             );
         }
-        (self.g.clone(), alpha_powers)
+        alpha_powers
     }
 
     pub fn verify(&self, u: &F, v: &F) -> bool {
@@ -81,9 +67,10 @@ impl<F: Field> MaliciousProver<F> {
         MaliciousProver { t }
     }
 
-    pub fn compute_malicious_values(&self, g: &F, alpha_powers: &[F]) -> (F, F) {
-        let g_t = self.t.eval_with_powers(g, alpha_powers);
+    pub fn compute_malicious_values(&self, alpha_powers: &[F]) -> (F, F) {
+        let g_t = self.t.eval_with_powers(alpha_powers);
         let z = F::random_element(&[]);
+        let g = &alpha_powers[0];
         let fake_v = g.pow(z.get_value());
         let fake_u = g_t.pow(z.get_value());
         (fake_u, fake_v)
@@ -93,10 +80,10 @@ impl<F: Field> MaliciousProver<F> {
 pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
     // Step 1 & 2: Verifier generates a challenge
     let max_degree = prover.p.degree();
-    let (g, alpha_powers) = verifier.generate_challenge(max_degree as usize);
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
 
     // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&g, &alpha_powers);
+    let (u, v) = prover.compute_values(&alpha_powers);
 
     // Step 4: Verifier checks whether u = v^t
     verifier.verify(&u, &v)
@@ -108,10 +95,10 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 ) -> bool {
     // Step 1 & 2: Verifier generates a challenge
     let max_degree = prover.t.degree() as usize;
-    let (g, alpha_powers) = verifier.generate_challenge(max_degree as usize);
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
 
     // Step 3: Malicious Prover computes and sends fake u and v
-    let (fake_u, fake_v) = prover.compute_malicious_values(&g, &alpha_powers);
+    let (fake_u, fake_v) = prover.compute_malicious_values(&alpha_powers);
 
     // Step 4: Verifier checks whether u = v^t (which will pass for the fake values)
     verifier.verify(&fake_u, &fake_v)
@@ -130,9 +117,8 @@ mod tests {
         type F = FiniteFieldElement<ModEIP197>;
 
         // Create polynomials P(x) and T(x)
-        let p =
-            Polynomial::from_monomials(&[F::from_value(-1), F::from_value(-2), F::from_value(-3)]);
-        let t = Polynomial::from_monomials(&[F::from_value(-1), F::from_value(-2)]);
+        let p = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2), F::from_value(3)]);
+        let t = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2)]);
 
         // Honest protocol
         let honest_prover = Prover::new(p.clone(), t.clone());
