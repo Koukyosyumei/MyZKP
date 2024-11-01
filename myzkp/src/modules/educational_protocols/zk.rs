@@ -1,9 +1,8 @@
-use crate::modules::field::{Field, FiniteFieldElement};
+use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
-use rand::Rng;
-
-const MODULUS: i128 = 3 * (1 << 30) + 1;
-const GENERATOR: i128 = 5; // A primitive root modulo MODULUS
+use num_bigint::{BigInt, RandBigInt, ToBigInt};
+use num_traits::Zero;
+use std::str::FromStr;
 
 struct Prover<F: Field> {
     p: Polynomial<F>,
