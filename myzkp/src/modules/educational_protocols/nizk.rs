@@ -126,3 +126,42 @@ pub fn non_interactive_zkp_protocol<F: Field>(
     let proof = prover.generate_proof(&setup.proof_key, delta);
     verifier.verify(&proof, &setup.verification_key)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::modules::field::{FiniteFieldElement, ModEIP197};
+    use num_bigint::ToBigInt;
+
+    #[test]
+    fn test_non_interactive_zkp() {
+        type F = FiniteFieldElement<ModEIP197>;
+
+        // Set up the curve
+        let a = F::from_value(30);
+        let b = F::from_value(34);
+        let curve = EllipticCurve { a, b };
+
+        // Set up the generator point
+        let g = EllipticCurvePoint::new(F::from_value(36), F::from_value(60), curve.clone());
+
+        // Set up the polynomials
+        let p = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2), F::from_value(3)]);
+        let t = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2)]);
+
+        // Generate trusted setup
+        let s = F::from_value(123);
+        let r = F::from_value(456);
+        let setup = TrustedSetup::generate(&curve, &g, &t, 3, &s, &r);
+
+        // Create prover and verifier
+        let prover = Prover::new(p, t, curve.clone(), g.clone());
+        let verifier = Verifier::new(curve, g);
+
+        // Run the protocol
+        let delta = F::from_value(789);
+        let result = non_interactive_zkp_protocol(&prover, &verifier, &setup, &delta);
+
+        assert!(result);
+    }
+}
