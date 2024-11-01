@@ -1402,9 +1402,10 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 
 Thanks to the Discrete Logarithm Assumption and the Knowledge of Exponent Assumption, the following properties hold:
 \begin{itemize}
-\item Alice cannot derive $b$ from $(g, g')$.
 \item Bob cannot derive $a$ from $(h, h')$.
-\item Alice knows a value $a$ such that $h = g^a$. In other words, $h$ is the power of $g$.
+\item Alice cannot derive $b$ from $(g, g')$.
+\item Alice cannot generate $(t, t')$ such that $t \neq h$ and $t^{b} = t'$.  
+\item If $h^{b} = h'$, Bob can conclude that $h$ is the power of $g$.
 \end{itemize}
 
 \subsection{Useful Algorithms}
@@ -1710,21 +1711,21 @@ To address this vulnerability, the Verifier must hide the randomly chosen input 
 An interesting property of polynomial exponentiation is:
 
 \begin{align}
-    g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{x^2})^{c_2} \cdots (g^{x^n})^{c_n}
+    g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
 \end{align}
 
-Instead of sending $s$, the Verifier can send $g$, $\alpha_{i} = g^{(s^i)}$, and its powers: $\alpha_1, \alpha_2, \ldots, \alpha_n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
+Instead of sending $s$, the Verifier can send $g$ and $\alpha_{i} = g^{(s^i)}$ for $i = 1, \hdots n$. BE CAREFUL THAT $g^{(s^i)} \bm{\neq} (g^s)^i$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $g$:
 
 \begin{equation}
     g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
 \end{equation}
 
-Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check $p = ht \iff g^p = (g^h)^t$.
+Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check $p = ht \iff g^p = (g^h)^t$. 
 
 \begin{protocol}{$+$ Discrete Logarithm Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly draw $s$ from $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$, where $\alpha = g^{s}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$, where $\alpha_i= g^{(s^{i})}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$ and $v = g^{h}$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
 \end{enumerate}
@@ -1736,12 +1737,12 @@ However, this protocol still has a flaw. Since the Prover can compute $g^t = \al
 
 \paragraph{$+$ Knowledge of Exponent Assumption}
 
-To address the vulnerability where the verifier $\mathcal{B}$ cannot distinguish if $v (= g^h)$ from the prover is a power of $\alpha = g^s$, we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
+To address the vulnerability where the verifier $\mathcal{B}$ cannot distinguish if $v (= g^h)$ from the prover is a power of $\alpha_i = g^{(s^i)}$, we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
 
 \begin{enumerate}
-    \item $\mathcal{B}$ sends both $\alpha$ and $\alpha' = \alpha^r$ for a new random value $r$.
+    \item $\mathcal{B}$ sends both $\alpha_i$ and $\alpha'_i = \alpha_i^r$ for a new random value $r$.
     \item The prover returns $a = (\alpha_i)^{c_i}$ and $a' = (\alpha'_i)^{c_i}$ for $i = 1, ..., n$.
-    \item $\mathcal{B}$ can conclude that $a$ is a power of $\alpha$ if $a^r = a'$.
+    \item $\mathcal{B}$ can conclude that $a$ is a power of $\alpha_i$ if $a^r = a'$.
 \end{enumerate}
 
 Based on this assumption, we can design an improved protocol:
@@ -1749,7 +1750,7 @@ Based on this assumption, we can design an improved protocol:
 \begin{protocol}{$+$ Knowledge of Exponent Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$ and $\{\alpha', \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha_{r} = g^{sr}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$ and $\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha_i = g^{(s^i)}$ and $\alpha' = \alpha_{r} = g^{(s^{i})r}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$, $v = g^{h}$, and $w = g^{p'}$, where $g^{p'} = g^{P(sr)}$.
     \item $\mathcal{B}$ checks whether $u^{r} = w$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
@@ -1765,7 +1766,7 @@ To transform the above protocol into a zk-SNARK, we need to ensure that the veri
 \begin{protocol}{$+$ Zero Knowledge}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$ and $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha^{r} = g^{sr}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$ and $\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha_i = g^{(s^{i})}$ and $\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}$.
     \item $\mathcal{A}$ randomly selects $\delta$ from field $\mathbb{F}$.
     \item $\mathcal{A}$ computes and sends $u' = (g^{p})^{\delta}$, $v' = (g^{h})^{\delta}$, and $w' = (g^{p'})^{\delta}$.
     \item $\mathcal{B}$ checks whether $u'^{r} = w'$.
@@ -1783,8 +1784,8 @@ The previously described protocol requires each verifier to generate unique rand
 \begin{enumerate}
     \item \textbf{Secret Seed}: A trusted third party generates the random values $s$ and $r$
     \item \textbf{Proof Key}: Provided to the prover \begin{enumerate}
-        \item $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$, where $\alpha_{i} = g_{(s^i)}$
-        \item $\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha' = g^{(sr)^i}$
+        \item $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$, where $\alpha_{i} = g^{(s^i)}$
+        \item $\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha_i' = g^{(s^{i})r}$
         \end{enumerate}
     \item \textbf{Verification Key}: Distributed to verifiers \begin{enumerate}
         \item $g^{r}$
