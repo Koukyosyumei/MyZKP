@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">1.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">1.1.</strong> Computation Rule and Properties</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">2.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">4.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">1.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">1.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">1.2.</strong> Semigroup, Group, Ring</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">2.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">4.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -190,6 +190,77 @@
 <p><em><strong>Definition: Commutative Property</strong></em></p>
 <p>A binary operation \(\circ\) is commutative if \(a \circ b = b \circ a\) for all \(a, b \in X\).</p>
 <p><strong>Example</strong>: Addition modulo \(n\) is also commutative. For \(n = 7\), \(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\).</p>
+<hr />
+<div style="break-before: page; page-break-before: always;"></div><h2 id="semigroup-group-ring"><a class="header" href="#semigroup-group-ring">Semigroup, Group, Ring</a></h2>
+<hr />
+<p><em><strong>Definition: Semigroup</strong></em></p>
+<p>A pair \((H, \circ)\), where \(H\) is a non-empty set and \(\circ\) is an associative binary operation on \(H\), is called a semigroup.</p>
+<p><strong>Example</strong>: The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \({1, 2, 3, 4, 5}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
+<hr />
+<p><em><strong>Definition: Abelian Semigroup</strong></em></p>
+<p>A semigroup whose operation is commutative is called an abelian semigroup.</p>
+<p><strong>Example</strong>: The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
+<hr />
+<p><em><strong>Definition: Identity Element</strong></em></p>
+<p>An element \(e \in H\) is an identity element of \(H\) if it satisfies \(e \circ a = a \circ e = a\) for any \(a \in H\).</p>
+<p><strong>Example</strong>: 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
+<hr />
+<p><em><strong>Definition: Monoid</strong></em></p>
+<p>A semigroup with an identity element is called a monoid.</p>
+<p><strong>Example</strong>: The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \({0, 1, 2, 3, 4}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
+<hr />
+<p><em><strong>Definition: Inverse</strong></em></p>
+<p>For an element \(a \in H\), an element \(b \in H\) is an inverse of \(a\) if \(a \circ b = b \circ a = e\), where \(e\) is the identity element.</p>
+<p><strong>Example</strong>: In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
+<hr />
+<p><em><strong>Definition: Group</strong></em></p>
+<p>A monoid in which every element has an inverse is called a group.</p>
+<p><strong>Example</strong>: The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \({1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}}\) has an inverse, making it a group.</p>
+<hr />
+<p><em><strong>Definition: Order of a Group</strong></em></p>
+<p>The order of a group is the number of elements in the group.</p>
+<p><strong>Example</strong>: The group of integers modulo 4 under addition has order 4, because the set of elements is \({0, 1, 2, 3}\).</p>
+<hr />
+<p><em><strong>Definition: Ring</strong></em></p>
+<p>A triple \((R, +, \cdot)\) is a ring if \((R, +)\) is an abelian group, \((R, \cdot)\) is a semigroup, and the distributive property holds: \(x \cdot (y + z) = (x \cdot y) + (x \cdot z)\) and \((x + y) \cdot z = (x \cdot z) + (y \cdot z)\) for all \(x, y, z \in R\).</p>
+<p><strong>Example</strong>: The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt;
+use std::ops::{Add, Mul, Neg, Sub};
+
+pub trait Ring:
+    Sized
+    + Clone
+    + PartialEq
+    + fmt::Display
+    + Add&lt;Output = Self&gt;
+    + Sub&lt;Output = Self&gt;
+    + Mul&lt;Output = Self&gt;
+    + Mul&lt;i64, Output = Self&gt;
+    + Neg&lt;Output = Self&gt;
+{
+    // A ring is an algebraic structure with addition and multiplication
+    fn zero() -&gt; Self;
+    fn one() -&gt; Self;
+}
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<p><em><strong>Definition: Communicative Ring</strong></em></p>
+<p>A ring is called a commutative ring if its multiplication operation is commutative.</p>
+<p><strong>Example</strong> The set of real numbers under usual addition and multiplication forms a commutative ring.</p>
+<hr />
+<p><em><strong>Definition: Field</strong></em></p>
+<p>A commutative ring with a multiplicative identity element where every non-zero element has a multiplicative inverse is called a field.</p>
+<p><strong>Example</strong> The set of rational numbers under usual addition and multiplication forms a field.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use crate::modules::ring::Ring;
+
+pub trait Field: Ring + Div&lt;Output = Self&gt; {
+    fn inverse(&amp;self) -&gt; Self;
+}
+<span class="boring">}</span></code></pre></pre>
 <hr />
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
