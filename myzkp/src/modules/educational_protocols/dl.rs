@@ -117,9 +117,8 @@ mod tests {
         type F = FiniteFieldElement<ModEIP197>;
 
         // Create polynomials P(x) and T(x)
-        let p =
-            Polynomial::from_monomials(&[F::from_value(-1), F::from_value(-2), F::from_value(-3)]);
-        let t = Polynomial::from_monomials(&[F::from_value(-1), F::from_value(-2)]);
+        let p = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2), F::from_value(3)]);
+        let t = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2)]);
 
         // Honest protocol
         let honest_prover = Prover::new(p.clone(), t.clone());
