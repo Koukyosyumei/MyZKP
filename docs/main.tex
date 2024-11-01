@@ -20,6 +20,7 @@
 
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{amssymb}
 \usepackage{centernot}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -29,6 +30,9 @@
 \usepackage{xcolor}
 \usepackage{tcolorbox}
 \usepackage{bm}
+
+% Packages required for the code listing
+\usepackage{listings}
 
 \lstset{
  	language = C++,
@@ -91,6 +95,18 @@
 \tcbuselibrary{theorems}
 \newtcbtheorem
   []% init options
+  {corollary}% name
+  {Corollary}% title
+  {%
+    colback=blue!5,
+    colframe=blue!35!black,
+    fonttitle=\bfseries,
+  }% options
+  {cor}% prefix
+
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
   {assumption}% name
   {Assumption}% title
   {%
@@ -112,23 +128,48 @@
   }% options
   {pro}% prefix
 
-\tcbuselibrary{theorems}
-\newtcbtheorem
-  []% init options
-  {corollary}% name
-  {Corollary}% title
-  {%
-    colback=yellow!5,
-    colframe=yellow!35!black,
-    fonttitle=\bfseries,
-  }% options
-  {cor}% prefix
-  
-
 %Header
 \pagestyle{fancy}
 \thispagestyle{empty}
 \rhead{ \textit{ }} 
+
+% Define colors for the code
+\definecolor{commentgreen}{rgb}{0,0.5,0}
+\definecolor{stringred}{rgb}{0.6,0,0}
+\definecolor{keywordblue}{rgb}{0,0,0.75}
+\definecolor{backgray}{rgb}{0.95,0.95,0.95}
+
+% Define Rust language style
+\lstdefinelanguage{Rust}{
+    morekeywords={
+        as, break, const, continue, crate, else, enum, extern, false, fn, for, if, impl, in, let, loop, match, mod, move, mut, pub, ref, return, self, Self, static, struct, super, trait, true, type, unsafe, use, where, while, async, await, dyn
+    },
+    sensitive=true,
+    morecomment=[l]{//},     % Line comments
+    morecomment=[s]{/*}{*/}, % Block comments
+    morestring=[b]"          % Strings in double quotes
+}
+
+% Define the style for the listings
+\lstset{
+    language=Rust,
+    backgroundcolor=\color{backgray},   % Set background color
+    basicstyle=\ttfamily\footnotesize,  % Set font style and size
+    keywordstyle=\color{keywordblue}\bfseries, % Keywords in blue and bold
+    commentstyle=\color{commentgreen}\itshape, % Comments in green and italic
+    stringstyle=\color{stringred},      % Strings in red
+    numbers=left,                       % Line numbers on the left
+    numberstyle=\tiny\color{gray},      % Line number style
+    stepnumber=1,                       % Step between line numbers
+    numbersep=5pt,                      % Space between numbers and code
+    showstringspaces=false,             % Don't show spaces in strings
+    tabsize=4,                          % Tab width
+    captionpos=b,                       % Caption position
+    breaklines=true,                    % Break long lines
+    breakatwhitespace=false,            % Don't break at whitespace
+    frame=single,                       % Frame around the code
+    framerule=0.8pt,                    % Thickness of the frame
+}
 
 % Update your Headers here
 %\fancyhead[LO]{Running Title for Header}
@@ -138,7 +179,7 @@
 
   
 %% Title
-\title{MyZKP: Introduction to Zero Knowledge Protocol
+\title{Building Zero-Knowledge Proofs from Scratch
 %%%% Cite as
 %%%% Update your official citation here when published 
 %\thanks{\textit{\underline{Citation}}: 
@@ -219,6 +260,8 @@ A binary operation $\circ$ is commutative if $a \circ b = b \circ a$ for all $a,
 
 Example: Addition modulo $n$ is also commutative. For $n = 7$, $5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1$.
 
+\paragraph{Exercise}
+
 \subsection{Semigroup, Group, Ring}
 
 \begin{definition}{Semigroup}{}
@@ -269,6 +312,27 @@ A triple $(R, +, \cdot)$ is a ring if $(R, +)$ is an abelian group, $(R, \cdot)$
 
 Example: The set of integers with usual addition and multiplication modulo $n$ forms a ring. For example, in $\mathbb{Z}/6\mathbb{Z}$, addition and multiplication modulo 6 form a ring.
 
+\begin{lstlisting}[language=Rust, caption=Implementation of Ring]
+use std::fmt;
+use std::ops::{Add, Mul, Neg, Sub};
+
+pub trait Ring:
+    Sized
+    + Clone
+    + PartialEq
+    + fmt::Display
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Mul<Output = Self>
+    + Mul<i64, Output = Self>
+    + Neg<Output = Self>
+{
+    // A ring is an algebraic structure with addition and multiplication
+    fn zero() -> Self;
+    fn one() -> Self;
+}
+\end{lstlisting}
+
 \begin{definition}{Commutative Ring}{}
 A ring is called a commutative ring if its multiplication operation is commutative.
 \end{definition}
@@ -281,6 +345,14 @@ A commutative ring with a multiplicative identity element where every non-zero e
 
 The set of rational numbers under usual addition and multiplication forms a field.
 
+\begin{lstlisting}[language=Rust, caption=Implementation of Field]
+use crate::modules::ring::Ring;
+
+pub trait Field: Ring + Div<Output = Self> {
+    fn inverse(&self) -> Self;
+}
+\end{lstlisting}
+
 \begin{definition}{Residue Class}{}
 The residue class of $a$ modulo $m$, denoted as $a + m\mathbb{Z}$, is the set $\{b : b \equiv a \pmod{m}\}$.
 \end{definition}
@@ -291,15 +363,58 @@ Example: For $m = 3$, the residue class of 2 is $2 + 3\mathbb{Z} = \{\ldots, -4,
 We denote the set of all residue classes modulo $m$ as $\mathbb{Z} / m\mathbb{Z}$. We say that $a + m\mathbb{Z}$ is invertible in $\mathbb{Z} / m\mathbb{Z}$ if and only if there exists a solution for $ax \equiv 1 \pmod{m}$.
 \end{definition}
 
+Example: In $\mathbb{Z}/5\mathbb{Z}$, $3 + 5\mathbb{Z}$ is invertible because $\gcd(3, 5) = 1$ ($3\cdot2 \equiv 1 \bmod 5$). However, in $\mathbb{Z}/6\mathbb{Z}$, $3 + 6\mathbb{Z}$ is not invertible because $\gcd(3, 6) = 3 \neq 1$ ($3 \cdot 1 \equiv 3 \bmod 6$, $3 \cdot 2 \equiv 0 \bmod 6$, $3 \cdot 3 \equiv 9 \bmod 6$, $3 \cdot 4 \equiv 0 \bmod 6$ ...).
+
+\begin{lemma}{}{}
+If $a$ and $b$ are coprime, the residues of $a$, $2a$, $3a$, ..., $(b-1)a$ modulo $b$ are all distinct.
+\end{lemma}
+\begin{proof}
+Suppose, for contradiction, that there exist $x, y \in {1, 2, ..., b-1}$ with $x \neq y$ such that $xa \equiv ya \pmod{b}$. Then $(x-y)a \equiv 0 \pmod{b}$, which implies $b \mid (x-y)a$. Since $a$ and $b$ are coprime, we must have $b \mid (x-y)$. However, $|x-y| < b$, so this is only possible if $x = y$, contradicting our assumption. Therefore, all residues must be distinct.
+\end{proof}
+
 \begin{theorem}{}{}
-$a + m\mathbb{Z}$ is invertible in $\mathbb{Z} / m\mathbb{Z}$ if and only if $\gcd(a, m) = 1$.
+For any integers $a$ and $b$, the equation $ax + by = 1$ has a solution in integers $x$ and $y$ if and only if $a$ and $b$ are coprime.
+\end{theorem}
+\begin{proof}
+($\Rightarrow$) We prove the contrapositive. Suppose $a$ and $b$ are not coprime. Let $d = \gcd(a,b) > 1$. Then $d \mid a$ and $d \mid b$, so $d \mid (ax + by)$ for any integers $x$ and $y$. Thus, $ax + by \neq 1$ for any $x$ and $y$.
+
+($\Leftarrow$) Suppose $a$ and $b$ are coprime. By the previous lemma, the residues of $a$, $2a$, ..., $(b-1)a$ modulo $b$ are all distinct. Therefore, there exists an $m \in {1, 2, ..., b-1}$ such that $ma \equiv 1 \pmod{b}$. This means there exists an integer $n$ such that $ma = bn + 1$, or equivalently, $ma - bn = 1$.
+\end{proof}
+
+\begin{theorem}{Bézout's identity}{}
+For any integers $a$ and $b$, we have:
+    \begin{equation}
+        a\mathbb{Z} + b \mathbb{Z} = \gcd(a, b)\mathbb{Z}
+    \end{equation}
 \end{theorem}
 
 \begin{proof}
-    TBD
+This statement is equivalent to proving that $ax + by = c$ has an integer solution if and only if $c$ is a multiple of $\gcd(a,b)$.
+
+($\Rightarrow$) If $ax + by = c$ for some integers $x$ and $y$, then $\gcd(a,b) \mid a$ and $\gcd(a,b) \mid b$, so $\gcd(a,b) \mid (ax + by) = c$.
+
+($\Leftarrow$) Let $c = k\gcd(a,b)$ for some integer $k$. We can write $a = p\gcd(a,b)$ and $b = q\gcd(a,b)$, where $p$ and $q$ are coprime. By the previous theorem, there exist integers $m$ and $n$ such that $pm + qn = 1$. Multiplying both sides by $k\gcd(a,b)$, we get:
+
+\begin{align*}
+    &(pm + qn)k\gcd(a, b) = k \gcd(a, b) \\
+    \iff& p \gcd(a, b) mk + q \gcd(a, b) nk = c \\
+    \iff& akm + bkn = c
+\end{align*}
+
+Thus, $x = km$ and $y = kn$ are integer solutions to $ax + by = c$.
 \end{proof}
 
-Example: In $\mathbb{Z}/5\mathbb{Z}$, $3 + 5\mathbb{Z}$ is invertible because $\gcd(3, 5) = 1$ ($3\cdot2 \equiv 1 \bmod 5$). However, in $\mathbb{Z}/6\mathbb{Z}$, $3 + 6\mathbb{Z}$ is not invertible because $\gcd(3, 6) = 3 \neq 1$ ($3 \cdot 1 \equiv 3 \bmod 6$, $3 \cdot 2 \equiv 0 \bmod 6$, $3 \cdot 3 \equiv 9 \bmod 6$, $3 \cdot 4 \equiv 0 \bmod 6$ ...).
+This theorem implies that for any integers $a$, $b$, and $n$, the equation $ax + by = n$ has an integer solution if and only if $\gcd(a,b) \mid n$.
+
+\begin{theorem}{}{}
+$a + m\mathbb{Z}$ is invertible in $\mathbb{Z}/m\mathbb{Z}$ if and only if $\gcd(a,m) = 1$.
+\end{theorem}
+
+\begin{proof}
+($\Rightarrow$) Suppose $a + m\mathbb{Z}$ is invertible in $\mathbb{Z}/m\mathbb{Z}$. Then there exists an integer $x$ such that $ax \equiv 1 \pmod{m}$. Let $g = \gcd(a,m)$. Then $g \mid a$, $g \mid m$, and $g \mid (ax - 1)$. Since $g \mid ax$ and $g \mid (ax - 1)$, we must have $g \mid 1$. Therefore, $g = 1$.
+
+($\Leftarrow$) Suppose $\gcd(a,m) = 1$. By Bézout's identity, there exist integers $x$ and $y$ such that $ax + my = 1$. This implies $ax \equiv 1 \pmod{m}$, so $x + m\mathbb{Z}$ is the multiplicative inverse of $a + m\mathbb{Z}$ in $\mathbb{Z}/m\mathbb{Z}$.
+\end{proof}
 
 \begin{definition}{Residue Class Ring}{}
 $(\mathbb{Z} / m \mathbb{Z}, +, \cdot)$ is a commutative ring where $1 + m \mathbb{Z}$ is the multiplicative identity element. This ring is called the residue class ring modulo $m$.
@@ -406,23 +521,7 @@ Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, consider the element 
 
 Example: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, for any element $g$, such as $g = 3 + 7\mathbb{Z}$, we have $3^6 \equiv 1 \bmod 7$. This holds for any $g \in (\mathbb{Z}/7\mathbb{Z})^{\times}$ because the order of the group is 6. Thus, $g^{|G|} = 1$ is satisfied.
 
-\begin{definition}{Pairing}{}
-Let $G_1$ and $G_2$ be cyclic groups under addition, both of prime order $p$, with generators $P$ and $Q$ respectively:
-
-    \begin{align}
-        G_1 &= \{0, P, 2P, ..., (p-1)P\} \\
-        G_2 &= \{0, Q, 2Q, ..., (p-1)Q\}
-    \end{align}
-
-Let $G_T$ be a cyclic group under multiplication, also of order $p$.
-A pairing is a map $e: G_1 \times G_2 \rightarrow G_T$ that satisfies the following bilinear property:
-
-    \begin{equation}
-        e(aP, bQ) = e(P, Q)^{ab}
-    \end{equation} for all $a, b \in \mathbb{Z}_p$.
-\end{definition}
-
-Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents area. The pairing function $e$ is like calculating the area: If you double the length and triple the width, the area becomes six times larger: $e(2P, 3Q) = e(P, Q)^{6}$
+\paragraph{Exercise}
 
 \subsection{Polynomials}
 
@@ -432,8 +531,18 @@ Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents ar
 
 Example: In $\mathbb{Z}[x]$, we have polynomials such as $2x^3 + x + 1$, $x$, and $1$. In $\mathbb{R}[x]$, we have polynomials like $\pi x^2 - \sqrt{2}x + e$.
 
+\begin{lstlisting}[language=Rust, caption=Polynomial]
+/// Polynomial struct representing a polynomial over Field.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Polynomial<F: Field> {
+    pub poly: Vec<F>,
+    pub var: String,
+}
+\end{lstlisting}
+
+
 \begin{definition}{Degree}{}
-    The degree of a non-zero polynomial $f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0$, denoted as $\deg f$, is the largest integer $n$ such that $a_n \neq 0$. The zero polynomial is defined to have degree $-\infty$.
+    The degree of a non-zero polynomial $f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0$, denoted as $\deg f$, is the largest integer $n$ such that $a_n \neq 0$. The zero polynomial is defined to have degree $-1$.
 \end{definition}
 
 Example: 
@@ -442,9 +551,31 @@ Example:
     \item $\deg(2x^3 + x + 1) = 3$
     \item $\deg(x) = 1$
     \item $\deg(1) = 0$
-    \item $\deg(0) = -\infty$
+    \item $\deg(0) = -1$
 \end{itemize}
 
+\begin{lstlisting}[language=Rust, caption=Degree of Polynomials]
+impl<F: Field> Polynomial<F> {
+    /// Removes trailing zeroes from a polynomial's coefficients.
+    fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
+        let mut trimmed = poly;
+        while trimmed.last() == Some(&F::zero(None)) {
+            trimmed.pop();
+        }
+        trimmed
+    }
+
+    /// Returns the degree of the polynomial.
+    pub fn degree(&self) -> isize {
+        let trimmed = Self::trim_trailing_zeros(self.poly.clone());
+        if trimmed.is_empty() {
+            -1
+        } else {
+            (trimmed.len() - 1) as isize
+        }
+    }
+}
+\end{lstlisting}
 
 \begin{definition}{Sum of polynomials}{}
     For polynomials $f(x) = \sum_{i=0}^n a_i x^i$ and $g(x) = \sum_{i=0}^m b_i x^i$, their sum is defined as:
@@ -454,12 +585,56 @@ Example:
 
 Example: Let $f(x) = 2x^2 + 3x + 1$ and $g(x) = x^3 - x + 4$. Then, $(f + g)(x) = x^3 + 2x^2 + 2x + 5$
 
+\begin{lstlisting}[language=Rust, caption=Sum of Polynomials]
+impl<F: Field> Add for Polynomial<F> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Polynomial<F> {
+        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero(None);
+
+        for i in 0..max_len {
+            let a = self.poly.get(i).unwrap_or(&zero);
+            let b = other.poly.get(i).unwrap_or(&zero);
+            result.push(a.clone() + b.clone());
+        }
+        Polynomial {
+            poly: Self::trim_trailing_zeros(result),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
+
 \begin{definition}{Product of polynomials}{}
     For polynomials $f(x) = \sum_{i=0}^n a_i x^i$ and $g(x) = \sum_{j=0}^m b_j x^j$, their product is defined as:
     $(fg)(x) = \sum_{k=0}^{n+m} c_k x^k$, where $c_k = \sum_{i+j=k} a_i b_j$
 \end{definition}
 
 Example: Let $f(x) = x + 1$ and $g(x) = x^2 - 1$. Then, $(fg)(x) = x^3 + x^2 - x - 1$
+
+\begin{lstlisting}[language=Rust, caption=Product of polynomials]
+impl<F: Field> Mul for Polynomial<F> {
+    type Output = Self;
+
+    /// Multiplication of two polynomials.
+    fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
+
+        for (i, a) in self.poly.iter().enumerate() {
+            for (j, b) in other.poly.iter().enumerate() {
+                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+            }
+        }
+        Polynomial {
+            poly: Self::trim_trailing_zeros(result),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
 
 Let $K$ be a field.
 
@@ -482,6 +657,42 @@ We can also define division in the polynomial ring $K[x]$.
 $q$ is called the quotient of $f$ divided by $g$, and $r$ is called the remainder; we write $r = f \bmod g$.
 
 Example: In $\mathbb{R}[x]$, let $f(x) = x^3 + 2x^2 - x + 3$ and $g(x) = x^2 + 1$.  Then $f = qg + r$ where $q(x) = x + 2$ and $r(x) = -3x + 1$.
+
+
+\begin{lstlisting}[language=Rust, caption=Division of polynomials]
+impl<F: Field> Div for Polynomial<F> {
+    type Output = Self;
+
+    /// Division of two polynomials, returns quotient.
+    fn div(self, other: Polynomial<F>) -> Polynomial<F> {
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
+        let mut quotient =
+            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+
+        let mut i = 0_i32;
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
+            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
+            quotient[deg_diff] = lead_term.clone();
+
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
+                    - (lead_term.clone() * divisor_coeffs[i].clone());
+            }
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+            i += 1;
+        }
+
+        Polynomial {
+            poly: Self::trim_trailing_zeros(quotient),
+            var: self.var.clone(),
+        }
+    }
+}
+\end{lstlisting}
 
 \begin{corollary}{}{}
     Let $f \in K[x]$ be a non-zero polynomial, and $a \in K$ such that $f(a) = 0$. Then, there exists a polynomial $q \in K[x]$ such that $f(x) = (x - a)q(x)$. In other words, $(x - a)$ is a factor of $f(x)$.
@@ -510,6 +721,35 @@ For example, the quadratic polynomial that goes through $\{(1, 0), (2, 3), (3, 8
 
 Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.
 
+\begin{lstlisting}[language=Rust, caption=Lagrange Interpolation]
+pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
+    let mut lagrange_polys = vec![];
+    let numerators = Polynomial::from_monomials(x_values);
+
+    for j in 0..x_values.len() {
+        let mut denominator = F::one(None);
+        for i in 0..x_values.len() {
+            if i != j {
+                denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+            }
+        }
+        let cur_poly = numerators
+            .clone()
+            .div(Polynomial::from_monomials(&[x_values[j].clone()]).scalar_mul(&denominator));
+        lagrange_polys.push(cur_poly);
+    }
+
+    let mut result = Polynomial {
+        poly: vec![],
+        var: "x".to_string(),
+    };
+    for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
+        result = result + lagrange_poly.scalar_mul(&y_values[j]);
+    }
+    result
+}
+\end{lstlisting}
+
 \begin{proposition}{Homomorphisms of Lagrange Interpolation}{}
 Let $L(v)$ and $L(w)$ be the polynomial resulting from Lagrange Interpolation on the output ($y$) vector $v$ and $w$ for the same inputs ($x$). Then, the following properties hold:
 
@@ -529,7 +769,9 @@ Let $v = (v_1, \ldots, v_n)$ and $w = (w_1, \ldots, w_n)$ be vectors, and $x_1, 
 \end{align*}
 \end{proof}
 
-\subsection{Finite Field}
+\paragraph{Exercise}
+
+\subsection{Galois Field}
 
 We will now discuss the construction of finite fields with $p^n$ elements, where $p$ is a prime number and $n$ is a positive integer. These fields are also known as Galois fields, denoted as $GF(p^n)$. It is evident that $\mathbb{Z}/p\mathbb{Z}$ is isomorphic to $GF(p)$.
 
@@ -590,7 +832,537 @@ where $u$ is drawn uniformly at random from $\mathbb{S}^m$.
 
 This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relatively small, the probability that the two different polynomials return the same value for a randomly chosen input is negligibly small. In other words, if we observe $P(u) = Q(u)$ for a random input $u$, we can conclude with high probability that $P$ and $Q$ are identical polynomials.
 
+\paragraph{Exercise}
+
 \subsection{Elliptic curve}
+
+\begin{definition}{Elliptic Curve}{}
+    An elliptic curve $E$ over a finite field $\mathbb{F}_{p}$ is defined by the equation:
+
+    \begin{equation}
+        y^2 = x^3 + a x + b
+    \end{equation}
+    where $(a, b \in \mathbb{F}_{p})$ and the discriminant $\Delta_{E} = 4a^3 + 27b^2 \neq 0$.
+\end{definition}
+
+\begin{lstlisting}[language=Rust, caption=Implementation of Elliptic Curve]
+use crate::modules::field::Field;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurve<F: Field> {
+    pub a: F,
+    pub b: F,
+}
+\end{lstlisting}
+
+\begin{definition}{$\mathbb{F}{p}$-Rational Point}{}
+An $\mathbb{F}_{p}$-rational point on an elliptic curve $E$ is a point $(x, y)$ where both $x$ and $y$ are elements of $\mathbb{F}_{p}$ and satisfy the curve equation, or the point at infinity $\mathcal{O}$.
+\end{definition}
+
+Example: For $E: y^2 = x^3 + 3x + 4$ over $\mathbb{F}_{7}$, the $\mathbb{F}_{7}$-rational points are:
+${(0, 2), (0, 5), (1, 1), (1, 6), (2, 2), (2, 5), (5, 1), (5, 6), \mathcal{O}}$
+
+\begin{definition}{The point at infinity}{}
+The point at infinity denoted $\mathcal{O}$, is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.
+\end{definition}
+
+\begin{lstlisting}[language=Rust, caption=Implementation of Rational Point]
+#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurvePoint<F: Field> {
+    pub x: Option<F>,
+    pub y: Option<F>,
+    pub curve: EllipticCurve<F>,
+}
+\end{lstlisting}
+
+\begin{definition}{Addition on Elliptic Curve}{}
+For an elliptic curve $E: y^2 = x^3 + ax + b$, the addition of points $P$ and $Q$ to get $R = P + Q$ is defined as follows:
+
+   \begin{itemize}
+       \item If $P = \mathcal{O}$, $R = Q$.
+       \item If $Q = \mathcal{O}$, $R = P$.
+       \item Otherwise, let $P = (x_P, y_P), Q = (x_Q, y_Q)$. Then:
+       \begin{itemize}
+           \item If $y_P = -y_Q$, $R = \mathcal{O}$
+           \item If $y_P \neq -y_Q$, $R = (x_R = \lambda^2 - x_P - x_Q, y_R = \lambda(x_P - x_R) - y_P)$\\, where $\lambda = \begin{cases}
+               \frac{y_P - y_Q}{x_P - x_Q} \quad \hbox{If } (x_P \neq x_Q) \\
+               \frac{3^{2}_{P} + a}{2y_P} \quad \hbox{Otherwise}
+           \end{cases}$
+       \end{itemize}
+   \end{itemize}
+\end{definition}
+
+Example: On $E: y^2 = x^3 + 2x + 3$ over $\mathbb{F}_{7}$, let $P = (5, 1)$ and $Q = (4, 4)$. Then, $P + Q = (0, 5)$, where $\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7$.
+
+\begin{lstlisting}[language=Rust, caption=Implementation of Addition on Elliptic Curve]
+impl<F: Field> EllipticCurvePoint<F> {
+    fn new(x: F, y: F, curve: EllipticCurve<F>) -> Self {
+        EllipticCurvePoint {
+            x: Some(x),
+            y: Some(y),
+            curve: curve,
+        }
+    }
+
+    pub fn point_at_infinity(curve: EllipticCurve<F>) -> Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            curve: curve,
+        }
+    }
+
+    pub fn is_point_at_infinity(&self) -> bool {
+        self.x.is_none() || self.y.is_none()
+    }
+
+    pub fn line_slope(&self, other: Self) -> F {
+        let x1 = self.x.clone().unwrap();
+        let y1 = self.y.clone().unwrap();
+        let x2 = other.x.clone().unwrap();
+        let y2 = other.y.clone().unwrap();
+
+        if self.x.clone() == other.x.clone() {
+            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
+        } else {
+            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        }
+    }
+}
+
+impl<F: Field> Add for EllipticCurvePoint<F> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        if self.is_point_at_infinity() {
+            return other;
+        }
+        if other.is_point_at_infinity() {
+            return self;
+        }
+
+        let m = self.line_slope(other.clone());
+
+        if self.x == other.x {
+            if self.y != other.y {
+                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+            } else {
+                let x1 = self.x.clone().unwrap();
+                let y1 = self.y.clone().unwrap();
+
+                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
+                let y3 = m * (x1 - x3.clone()) - y1;
+
+                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+            }
+        } else {
+            let x1 = self.x.clone().unwrap();
+            let y1 = self.y.clone().unwrap();
+            let x2 = other.x.clone().unwrap();
+            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
+            let y3 = m * (x1 - x3.clone()) - y1;
+
+            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{definition}{Mordell-Weil Group}{}
+The Mordell-Weil group of an elliptic curve $E$ is the group of rational points on $E$ under the addition operation defined above.
+\end{definition}
+
+Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}_{11}$, the Mordell-Weil group is the set of all $\mathbb{F}_{11}$-rational points on $E$ with the elliptic curve addition operation.
+
+\begin{definition}{Group Order}{}
+The group order of an elliptic curve $E$ over $\mathbb{F}_{p}$, denoted $\#E(\mathbb{F}_{p})$, is the number of $\mathbb{F}_{p}$-rational points on $E$, including the point at infinity.
+\end{definition}
+Example: For $E: y^2 = x^3 + x + 6$ over $\mathbb{F}_{11}$, $\#E(\mathbb{F}_{11}) = 13$.
+
+\begin{theorem}{Hasse-Weil}{}
+Let $\#E(\mathbb{F}_{p})$ be the group order of the elliptic curve $E$ over $\mathbb{F}_{p}$. Then:
+
+        \begin{equation}
+            p + 1 - 2 \sqrt{p} \leq \#E \leq p + 1 + 2 \sqrt{p}
+        \end{equation}
+\end{theorem}
+
+For an elliptic curve over $\mathbb{F}_{23}$, the Hasse-Weil theorem guarantees that: 
+
+\begin{equation*}
+23 + 1 - 2 \sqrt{23} \simeq 14.42 \#E(\mathbb{F}_{23}) \geq 23 + 1 + 2 \sqrt{23} \simeq 33.58
+\end{equation*}
+
+\begin{definition}{Point Order}{}
+The order of a point $P$ on an elliptic curve is the smallest positive integer $n$ such that $nP = \mathcal{O}$ (where $nP$ denotes $P$ added to itself $n$ times). We also denote the set of points of order $n$, also called \textit{torsion} group, by 
+
+\begin{equation}
+    E[n] = \{P \in E: [n]P = \mathcal{O}\}
+\end{equation}
+\end{definition}
+
+Example: On $E: y^2 = x^3 + 2x + 2$ over $\mathbb{F}_{17}$, the point $P = (5, 1)$ has order 18 because $18P = \mathcal{O}$, and no smaller positive multiple of $P$ equals $\mathcal{O}$.
+
+The intuitive view is that if you continue to add points to themselves (doubling, tripling, etc.), the lines drawn between the prior point and the next point will eventually become more vertical. When the line becomes vertical, it does not intersect the elliptic curve at any finite point. In elliptic curve geometry, a vertical line is considered to "intersect" the curve at a special place called the "point at infinity," This point is like a north pole in geographic terms: no matter which direction you go, if the line becomes vertical (reaching infinitely high), it converges to this point.
+
+\begin{definition}{Field Extension}{}
+    Let $F$ and $L$ be fields. If $F \subseteq L$ and the operations of $F$ are the same as those of $L$, we call $L$ a field extension of $F$. This is denoted as $L/F$.
+\end{definition}
+
+A field extension $L/F$ naturally gives $L$ the structure of a vector space over $F$. The dimension of this vector space is called the degree of the extension.
+
+Examples:
+\begin{itemize}
+    \item $\mathbb{C}/\mathbb{R}$ is a field extension with basis $\{1, i\}$ and degree 2.
+    \item $\mathbb{R}/\mathbb{Q}$ is an infinite degree extension.
+    \item $\mathbb{Q}(\sqrt{2})/\mathbb{Q}$ is a degree 2 extension with basis $\{1, \sqrt{2}\}$.
+\end{itemize}
+
+\begin{definition}{Algebraic Extension}{}
+    A field extension $L/K$ is called algebraic if every element $\alpha \in L$ is algebraic over $K$, i.e., $\alpha$ is the root of some non-zero polynomial with coefficients in $K$.
+
+    For an algebraic element $\alpha \in L$ over $K$, we denote by $K(\alpha)$ the smallest field containing both $K$ and $\alpha$.
+\end{definition}
+
+\begin{itemize}
+    \item $\mathbb{C}/\mathbb{R}$ is algebraic: any $z = a + bi \in \mathbb{C}$ is a root of $x^2 - 2ax + (a^2 + b^2) \in \mathbb{R}[x]$.
+    \item $\mathbb{Q}(\sqrt[3]{2})/\mathbb{Q}$ is algebraic: $\sqrt[3]{2}$ is a root of $x^3 - 2 \in \mathbb{Q}[x]$.
+    \item $\mathbb{R}/\mathbb{Q}$ is not algebraic (a field extension that is not algebraic is called \textit{transcendental}).
+\end{itemize}
+
+\begin{definition}{Field of Rational Functions}{}
+Let $K$ be a field and $X$ be indeterminate. The field of rational functions over $K$, denoted $K(X)$, is defined as:
+
+\begin{equation*}
+    K(X) = \left\{ \frac{f(X)}{g(X)} \,\middle|\, f(X), g(X) \in K[X], g(X) \neq 0 \right\}
+\end{equation*}
+
+where $K[X]$ is the ring of polynomials in $X$ with coefficients in $K$.
+\end{definition}
+
+$K(X)$ can be viewed as the field obtained by adjoining a letter $X$ to $K$. This construction generalizes to multiple variables, e.g., $K(X,Y)$.
+
+The concept of a function field naturally arises in the context of algebraic curves, particularly elliptic curves. Intuitively, the function field encapsulates the algebraic structure of rational functions on the curve.
+
+We first construct the coordinate ring for an elliptic curve $E: y^2 = x^3 + ax + b$. Consider functions $X: E \to K$ and $Y: E \to K$ that extract the $x$ and $y$ coordinates, respectively, from an arbitrary point $P \in E$. These functions generate the polynomial ring $K[X,Y]$, subject to the relation $Y^2 = X^3 + aX + b$.
+
+To put it simply, the function field is a field that consists of all functions that determine the value based on the point on the curve.
+
+\begin{definition}{Coordinate Ring of an Elliptic Curve}{}
+The \textbf{coordinate ring} of an elliptic curve $E: y^2 = x^3 + ax + b$ over a field $K$ is defined as:
+\begin{equation}
+    K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
+\end{equation}
+\end{definition}
+
+In other words, we can view $K[E]$ as a ring representing all polynomial functions on $E$. Recall that $K[X, Y]$ is the polynomial ring in two variables $X$ and $Y$ over the field K, meaning that it contains all polynomials in $X$ and $Y$ with coefficients from $K$. Then, the notation $K[X, Y]/(Y^2 - X^3 - aX - b)$ denotes the quotient ring obtained by taking $K[X, Y]$ and "modding out" by the ideal $(Y^2 - X^3 - aX - b)$.
+
+For example, for an elliptic curve $E: y^2 = x^3 - x$ over $\mathbb{Q}$, some elements of the coordinate ring $\mathbb{Q}[E]$ include:
+
+\begin{itemize}
+    \item Constants: $3, -2, \frac{1}{7}, \ldots$
+    \item Linear functions: $X, Y, 2X+3Y, \ldots$
+    \item Quadratic functions: $X^2, XY, Y^2 (= X^3 - X), \ldots$
+    \item Higher-degree functions: $X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots$
+\end{itemize}
+
+Then, the function field is defined as follows:
+
+\begin{definition}{Function Field of an Elliptic Curve}{}
+Let $E: y^2 = x^3 + ax + b$ be an elliptic curve over a field $K$. The \textbf{function field} of $E$, denoted $K(E)$, is defined as:
+\begin{equation}
+    K(E) = \left\{\frac{f}{g} \,\middle|\, f, g \in K[E], g \neq 0 \right\}
+\end{equation}
+where $K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)$ is the coordinate ring of $E$.
+\end{definition}
+
+$K(E)$ can be viewed as the field of all rational functions on $E$.
+
+\begin{definition}{Zero of a Function}{}
+Let $h \in K(E)$ be a non-zero function. A point $P \in E$ is called a \textbf{zero} of $h$ if $h(P) = 0$.
+\end{definition}
+
+\begin{definition}{Pole of a Function}{}
+Let $h \in K(E)$ be a non-zero function. A point $P \in E$ is called a \textbf{pole} of $h$ if $h$ is not defined at $P$ or, equivalently if $1/h$ has a zero at $P$.
+\end{definition}
+
+Consider the elliptic curve $E: Y^2 = X^3 - X$ over a field $K$ of characteristic $\neq 2, 3$. Let $P_{-1} = (-1, 0)$, $P_0 = (0, 0)$, and $P_1 = (1, 0)$ be the points where $Y = 0$.
+
+\begin{itemize}
+    \item The function $Y \in K(E)$ has three simple zeros: $P_{-1}$, $P_0$, and $P_1$.
+    \item The function $X \in K(E)$ has a double zero at $P_0$ (since $P_0 = -P_0$).
+    \item The function $X - 1 \in K(E)$ has a simple zero at $P_1$.
+    \item The function $X^2 - 1 \in K(E)$ has two simple zeros at $P_{-1}$ and $P_1$.
+    \item The function $\frac{Y}{X} \in K(E)$ has a simple zero at $P_{-1}$ and a simple pole at $P_0$.
+\end{itemize}
+
+An important property of functions in $K(E)$ is that they have the same number of zeros and poles when counted with multiplicity. This is a consequence of a more general result known as the Degree-Genus Formula.
+
+\begin{theorem}{Degree-Genus Formula for Elliptic Curves}{}
+Let $f \in K(E)$ be a non-zero rational function on an elliptic curve $E$. Then:
+\begin{equation}
+    \sum_{P \in E} ord_{P(f)} = 0
+\end{equation}
+where $ord_{P(f)}$ denotes the order of $f$ at $P$, which is positive for zeros and negative for poles.
+\end{theorem}
+
+This theorem implies that the total number of zeros (counting multiplicity) equals the total number of poles for any non-zero function in $K(E)$.
+
+We now introduce a powerful tool for analyzing functions on elliptic curves: the concept of divisors.
+
+\begin{definition}{Divisor of a Function on an Elliptic Curve}{}
+Let $E: Y^2 = X^3 + AX + B$ be an elliptic curve over a field $K$, and let $f \in K(E)$ be a non-zero rational function on $E$. The \textbf{divisor} of $f$, denoted $div(f)$, is defined as:
+    \begin{equation}
+        div(f) = \sum_{P \in E} ord_P(f) [P]
+    \end{equation}
+, where $ord_P(f)$ is the order of $f$ at $P$ (positive for zeros, negative for poles), and the sum is taken over all points $P \in E$, including the point at infinity. This sum has only finitely many non-zero terms.
+\end{definition}
+
+Note that this $\sum_{P \in E}$ is a symbolic summation, and we do not calculate the concrete value of a divisor.
+
+Consider the elliptic curve $E: Y^2 = X^3 - X$ over $\mathbb{Q}$.
+\begin{itemize}
+    \item For $f = X$, we have $div(X) = 2[(0,0)] - 2[\mathcal{O}]$.
+    \item For $g = Y$, we have $div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]$.
+    \item For $h = \frac{X-1}{Y}$, we have $div(h) = [(1,0)] - [(-1,0)]$.
+\end{itemize}
+
+The concept of divisors can be extended to the elliptic curve itself:
+
+\begin{definition}{Divisor on an Elliptic Curve}{}
+A \textbf{divisor} $D$ on an elliptic curve $E$ is a formal sum
+    \begin{equation}
+        D = \sum_{P \in E} n_P [P]
+    \end{equation}
+where $n_P \in \mathbb{Z}$ and $n_P = 0$ for all but finitely many $P$.
+\end{definition}
+
+On the curve $E: Y^2 = X^3 - X$:
+\begin{itemize}
+    \item $D_1 = 3[(0,0)] - 2[(1,1)] - [(2,\sqrt{6})]$ is a divisor.
+    \item $D_2 = [(1,0)] + [(-1,0)] - 2[\mathcal{O}]$ is a divisor.
+    \item $D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]$ is a divisor (where $E[2]$ are the 2-torsion points).
+\end{itemize}
+
+To quantify the properties of divisors, we introduce two important metrics:
+
+\begin{definition}{Degree of a Divisor}{}
+The \textbf{degree} of a divisor $D = \sum_{P \in E} n_P [P]$ is defined as:
+    \begin{equation}
+        deg(D) = \sum_{P \in E} n_P
+    \end{equation}
+\end{definition}
+
+\begin{definition}{Sum of a Divisor}{}
+The \textbf{sum} of a divisor $D = \sum_{P \in E} n_P [P]$ is defined as:
+    \begin{equation}
+        Sum(D) = \sum_{P \in E} n_P P
+    \end{equation}
+where $n_P P$ denotes the point addition of $P$ to itself $n_P$ times in the group law of $E$.
+\end{definition}
+
+For the divisors in the previous example:
+\begin{itemize}
+    \item $deg(D_1) = 3 - 2 - 1 = 0$
+    \item $deg(D_2) = 1 + 1 - 2 = 0$
+    \item $deg(D_3) = 4 - 4 = 0$
+    \item $Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}$ (since $(1,0)$ and $(-1,0)$ are 2-torsion points)
+\end{itemize}
+
+The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:
+
+\begin{theorem}{}{}
+Let $E$ be an elliptic curve over a field $K$.
+\begin{enumerate}
+    \item If $f, f' \in K(E)$ are non-zero rational functions on $E$ with $div(f) = div(f')$, then there exists a non-zero constant $c \in K^*$ such that $f = cf'$.
+    \item A divisor $D$ on $E$ is the divisor of a rational function on $E$ if and only if $deg(D) = 0$ and $Sum(D) = \mathcal{O}$.
+\end{enumerate}
+\end{theorem}
+
+On $E: Y^2 = X^3 - X$:
+\begin{itemize}
+    \item The function $f = \frac{Y}{X}$ has $div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]$. Note that $deg(div(f)) = 0$ and $Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}$.
+    \item The divisor $D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]$ has $deg(D) = 0$, but $Sum(D) \neq \mathcal{O}$. Therefore, $D$ is not the divisor of any rational function on $E$.
+\end{itemize}
+
+\begin{definition}{Pairing}{}
+Let $G_1$ and $G_2$ be cyclic groups under addition, both of prime order $p$, with generators $P$ and $Q$ respectively:
+
+    \begin{align}
+        G_1 &= \{0, P, 2P, ..., (p-1)P\} \\
+        G_2 &= \{0, Q, 2Q, ..., (p-1)Q\}
+    \end{align}
+
+Let $G_T$ be a cyclic group under multiplication, also of order $p$.
+A pairing is a map $e: G_1 \times G_2 \rightarrow G_T$ that satisfies the following bilinear property:
+
+    \begin{equation}
+        e(aP, bQ) = e(P, Q)^{ab}
+    \end{equation} for all $a, b \in \mathbb{Z}_p$.
+\end{definition}
+
+Imagine $G_1$ represents length, $G_2$ represents width, and $G_T$ represents area. The pairing function $e$ is like calculating the area: If you double the length and triple the width, the area becomes six times larger: $e(2P, 3Q) = e(P, Q)^{6}$
+
+The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.
+
+\begin{definition}{The Weil Pairing}{}
+    Let $E$ be an elliptic curve and $n$ be a positive integer. For points $P, Q \in E[n]$, where $E[n]$ denotes the $n$-torsion subgroup of $E$, we define the Weil pairing $e_n(P, Q)$ as follows:
+
+    Let $f_P$ and $f_Q$ be rational functions on $E$ satisfying:
+    \begin{align}
+        div(f_P) &= n[P] - n[\mathcal{O}] \\
+        div(f_Q) &= n[Q] - n[\mathcal{O}]
+    \end{align}
+
+    Then, for an arbitrary point $S \in E$ such that $S \notin \{\mathcal{O}, P, -Q, P-Q\}$, the Weil pairing is given by:
+
+    \begin{equation}
+    e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
+    \end{equation}
+\end{definition}
+
+We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.
+
+\begin{theorem}{}{}
+Let $E$ be an elliptic curve over a field $K$, and let $P = (x_P, y_P)$ and $Q = (x_Q, y_Q)$ be non-zero points on $E$. Define $\lambda$ as:
+
+\begin{equation}
+    \lambda = \begin{cases}
+        \hbox{slope of the line through $P$ and $Q$} &\quad \hbox{if $P \neq Q$} \\
+        \hbox{slope of the tangent line to $E$ at $P$} &\quad \hbox{if $P = Q$} \\
+        \infty &\quad \hbox{if the line is vertical}
+    \end{cases}
+\end{equation}
+
+Then, the function $g_{P,Q}: E \to K$ defined by:
+\begin{equation}
+g_{P,Q} = \begin{cases}
+\frac{y - y_P - \lambda(x - x_P)}{x + x_P + x_Q - \lambda^2} &\quad \hbox{if } \lambda \neq \infty \\
+x - x_P &\quad \hbox{if } \lambda = \infty
+\end{cases}
+\end{equation} has the following divisor:
+
+\begin{equation}
+div(g_{P,Q}) = [P] + [Q] - [P + Q] - [\mathcal{O}]
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+
+
+We consider two cases based on the value of $\lambda$.
+
+Case 1: $\lambda \neq \infty$
+
+Let $y = \lambda x + v$ be the line through $P$ and $Q$ (or the tangent line at $P$ if $P = Q$). This line intersects $E$ at three points: $P$, $Q$, and $-P-Q$. Thus,
+\begin{equation}
+div(y - \lambda x - v) = [P] + [Q] + [-P - Q] - 3[\mathcal{O}]
+\end{equation}
+Vertical lines intersect $E$ at points and their negatives, so:
+\begin{equation}
+div(x - x_{P+Q}) = [P + Q] + [-P - Q] - 2[\mathcal{O}]
+\end{equation}
+It follows that $g_{P,Q} = \frac{y - \lambda x - v}{x - x_{P+Q}}$ has the desired divisor.
+
+Case 2: $\lambda = \infty$
+
+In this case, $P + Q = \mathcal{O}$, so we want $g_{P,Q}$ to have divisor $[P] + [-P] - 2[\mathcal{O}]$. The function $x - x_P$ has this divisor.
+\end{proof}
+
+\begin{theorem}{Miller's Algorithm}{}
+
+Let $m \geq 1$ and write its binary expansion as:
+\begin{equation}
+m = m_0 + m_1 \cdot 2 + m_2 \cdot 2^2 + \cdots + m_{n-1} \cdot 2^{n-1}
+\end{equation}
+where $m_i \in \{0, 1\}$ and $m_{n-1} \neq 0$.
+The following algorithm, using the function $g_{P,Q}$ defined in the previous theorem, returns a function $f_P$ whose divisor satisfies:
+
+    \begin{equation}
+        div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
+    \end{equation}
+
+\end{theorem}
+
+\begin{algorithm}
+\caption{Miller's Algorithm}\label{alg:miller}
+\begin{algorithmic}
+\State Set $T = P$ and $f = 1$
+\For{$i \gets n-2 \cdots 0$}
+    \State Set $f = f^2 \cdot g_{T, T}$
+    \State Set $T = 2T$
+    \If{$m_i = 1$}
+        \State Set $f = f \cdot g_{T, P}$
+        \State Set $T = T + P$
+    \EndIf
+\EndFor
+\State \Return $f$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proof}
+    TBD
+\end{proof}
+
+\begin{lstlisting}[language=Rust, caption=Implementation of the Weil Pairing]
+pub fn get_lambda<F: Field>(
+    p: EllipticCurvePoint<F>,
+    q: EllipticCurvePoint<F>,
+    r: EllipticCurvePoint<F>,
+) -> F {
+    let p_x = p.x.clone().unwrap();
+    let p_y = p.y.clone().unwrap();
+    let q_x = q.x.clone().unwrap();
+    // let q_y = q.y.clone().unwrap();
+    let r_x = r.x.clone().unwrap();
+    let r_y = r.y.clone().unwrap();
+
+    if (p == q && p_y.clone() == F::zero()) || (p != q && p_x.clone() == q_x.clone()) {
+        return r_x.clone() - p_x.clone();
+    }
+    let slope = p.line_slope(q.clone());
+    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
+    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
+    return numerator / denominator;
+}
+
+pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: BigInt) -> F {
+    if p == q {
+        F::one();
+    }
+
+    let mut f = F::one();
+    let mut t = p.clone();
+
+    for i in (1..m.bits()).rev() {
+        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
+        t = t.clone() + t.clone();
+        if m.bit(i) {
+            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
+            t = t.clone() + p.clone();
+        }
+    }
+
+    f
+}
+
+pub fn weil_pairing<F: Field>(
+    p: EllipticCurvePoint<F>,
+    q: EllipticCurvePoint<F>,
+    m: BigInt,
+    s: Option<EllipticCurvePoint<F>>,
+) -> F {
+    let s_value = s.unwrap();
+    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
+    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
+    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
+    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
+
+    return (fp_qs / fp_s) / (fq_ps / fq_s);
+}
+\end{lstlisting}
+
+\paragraph{Exercise}
 
 \subsection{Assumptions}
 
@@ -598,6 +1370,12 @@ This lemma states that if $\mathbb{S}$ is sufficiently large and $n$ is relative
 \end{assumption}
 
 The Discrete Logarithm Problem can be thought of as a one-way function. It's easy to compute $g^{x}$ given $g$ and $x$, but it's computationally difficult to find $x$ given $g$ and $g^{x}$.
+
+\begin{assumption}{Elliptic Curve Discrete Logarithm Problem}{}
+Let $E$ be an elliptic curve defined over a finite field $\mathbb{F}_q$, where $q$ is a prime power. Let $P$ be a point on $E$ of point order $n$, and let $\langle P \rangle$ be the cyclic subgroup of $E$ generated by $P$. For any element $Q \in \langle P \rangle$, there is currently no known efficient (polynomial-time) algorithm to compute the unique integer $k$, $0 \leq k < n$, such that $Q = kP$.
+\end{assumption}
+
+This assumption is an elliptic curve version of the Discrete Logarithm Problem.
 
 \begin{assumption}{Knowledge of Exponent Assumption}{}
 Let $G$ be a cyclic group of prime order $q$ with generator $g \in G$. For any probabilistic polynomial-time algorithm $\mathcal{A}$ that outputs:
@@ -633,9 +1411,49 @@ Thanks to the Discrete Logarithm Assumption and the Knowledge of Exponent Assump
 
 \paragraph{Euclidean Algorithm}
 
+The Euclidean Algorithm is an efficient method to calculate the greatest common divisor for the given two integers.
+
+\begin{theorem}{}{}
+For any integers $a$ and $b$:
+\begin{enumerate}
+\item If $b = 0$, then $\gcd(a, b) = |a|$.
+\item If $b \neq 0$, then $\gcd(a, b) = \gcd(|b|, a \bmod |b|)$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+
+The first statement is trivial, as any non-zero integer divides 0, and the greatest divisor of $a$ that also divides 0 is $|a|$ itself.
+For the second statement, let $b \neq 0$. We can write $a$ as $a = q|b| + (a \bmod |b|)$, where $q$ is the quotient.
+First, we show that any common divisor of $a$ and $b$ is also a common divisor of $|b|$ and $a \bmod |b|$. Let $d$ be a common divisor of $a$ and $b$. Then $d \mid a$ and $d \mid b$, which implies $d \mid |b|$. Since $a \bmod |b| = a - q|b|$, and $d$ divides both $a$ and $|b|$, it must also divide $a \bmod |b|$.
+Conversely, we show that any common divisor of $|b|$ and $a \bmod |b|$ is also a common divisor of $a$ and $b$. Let $d$ be a common divisor of $|b|$ and $a \bmod |b|$. Then $d \mid |b|$, which implies $d \mid b$. Since $a = q|b| + (a \bmod |b|)$ and $d$ divides both $|b|$ and $a \bmod |b|$, it must also divide $a$.
+Therefore, the set of common divisors of $a$ and $b$ is identical to the set of common divisors of $|b|$ and $a \bmod |b|$. Consequently, their greatest common divisors must also be equal: $\gcd(a. b) = \gcd(|b|, a \mod |b|)$.
+\end{proof}
+
+Based on this theorem, the Euclidean Algorithm operates as follows:
+
+Based on this theorem, we can formulate the Euclidean Algorithm as follows:
+\begin{algorithm}
+\caption{Euclidean Algorithm}\label{alg:euclidean}
+\begin{algorithmic}
+\Require Two integers $a$ and $b$
+\Ensure $\gcd(a, b)$
+\State $a \gets |a|$
+\State $b \gets |b|$
+\While{$b \neq 0$}
+    \State $r \gets a \bmod b$
+    \State $a \gets b$
+    \State $b \gets r$
+\EndWhile
+\State \Return $a$ \Comment{$\gcd(a, b)$}
+\end{algorithmic}
+\end{algorithm}
+
 \paragraph{Generation of Primes}
 
 \paragraph{Fast Fourier Transform}
+
+\paragraph{Exercise}
 
 \section{Basic of zk-SNARKs}
 
@@ -895,10 +1713,10 @@ An interesting property of polynomial exponentiation is:
     g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{x^2})^{c_2} \cdots (g^{x^n})^{c_n}
 \end{align}
 
-Instead of sending $s$, the Verifier can send $g$, $\alpha = g^s$, and its powers: $\alpha, \alpha^2, \ldots, \alpha^n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
+Instead of sending $s$, the Verifier can send $g$, $\alpha_{i} = g^{(s^i)}$, and its powers: $\alpha_1, \alpha_2, \ldots, \alpha_n$. The Prover can still evaluate $g^p = g^{P(s)}$ using these powers of $\alpha$:
 
 \begin{equation}
-    g^{p} = g^{P(s)} = g^{c_0} \alpha^{c_1} (\alpha^{2})^{c_2} \cdots (\alpha^{n})^{c_n}
+    g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
 \end{equation}
 
 Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check $p = ht \iff g^p = (g^h)^t$.
@@ -906,7 +1724,7 @@ Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check
 \begin{protocol}{$+$ Discrete Logarithm Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly draw $s$ from $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$, where $\alpha = g^{s}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$ and $v = g^{h}$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
 \end{enumerate}
@@ -914,7 +1732,7 @@ Similarly, the Prover can evaluate $g^h = g^{H(s)}$. The Verifier can then check
 
 This approach prevents the Prover from obtaining $s$ or $t = T(s)$, making it impossible to send fake $(h', p')$ such that $p' = h't$.
 
-However, this protocol still has a flaw. Since the Prover can compute $g^t = \alpha^{c_1}(\alpha^2)^{c_2}\cdots(\alpha^d)^{c_d}$, they could send fake values $((g^{t})^{z}, g^{z})$ instead of $(g^p, g^h)$ for an arbitrary value $z$. The verifier's check would still pass, and they could not detect this deception.
+However, this protocol still has a flaw. Since the Prover can compute $g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}$, they could send fake values $((g^{t})^{z}, g^{z})$ instead of $(g^p, g^h)$ for an arbitrary value $z$. The verifier's check would still pass, and they could not detect this deception.
 
 \paragraph{$+$ Knowledge of Exponent Assumption}
 
@@ -922,7 +1740,7 @@ To address the vulnerability where the verifier $\mathcal{B}$ cannot distinguish
 
 \begin{enumerate}
     \item $\mathcal{B}$ sends both $\alpha$ and $\alpha' = \alpha^r$ for a new random value $r$.
-    \item The prover returns $a = (\alpha^i)^{c_i}$ and $a' = (\alpha'^i)^{c_i}$ for $i = 1, ..., n$.
+    \item The prover returns $a = (\alpha_i)^{c_i}$ and $a' = (\alpha'_i)^{c_i}$ for $i = 1, ..., n$.
     \item $\mathcal{B}$ can conclude that $a$ is a power of $\alpha$ if $a^r = a'$.
 \end{enumerate}
 
@@ -931,7 +1749,7 @@ Based on this assumption, we can design an improved protocol:
 \begin{protocol}{$+$ Knowledge of Exponent Assumption}{}
 \begin{enumerate}
     \item $\mathcal{B}$ randomly selects $s$ and $r$ from field $\mathbb{F}$.
-    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha^2, ..., \alpha^{n}\}$ and $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha^{r} = g^{sr}$.
+    \item $\mathcal{B}$ computes and sends $\{\alpha, \alpha_2, ..., \alpha_{n}\}$ and $\{\alpha', \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha = g^{s}$ and $\alpha' = \alpha_{r} = g^{sr}$.
     \item $\mathcal{A}$ computes and sends $u = g^{p}$, $v = g^{h}$, and $w = g^{p'}$, where $g^{p'} = g^{P(sr)}$.
     \item $\mathcal{B}$ checks whether $u^{r} = w$.
     \item $\mathcal{B}$ checks whether $u = v^{t}$.
@@ -965,8 +1783,8 @@ The previously described protocol requires each verifier to generate unique rand
 \begin{enumerate}
     \item \textbf{Secret Seed}: A trusted third party generates the random values $s$ and $r$
     \item \textbf{Proof Key}: Provided to the prover \begin{enumerate}
-        \item $\{\alpha, \alpha^2, ..., \alpha^{n}\}$, where $\alpha = g^{s}$
-        \item $\{\alpha', \alpha'^2, ..., \alpha'^{n}\}$, where $\alpha' = g^{sr}$
+        \item $\{\alpha_1, \alpha_2, ..., \alpha_{n}\}$, where $\alpha_{i} = g_{(s^i)}$
+        \item $\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}$, where $\alpha' = g^{(sr)^i}$
         \end{enumerate}
     \item \textbf{Verification Key}: Distributed to verifiers \begin{enumerate}
         \item $g^{r}$
