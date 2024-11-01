@@ -1,0 +1,9 @@
+[book]
+authors = ["Koukyosyumei"]
+language = "en"
+multilingual = false
+src = "src"
+title = "MyZKP: Building Zero Knowledge Proof from Scratch"
+
+[output.html]
+mathjax-support = true
