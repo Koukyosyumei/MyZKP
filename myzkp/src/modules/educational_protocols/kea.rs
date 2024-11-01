@@ -2,8 +2,19 @@ use crate::modules::field::{Field, FiniteFieldElement};
 use crate::modules::polynomial::Polynomial;
 use rand::Rng;
 
-const MODULUS: i128 = 3 * (1 << 30) + 1;
-const GENERATOR: i128 = 5; // A primitive root modulo MODULUS
+impl<F: Field> Polynomial<F> {
+    fn eval_with_powers(&self, g: &F, alpha_powers: &[F]) -> F {
+        let mut result = F::one();
+        for (i, coef) in self.poly.iter().enumerate() {
+            if i == 0 {
+                result = result * g.pow(coef.clone().get_value());
+            } else {
+                result = result * alpha_powers[i - 1].pow(coef.clone().get_value());
+            }
+        }
+        result
+    }
+}
 
 struct Prover<F: Field> {
     p: Polynomial<F>,
@@ -33,11 +44,17 @@ impl<F: Field> Prover<F> {
 }
 
 impl<F: Field> Verifier<F> {
-    fn new(t: Polynomial<F>) -> Self {
+    fn new(t: Polynomial<F>, generatir: i128) -> Self {
         let mut rng = rand::thread_rng();
-        let s = FiniteFieldElement::<MODULUS>::from(rng.gen_range(0..MODULUS));
-        let r = FiniteFieldElement::<MODULUS>::from(rng.gen_range(0..MODULUS));
-        let g = FiniteFieldElement::<MODULUS>::from(GENERATOR);
+        let s = F::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+        ));
+        let r = F::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+        ));
+        let g = F::from_value(generator);
         Verifier { t, s, r, g }
     }
 
@@ -80,21 +97,6 @@ fn knowledge_of_exponent_protocol<F: Field>(prover: &Prover<F>, verifier: &Verif
 
     // Step 4 & 5: Verifier checks whether u^r = w and u = v^t
     verifier.verify(&u, &v, &w)
-}
-
-// Add this method to the Polynomial struct if not already present
-impl<F: Field> Polynomial<F> {
-    fn eval_with_powers(&self, g: &F, alpha_powers: &[F]) -> F {
-        let mut result = F::one();
-        for (i, coef) in self.poly.iter().enumerate() {
-            if i == 0 {
-                result = result * g.pow(coef.clone().value);
-            } else {
-                result = result * alpha_powers[i - 1].pow(coef.clone().value);
-            }
-        }
-        result
-    }
 }
 
 fn main() {

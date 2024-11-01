@@ -57,6 +57,14 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    pub fn eval_with_powers(&self, powers: &[F]) -> F {
+        let mut result = F::one();
+        for (i, coef) in self.poly.iter().enumerate() {
+            result = result * powers[i].pow(coef.clone().get_value());
+        }
+        result
+    }
+
     /// Lagrange interpolation to compute polynomials.
     pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
         let mut lagrange_polys = vec![];
