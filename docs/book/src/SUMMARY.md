@@ -7,6 +7,7 @@
   - [Polynomials](./number_theory/subsec3.md)
   - [Galoid Field](./number_theory/subsec4.md)
   - [Elliptic Curve](./number_theory/subsec5.md)
+  - [Useful Assumptions](./number_theory/subsec6.md)
 - [Basics of zk-SNARKs](./zksnark/README.md)
   - [Arithmetization](./zksnark/subsec2.md)
   - [Proving Single Polynomial](./zksnark/subsec3.md)
