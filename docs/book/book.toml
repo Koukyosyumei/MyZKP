@@ -7,4 +7,7 @@ title = "MyZKP: Building Zero Knowledge Proof from Scratch"
 
 [output.html]
 mathjax-support = true
+<<<<<<< HEAD
 additional-css = ["theme/css/custom.css"]
+=======
+>>>>>>> main
