@@ -30,10 +30,7 @@
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-<<<<<<< HEAD
         <link rel="stylesheet" href="theme/css/custom.css">
-=======
->>>>>>> main
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -95,11 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-<<<<<<< HEAD
                 <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
-=======
-                <ol class="chapter"><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">1.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">1.1.</strong> Computation Rule and Properties</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">2.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">4.</strong> Basics of zkVM</a></li></ol>
->>>>>>> main
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -184,7 +177,6 @@
 
                 <div id="content" class="content">
                     <main>
-<<<<<<< HEAD
                         <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h1>
 <h3 id="definition-binary-operation"><a class="header" href="#definition-binary-operation">Definition: Binary Operation</a></h3>
@@ -1431,24 +1423,6 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
-=======
-                        <h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h2>
-<hr />
-<p><em><strong>Definition: Binary Operation</strong></em></p>
-<p>A mapping \(\circ: X \times X \rightarrow X\) is a binary operation on \(X\) if for any pair of elements \((x_1, x_2)\) in \(X\), \(x_1 \circ x_2\) is also in \(X\).</p>
-<p><strong>Example</strong>: Addition (+) on the set of integers is a binary operation. For example, \(5 + 3 = 8\), and both \(5, 3, 8\) are integers, staying within the set of integers.</p>
-<hr />
-<p><em><strong>Definition: Associative Property</strong></em></p>
-<p>A binary operation \(\circ\) is associative if \((a \circ b) \circ c = a \circ (b \circ c)\) for all \(a, b, c \in X\).</p>
-<p><strong>Example</strong>: Multiplication of real numbers is associative: \((2 \times 3) \times 4 = 2 \times (3 \times 4) = 24\). In a modular context, we also have addition modulo \(n\) being associative. For example, for \(n = 5\), \((2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4\).</p>
-<hr />
-<p><em><strong>Definition: Commutative Property</strong></em></p>
-<p>A binary operation \(\circ\) is commutative if \(a \circ b = b \circ a\) for all \(a, b \in X\).</p>
-<p><strong>Example</strong>: Addition modulo \(n\) is also commutative. For \(n = 7\), \(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\).</p>
-<hr />
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
->>>>>>> main
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
