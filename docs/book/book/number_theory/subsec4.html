@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Basics of zk-STARKS - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Galoid Field - MyZKP: Building Zero Knowledge Proof from Scratch</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="../zkstark/index.html" class="active"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html" class="active"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -176,16 +176,61 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h3 id="galois-field"><a class="header" href="#galois-field">Galois Field</a></h3>
+<p>We will now discuss the construction of finite fields with \(p^n\) elements, where \(p\) is a prime number and \(n\) is a positive integer. These fields are also known as Galois fields, denoted as \(GF(p^n)\). It is evident that \(\mathbb{Z}/p\mathbb{Z}\) is isomorphic to \(GF(p)\).</p>
+<h3 id="definition-irreducible-polynomial"><a class="header" href="#definition-irreducible-polynomial">Definition: Irreducible Polynomial</a></h3>
+<hr />
+<p><em>A polynomial \(f \in (\mathbb{Z}/p\mathbb{Z})[X]\) of degree \(n\) is called irreducible over \(\mathbb{Z}/p\mathbb{Z}\) if it cannot be factored as a product of two polynomials of lower degree in \((\mathbb{Z}/p\mathbb{Z})[X]\).</em></p>
+<hr />
+<p><strong>Example:</strong> In \((\mathbb{Z}/2\mathbb{Z})[X]\):</p>
+<ul>
+<li>\(X^2 + X + 1\) is irreducible</li>
+<li>\(X^2 + 1 = (X + 1)^2\) is reducible</li>
+</ul>
+<p>To construct \(GF(p^n)\), we use an irreducible polynomial of degree \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
+<h3 id="definition-residue-class-modulo-a-polynomial"><a class="header" href="#definition-residue-class-modulo-a-polynomial">Definition: Residue Class modulo a Polynomial</a></h3>
+<hr />
+<p><em>For \(f, g \in (\mathbb{Z}/p\mathbb{Z})[X]\), the residue class of \(g \bmod f\) is the set of all polynomials \(h \in (\mathbb{Z}/p\mathbb{Z})[X]\) such that \(h \equiv g \pmod{f}\). This class is denoted as:</em></p>
+<p>\[ g + f(\mathbb{Z}/p\mathbb{Z})[X] = \{g + hf : h \in (\mathbb{Z}/p\mathbb{Z})[X]\} \]</p>
+<hr />
+<p><strong>Example:</strong> In \((\mathbb{Z}/2\mathbb{Z})[X]\), with \(f(X) = X^2 + X + 1\), the residue classes \(\bmod f\) are:</p>
+<ul>
+<li>\(0 + f(\mathbb{Z}/2\mathbb{Z})[X] = \{0, X^2 + X + 1, X^2 + X, X^2 + 1, X^2, X + 1, X, 1\}\)</li>
+<li>\(1 + f(\mathbb{Z}/2\mathbb{Z})[X] = \{1, X^2 + X, X^2 + 1, X^2, X + 1, X, 0, X^2 + X + 1\}\)</li>
+<li>\(X + f(\mathbb{Z}/2\mathbb{Z})[X] = \{X, X^2 + 1, X^2, X^2 + X + 1, X + 1, 1, X^2 + X, 0\}\)</li>
+<li>\((X + 1) + f(\mathbb{Z}/2\mathbb{Z})[X] = \{X + 1, X^2, X^2 + X + 1, X^2 + X, 1, 0, X^2 + 1, X\}\)</li>
+</ul>
+<p>These four residue classes form \(GF(4)\).</p>
+<h3 id="theorem"><a class="header" href="#theorem">Theorem:</a></h3>
+<hr />
+<p><em>If \(f \in (\mathbb{Z}/p\mathbb{Z})[X]\) is an irreducible polynomial of degree \(n\), then the residue ring \((\mathbb{Z}/p\mathbb{Z})[X]/(f)\) is a field with \(p^n\) elements, isomorphic to \(GF(p^n)\).</em></p>
+<hr />
+<p><strong>Proof</strong> (Outline) The irreducibility of \(f\) ensures that \((f)\) is a maximal ideal in \((\mathbb{Z}/p\mathbb{Z})[X]\), making the quotient ring a field. The number of elements is \(p^n\) because there are \(p^n\) polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
+<p>This construction allows us to represent elements of \(GF(p^n)\) as polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\). Addition is performed coefficient-wise modulo \(p\), while multiplication is performed modulo the irreducible polynomial \(f\).</p>
+<p><strong>Example:</strong> To construct \(GF(8)\), we can use the irreducible polynomial \(f(X) = X^3 + X + 1\) over \(\mathbb{Z}/2\mathbb{Z}\). The elements of \(GF(8)\) are represented by:
+[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} ]
+For instance, multiplication in \(GF(8)\):
+[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} ]</p>
+<h3 id="lemma-schwartz---zippel-lemma"><a class="header" href="#lemma-schwartz---zippel-lemma">Lemma: Schwartz - Zippel Lemma</a></h3>
+<hr />
+<p><em>Let \(\mathbb{F}\) be a field and \(P: F^m \rightarrow \mathbb{F}\) and \(Q: \mathbb{F}^m \rightarrow \mathbb{F}\) be two distinct multivariate polynomials of total degree at most \(n\). For any finite subset \(\mathbb{S} \subseteq \mathbb{F}\), we have:</em></p>
+<p>\begin{align}
+Pr_{u \sim \mathbb{S}^{m}}[P(u) = Q(u)] \leq \frac{n}{|\mathbb{S}|}
+\end{align}</p>
+<p><em>, where \(u\) is drawn uniformly at random from \(\mathbb{S}^m\).</em></p>
+<hr />
+<p><strong>Proof</strong> TBD</p>
+<p>This lemma states that if \(\mathbb{S}\) is sufficiently large and \(n\) is relatively small, the probability that the two different polynomials return the same value for a randomly chosen input is negligibly small. In other words, if we observe \(P(u) = Q(u)\) for a random input \(u\), we can conclude with high probability that \(P\) and \(Q\) are identical polynomials.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../zksnark/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../number_theory/subsec3.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zkvm/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../number_theory/subsec5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +240,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../zksnark/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../number_theory/subsec3.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zkvm/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../number_theory/subsec5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

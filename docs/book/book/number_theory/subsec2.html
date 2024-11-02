@@ -29,6 +29,7 @@
         <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/css/custom.css">
 
         <!-- MathJax -->
         <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -90,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">1.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">1.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html" class="active"><strong aria-hidden="true">1.2.</strong> Semigroup, Group, Ring</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">2.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">4.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html" class="active"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -177,28 +178,44 @@
                     <main>
                         <h2 id="semigroup-group-ring"><a class="header" href="#semigroup-group-ring">Semigroup, Group, Ring</a></h2>
 <h3 id="definition-semigroup"><a class="header" href="#definition-semigroup">Definition: Semigroup</a></h3>
+<hr />
 <p><em>A pair \((H, \circ)\), where \(H\) is a non-empty set and \(\circ\) is an associative binary operation on \(H\), is called a semigroup.</em></p>
+<hr />
 <p><strong>Example</strong>: The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \(\{1, 2, 3, 4, 5\}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
 <h3 id="definition-abelian-semigroup"><a class="header" href="#definition-abelian-semigroup">Definition: Abelian Semigroup</a></h3>
+<hr />
 <p><em>A semigroup whose operation is commutative is called an abelian semigroup.</em></p>
+<hr />
 <p><strong>Example</strong>: The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
 <h3 id="definition-identity-element"><a class="header" href="#definition-identity-element">Definition: Identity Element</a></h3>
+<hr />
 <p><em>An element \(e \in H\) is an identity element of \(H\) if it satisfies \(e \circ a = a \circ e = a\) for any \(a \in H\).</em></p>
+<hr />
 <p><strong>Example</strong>: 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
 <h3 id="definition-monoid"><a class="header" href="#definition-monoid">Definition: Monoid</a></h3>
+<hr />
 <p><em>A semigroup with an identity element is called a monoid.</em></p>
+<hr />
 <p><strong>Example</strong>: The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \(\{0, 1, 2, 3, 4\}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
 <h3 id="definition-inverse"><a class="header" href="#definition-inverse">Definition: Inverse</a></h3>
+<hr />
 <p><em>For an element \(a \in H\), an element \(b \in H\) is an inverse of \(a\) if \(a \circ b = b \circ a = e\), where \(e\) is the identity element.</em></p>
+<hr />
 <p><strong>Example</strong>: In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
 <h3 id="definition-group"><a class="header" href="#definition-group">Definition: Group</a></h3>
+<hr />
 <p><em>A monoid in which every element has an inverse is called a group.</em></p>
+<hr />
 <p><strong>Example</strong>: The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \(\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}\) has an inverse, making it a group.</p>
 <h3 id="definition-order-of-a-group"><a class="header" href="#definition-order-of-a-group">Definition: Order of a Group</a></h3>
+<hr />
 <p><em>The order of a group is the number of elements in the group.</em></p>
+<hr />
 <p><strong>Example</strong>: The group of integers modulo 4 under addition has order 4, because the set of elements is \(\{0, 1, 2, 3\}\).</p>
 <h3 id="definition-ring"><a class="header" href="#definition-ring">Definition: Ring</a></h3>
+<hr />
 <p><em>A triple \((R, +, \cdot)\) is a ring if \((R, +)\) is an abelian group, \((R, \cdot)\) is a semigroup, and the distributive property holds: \(x \cdot (y + z) = (x \cdot y) + (x \cdot z)\) and \((x + y) \cdot z = (x \cdot z) + (y \cdot z)\) for all \(x, y, z \in R\).</em></p>
+<hr />
 <p><strong>Example</strong>: The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -222,10 +239,14 @@ pub trait Ring:
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-communicative-ring"><a class="header" href="#definition-communicative-ring">Definition: Communicative Ring</a></h3>
+<hr />
 <p><em>A ring is called a commutative ring if its multiplication operation is commutative.</em></p>
+<hr />
 <p><strong>Example</strong> The set of real numbers under usual addition and multiplication forms a commutative ring.</p>
 <h3 id="definition-field"><a class="header" href="#definition-field">Definition: Field</a></h3>
+<hr />
 <p><em>A commutative ring with a multiplicative identity element where every non-zero element has a multiplicative inverse is called a field.</em></p>
+<hr />
 <p><strong>Example</strong> The set of rational numbers under usual addition and multiplication forms a field.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -236,26 +257,36 @@ pub trait Field: Ring + Div&lt;Output = Self&gt; {
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-residue-class"><a class="header" href="#definition-residue-class">Definition: Residue Class</a></h3>
+<hr />
 <p><em>The residue class of \( a \) modulo \( m \), denoted as \( a + m\mathbb{Z} \), is the set \( \{b : b \equiv a \pmod{m}\} \).</em></p>
+<hr />
 <p><strong>Example:</strong> For \( m = 3 \), the residue class of 2 is \( 2 + 3\mathbb{Z} = \{\ldots, -4, -1, 2, 5, 8, \ldots\} \).</p>
 <h3 id="definition-inverse-of-residue-class"><a class="header" href="#definition-inverse-of-residue-class">Definition: Inverse of Residue Class</a></h3>
+<hr />
 <p><em>We denote the set of all residue classes modulo \( m \) as \( \mathbb{Z} / m\mathbb{Z} \). We say that \( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z} / m\mathbb{Z} \) if and only if there exists a solution for \( ax \equiv 1 \pmod{m} \).</em></p>
+<hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/5\mathbb{Z} \), \( 3 + 5\mathbb{Z} \) is invertible because \( \gcd(3, 5) = 1 \) (since \( 3\cdot2 \equiv 1 \pmod{5} \)). However, in \( \mathbb{Z}/6\mathbb{Z} \), \( 3 + 6\mathbb{Z} \) is not invertible because \( \gcd(3, 6) = 3 \neq 1 \).</p>
 <h3 id="lemma-121"><a class="header" href="#lemma-121">Lemma 1.2.1</a></h3>
+<hr />
 <p><em>If \( a \) and \( b \) are coprime, the residues of \( a \), \( 2a \), \( 3a \), ..., \( (b-1)a \) modulo \( b \) are all distinct.</em></p>
+<hr />
 <p><strong>Proof:</strong> Suppose, for contradiction, that there exist \( x, y \in \{1, 2, \dots, b-1\} \) with \( x \neq y \) such that \( xa \equiv ya \pmod{b} \). Then \( (x-y)a \equiv 0 \pmod{b} \), implying \( b \mid (x-y)a \). Since \( a \) and \( b \) are coprime, we must have \( b \mid (x-y) \). However, \( |x-y| &lt; b \), so this is only possible if \( x = y \), contradicting our assumption. Therefore, all residues must be distinct.</p>
 <h3 id="theorem-122"><a class="header" href="#theorem-122">Theorem 1.2.2</a></h3>
+<hr />
 <p><em>For any integers \( a \) and \( b \), the equation \( ax + by = 1 \) has a solution in integers \( x \) and \( y \) if and only if \( a \) and \( b \) are coprime.</em></p>
+<hr />
 <p><strong>Proof:</strong></p>
 <ul>
 <li><strong>(\( \Rightarrow \))</strong> Suppose \( a \) and \( b \) are not coprime, let \( d = \gcd(a,b) &gt; 1 \). Then \( d \mid a \) and \( d \mid b \), so \( d \mid (ax + by) \) for any integers \( x \) and \( y \). Thus, \( ax + by \neq 1 \) for any \( x \) and \( y \).</li>
 <li><strong>(\( \Leftarrow \))</strong> Suppose \( a \) and \( b \) are coprime. By the previous lemma, the residues of \( a \), \( 2a \), ..., \( (b-1)a \) modulo \( b \) are all distinct. Therefore, there exists an \( m \in \{1, 2, ..., b-1\} \) such that \( ma \equiv 1 \pmod{b} \). This means there exists an integer \( n \) such that \( ma = bn + 1 \), or equivalently, \( ma - bn = 1 \).</li>
 </ul>
 <h3 id="theorem-bézouts-identity"><a class="header" href="#theorem-bézouts-identity">Theorem: Bézout's Identity</a></h3>
+<hr />
 <p><em>For any integers \( a \) and \( b \), we have:
-\[
+\(
 a\mathbb{Z} + b \mathbb{Z} = \gcd(a, b)\mathbb{Z}
-\]</em></p>
+\)</em></p>
+<hr />
 <p><strong>Proof:</strong></p>
 <p>This statement is equivalent to proving that \( ax + by = c \) has an integer solution if and only if \( c \) is a multiple of \( \gcd(a,b) \).</p>
 <ul>
@@ -268,7 +299,9 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 </ul>
 <p>This theorem implies that for any integers \( a \), \( b \), and \( n \), the equation \( ax + by = n \) has an integer solution if and only if \( \gcd(a,b) \mid n \).</p>
 <h3 id="theorem-123"><a class="header" href="#theorem-123">Theorem 1.2.3</a></h3>
+<hr />
 <p><em>\( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z}/m\mathbb{Z} \) if and only if \( \gcd(a,m) = 1 \).</em></p>
+<hr />
 <p><strong>Proof:</strong></p>
 <ul>
 <li><strong>(\( \Rightarrow \))</strong> Suppose \( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z}/m\mathbb{Z} \). Then there exists an integer \( x \) such that \( ax \equiv 1 \pmod{m} \). Let \( g = \gcd(a,m) \). Since \( g \mid ax \) and \( g \mid (ax - 1) \), we must have \( g \mid 1 \), so \( g = 1 \).</li>
@@ -278,54 +311,80 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <p><em>\( (\mathbb{Z} / m \mathbb{Z}, +, \cdot) \) is a commutative ring where \( 1 + m \mathbb{Z} \) is the multiplicative identity element. This ring is called the residue class ring modulo \( m \).</em></p>
 <p><strong>Example:</strong> \( \mathbb{Z}/4\mathbb{Z} = \{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\} \).</p>
 <h3 id="definition-primitive-residue-class"><a class="header" href="#definition-primitive-residue-class">Definition: Primitive Residue Class</a></h3>
-<p>A residue class \( a + m\mathbb{Z} \) is called primitive if \( \gcd(a, m) = 1 \).</p>
+<hr />
+<p><em>A residue class \( a + m\mathbb{Z} \) is called primitive if \( \gcd(a, m) = 1 \).</em></p>
+<hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/6\mathbb{Z} \), the primitive residue classes are \( 1 + 6\mathbb{Z} \) and \( 5 + 6\mathbb{Z} \).</p>
 <h3 id="theorem-124"><a class="header" href="#theorem-124">Theorem 1.2.4</a></h3>
+<hr />
 <p><em>A residue ring \( \mathbb{Z} / m\mathbb{Z} \) is a field if and only if \( m \) is a prime number.</em></p>
+<hr />
 <p><strong>Proof:</strong> TBD</p>
 <p><strong>Example:</strong> For \( m = 5 \), \( \mathbb{Z}/5\mathbb{Z} = \{0 + 5\mathbb{Z}, 1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\} \) forms a field because 5 is a prime number, and every non-zero element has a multiplicative inverse.</p>
 <h3 id="definition-primitive-residue-class-group"><a class="header" href="#definition-primitive-residue-class-group">Definition: Primitive Residue Class Group</a></h3>
+<hr />
 <p><em>The group of all primitive residue classes modulo \( m \) is called the primitive residue class group, denoted by \( (\mathbb{Z}/m\mathbb{Z})^{\times} \).</em></p>
+<hr />
 <p><strong>Example:</strong> For \( m = 8 \), the set of all primitive residue classes is \( (\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3 + 8\mathbb{Z}, 5 + 8\mathbb{Z}, 7 + 8\mathbb{Z}\} \). These are the integers less than 8 that are coprime to 8 (i.e., \(\gcd(a, 8) = 1\)).</p>
 <p>Contrast this with \( m = 9 \). The primitive residue class group is \((\mathbb{Z}/9\mathbb{Z})^{\times} = \{1 + 9\mathbb{Z}, 2 + 9\mathbb{Z}, 4 + 9\mathbb{Z}, 5 + 9\mathbb{Z}, 7 + 9\mathbb{Z}, 8 + 9\mathbb{Z}\}\), as these are the integers less than 9 that are coprime to 9.</p>
 <h3 id="definition-eulers-totient-function"><a class="header" href="#definition-eulers-totient-function">Definition: Euler's Totient Function</a></h3>
-<p>Euler's totient function $\phi(m)$ is equal to the order of the primitive residue class group modulo $m$, which is the number of integers less than $m$ and coprime to $m$.</p>
-<p><strong>Example</strong>: For $m = 12$, $\phi(12) = 4$ because there are 4 integers less than 12 that are coprime to 12: ${1, 5, 7, 11}$.</p>
-<p>For $m = 10$, $\phi(10) = 4$, as there are also 4 integers less than 10 that are coprime to 10: ${1, 3, 7, 9}$.</p>
+<hr />
+<p><em>Euler's totient function \(\phi(m)\) is equal to the order of the primitive residue class group modulo \(m\), which is the number of integers less than \(m\) and coprime to \(m\).</em></p>
+<hr />
+<p><strong>Example</strong>: For \(m = 12\), \(\phi(12) = 4\) because there are 4 integers less than 12 that are coprime to 12: \({1, 5, 7, 11}\).</p>
+<p>For \(m = 10\), \(\phi(10) = 4\), as there are also 4 integers less than 10 that are coprime to 10: \({1, 3, 7, 9}\).</p>
 <h3 id="definition-order-of-an-element-within-a-group"><a class="header" href="#definition-order-of-an-element-within-a-group">Definition: Order of an Element within a Group</a></h3>
-<p>The order of $g \in G$ is the smallest natural number $e$ such that $g^{e} = 1$. We denote it as $\text{order}_g(g)$ or $\text{order } g$.</p>
-<p><strong>Example</strong>: In $(\mathbb{Z}/7\mathbb{Z})^{\times}$, the element 3 has order 6 because $3^6 \bmod 7 = 1$. In other words, $3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1$, and 6 is the smallest such exponent.</p>
+<hr />
+<p><em>The order of \(g \in G\) is the smallest natural number \(e\) such that \(g^{e} = 1\). We denote it as \(\text{order}_g(g)\)or \(\text{order } g\).</em></p>
+<hr />
+<p><strong>Example</strong>: In \((\mathbb{Z}/7\mathbb{Z})^{\times}\), the element 3 has order 6 because \(3^6 \bmod 7 = 1\). In other words, \(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\), and 6 is the smallest such exponent.</p>
 <h3 id="definition-subgroup"><a class="header" href="#definition-subgroup">Definition: Subgroup</a></h3>
-<p>A subset $U \subseteq G$ is a subgroup of $G$ if $U$ itself is a group under the operation of $G$.</p>
-<p><strong>Example</strong>: Consider $(\mathbb{Z}/8\mathbb{Z})^{\times} = {1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}$ under multiplication modulo 8. The subset ${1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}$ forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse ($7 \times 7 \equiv 1 \bmod 8$).</p>
-<h3 id="definition-subgroup-generated-by-g"><a class="header" href="#definition-subgroup-generated-by-g">Definition: Subgroup Generated by $g$</a></h3>
-<p>The set ${g^{k} : k \in \mathbb{Z}}$, for some element $g \in G$, forms a subgroup of $G$ and is called the subgroup generated by $g$, denoted by $\langle g \rangle$.</p>
-<p><strong>Example</strong>: Consider the group $(\mathbb{Z}/7\mathbb{Z})^{\times} = {1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}}$ under multiplication modulo 7. If we take $g = 3$, then $\langle 3 +7\mathbb{Z} \rangle = {3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}} \bmod 7 = {3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}}$, which forms a subgroup generated by 3. This subgroup contains all elements of $(\mathbb{Z}/7\mathbb{Z})^{\times}$, making 3 a generator of the entire group.</p>
-<p>If $g$ has a finite order $e$, we have that $\langle g \rangle = {g^{k}: 0 \leq k \leq e}$, meaning $e$ is the order of $\langle g \rangle$.</p>
+<hr />
+<p><em>A subset \(U \subseteq G\) is a subgroup of \(G\) if \(U\) itself is a group under the operation of \(G\).</em></p>
+<hr />
+<p><strong>Example</strong>: Consider \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\) under multiplication modulo 8. The subset \({1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\(7 \times 7 \equiv 1 \bmod 8\)).</p>
+<h3 id="definition-subgroup-generated-by-g"><a class="header" href="#definition-subgroup-generated-by-g">Definition: Subgroup Generated by \(g\)</a></h3>
+<hr />
+<p><em>The set \(\{g^{k} : k \in \mathbb{Z}\}\), for some element \(g \in G\), forms a subgroup of \(G\) and is called the subgroup generated by \(g\), denoted by \(\langle g \rangle\).</em></p>
+<hr />
+<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle = \{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 = \{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
+<p>If \(g\) has a finite order \(e\), we have that \(\langle g \rangle = \{g^{k}: 0 \leq k \leq e\}\), meaning \(e\) is the order of \(\langle g \rangle\).</p>
 <h3 id="definition-cyclic-group"><a class="header" href="#definition-cyclic-group">Definition: Cyclic Group</a></h3>
-<p>A group $G$ is called a cyclic group if there exists an element $g \in G$ such that $G = \langle g \rangle$. In this case, $g$ is called a generator of $G$.</p>
-<p><strong>Example</strong>: The group $(\mathbb{Z}/6\mathbb{Z})^{\times} = {1+6\mathbb{Z}, 5+6\mathbb{Z}}$ under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because $\langle 5 +6\mathbb{Z} \rangle = {(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}}$. Since 5 generates all the elements of the group, $G$ is cyclic.</p>
-<h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
-<p>If $G$ is a finite cyclic group, it has $\phi(|G|)$ generators, and each generator has order $|G|$.</p>
-<p><strong>Proof</strong>: <em>TBD</em></p>
-<p><strong>Example</strong>: Consider the group $(\mathbb{Z}/8\mathbb{Z})^{\times} = {1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}}$. This group is cyclic, and $\phi(8) = 4$. The generators of this group are ${1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}}$, each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is $|G| = 4$.</p>
-<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem</a></h3>
-<p>If $G$ is a finite cyclic group, the order of any subgroup of $G$ divides the order of $G$.</p>
-<p><strong>Proof</strong>: <em>TBD</em></p>
-<p><strong>Example</strong>: Consider the cyclic group $(\mathbb{Z}/6\mathbb{Z})^{\times} = {1+6\mathbb{Z}, 5+6\mathbb{Z}}$ under multiplication modulo 6. If we take the subgroup $\langle 5+6\mathbb{Z} \rangle = {1+6\mathbb{Z}, 5+6\mathbb{Z}}$, this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
+<hr />
+<p><em>A group \(G\) is called a cyclic group if there exists an element \(g \in G\) such that \(G = \langle g \rangle\). In this case, \(g\) is called a generator of \(G\).</em></p>
+<hr />
+<p><strong>Example</strong>: The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
+<h3 id="theorem-125"><a class="header" href="#theorem-125">Theorem 1.2.5</a></h3>
+<hr />
+<p><em>If \(G\) is a finite cyclic group, it has \(\phi(|G|)\)generators, and each generator has order \(|G|\).</em></p>
+<hr />
+<p><strong>Proof</strong>: TBD</p>
+<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
+<h3 id="theorem-126"><a class="header" href="#theorem-126">Theorem 1.2.6</a></h3>
+<hr />
+<p><em>If \(G\) is a finite cyclic group, the order of any subgroup of \(G\) divides the order of \(G\).</em></p>
+<hr />
+<p><strong>Proof</strong>: TBD</p>
+<p><strong>Example</strong>: Consider the cyclic group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6. If we take the subgroup \(\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
 <h3 id="theorem-fermats-little-theorem"><a class="header" href="#theorem-fermats-little-theorem">Theorem: Fermat's Little Theorem</a></h3>
-<p>If $\gcd(a, m) = 1$, then $a^{\phi(m)} \equiv 1 \pmod{m}$.</p>
-<p><strong>Proof</strong>: <em>TBD</em></p>
-<p><strong>Example</strong>: Take $a = 2$ and $m = 5$. Since $\gcd(2, 5) = 1$, Fermat's Little Theorem tells us that $2^{\phi(5)} = 2^4 \equiv 1 \bmod 5$. Indeed, $2^4 = 16$ and $16 \bmod 5 = 1$.</p>
-<p>This theorem suggests that $a^{\phi(m) - 1} + m \mathbb{Z}$ is the inverse residue class of $a + m \mathbb{Z}$.</p>
-<h3 id="theorem-2"><a class="header" href="#theorem-2">Theorem</a></h3>
-<p>The order of any element in a group divides the order of the group.</p>
-<p><strong>Proof</strong>: <em>TBD</em></p>
-<p><strong>Example</strong>: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, consider the element $3 + 7\mathbb{Z}$. The order of $3 + 7\mathbb{Z}$ is 6, as $3^6 \equiv 1 \bmod 7$. The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
+<hr />
+<p><em>If \(\gcd(a, m) = 1\), then \(a^{\phi(m)} \equiv 1 \pmod{m}\).</em></p>
+<hr />
+<p><strong>Proof</strong>: TBD</p>
+<p><strong>Example</strong>: Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
+<p>This theorem suggests that \(a^{\phi(m) - 1} + m \mathbb{Z}\) is the inverse residue class of \(a + m \mathbb{Z}\).</p>
+<h3 id="theorem-127"><a class="header" href="#theorem-127">Theorem 1.2.7</a></h3>
+<hr />
+<p><em>The order of any element in a group divides the order of the group.</em></p>
+<hr />
+<p><strong>Proof</strong>: TBD</p>
+<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), consider the element \(3 + 7\mathbb{Z}\). The order of \(3 + 7\mathbb{Z}\) is 6, as \(3^6 \equiv 1 \bmod 7\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
 <h3 id="theorem-generalization-of-fermats-little-theorem"><a class="header" href="#theorem-generalization-of-fermats-little-theorem">Theorem: Generalization of Fermat's Little Theorem</a></h3>
-<p>For any element $g \in G$, we have $g^{|G|} = 1$.</p>
-<p><strong>Proof</strong>: <em>TBD</em></p>
-<p><strong>Example</strong>: In the group $(\mathbb{Z}/7\mathbb{Z})^{\times}$, for any element $g$, such as $g = 3 + 7\mathbb{Z}$, we have $3^6 \equiv 1 \bmod 7$. This holds for any $g \in (\mathbb{Z}/7\mathbb{Z})^{\times}$ because the order of the group is 6. Thus, $g^{|G|} = 1$ is satisfied.</p>
+<hr />
+<p><em>For any element \(g \in G\), we have \(g^{|G|} = 1\).</em></p>
+<hr />
+<p><strong>Proof</strong>: TBD</p>
+<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
 
                     </main>
 
@@ -335,7 +394,7 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zksnark/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../number_theory/subsec3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -349,7 +408,7 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zksnark/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../number_theory/subsec3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
