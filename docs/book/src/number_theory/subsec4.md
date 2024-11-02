@@ -1,4 +1,4 @@
-### Galois Field
+# Galois Field
 
 We will now discuss the construction of finite fields with \\(p^n\\) elements, where \\(p\\) is a prime number and \\(n\\) is a positive integer. These fields are also known as Galois fields, denoted as \\(GF(p^n)\\). It is evident that \\(\mathbb{Z}/p\mathbb{Z}\\) is isomorphic to \\(GF(p)\\).
 

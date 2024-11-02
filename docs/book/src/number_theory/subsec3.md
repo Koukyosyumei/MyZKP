@@ -1,4 +1,4 @@
-## Polynomials
+# Polynomials
 
 Let \\(K\\) be a field.
 

@@ -8,5 +8,7 @@
   - [Galoid Field](./number_theory/subsec4.md)
   - [Elliptic Curve](./number_theory/subsec5.md)
 - [Basics of zk-SNARKs](./zksnark/README.md)
+  - [Arithmetization](./zksnark/subsec2.md)
+  - [Proving Single Polynomial](./zksnark/subsec3.md)
 - [Basics of zk-STARKS](./zkstark/README.md)
 - [Basics of zkVM](./zkvm/README.md)

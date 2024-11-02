@@ -1,4 +1,4 @@
-## Elliptic curve
+# Elliptic curve
 
 ### Definition: Elliptic Curve
     

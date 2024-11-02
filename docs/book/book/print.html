@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h1>
 <h3 id="definition-binary-operation"><a class="header" href="#definition-binary-operation">Definition: Binary Operation</a></h3>
 <hr />
 <p><em>A mapping \(\circ: X \times X \rightarrow X\) is a binary operation on \(X\) if for any pair of elements \((x_1, x_2)\) in \(X\), \(x_1 \circ x_2\) is also in \(X\).</em></p>
@@ -194,7 +194,7 @@
 <p><em>A binary operation \(\circ\) is commutative if \(a \circ b = b \circ a\) for all \(a, b \in X\).</em></p>
 <hr />
 <p><strong>Example</strong>: Addition modulo \(n\) is also commutative. For \(n = 7\), \(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\).</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="semigroup-group-ring"><a class="header" href="#semigroup-group-ring">Semigroup, Group, Ring</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="semigroup-group-ring"><a class="header" href="#semigroup-group-ring">Semigroup, Group, Ring</a></h1>
 <h3 id="definition-semigroup"><a class="header" href="#definition-semigroup">Definition: Semigroup</a></h3>
 <hr />
 <p><em>A pair \((H, \circ)\), where \(H\) is a non-empty set and \(\circ\) is an associative binary operation on \(H\), is called a semigroup.</em></p>
@@ -365,7 +365,7 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <hr />
 <p><em>The set \(\{g^{k} : k \in \mathbb{Z}\}\), for some element \(g \in G\), forms a subgroup of \(G\) and is called the subgroup generated by \(g\), denoted by \(\langle g \rangle\).</em></p>
 <hr />
-<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle = \{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 = \{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
+<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle =\) \(\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 =\) \(\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
 <p>If \(g\) has a finite order \(e\), we have that \(\langle g \rangle = \{g^{k}: 0 \leq k \leq e\}\), meaning \(e\) is the order of \(\langle g \rangle\).</p>
 <h3 id="definition-cyclic-group"><a class="header" href="#definition-cyclic-group">Definition: Cyclic Group</a></h3>
 <hr />
@@ -403,7 +403,7 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <hr />
 <p><strong>Proof</strong>: TBD</p>
 <p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="polynomials"><a class="header" href="#polynomials">Polynomials</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="polynomials"><a class="header" href="#polynomials">Polynomials</a></h1>
 <p>Let \(K\) be a field.</p>
 <h3 id="definition-polynomial"><a class="header" href="#definition-polynomial">Definition: Polynomial</a></h3>
 <p><em>A univariate polynomial over a commutative ring \(R\) with unity \(1\) is an expression of the form \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), where \(x\) is a variable and coefficients \(a_0, \ldots, a_n\) belong to \(R\). The set of all polynomials over \(R\) in the variable \(x\) is denoted as \(R[x]\).</em></p>
@@ -600,7 +600,7 @@ P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1
 L(v + w) &amp;= \sum_{i=1}^n (v_i + w_i) \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \sum_{i=1}^n v_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} + \sum_{i=1}^n w_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = L(v) + L(w) \\
 L(\gamma v) &amp;= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \gamma \sum_{i=1}^n v_i \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} = \gamma L(v)
 \end{align*}</p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="galois-field"><a class="header" href="#galois-field">Galois Field</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="galois-field"><a class="header" href="#galois-field">Galois Field</a></h1>
 <p>We will now discuss the construction of finite fields with \(p^n\) elements, where \(p\) is a prime number and \(n\) is a positive integer. These fields are also known as Galois fields, denoted as \(GF(p^n)\). It is evident that \(\mathbb{Z}/p\mathbb{Z}\) is isomorphic to \(GF(p)\).</p>
 <h3 id="definition-irreducible-polynomial"><a class="header" href="#definition-irreducible-polynomial">Definition: Irreducible Polynomial</a></h3>
 <hr />
@@ -645,7 +645,7 @@ Pr_{u \sim \mathbb{S}^{m}}[P(u) = Q(u)] \leq \frac{n}{|\mathbb{S}|}
 <hr />
 <p><strong>Proof</strong> TBD</p>
 <p>This lemma states that if \(\mathbb{S}\) is sufficiently large and \(n\) is relatively small, the probability that the two different polynomials return the same value for a randomly chosen input is negligibly small. In other words, if we observe \(P(u) = Q(u)\) for a random input \(u\), we can conclude with high probability that \(P\) and \(Q\) are identical polynomials.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="elliptic-curve"><a class="header" href="#elliptic-curve">Elliptic curve</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="elliptic-curve"><a class="header" href="#elliptic-curve">Elliptic curve</a></h1>
 <h3 id="definition-elliptic-curve"><a class="header" href="#definition-elliptic-curve">Definition: Elliptic Curve</a></h3>
 <hr />
 <p><em>An elliptic curve \(E\) over a finite field \(\mathbb{F}_{p}\) is defined by the equation:</em></p>
@@ -1110,7 +1110,282 @@ pub fn weil_pairing&lt;F: Field&gt;(
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 <span class="boring">}</span></code></pre></pre>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arithmetization"><a class="header" href="#arithmetization">Arithmetization</a></h1>
+<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.</p>
+<p>To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.</p>
+<p>However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression \(z = x \land y\) can be represented as \(x(x-1) = 0\), \(y(y-1) = 0\), and \(z = xy\) in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.</p>
+<h2 id="rank-1-constraint-system-r1cs"><a class="header" href="#rank-1-constraint-system-r1cs">Rank-1 Constraint System (R1CS)</a></h2>
+<p>There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as \underline{a set of equality constraints, each involving only one multiplication}. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:</p>
+<h3 id="definition-r1cs"><a class="header" href="#definition-r1cs">Definition: R1CS</a></h3>
+<p>An R1CS structure \(\mathcal{S}\) consists of:</p>
+<ul>
+<li>Size bounds \(m, d, \ell \in \mathbb{N}\) where \(d &gt; \ell\)</li>
+<li>Three matrices \(O, L, R \in \mathbb{F}^{m\ times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
+</ul>
+<p>An R1CS instance includes a public input \(p \in \mathbb{F}^\ell\), while an R1CS witness is a vector \(w \in \mathbb{F}^{d - \ell - 1}\).
+A structure-instance tuple \((S, p)\) is satisfied by a witness \(w\) if:
+\begin{equation}
+(L \cdot a) \circ (R \cdot a) - O \cdot a = \mathbf{0}
+\end{equation}
+where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multiplication, and \(\circ\) is the Hadamard product.</p>
+<p>The intuitive interpretation of each matrix is as follows:</p>
+<ul>
+<li>\(L\): Encodes the left input of each gate</li>
+<li>\(R\): Encodes the right input of each gate</li>
+<li>\(O\): Encodes the output of each gate</li>
+<li>The leading 1 in the witness vector allows for constant terms</li>
+</ul>
+<p><strong>Single Multiplication</strong></p>
+<p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
+<ul>
+<li>\textbf{Witness vector}: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li>\textbf{Number of witnesses}: \(m = 4\)</li>
+<li>\textbf{Number of constraints}: \(d = 1\)</li>
+</ul>
+<p>The R1CS constraint for \(z = x \cdot y\) is satisfied when:</p>
+<p>\begin{align*}
+&amp;(\begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \cdot a) \circ (\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \cdot a) - \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 \end{bmatrix} \cdot a \\
+=&amp;(\begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix}) \circ (\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix}) - \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 \end{bmatrix} \cdot \begin{bmatrix}
+1 \\ 3690 \\ 82 \\ 45
+\end{bmatrix} \\
+=&amp; 82 \cdot 45 - 3690 \\
+=&amp; 3690 - 3690 \\
+=&amp; 0
+\end{align*}</p>
+<p>This example demonstrates how R1CS encodes a simple multiplication constraint:</p>
+<ul>
+<li>\(L = \begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix}\) selects \(x\) (left input)</li>
+<li>\(R = \begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix}\) selects \(y\) (right input)</li>
+<li>\(O = \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 \end{bmatrix}\) selects \(z\) (output)</li>
+</ul>
+<p><strong>Multiple Constraints</strong></p>
+<p>Let's examine a more complex example: \(r = a \cdot b \cdot c \cdot d\). Since R1CS requires that each constraint contain only one multiplication, we need to break this down into multiple constraints:</p>
+<p>\begin{align*}
+v_1 &amp;= a \cdot b \\
+v_2 &amp;= c \cdot d \\
+r &amp;= v_1 \cdot v_2
+\end{align*}</p>
+<p>Note that alternative representations are possible, such as \(v_1 = ab, v_2 = v_1c, r = v_2d\). In this example, we use 7 variables \((r, a, b, c, d, v_1, v_2)\), so the dimension of the witness vector will be \(m = 8\) (including the constant 1). We have three constraints, so \(n = 3\).
+To construct the matrices \(L\), \(R\), and \(O\), we can interpret the constraints as linear combinations:</p>
+<p>\begin{align*}
+v_1 &amp;= (0 \cdot 1 + 0 \cdot r + 1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot b \\
+v_2 &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot d \\
+r &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot v_1 + 0 \cdot v_2) \cdot v_2
+\end{align*}</p>
+<p>Thus, we can construct \(L\), \(R\), and \(O\) as follows:</p>
+<p>\begin{equation*}
+L = \begin{bmatrix}
+0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0
+\end{bmatrix}
+\end{equation*}
+\begin{equation*}
+R = \begin{bmatrix}
+0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1
+\end{bmatrix}
+\end{equation*}
+\begin{equation*}
+O = \begin{bmatrix}
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \\
+0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0
+\end{bmatrix}
+\end{equation*}</p>
+<p>Where the columns in each matrix correspond to \((1, r, a, b, c, d, v_1, v_2)\).</p>
+<p><strong>Addition with a Constant</strong></p>
+<p>Let's examine the case \(z = x \cdot y + 3\). We can represent this as \(-3 + z = x \cdot y\). For the witness vector \((1, z, x, y)\), we have:</p>
+<p>\begin{align*}
+L &amp;= \begin{bmatrix}
+0 &amp; 0 &amp; 1 &amp; 0
+\end{bmatrix} \\
+R &amp;= \begin{bmatrix}
+0 &amp; 0 &amp; 0 &amp; 1
+\end{bmatrix} \\
+O &amp;= \begin{bmatrix}
+-3 &amp; 1 &amp; 0 &amp; 0
+\end{bmatrix}
+\end{align*}</p>
+<p>Note that the constant 3 appears in the \(O\) matrix with a negative sign, effectively moving it to the left side of the equation</p>
+<p><strong>Multiplication with a Constant</strong></p>
+<p>Now, let's consider \(z = 3x^2 + y\). The requirement of "one multiplication per constraint" doesn't apply to multiplication with a constant, as we can treat it as repeated addition.</p>
+<p>\begin{align*}
+L &amp;= \begin{bmatrix}
+0 &amp; 0 &amp; 3 &amp; 0
+\end{bmatrix} \\
+R &amp;= \begin{bmatrix}
+0 &amp; 0 &amp; 1 &amp; 0
+\end{bmatrix} \\
+O &amp;= \begin{bmatrix}
+0 &amp; 1 &amp; 0 &amp; -1
+\end{bmatrix}
+\end{align*}</p>
+<h2 id="uadratic-arithmetic-program-qap"><a class="header" href="#uadratic-arithmetic-program-qap">uadratic Arithmetic Program (QAP)</a></h2>
+<p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
+<p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
+<p>\begin{align*}
+A = \begin{bmatrix}
+2 &amp; 5 \\
+3 &amp; 1 \\
+\end{bmatrix},
+B = \begin{bmatrix}
+4 &amp; 1 \\
+2 &amp; 3 \\
+\end{bmatrix},
+v = \begin{bmatrix}
+3 \\ 1
+\end{bmatrix},
+u = \begin{bmatrix}
+2 \\ 2
+\end{bmatrix}
+\end{align*}</p>
+<p>The equivalence check can be represented as:</p>
+<p>\begin{equation*}
+\begin{bmatrix}
+2 \\ 3
+\end{bmatrix} \cdot 3 + \begin{bmatrix}
+5 \\ 1
+\end{bmatrix} \cdot 1 = \begin{bmatrix}
+4 \\ 2
+\end{bmatrix} \cdot 2 + \begin{bmatrix}
+1 \\ 3
+\end{bmatrix} \cdot 2
+\end{equation*}</p>
+<p>This matrix-vector equality check is equivalent to the following polynomial equality check:</p>
+<p>\begin{equation*}
+3 \cdot L([(1, 2), (2, 3)]) + 1 \cdot L([(1, 5), (2, 1)]) = 2 \cdot L([(1, 4), (2, 2)]) + 2 \cdot L([(1, 1), (2, 3)])
+\end{equation*}</p>
+<p>where \(L\) denotes Lagrange Interpolation. In \(\mathbb{F}_{11}\) (field with 11 elements), we have:</p>
+<p>\begin{align*}
+L([(1, 2), (2, 3)]) &amp;= x + 1 \\
+L([(1, 5), (2, 1)]) &amp;= 7x + 9 \\
+L([(1, 4), (2, 2)]) &amp;= 9x + 6 \\
+L([(1, 1), (2, 3)]) &amp;= 2x + 10
+\end{align*}</p>
+<p>The Schwartz-Zippel Lemma states that we need only one evaluation at a random point to check the equivalence of polynomials with high probability.</p>
+<p>However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. Thus, we don't have \(\ell(x) \cdot r(x) = o(x)\), where \(\ell(x)\), \(r(x)\), and \(o(x)\) are the polynomials resulting from the Lagrange interpolation of \(L \cdot a\), \(R \cdot a\), and \(O \cdot a\) respectively.</p>
+<p>While \(\ell(x)\), \(r(x)\), and \(o(x)\) are of degree at most \(d-1\), \(\ell(x) \cdot r(x)\) is of degree at most \(2d-2\).</p>
+<p>To address this discrepancy, we introduce a degree \(d\) polynomial \(t(x) = \prod_{i=1}^{d} (x - i)\). We can then rewrite the equation as:</p>
+<p>\begin{equation}
+\ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
+\end{equation}</p>
+<p>where \(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="proving-single-polynomial"><a class="header" href="#proving-single-polynomial">Proving Single Polynomial</a></h1>
+<p>Before dealing with all of \(\ell(x)\), \(r(x)\), and \(o(x)\) at once, we design a protocol that allows the Prover \(\mathcal{A}\) to convince the Verifier \(\mathcal{B}\) that \(\mathcal{A}\) knows a specific polynomial. Let's denote this polynomial of degree \(n\) with coefficients in a finite field as:</p>
+<p>\begin{equation}
+P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
+\end{equation}</p>
+<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(d &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_d\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\). Note that the Prover also knows \(T(x)\).</p>
+<p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
+<h3 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h3>
+<p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
+<p><em>Naive Approach</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</em></li>
+<li><em>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</em></li>
+</ul>
+<p>This protocol is highly inefficient, requiring \(\mathcal{O}(|\mathbb{F}|)\) evaluations and communications.</p>
+<h3 id="-schwartz-zippel-lemma"><a class="header" href="#-schwartz-zippel-lemma">\(+\) Schwartz-Zippel Lemma</a></h3>
+<p>Instead of evaluating polynomials at all values in \(\mathbb{F}\), we can leverage the Schwartz-Zippel Lemma: if \(H(s) = \frac{P(s)}{T(s)}\) or equivalently \(H(s)T(s) = P(s)\) for a random element \(s\), we can conclude that \(H(x) = \frac{P(x)}{T(x)}\) with high probability. Thus, the Prover \(\mathcal{A}\) only needs to send evaluations of \(P(s)\) and \(H(s)\) for a random input \(s\) received from \(\mathcal{B}\).</p>
+<p><em>\(+\) Schwartz-Zippel Lemma</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) draws random \(s\) from \(\mathbb{F}\) and sends it to \(\mathcal{A}\).</em></li>
+<li><em>\(\mathcal{A}\) computes \(h = H(s)\) and \(p = P(s)\) and send them to \(\mathcal{B}\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(p = t h\), where \(t\) denotes \(T(s)\).</em></li>
+</ul>
+<p>This protocol is efficient, requiring only a constant number of evaluations and communications. However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
+<h3 id="-discrete-logarithm-assumption"><a class="header" href="#-discrete-logarithm-assumption">\(+\) Discrete Logarithm Assumption</a></h3>
+<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\alpha\), where \(\alpha = g^s \bmod p\). Thus, it's safe for the Verifier to send \(\alpha\), as the Prover cannot easily derive \(s\) from it.</p>
+<p>An interesting property of polynomial exponentiation is:</p>
+<p>\begin{align}
+g^{P(x)} &amp;= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
+\end{align}</p>
+<p>Instead of sending \(s\), the Verifier can send \(g\) and \(\alpha_{i} = g^{(s^i)}\) for \(i = 1, \cdots n\). BE CAREFUL THAT <strong>\(g^{(s^i)} \neq (g^s)^i\)</strong>. The Prover can still evaluate \(g^p = g^{P(s)}\) using these powers of \(g\):</p>
+<p>\begin{equation}
+g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
+\end{equation}</p>
+<p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
+<p><em>\(+\) Discrete Logarithm Assumption</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</em></li>
+<li><em>\(\mathcal{B}\) computes and sends \(\{\alpha, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_i= g^{(s^{i})}\).</em></li>
+<li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\) and \(v = g^{h}\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
+</ul>
+<p>This approach prevents the Prover from obtaining \(s\) or \(t = T(s)\), making it impossible to send fake \((h', p')\) such that \(p' = h't\).</p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<h3 id="-knowledge-of-exponent-assumption"><a class="header" href="#-knowledge-of-exponent-assumption">\(+\) Knowledge of Exponent Assumption</a></h3>
+<p>To address the vulnerability where the verifier \(\mathcal{B}\) cannot distinguish if \(v (= g^h)\) from the prover is a power of \(\alpha_i = g^{(s^i)}\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:</p>
+<ul>
+<li>\(\mathcal{B}\) sends both \(\alpha_i\) and \(\alpha'_i = \alpha_i^r\) for a new random value \(r\).</li>
+<li>The prover returns \(a = (\alpha_i)^{c_i}\) and \(a' = (\alpha'_i)^{c_i}\) for \(i = 1, ..., n\).</li>
+<li>\(\mathcal{B}\) can conclude that \(a\) is a power of \(\alpha_i\) if \(a^r = a'\).</li>
+</ul>
+<p>Based on this assumption, we can design an improved protocol:</p>
+<p><em>\(+\) Knowledge of Exponent Assumption</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
+<li><em>\(\mathcal{B}\) computes and sends \({\alpha_1, \alpha_2, ..., \alpha_{n}}\) and \({\alpha'_1, \alpha'_2, ..., \alpha'_{n}}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
+<li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
+</ul>
+<p>The prover can compute \(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
+<h3 id="-zero-knowledge"><a class="header" href="#-zero-knowledge">\(+\) Zero Knowledge</a></h3>
+<p>To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \(P(x)\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \(\delta\):</p>
+<p><em>\(+\) Zero Knowledge</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
+<li><em>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</em></li>
+<li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
+<li><em>\(\mathcal{A}\) computes and sends \(u' = (g^{p})^{\delta}\), \(v' = (g^{h})^{\delta}\), and \(w' = (g^{p'})^{\delta}\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
+</ul>
+<p>By introducing the random value \(\delta\), the verifier can no longer learn anything about \(p\), \(h\), or \(w\), thus achieving zero knowledge.</p>
+<h3 id="-non-interactivity"><a class="header" href="#-non-interactivity">\(+\) Non-interactivity</a></h3>
+<p>The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.</p>
+<p><em>\(+\) Non-Interactive: Trusted Setup</em></p>
+<ul>
+<li><em><strong>Secret Seed:</strong> A trusted third party generates the random values \(s\) and \(r\)</em></li>
+<li><em><strong>Proof Key:</strong> Provided to the prover</em>
+<ul>
+<li><em>\(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_{i} = g^{(s^i)}\)</em></li>
+<li><em>\(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i' = g^{(s^{i})r}\)</em></li>
+</ul>
+</li>
+<li><em><strong>Verification Key:</strong> Distributed to verifiers</em>
+<ul>
+<li><em>\(g^{r}\)</em></li>
+<li><em>\(g^{T(s)}\)</em></li>
+</ul>
+</li>
+<li><em>After distribution, the original \(s\) and \(r\) values are securely destroyed.</em></li>
+</ul>
+<p>Then, the non-interactive protocol consists of two main parts: proof generation and verification.</p>
+<p><em>\(+\) Non-Interactive: Proof</em></p>
+<ul>
+<li><em>\(\mathcal{A}\) receives the proof key</em></li>
+<li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
+<li><em>\(\mathcal{A}\) broadcast the proof \(\pi = (u' = (g^{p})^{\delta}, v' = (g^{h})^{\delta}, w' = (g^{p'})^{\delta})\)</em></li>
+</ul>
+<p>Since \(r\) is not shared and already destroyed, the verifier \(\mathcal{B}\) cannot calculate \(u'^{r}\) to check \(u'^{r} = w'\). Instead, the verifier can use a paring with bilinear mapping; \(u'^{r} = w'\) is equivalent to \(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\).</p>
+<p><em>\(+\) Non-Interactive: Verification</em></p>
+<ul>
+<li><em>\(\mathcal{B}\) receives the verification key.</em></li>
+<li><em>\(\mathcal{B}\) receives the proof \(\pi\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(e(u', g^{r}) = e(w', g)\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

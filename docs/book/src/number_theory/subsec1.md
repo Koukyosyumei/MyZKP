@@ -1,4 +1,4 @@
-## Computation Rule and Properties
+# Computation Rule and Properties
 
 
 ### Definition: Binary Operation
