@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-use crate::modules::curve::EllipticCurvePoint;
 use crate::modules::field::Field;
 
 /// Polynomial struct representing a polynomial over Field.
