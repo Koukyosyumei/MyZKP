@@ -3,6 +3,7 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 use crate::modules::curve;
 use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
+use crate::modules::field;
 use crate::modules::field::Field;
 
 /// Polynomial struct representing a polynomial over Field.
@@ -297,14 +298,14 @@ impl<F: Field> Rem for Polynomial<F> {
     }
 }
 
-impl<F: Field, E: curve::EllipticCurve<F>> Polynomial<F> {
-    pub fn eval_with_powers_on_curve(
+impl<F: Field> Polynomial<F> {
+    pub fn eval_with_powers_on_curve<E: EllipticCurve<F>>(
         &self,
         powers: &[EllipticCurvePoint<F, E>],
     ) -> EllipticCurvePoint<F, E> {
-        let mut result = EllipticCurvePoint::<F, E>::point_at_infinity();
+        let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.poly.iter().enumerate() {
-            result = result + powers[i].clone() * (coef.clone().get_value());
+            result = result + powers[i].clone() * coef.clone().get_value();
         }
         result
     }
