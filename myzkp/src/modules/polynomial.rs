@@ -1,7 +1,7 @@
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-// Assuming FiniteFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
+use crate::modules::curve::EllipticCurvePoint;
 use crate::modules::field::Field;
 
 /// Polynomial struct representing a polynomial over Field.
@@ -64,6 +64,18 @@ impl<F: Field> Polynomial<F> {
         }
         result
     }
+
+    /*
+    pub fn eval_with_powers_on_curve(
+        &self,
+        powers: &[EllipticCurvePoint<C, F>],
+    ) -> EllipticCurvePoint<C, F> {
+        let mut result = F::one();
+        for (i, coef) in self.poly.iter().enumerate() {
+            result = result + powers[i] * (coef.clone().get_value());
+        }
+        result
+    }*/
 
     /// Lagrange interpolation to compute polynomials.
     pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {

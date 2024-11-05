@@ -1,36 +1,40 @@
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
+use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::ops::{Add, Mul, Neg, Sub};
 
 use crate::modules::field::Field;
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurve<F: Field> {
-    pub a: F,
-    pub b: F,
+pub trait EllipticCurve<F: Field>: Debug + Clone + PartialEq {
+    fn get_a() -> F;
+    fn get_b() -> F;
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurvePoint<F: Field> {
+pub struct EllipticCurvePoint<E: EllipticCurve<F>, F: Field> {
     pub x: Option<F>,
     pub y: Option<F>,
-    pub curve: EllipticCurve<F>,
+    _phantom: PhantomData<E>,
 }
 
-impl<F: Field> EllipticCurvePoint<F> {
-    fn new(x: F, y: F, curve: EllipticCurve<F>) -> Self {
+impl<E: EllipticCurve<F>, F: Field> EllipticCurvePoint<E, F> {
+    fn new(x: F, y: F) -> Self {
+        // let a = E::get_a();
+        // let b = E::get_b();
+        // assert!(y.pow(2) == x.pow(3) + a * x + b, "Point is not on the curve");
         EllipticCurvePoint {
             x: Some(x),
             y: Some(y),
-            curve: curve,
+            _phantom: PhantomData,
         }
     }
 
-    pub fn point_at_infinity(curve: EllipticCurve<F>) -> Self {
+    pub fn point_at_infinity() -> Self {
         EllipticCurvePoint {
             x: None,
             y: None,
-            curve: curve,
+            _phantom: PhantomData,
         }
     }
 
@@ -43,28 +47,27 @@ impl<F: Field> EllipticCurvePoint<F> {
             return self.clone();
         }
 
-        EllipticCurvePoint::new(
-            self.x.clone().unwrap(),
-            -(self.y.clone().unwrap()),
-            self.curve.clone(),
-        )
+        EllipticCurvePoint::new(self.x.clone().unwrap(), -(self.y.clone().unwrap()))
     }
 
     pub fn line_slope(&self, other: Self) -> F {
+        let a = E::get_a();
+        // let b = E::get_b();
+
         let x1 = self.x.clone().unwrap();
         let y1 = self.y.clone().unwrap();
         let x2 = other.x.clone().unwrap();
         let y2 = other.y.clone().unwrap();
 
         if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
+            ((x1.clone() * x1.clone()) * (3_i64) + a.clone()) / (y1.clone() * (2_i64))
         } else {
             (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
         }
     }
 }
 
-impl<F: Field> Add for EllipticCurvePoint<F> {
+impl<E: EllipticCurve<F>, F: Field> Add for EllipticCurvePoint<E, F> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -82,7 +85,7 @@ impl<F: Field> Add for EllipticCurvePoint<F> {
             // Check if they are inverses of each other
             if self.y != other.y {
                 // TODO: check self.y = -other.y
-                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+                return EllipticCurvePoint::point_at_infinity();
             } else {
                 // P = Q, handle point doubling
                 let x1 = self.x.clone().unwrap();
@@ -94,7 +97,7 @@ impl<F: Field> Add for EllipticCurvePoint<F> {
                 let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
                 let y3 = m * (x1 - x3.clone()) - y1;
 
-                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+                return EllipticCurvePoint::new(x3, y3);
             }
         } else {
             // P != Q, handle regular addition
@@ -107,21 +110,21 @@ impl<F: Field> Add for EllipticCurvePoint<F> {
             let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
             let y3 = m * (x1 - x3.clone()) - y1;
 
-            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+            return EllipticCurvePoint::new(x3, y3);
         }
     }
 }
 
-impl<F: Field> Mul<BigInt> for EllipticCurvePoint<F> {
+impl<E: EllipticCurve<F>, F: Field> Mul<BigInt> for EllipticCurvePoint<E, F> {
     type Output = Self;
 
     fn mul(self, scalar: BigInt) -> Self {
         if scalar.is_zero() {
             // Return the point at infinity for scalar * 0
-            return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+            return EllipticCurvePoint::point_at_infinity();
         }
 
-        let mut result = EllipticCurvePoint::point_at_infinity(self.curve.clone());
+        let mut result = EllipticCurvePoint::point_at_infinity();
         let mut current = self.clone(); // Start with the current point
         let mut scalar_bits = scalar.clone();
 
@@ -137,32 +140,28 @@ impl<F: Field> Mul<BigInt> for EllipticCurvePoint<F> {
     }
 }
 
-impl<F: Field> Neg for EllipticCurvePoint<F> {
+impl<E: EllipticCurve<F>, F: Field> Neg for EllipticCurvePoint<E, F> {
     type Output = Self;
     fn neg(self) -> Self {
         if self.is_point_at_infinity() {
             return self;
         } else {
-            EllipticCurvePoint::new(
-                self.x.clone().unwrap(),
-                -self.y.clone().unwrap(),
-                self.curve,
-            )
+            EllipticCurvePoint::new(self.x.clone().unwrap(), -self.y.clone().unwrap())
         }
     }
 }
 
-impl<F: Field> Sub for EllipticCurvePoint<F> {
+impl<E: EllipticCurve<F>, F: Field> Sub for EllipticCurvePoint<E, F> {
     type Output = Self;
     fn sub(self, other: Self) -> Self {
         self + (-other)
     }
 }
 
-pub fn get_lambda<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    r: EllipticCurvePoint<F>,
+pub fn get_lambda<E: EllipticCurve<F>, F: Field>(
+    p: EllipticCurvePoint<E, F>,
+    q: EllipticCurvePoint<E, F>,
+    r: EllipticCurvePoint<E, F>,
 ) -> F {
     let p_x = p.x.clone().unwrap();
     let p_y = p.y.clone().unwrap();
@@ -180,7 +179,11 @@ pub fn get_lambda<F: Field>(
     return numerator / denominator;
 }
 
-pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: BigInt) -> F {
+pub fn miller<E: EllipticCurve<F>, F: Field>(
+    p: EllipticCurvePoint<E, F>,
+    q: EllipticCurvePoint<E, F>,
+    m: BigInt,
+) -> F {
     if p == q {
         F::one();
     }
@@ -200,11 +203,11 @@ pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: B
     f
 }
 
-pub fn weil_pairing<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
+pub fn weil_pairing<E: EllipticCurve<F>, F: Field>(
+    p: EllipticCurvePoint<E, F>,
+    q: EllipticCurvePoint<E, F>,
     m: BigInt,
-    s: Option<EllipticCurvePoint<F>>,
+    s: Option<EllipticCurvePoint<E, F>>,
 ) -> F {
     let s_value = s.unwrap();
     let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
@@ -228,25 +231,34 @@ mod tests {
     #[test]
     fn test_weil_pairing() {
         define_myzkp_modulus_type!(Mod631, "631");
+        type F = FiniteFieldElement<Mod631>;
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CurveA30B34;
+        impl EllipticCurve<F> for CurveA30B34 {
+            fn get_a() -> F {
+                FiniteFieldElement::<Mod631>::from_value(30_i64)
+            }
+            fn get_b() -> F {
+                FiniteFieldElement::<Mod631>::from_value(34_i64)
+            }
+        }
 
         let a = FiniteFieldElement::<Mod631>::from_value(30_i64);
         let b = FiniteFieldElement::<Mod631>::from_value(34_i64);
-        let curve = EllipticCurve { a, b };
+        //let curve = EllipticCurve { a, b };
 
-        let p = EllipticCurvePoint::new(
+        let p = EllipticCurvePoint::<Mod631, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(36_i64),
             FiniteFieldElement::<Mod631>::from_value(60_i64),
-            curve.clone(),
         );
-        let q = EllipticCurvePoint::new(
+        let q = EllipticCurvePoint::<Mod631, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(121_i64),
             FiniteFieldElement::<Mod631>::from_value(387_i64),
-            curve.clone(),
         );
-        let s = EllipticCurvePoint::new(
+        let s = EllipticCurvePoint::<Mod631, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(0_i64),
             FiniteFieldElement::<Mod631>::from_value(36_i64),
-            curve.clone(),
         );
         let order = 5.to_bigint().unwrap();
 
@@ -268,15 +280,13 @@ mod tests {
         let w = weil_pairing(p.clone(), q.clone(), order.clone(), Some(s.clone()));
         assert_eq!(w.sanitize().value, 242.to_bigint().unwrap());
 
-        let p_prime = EllipticCurvePoint::new(
+        let p_prime = EllipticCurvePoint::<Mod631, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(617_i64),
             FiniteFieldElement::<Mod631>::from_value(5_i64),
-            curve.clone(),
         );
-        let q_prime = EllipticCurvePoint::new(
+        let q_prime = EllipticCurvePoint::<Mod631, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(121_i64),
             FiniteFieldElement::<Mod631>::from_value(244_i64),
-            curve.clone(),
         );
 
         let w_prime = weil_pairing(

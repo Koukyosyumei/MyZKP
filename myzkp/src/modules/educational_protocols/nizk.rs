@@ -1,4 +1,4 @@
-use crate::modules::elliptic_curve::{weil_pairing, EllipticCurve, EllipticCurvePoint};
+use crate::modules::curve::{weil_pairing, EllipticCurve, EllipticCurvePoint};
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use num_bigint::BigInt;
@@ -72,9 +72,9 @@ impl<F: Field> Prover<F> {
     }
 
     pub fn generate_proof(&self, proof_key: &ProofKey<F>, delta: &F) -> Proof<F> {
-        let g_p = self.p.eval_with_powers(&proof_key.alpha);
-        let g_h = self.h.eval_with_powers(&proof_key.alpha);
-        let g_p_prime = self.p.eval_with_powers(&proof_key.alpha_prime);
+        let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
+        let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
+        let g_p_prime = self.p.eval_with_powers_on_curve(&proof_key.alpha_prime);
 
         Proof {
             u_prime: g_p * delta.get_value(),
