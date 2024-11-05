@@ -218,6 +218,23 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 
+#[macro_export]
+macro_rules! define_myzkp_curve_type {
+    ($name:ident, $a:expr, $b:expr) => {
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct $name;
+
+        impl EllipticCurve for $name {
+            fn get_a() -> BigInt {
+                BigInt::from_str($a).unwrap()
+            }
+            fn get_b() -> BigInt {
+                BigInt::from_str($b).unwrap()
+            }
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,17 +248,7 @@ mod tests {
     #[test]
     fn test_weil_pairing() {
         define_myzkp_modulus_type!(Mod631, "631");
-
-        #[derive(Debug, Clone, PartialEq)]
-        struct CurveA30B34;
-        impl EllipticCurve for CurveA30B34 {
-            fn get_a() -> BigInt {
-                30_i64.to_bigint().unwrap()
-            }
-            fn get_b() -> BigInt {
-                34_i64.to_bigint().unwrap()
-            }
-        }
+        define_myzkp_curve_type!(CurveA30B34, "30", "34");
 
         let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(36_i64),
