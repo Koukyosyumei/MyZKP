@@ -243,15 +243,15 @@ mod tests {
             }
         }
 
-        let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34::<FiniteFieldElement<Mod631>>::new(
+        let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(36_i64),
             FiniteFieldElement::<Mod631>::from_value(60_i64),
         );
-        let q = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34::<FiniteFieldElement<Mod631>>::new(
+        let q = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(121_i64),
             FiniteFieldElement::<Mod631>::from_value(387_i64),
         );
-        let s = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34::<FiniteFieldElement<Mod631>>::new(
+        let s = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(0_i64),
             FiniteFieldElement::<Mod631>::from_value(36_i64),
         );
@@ -275,11 +275,11 @@ mod tests {
         let w = weil_pairing(p.clone(), q.clone(), order.clone(), Some(s.clone()));
         assert_eq!(w.sanitize().value, 242.to_bigint().unwrap());
 
-        let p_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34::<FiniteFieldElement<Mod631>>::new(
+        let p_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(617_i64),
             FiniteFieldElement::<Mod631>::from_value(5_i64),
         );
-        let q_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34::<FiniteFieldElement<Mod631>>::new(
+        let q_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(121_i64),
             FiniteFieldElement::<Mod631>::from_value(244_i64),
         );
