@@ -11,6 +11,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
+use crate::modules::utils::extended_euclidean;
 
 pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> Polynomial<F>;
@@ -140,9 +141,10 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
 {
     fn inverse(&self) -> Self {
         // Implementation of inverse using extended Euclidean algorithm for polynomials
-        let (gcd, s, _) = extended_euclidean(&self.poly, &P::modulus());
-        assert_eq!(gcd.degree(), 0, "Element is not invertible");
-        Self::new(s * gcd.nth_coefficient(0).inverse())
+        let (r, s, t) = extended_euclidean(self.poly.clone(), P::modulus());
+        ExtendedFieldElement::<M, P>::new(t.clone())
+        //assert_eq!(gcd.degree(), 0, "Element is not invertible");
+        //Self::new(s * gcd.nth_coefficient(0).inverse())
     }
 }
 
@@ -185,24 +187,6 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::Display
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.poly)
-    }
-}
-
-// Helper function for extended Euclidean algorithm for polynomials
-fn extended_euclidean<F: Field>(
-    a: &Polynomial<F>,
-    b: &Polynomial<F>,
-) -> (Polynomial<F>, Polynomial<F>, Polynomial<F>) {
-    if b.degree() == -1 {
-        (
-            a.clone(),
-            Polynomial::from_monomials(&[F::one()]),
-            Polynomial::from_monomials(&[F::zero()]),
-        )
-    } else {
-        let (q, r) = (a.clone() / b.clone(), a.clone() % b.clone());
-        let (gcd, s, t) = extended_euclidean(b, &r);
-        (gcd, t.clone(), s - q * t)
     }
 }
 

@@ -9,7 +9,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::str::FromStr;
 
 use crate::modules::ring::Ring;
-use crate::modules::utils::extended_gcd;
+use crate::modules::utils::extended_euclidean;
 
 pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
@@ -113,7 +113,7 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
             new_r += &modulus;
         }
 
-        let (final_r, _, mut t) = extended_gcd(r, new_r);
+        let (final_r, _, mut t) = extended_euclidean(r, new_r);
 
         // At this point, r should be 1 if the inverse exists
         //if final_r == BigInt::one() {

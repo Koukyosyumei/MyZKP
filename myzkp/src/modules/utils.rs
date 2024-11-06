@@ -1,7 +1,7 @@
 use num_traits::{One, Zero};
 use std::ops::{Div, Rem, Sub};
 
-pub fn extended_gcd<F>(a: F, b: F) -> (F, F, F)
+pub fn extended_euclidean<F>(a: F, b: F) -> (F, F, F)
 where
     F: Clone + PartialEq + Sub<Output = F> + Div<Output = F> + Rem<Output = F> + Zero + One,
 {

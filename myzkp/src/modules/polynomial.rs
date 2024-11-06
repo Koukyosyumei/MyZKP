@@ -1,3 +1,4 @@
+use num_traits::{One, Signed, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
@@ -16,22 +17,6 @@ impl<F: Field> Polynomial<F> {
         Polynomial {
             coef: vec![F::zero(), F::one()],
         }
-    }
-
-    pub fn one() -> Self {
-        Polynomial {
-            coef: vec![F::one()],
-        }
-    }
-
-    pub fn zero() -> Self {
-        Polynomial {
-            coef: vec![F::zero()],
-        }
-    }
-
-    pub fn is_zero(&self) -> bool {
-        self.coef.len() == 0 && self.coef[0].is_zero()
     }
 
     /// Removes trailing zeroes from a polynomial's coefficients.
@@ -167,6 +152,26 @@ impl<F: Field> fmt::Display for Polynomial<F> {
     }
 }
 
+impl<F: Field> Zero for Polynomial<F> {
+    fn zero() -> Self {
+        Polynomial {
+            coef: vec![F::zero()],
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.degree() == -1
+    }
+}
+
+impl<F: Field> One for Polynomial<F> {
+    fn one() -> Self {
+        Polynomial {
+            coef: vec![F::one()],
+        }
+    }
+}
+
 // Arithmetic operations implementation for Polynomial.
 impl<F: Field> Add for Polynomial<F> {
     type Output = Self;
@@ -224,7 +229,10 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
 
     /// Multiplication of two polynomials.
     fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut result = vec![F::zero(); self.degree() as usize + other.degree() as usize + 1];
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::<F>::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
 
         for (i, a) in self.coef.iter().enumerate() {
             for (j, b) in other.coef.iter().enumerate() {
