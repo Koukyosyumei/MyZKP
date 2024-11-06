@@ -72,21 +72,11 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     for ExtendedFieldElement<M, P>
 {
     fn zero() -> Self {
-        /*
-        ExtendedFieldElement::<M>::new(
-            Polynomial::<FiniteFieldElement<M>>::zero(),
-            self.irreducible_poly,
-        )*/
-        unimplemented!("")
+        ExtendedFieldElement::<M, P>::new(Polynomial::<FiniteFieldElement<M>>::zero())
     }
 
     fn one() -> Self {
-        unimplemented!("")
-        /*
-        ExtendedFieldElement::<M>::new(
-            Polynomial::<FiniteFieldElement<M>>::one(),
-            self.irreducible_poly,
-        )*/
+        ExtendedFieldElement::<M, P>::new(Polynomial::<FiniteFieldElement<M>>::one())
     }
 }
 
