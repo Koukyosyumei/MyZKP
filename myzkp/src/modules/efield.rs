@@ -1,4 +1,3 @@
-use crate::modules::ring::Ring;
 use num_bigint::BigInt;
 use num_traits::One;
 use num_traits::Zero;
@@ -11,6 +10,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
+use crate::modules::ring::Ring;
 
 pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> Polynomial<F>;
@@ -65,13 +65,21 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> PartialEq
 
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Eq for ExtendedFieldElement<M, P> {}
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
+impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Zero
     for ExtendedFieldElement<M, P>
 {
     fn zero() -> Self {
         ExtendedFieldElement::<M, P>::new(Polynomial::<FiniteFieldElement<M>>::zero())
     }
 
+    fn is_zero(&self) -> bool {
+        self.poly.is_zero()
+    }
+}
+
+impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> One
+    for ExtendedFieldElement<M, P>
+{
     fn one() -> Self {
         ExtendedFieldElement::<M, P>::new(Polynomial::<FiniteFieldElement<M>>::one())
     }
@@ -136,11 +144,11 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         assert_eq!(gcd.degree(), 0, "Element is not invertible");
         Self::new(s * gcd.nth_coefficient(0).inverse())
     }
+}
 
-    fn get_value(&self) -> BigInt {
-        unimplemented!("Not applicable for extended field elements")
-    }
-
+impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
+    for ExtendedFieldElement<M, P>
+{
     fn pow(&self, n: BigInt) -> Self {
         let mut result = Self::new(Polynomial::from_monomials(
             &[FiniteFieldElement::<M>::one()],
@@ -157,6 +165,10 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         }
 
         result
+    }
+
+    fn get_value(&self) -> BigInt {
+        unimplemented!("Not applicable for extended field elements")
     }
 
     fn from_value<V: Into<BigInt>>(_value: V) -> Self {

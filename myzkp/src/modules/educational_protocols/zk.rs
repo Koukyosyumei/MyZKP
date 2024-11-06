@@ -102,8 +102,10 @@ pub fn zk_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::polynomial::Polynomial;
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_kea_protocol() {

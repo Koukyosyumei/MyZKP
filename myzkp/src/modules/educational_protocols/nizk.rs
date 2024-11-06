@@ -158,9 +158,10 @@ pub fn non_interactive_zkp_protocol<F: Field, E: EllipticCurve>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::field::ModulusValue;
     use std::str::FromStr;
 
+    use crate::modules::field::ModulusValue;
+    use crate::modules::ring::Ring;
     use crate::{
         define_myzkp_curve_type, define_myzkp_modulus_type,
         modules::field::{FiniteFieldElement, ModEIP197},

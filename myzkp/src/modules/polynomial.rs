@@ -30,6 +30,10 @@ impl<F: Field> Polynomial<F> {
         }
     }
 
+    pub fn is_zero(&self) -> bool {
+        self.coef.len() == 0 && self.coef[0].is_zero()
+    }
+
     /// Removes trailing zeroes from a polynomial's coefficients.
     fn trim_trailing_zeros(coef: Vec<F>) -> Vec<F> {
         let mut trimmed = coef;
@@ -316,7 +320,9 @@ impl<F: Field> Rem for Polynomial<F> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_polynomial_addition() {

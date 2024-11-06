@@ -281,6 +281,7 @@ macro_rules! define_myzkp_curve_type {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::modules::ring::Ring;
     use crate::{
         define_myzkp_modulus_type,
         modules::field::{FiniteFieldElement, ModulusValue},

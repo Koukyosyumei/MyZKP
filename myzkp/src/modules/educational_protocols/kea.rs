@@ -94,8 +94,10 @@ pub fn knowledge_of_exponent_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::polynomial::Polynomial;
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_kea_protocol() {

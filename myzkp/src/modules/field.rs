@@ -14,12 +14,6 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
     fn inverse(&self) -> Self;
-
-    // Utility functions
-    fn get_value(&self) -> BigInt;
-    fn pow(&self, n: BigInt) -> Self;
-    fn from_value<M: Into<BigInt>>(value: M) -> Self;
-    fn random_element(exclude_elements: &[Self]) -> Self;
 }
 
 #[derive(Debug, Clone)]
@@ -81,11 +75,18 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
     }
     */
 }
-impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
+
+impl<M: ModulusValue> Zero for FiniteFieldElement<M> {
     fn zero() -> Self {
         FiniteFieldElement::<M>::new(BigInt::zero())
     }
 
+    fn is_zero(&self) -> bool {
+        self.value.is_zero()
+    }
+}
+
+impl<M: ModulusValue> One for FiniteFieldElement<M> {
     fn one() -> Self {
         FiniteFieldElement::<M>::new(BigInt::one())
     }
@@ -98,9 +99,6 @@ impl<M: ModulusValue> Hash for FiniteFieldElement<M> {
 }
 
 impl<M: ModulusValue> Field for FiniteFieldElement<M> {
-    fn get_value(&self) -> BigInt {
-        self.value.clone()
-    }
     fn inverse(&self) -> Self {
         let modulus = M::modulus();
         let mut t = BigInt::zero();
@@ -143,7 +141,9 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
         //    panic!("r={}: Inverse does not exist", r)
         //}
     }
+}
 
+impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
     fn pow(&self, n: BigInt) -> Self {
         let mut exponent = n;
         let mut base = self.clone();
@@ -167,6 +167,10 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 
     fn from_value<V: Into<BigInt>>(value: V) -> Self {
         FiniteFieldElement::<M>::new(value.into())
+    }
+
+    fn get_value(&self) -> BigInt {
+        self.value.clone()
     }
 
     // Random element excluding a set of elements.
@@ -226,16 +230,6 @@ impl<M: ModulusValue> Mul<FiniteFieldElement<M>> for FiniteFieldElement<M> {
     }
 }
 
-/*
-impl<M: ModulusValue> Mul<i64> for FiniteFieldElement<M> {
-    type Output = Self;
-
-    fn mul(self, n: i64) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value * n.to_bigint().unwrap()) % &modulus)
-    }
-}*/
-
 impl<M: ModulusValue> Neg for FiniteFieldElement<M> {
     type Output = Self;
 
@@ -274,6 +268,7 @@ define_myzkp_modulus_type!(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::modules::ring::Ring;
     use num_bigint::ToBigInt;
 
     define_myzkp_modulus_type!(Mod7, "7");

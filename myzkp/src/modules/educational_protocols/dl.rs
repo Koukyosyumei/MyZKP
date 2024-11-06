@@ -108,8 +108,10 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::polynomial::Polynomial;
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_dl_protocol() {
