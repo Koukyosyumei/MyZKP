@@ -8,7 +8,6 @@ use crate::modules::field::Field;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial<F: Field> {
     pub poly: Vec<F>,
-    pub var: String, // Variable for representation, default to 'x'
 }
 
 impl<F: Field> Polynomial<F> {
@@ -16,21 +15,18 @@ impl<F: Field> Polynomial<F> {
     pub fn x() -> Self {
         Polynomial {
             poly: vec![F::zero(), F::one()],
-            var: "x".to_string(),
         }
     }
 
     pub fn one() -> Self {
         Polynomial {
             poly: vec![F::one()],
-            var: "x".to_string(),
         }
     }
 
     pub fn zero() -> Self {
         Polynomial {
             poly: vec![F::zero()],
-            var: "x".to_string(),
         }
     }
 
@@ -108,10 +104,7 @@ impl<F: Field> Polynomial<F> {
             lagrange_polys.push(cur_poly);
         }
 
-        let mut result = Polynomial {
-            poly: vec![],
-            var: "x".to_string(),
-        };
+        let mut result = Polynomial { poly: vec![] };
         for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
             result = result + lagrange_poly.clone() * y_values[j].clone();
         }
@@ -122,12 +115,10 @@ impl<F: Field> Polynomial<F> {
     pub fn from_monomials(x_values: &[F]) -> Polynomial<F> {
         let mut poly = Polynomial {
             poly: vec![F::one()],
-            var: "x".to_string(),
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
                 poly: vec![F::zero() - x.clone(), F::one()],
-                var: "x".to_string(),
             });
         }
         poly
@@ -146,16 +137,16 @@ impl<F: Field> fmt::Display for Polynomial<F> {
                 } else if i == 1 {
                     // Linear term (e.g., 3x)
                     if coeff == &F::one() {
-                        format!("{}", self.var)
+                        format!("{}", "x")
                     } else {
-                        format!("{}{}", coeff, self.var)
+                        format!("{}{}", coeff, "x")
                     }
                 } else {
                     // Higher degree terms (e.g., 3x^2)
                     if coeff == &F::one() {
-                        format!("{}^{}", self.var, i)
+                        format!("{}^{}", "x", i)
                     } else {
-                        format!("{}{}^{}", coeff, self.var, i)
+                        format!("{}{}^{}", coeff, "x", i)
                     }
                 };
                 terms.push(term);
@@ -189,7 +180,6 @@ impl<F: Field> Add for Polynomial<F> {
         }
         Polynomial {
             poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
         }
     }
 }
@@ -210,7 +200,6 @@ impl<F: Field> Sub for Polynomial<F> {
         }
         Polynomial {
             poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
         }
     }
 }
@@ -222,7 +211,6 @@ impl<F: Field> Neg for Polynomial<F> {
     fn neg(self) -> Polynomial<F> {
         Polynomial {
             poly: self.poly.iter().map(|x| -x.clone()).collect(),
-            var: self.var.clone(),
         }
     }
 }
@@ -241,7 +229,6 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
         }
         Polynomial {
             poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
         }
     }
 }
@@ -256,7 +243,6 @@ impl<F: Field> Mul<F> for Polynomial<F> {
                 .iter()
                 .map(|x| x.clone() * scalar.clone())
                 .collect(),
-            var: self.var.clone(),
         }
     }
 }
@@ -286,7 +272,6 @@ impl<F: Field> Div for Polynomial<F> {
 
         Polynomial {
             poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
         }
     }
 }
@@ -320,7 +305,6 @@ impl<F: Field> Rem for Polynomial<F> {
 
         Polynomial {
             poly: remainder_coeffs,
-            var: self.var.clone(),
         }
     }
 }
@@ -337,21 +321,18 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ],
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(5_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 + poly2, expected);
     }
@@ -363,21 +344,18 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(4_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(5_i32),
             ],
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 - poly2, expected);
     }
@@ -389,14 +367,12 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(4_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(-3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(-4_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(-poly, expected);
     }
@@ -408,14 +384,12 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ], // 1 + 2x
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 2 + 3x
-            var: "x".to_string(),
         };
         let expected = Polynomial {
             poly: vec![
@@ -423,7 +397,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(7_i32), // x term
                 FiniteFieldElement::<ModEIP197>::from_value(6_i32), // x^2 term
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 * poly2, expected);
     }
@@ -435,7 +408,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ], // 1 + 2x
-            var: "x".to_string(),
         };
         let scalar = FiniteFieldElement::<ModEIP197>::from_value(3_i32);
         let expected = Polynomial {
@@ -443,7 +415,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(6_i32),
             ], // 3 + 6x
-            var: "x".to_string(),
         };
         assert_eq!(poly * scalar, expected);
     }
@@ -456,14 +427,12 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 3 + 3x + x^2
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
             poly: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 1 + x
-            var: "x".to_string(),
         };
         let quotient = poly1.clone() / poly2.clone();
         let expected_quotient = Polynomial {
@@ -471,12 +440,10 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 2 + x
-            var: "x".to_string(),
         };
         let remainder = poly1.clone() % poly2.clone();
         let expected_remainder = Polynomial {
             poly: vec![FiniteFieldElement::<ModEIP197>::from_value(1_i32)], // remainder is 1
-            var: "x".to_string(),
         };
         assert_eq!(quotient, expected_quotient);
         assert_eq!(remainder, expected_remainder);
@@ -489,7 +456,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 2 + 3x
-            var: "x".to_string(),
         };
         let point = FiniteFieldElement::<ModEIP197>::from_value(2_i32);
         let expected = FiniteFieldElement::<ModEIP197>::from_value(8_i32); // 2 + 3 * 2 = 8
@@ -504,7 +470,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(0_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 1 + 0x + 3x^2
-            var: "x".to_string(),
         };
         assert_eq!(poly.degree(), 2); // The degree should be 2
     }
@@ -528,7 +493,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(0_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // x^2 - 1
-            var: "x".to_string(),
         };
         assert_eq!(result, expected);
     }
@@ -547,7 +511,6 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(-5_i32), // x term
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32), // x^2 term
             ],
-            var: "x".to_string(),
         };
         assert_eq!(result, expected);
     }

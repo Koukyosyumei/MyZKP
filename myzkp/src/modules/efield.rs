@@ -41,10 +41,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new(Polynomial {
-            poly: vec![value],
-            var: "x".to_string(),
-        })
+        Self::new(Polynomial { poly: vec![value] })
     }
 }
 
@@ -220,7 +217,6 @@ mod tests {
                         FiniteFieldElement::<Mod7>::zero(),
                         FiniteFieldElement::<Mod7>::from_value(1),
                     ],
-                    var: "x".to_string(),
                 }
             }
         }
@@ -230,14 +226,12 @@ mod tests {
                 FiniteFieldElement::from_value(3),
                 FiniteFieldElement::from_value(2),
             ],
-            var: "x".to_string(),
         });
         let b = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
             poly: vec![
                 FiniteFieldElement::from_value(1),
                 FiniteFieldElement::from_value(4),
             ],
-            var: "x".to_string(),
         });
 
         /*
@@ -251,7 +245,7 @@ mod tests {
                         FiniteFieldElement::from_value(4),
                         FiniteFieldElement::from_value(6)
                     ],
-                    var: "x".to_string(),
+
                 },
                 irreducible_poly.clone()
             )
@@ -267,7 +261,7 @@ mod tests {
                         FiniteFieldElement::from_value(2),
                         FiniteFieldElement::from_value(5)
                     ],
-                    var: "x".to_string(),
+
                 },
                 irreducible_poly.clone()
             )
@@ -294,7 +288,7 @@ mod tests {
                         FiniteFieldElement::from_value(5),
                         FiniteFieldElement::from_value(6)
                     ],
-                    var: "x".to_string(),
+
                 },
                 irreducible_poly.clone()
             )
