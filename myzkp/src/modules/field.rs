@@ -31,9 +31,9 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
     // Constructor with optional modulus and generator_value.
     pub fn new(value: BigInt) -> Self {
         let modulus = M::modulus();
-        let value_sanitized = value % &modulus;
+        let mut value_sanitized = value % &modulus;
 
-        //if value_sanitized < 0_i32.to_bigint().unwrap() {
+        //if value_sanitized < BigInt::zero() {
         //    value_sanitized += modulus.clone();
         //}
 
@@ -46,7 +46,7 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
     pub fn sanitize(&self) -> Self {
         let modulus = M::modulus();
         let mut value_sanitized = self.value.clone() % &modulus;
-        if value_sanitized < 0_i32.to_bigint().unwrap() {
+        if value_sanitized < BigInt::zero() {
             value_sanitized += modulus.clone();
         }
         FiniteFieldElement {
