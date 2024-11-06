@@ -252,6 +252,10 @@ impl<F: Field> Div for Polynomial<F> {
 
     /// Division of two polynomials, returns quotient.
     fn div(self, other: Polynomial<F>) -> Polynomial<F> {
+        if self.degree() < other.degree() {
+            return self.clone();
+        }
+
         let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
         let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();

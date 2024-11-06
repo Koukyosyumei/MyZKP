@@ -210,6 +210,7 @@ mod tests {
         pub struct Ip7;
 
         impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
+            // x^2 + 1
             fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
                 Polynomial {
                     coef: vec![
@@ -221,12 +222,15 @@ mod tests {
             }
         }
 
+        // 2x + 3
         let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(3),
                 FiniteFieldElement::from_value(2),
             ],
         });
+
+        // 4x + 1
         let b = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(1),
@@ -246,21 +250,13 @@ mod tests {
             })
         );
 
-        /*
         // Multiplication
         let product = a.clone() * b.clone();
         assert_eq!(
             product,
-            ExtendedFieldElement::<Mod7>::new(
-                Polynomial {
-                    poly: vec![
-                        FiniteFieldElement::from_value(2),
-                        FiniteFieldElement::from_value(5)
-                    ],
-
-                },
-
-            )
+            ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+                coef: vec![FiniteFieldElement::from_value(2),],
+            },)
         );
 
         // Inverse
@@ -268,12 +264,10 @@ mod tests {
         let product = a.clone() * inv_a;
         assert_eq!(
             product,
-            ExtendedFieldElement::<Mod7>::from_base_field(
-                FiniteFieldElement::one(),
-
-            )
+            ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one(),)
         );
 
+        /*
         // Exponentiation
         let a_cubed = a.pow(BigInt::from(3));
         assert_eq!(
