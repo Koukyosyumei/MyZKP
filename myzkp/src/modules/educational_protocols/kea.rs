@@ -1,8 +1,9 @@
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
 use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::Zero;
 use std::str::FromStr;
+
+use crate::modules::field::Field;
+use crate::modules::polynomial::Polynomial;
 
 pub struct Prover<F: Field> {
     pub p: Polynomial<F>,

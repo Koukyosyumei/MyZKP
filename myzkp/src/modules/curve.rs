@@ -1,5 +1,6 @@
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
+use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::{Add, Mul, Neg, Sub};
@@ -19,7 +20,7 @@ pub struct EllipticCurvePoint<F: Field, E: EllipticCurve> {
 }
 
 impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
-    fn new(x: F, y: F) -> Self {
+    pub fn new(x: F, y: F) -> Self {
         // let a = E::get_a();
         // let b = E::get_b();
         // assert!(y.pow(2) == x.pow(3) + a * x + b, "Point is not on the curve");
@@ -158,6 +159,21 @@ impl<F: Field, E: EllipticCurve> Sub for EllipticCurvePoint<F, E> {
     }
 }
 
+impl<F: Field, E: EllipticCurve> fmt::Display for EllipticCurvePoint<F, E> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_point_at_infinity() {
+            write!(f, "(x=∞, y=∞)")
+        } else {
+            match (self.x.as_ref(), self.y.as_ref()) {
+                (Some(x), Some(y)) => write!(f, "(x={}, y={})", x, y),
+                (Some(x), None) => write!(f, "({}, ∅)", x),
+                (None, Some(y)) => write!(f, "(∅, {})", y),
+                (None, None) => unreachable!(), // This case is handled by is_infinity()
+            }
+        }
+    }
+}
+
 pub fn get_lambda<F: Field, E: EllipticCurve>(
     p: EllipticCurvePoint<F, E>,
     q: EllipticCurvePoint<F, E>,
@@ -185,7 +201,7 @@ pub fn miller<F: Field, E: EllipticCurve>(
     m: BigInt,
 ) -> F {
     if p == q {
-        F::one();
+        return F::one();
     }
 
     let mut f = F::one();

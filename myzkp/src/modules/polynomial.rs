@@ -65,6 +65,17 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    pub fn eval_with_powers_on_curve<E: EllipticCurve>(
+        &self,
+        powers: &[EllipticCurvePoint<F, E>],
+    ) -> EllipticCurvePoint<F, E> {
+        let mut result = EllipticCurvePoint::point_at_infinity();
+        for (i, coef) in self.poly.iter().enumerate() {
+            result = result + powers[i].clone() * coef.clone().get_value();
+        }
+        result
+    }
+
     /// Lagrange interpolation to compute polynomials.
     pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
         let mut lagrange_polys = vec![];
@@ -293,19 +304,6 @@ impl<F: Field> Rem for Polynomial<F> {
             poly: remainder_coeffs,
             var: self.var.clone(),
         }
-    }
-}
-
-impl<F: Field> Polynomial<F> {
-    pub fn eval_with_powers_on_curve<E: EllipticCurve>(
-        &self,
-        powers: &[EllipticCurvePoint<F, E>],
-    ) -> EllipticCurvePoint<F, E> {
-        let mut result = EllipticCurvePoint::point_at_infinity();
-        for (i, coef) in self.poly.iter().enumerate() {
-            result = result + powers[i].clone() * coef.clone().get_value();
-        }
-        result
     }
 }
 

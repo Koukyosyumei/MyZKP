@@ -65,10 +65,10 @@ pub fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::polynomial::Polynomial;
     use crate::{
         define_myzkp_modulus_type,
         modules::field::{FiniteFieldElement, ModulusValue},
+        modules::polynomial::Polynomial,
     };
     use num_bigint::BigInt;
     use std::str::FromStr;

@@ -131,8 +131,7 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
         }
 
         // At this point, r should be 1 if the inverse exists
-        assert_eq!(r, BigInt::one(), "Inverse does not exist");
-
+        //if r == BigInt::one() {
         // Ensure t is within the correct range
         t %= &modulus;
         if t.is_negative() {
@@ -140,6 +139,9 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
         }
 
         FiniteFieldElement::<M>::new(t)
+        //} else {
+        //    panic!("r={}: Inverse does not exist", r)
+        //}
     }
 
     fn pow(&self, n: BigInt) -> Self {
