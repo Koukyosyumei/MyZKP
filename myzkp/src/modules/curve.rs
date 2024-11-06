@@ -234,7 +234,7 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 
-pub fn tate_pairing<F: Field, E: EllipticCurve>(
+pub fn general_tate_pairing<F: Field, E: EllipticCurve>(
     p: EllipticCurvePoint<F, E>,
     q: EllipticCurvePoint<F, E>,
     ell: BigInt,
@@ -247,6 +247,17 @@ pub fn tate_pairing<F: Field, E: EllipticCurve>(
     let f = fp_qs / fp_s;
 
     return f.pow((modulus - BigInt::one()) / ell);
+}
+
+pub fn tate_pairing<F: Field, E: EllipticCurve>(
+    p: EllipticCurvePoint<F, E>,
+    q: EllipticCurvePoint<F, E>,
+    ell: BigInt,
+    modulus: BigInt,
+) -> F {
+    let fp_q = miller(p.clone(), q.clone(), ell.clone());
+
+    return fp_q.pow((modulus - BigInt::one()) / ell);
 }
 
 #[macro_export]
@@ -363,7 +374,7 @@ mod tests {
     }
 
     #[test]
-    fn test_tate_pairing() {
+    fn test_general_tate_pairing() {
         let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(36_i64),
             FiniteFieldElement::<Mod631>::from_value(60_i64),
@@ -386,7 +397,7 @@ mod tests {
         );
         let order = 5.to_bigint().unwrap();
 
-        let tate = tate_pairing(
+        let tate = general_tate_pairing(
             p.clone(),
             q.clone(),
             order.clone(),
@@ -394,12 +405,47 @@ mod tests {
             Some(s.clone()),
         );
 
-        let tate_prime = tate_pairing(
+        let tate_prime = general_tate_pairing(
             p_prime.clone(),
             q_prime.clone(),
             order.clone(),
             BigInt::from(631),
             Some(s.clone()),
+        );
+
+        assert_eq!(
+            tate.pow(12_i32.to_bigint().unwrap()).sanitize(),
+            tate_prime.sanitize()
+        );
+    }
+
+    #[test]
+    fn test_tate_pairing() {
+        let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(36_i64),
+            FiniteFieldElement::<Mod631>::from_value(60_i64),
+        );
+        let q = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(387_i64),
+        );
+        let p_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(617_i64),
+            FiniteFieldElement::<Mod631>::from_value(5_i64),
+        );
+        let q_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(244_i64),
+        );
+        let order = 5.to_bigint().unwrap();
+
+        let tate = tate_pairing(p.clone(), q.clone(), order.clone(), BigInt::from(631));
+
+        let tate_prime = tate_pairing(
+            p_prime.clone(),
+            q_prime.clone(),
+            order.clone(),
+            BigInt::from(631),
         );
 
         assert_eq!(
