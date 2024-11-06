@@ -28,6 +28,12 @@ impl<F: Field> Polynomial<F> {
         trimmed
     }
 
+    pub fn reduce(&self) -> Self {
+        Polynomial {
+            coef: Self::trim_trailing_zeros(self.coef.clone()),
+        }
+    }
+
     /// Returns the degree of the polynomial.
     pub fn degree(&self) -> isize {
         let trimmed = Self::trim_trailing_zeros(self.coef.clone());

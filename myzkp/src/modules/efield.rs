@@ -29,12 +29,14 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
             poly: poly,
             _phantom: PhantomData,
         };
-        result.reduce();
-        result
+        result.reduce()
     }
 
-    fn reduce(&mut self) {
-        self.poly = self.poly.clone() % P::modulus();
+    fn reduce(&self) -> Self {
+        Self {
+            poly: self.poly.clone() % P::modulus(),
+            _phantom: PhantomData,
+        }
     }
 
     pub fn degree(&self) -> isize {
@@ -42,7 +44,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new(Polynomial { coef: vec![value] })
+        Self::new((Polynomial { coef: vec![value] }).reduce()).reduce()
     }
 }
 
@@ -141,7 +143,8 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
 {
     fn inverse(&self) -> Self {
         // Implementation of inverse using extended Euclidean algorithm for polynomials
-        let (r, s, t) = extended_euclidean(self.poly.clone(), P::modulus());
+        let (r, s, t) = extended_euclidean(P::modulus(), self.poly.clone());
+        println!("r={}, s={}, t={}", r.clone(), s.clone(), t.clone());
         ExtendedFieldElement::<M, P>::new(t.clone())
         //assert_eq!(gcd.degree(), 0, "Element is not invertible");
         //Self::new(s * gcd.nth_coefficient(0).inverse())
@@ -198,7 +201,7 @@ mod tests {
 
     use crate::define_myzkp_modulus_type;
 
-    define_myzkp_modulus_type!(Mod7, "7");
+    define_myzkp_modulus_type!(Mod7, "2");
 
     #[test]
     fn test_extended_field_operations() {
@@ -206,31 +209,31 @@ mod tests {
         pub struct Ip7;
 
         impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
-            // x^2 + 1
+            // x^2 + x + 1
             fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
                 Polynomial {
                     coef: vec![
                         FiniteFieldElement::<Mod7>::from_value(1),
-                        FiniteFieldElement::<Mod7>::zero(),
+                        FiniteFieldElement::<Mod7>::from_value(1),
                         FiniteFieldElement::<Mod7>::from_value(1),
                     ],
                 }
             }
         }
 
-        // 2x + 3
+        // x + 1
         let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
-                FiniteFieldElement::from_value(3),
-                FiniteFieldElement::from_value(2),
+                FiniteFieldElement::from_value(1),
+                FiniteFieldElement::from_value(1),
             ],
         });
 
-        // 4x + 1
+        // x
         let b = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
+                FiniteFieldElement::from_value(0),
                 FiniteFieldElement::from_value(1),
-                FiniteFieldElement::from_value(4),
             ],
         });
 
@@ -239,10 +242,7 @@ mod tests {
         assert_eq!(
             sum,
             ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
-                coef: vec![
-                    FiniteFieldElement::from_value(4),
-                    FiniteFieldElement::from_value(6)
-                ],
+                coef: vec![FiniteFieldElement::from_value(1)],
             })
         );
 
@@ -251,16 +251,17 @@ mod tests {
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
-                coef: vec![FiniteFieldElement::from_value(2),],
+                coef: vec![FiniteFieldElement::from_value(1)],
             },)
         );
 
         // Inverse
         let inv_a = a.clone().inverse();
+        println!("~~~~~~~~~~~~~{} {}", a.clone(), inv_a.clone());
         let product = a.clone() * inv_a;
         assert_eq!(
             product,
-            ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one(),)
+            ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one())
         );
 
         /*
