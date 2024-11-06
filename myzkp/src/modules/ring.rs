@@ -9,7 +9,6 @@ pub trait Ring:
     + Add<Output = Self>
     + Sub<Output = Self>
     + Mul<Output = Self>
-    + Mul<i64, Output = Self>
     + Neg<Output = Self>
 {
     // A ring is an algebraic structure with addition and multiplication

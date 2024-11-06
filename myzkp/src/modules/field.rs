@@ -226,6 +226,7 @@ impl<M: ModulusValue> Mul<FiniteFieldElement<M>> for FiniteFieldElement<M> {
     }
 }
 
+/*
 impl<M: ModulusValue> Mul<i64> for FiniteFieldElement<M> {
     type Output = Self;
 
@@ -233,7 +234,7 @@ impl<M: ModulusValue> Mul<i64> for FiniteFieldElement<M> {
         let modulus = M::modulus();
         FiniteFieldElement::<M>::new((&self.value * n.to_bigint().unwrap()) % &modulus)
     }
-}
+}*/
 
 impl<M: ModulusValue> Neg for FiniteFieldElement<M> {
     type Output = Self;

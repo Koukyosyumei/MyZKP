@@ -20,6 +20,20 @@ impl<F: Field> Polynomial<F> {
         }
     }
 
+    pub fn one() -> Self {
+        Polynomial {
+            poly: vec![F::one()],
+            var: "x".to_string(),
+        }
+    }
+
+    pub fn zero() -> Self {
+        Polynomial {
+            poly: vec![F::zero()],
+            var: "x".to_string(),
+        }
+    }
+
     /// Removes trailing zeroes from a polynomial's coefficients.
     fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
         let mut trimmed = poly;

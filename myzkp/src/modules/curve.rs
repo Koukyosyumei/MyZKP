@@ -61,7 +61,8 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
         let y2 = other.y.clone().unwrap();
 
         if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()) * (3_i64) + a.clone()) / (y1.clone() * (2_i64))
+            ((x1.clone() * x1.clone()) * (F::from_value(3_i64)) + a.clone())
+                / (y1.clone() * (F::from_value(2_i64)))
         } else {
             (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
         }
