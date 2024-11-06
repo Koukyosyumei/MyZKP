@@ -194,7 +194,7 @@ mod tests {
 
         // Run the protocol
         let delta = F::from_value(23);
-        let order = BigInt::from_str("15").unwrap();
+        let order = BigInt::from_str("5").unwrap();
         let result = non_interactive_zkp_protocol(&prover, &verifier, &setup, &delta, order, ms);
 
         let proof = prover.generate_proof(&setup.proof_key, &delta);

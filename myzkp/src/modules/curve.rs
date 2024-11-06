@@ -323,6 +323,14 @@ mod tests {
         );
         assert_eq!(y_prime.sanitize().value, 1_i32.to_bigint().unwrap());
 
+        let y_prime2 = weil_pairing(
+            p_prime.clone() * 3_i32.to_bigint().unwrap(),
+            p_prime.clone() * 2_i32.to_bigint().unwrap(),
+            order.clone(),
+            Some(s.clone()),
+        );
+        assert_eq!(y_prime2.sanitize().value, 1_i32.to_bigint().unwrap());
+
         assert_eq!(p.clone() * 3_i32.to_bigint().unwrap(), p_prime.clone());
         assert_eq!(q.clone() * 4_i32.to_bigint().unwrap(), q_prime.clone());
         assert_eq!(
