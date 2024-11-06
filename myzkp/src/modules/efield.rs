@@ -159,11 +159,11 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         result
     }
 
-    fn from_value<V: Into<BigInt>>(value: V) -> Self {
+    fn from_value<V: Into<BigInt>>(_value: V) -> Self {
         unimplemented!("Use from_base_field for extended field elements")
     }
 
-    fn random_element(exclude_elements: &[Self]) -> Self {
+    fn random_element(_exclude_elements: &[Self]) -> Self {
         unimplemented!("Random element generation for extended field not implemented")
     }
 }
