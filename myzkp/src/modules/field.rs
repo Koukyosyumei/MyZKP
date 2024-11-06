@@ -9,6 +9,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::str::FromStr;
 
 use crate::modules::ring::Ring;
+use crate::modules::utils::extended_gcd;
 
 pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
@@ -101,8 +102,6 @@ impl<M: ModulusValue> Hash for FiniteFieldElement<M> {
 impl<M: ModulusValue> Field for FiniteFieldElement<M> {
     fn inverse(&self) -> Self {
         let modulus = M::modulus();
-        let mut t = BigInt::zero();
-        let mut new_t = BigInt::one();
         let mut r = modulus.clone();
         let mut new_r = self.value.clone();
 
@@ -114,22 +113,10 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
             new_r += &modulus;
         }
 
-        while !new_r.is_zero() {
-            let quotient = &r / &new_r;
-
-            // Update (t, new_t) = (new_t, t - quotient * new_t)
-            let temp_t = new_t.clone();
-            new_t = &t - &quotient * &new_t;
-            t = temp_t;
-
-            // Update (r, new_r) = (new_r, r - quotient * new_r)
-            let temp_r = new_r.clone();
-            new_r = &r - &quotient * &new_r;
-            r = temp_r;
-        }
+        let (final_r, _, mut t) = extended_gcd(r, new_r);
 
         // At this point, r should be 1 if the inverse exists
-        //if r == BigInt::one() {
+        //if final_r == BigInt::one() {
         // Ensure t is within the correct range
         t %= &modulus;
         if t.is_negative() {
