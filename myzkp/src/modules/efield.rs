@@ -207,9 +207,9 @@ mod tests {
     #[test]
     fn test_extended_field_operations() {
         #[derive(Debug, Clone, PartialEq, Hash)]
-        pub struct IP7;
+        pub struct Ip7;
 
-        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for IP7 {
+        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
             fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
                 Polynomial {
                     coef: vec![
@@ -221,36 +221,32 @@ mod tests {
             }
         }
 
-        let a = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
+        let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(3),
                 FiniteFieldElement::from_value(2),
             ],
         });
-        let b = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
+        let b = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(1),
                 FiniteFieldElement::from_value(4),
             ],
         });
 
-        /*
         // Addition
         let sum = a.clone() + b.clone();
         assert_eq!(
             sum,
-            ExtendedFieldElement::<Mod7>::new(
-                Polynomial {
-                    poly: vec![
-                        FiniteFieldElement::from_value(4),
-                        FiniteFieldElement::from_value(6)
-                    ],
-
-                },
-                irreducible_poly.clone()
-            )
+            ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+                coef: vec![
+                    FiniteFieldElement::from_value(4),
+                    FiniteFieldElement::from_value(6)
+                ],
+            })
         );
 
+        /*
         // Multiplication
         let product = a.clone() * b.clone();
         assert_eq!(
@@ -263,7 +259,7 @@ mod tests {
                     ],
 
                 },
-                irreducible_poly.clone()
+
             )
         );
 
@@ -274,7 +270,7 @@ mod tests {
             product,
             ExtendedFieldElement::<Mod7>::from_base_field(
                 FiniteFieldElement::one(),
-                irreducible_poly.clone()
+
             )
         );
 
@@ -290,7 +286,7 @@ mod tests {
                     ],
 
                 },
-                irreducible_poly.clone()
+
             )
         );
                 */
