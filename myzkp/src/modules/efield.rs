@@ -41,7 +41,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new(Polynomial { poly: vec![value] })
+        Self::new(Polynomial { coef: vec![value] })
     }
 }
 
@@ -49,7 +49,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash
     for ExtendedFieldElement<M, P>
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for v in &self.poly.poly.clone() {
+        for v in &self.poly.coef.clone() {
             v.hash(state);
         }
     }
@@ -212,7 +212,7 @@ mod tests {
         impl IrreduciblePoly<FiniteFieldElement<Mod7>> for IP7 {
             fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
                 Polynomial {
-                    poly: vec![
+                    coef: vec![
                         FiniteFieldElement::<Mod7>::from_value(1),
                         FiniteFieldElement::<Mod7>::zero(),
                         FiniteFieldElement::<Mod7>::from_value(1),
@@ -222,13 +222,13 @@ mod tests {
         }
 
         let a = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::from_value(3),
                 FiniteFieldElement::from_value(2),
             ],
         });
         let b = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::from_value(1),
                 FiniteFieldElement::from_value(4),
             ],
