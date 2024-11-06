@@ -3,6 +3,7 @@ use num_bigint::BigInt;
 use num_traits::One;
 use num_traits::Zero;
 use std::fmt;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::ops::{Add, Div, Mul, Neg, Sub};
@@ -10,7 +11,9 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 
-// Assuming the FiniteFieldElement, ModulusValue, Field, and Polynomial structs are already defined
+pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
+    fn modulus() -> Polynomial<F>;
+}
 
 #[derive(Clone, Debug)]
 pub struct ExtendedFieldElement<M: ModulusValue> {
@@ -71,20 +74,21 @@ impl<M: ModulusValue> Eq for ExtendedFieldElement<M> {}
 
 impl<M: ModulusValue> Ring for ExtendedFieldElement<M> {
     fn zero() -> Self {
-        ExtendedFieldElement::<M>::new(Polynomial::<FiniteFieldElement<M>>::zero())
+        /*
+        ExtendedFieldElement::<M>::new(
+            Polynomial::<FiniteFieldElement<M>>::zero(),
+            self.irreducible_poly,
+        )*/
+        unimplemented!("")
     }
 
     fn one() -> Self {
-        ExtendedFieldElement::<M>::new(Polynomial::<FiniteFieldElement<M>>::one())
-    }
-}
-
-impl<M: ModulusValue> Mul<i64> for ExtendedFieldElement<M> {
-    type Output = Self;
-
-    fn mul(self, n: i64) -> Self {
-        let modulus = M::modulus();
-        ExtendedFieldElement::<M>::new((&self.value * n.to_bigint().unwrap()) % &modulus)
+        unimplemented!("")
+        /*
+        ExtendedFieldElement::<M>::new(
+            Polynomial::<FiniteFieldElement<M>>::one(),
+            self.irreducible_poly,
+        )*/
     }
 }
 
@@ -287,8 +291,8 @@ mod tests {
         );
 
         // Inverse
-        let inv_a = a.inverse();
-        let product = a * inv_a;
+        let inv_a = a.clone().inverse();
+        let product = a.clone() * inv_a;
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod7>::from_base_field(

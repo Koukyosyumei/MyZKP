@@ -296,6 +296,10 @@ impl<F: Field> Rem for Polynomial<F> {
 
     /// Division of two polynomials, returns quotient.
     fn rem(self, other: Polynomial<F>) -> Polynomial<F> {
+        if self.degree() < other.degree() {
+            return self.clone();
+        }
+
         let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
         let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
