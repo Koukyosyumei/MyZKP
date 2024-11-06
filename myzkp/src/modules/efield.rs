@@ -197,7 +197,6 @@ fn extended_euclidean<F: Field>(
     }
 }
 
-/*
 // Test the implementation
 #[cfg(test)]
 mod tests {
@@ -210,37 +209,38 @@ mod tests {
 
     #[test]
     fn test_extended_field_operations() {
-        // Define the irreducible polynomial x^2 + 1
-        let irreducible_poly = Polynomial {
+        #[derive(Debug, Clone, PartialEq, Hash)]
+        pub struct IP7;
+
+        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for IP7 {
+            fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
+                Polynomial {
+                    poly: vec![
+                        FiniteFieldElement::<Mod7>::from_value(1),
+                        FiniteFieldElement::<Mod7>::zero(),
+                        FiniteFieldElement::<Mod7>::from_value(1),
+                    ],
+                    var: "x".to_string(),
+                }
+            }
+        }
+
+        let a = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
             poly: vec![
-                FiniteFieldElement::<Mod7>::from_value(1),
-                FiniteFieldElement::<Mod7>::zero(),
-                FiniteFieldElement::<Mod7>::from_value(1),
+                FiniteFieldElement::from_value(3),
+                FiniteFieldElement::from_value(2),
             ],
             var: "x".to_string(),
-        };
+        });
+        let b = ExtendedFieldElement::<Mod7, IP7>::new(Polynomial {
+            poly: vec![
+                FiniteFieldElement::from_value(1),
+                FiniteFieldElement::from_value(4),
+            ],
+            var: "x".to_string(),
+        });
 
-        let a = ExtendedFieldElement::<Mod7>::new(
-            Polynomial {
-                poly: vec![
-                    FiniteFieldElement::from_value(3),
-                    FiniteFieldElement::from_value(2),
-                ],
-                var: "x".to_string(),
-            },
-            irreducible_poly.clone(),
-        );
-        let b = ExtendedFieldElement::<Mod7>::new(
-            Polynomial {
-                poly: vec![
-                    FiniteFieldElement::from_value(1),
-                    FiniteFieldElement::from_value(4),
-                ],
-                var: "x".to_string(),
-            },
-            irreducible_poly.clone(),
-        );
-
+        /*
         // Addition
         let sum = a.clone() + b.clone();
         assert_eq!(
@@ -299,6 +299,6 @@ mod tests {
                 irreducible_poly.clone()
             )
         );
+                */
     }
 }
-    */
