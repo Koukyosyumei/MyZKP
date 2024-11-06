@@ -234,6 +234,21 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
 
+pub fn tate_pairing<F: Field, E: EllipticCurve>(
+    p: EllipticCurvePoint<F, E>,
+    q: EllipticCurvePoint<F, E>,
+    ell: BigInt,
+    modulus: BigInt,
+    s: Option<EllipticCurvePoint<F, E>>,
+) -> F {
+    let s_value = s.unwrap();
+    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), ell.clone());
+    let fp_s = miller(p.clone(), s_value.clone(), ell.clone());
+    let f = fp_qs / fp_s;
+
+    return f.pow((modulus - BigInt::one()) / ell);
+}
+
 #[macro_export]
 macro_rules! define_myzkp_curve_type {
     ($name:ident, $a:expr, $b:expr) => {
@@ -261,11 +276,11 @@ mod tests {
     use num_bigint::{BigInt, ToBigInt};
     use std::str::FromStr;
 
+    define_myzkp_modulus_type!(Mod631, "631");
+    define_myzkp_curve_type!(CurveA30B34, "30", "34");
+
     #[test]
     fn test_weil_pairing() {
-        define_myzkp_modulus_type!(Mod631, "631");
-        define_myzkp_curve_type!(CurveA30B34, "30", "34");
-
         let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
             FiniteFieldElement::<Mod631>::from_value(36_i64),
             FiniteFieldElement::<Mod631>::from_value(60_i64),
@@ -344,6 +359,52 @@ mod tests {
         assert_eq!(
             w.pow(12_i32.to_bigint().unwrap()).sanitize(),
             w_prime.sanitize()
+        );
+    }
+
+    #[test]
+    fn test_tate_pairing() {
+        let p = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(36_i64),
+            FiniteFieldElement::<Mod631>::from_value(60_i64),
+        );
+        let q = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(387_i64),
+        );
+        let p_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(617_i64),
+            FiniteFieldElement::<Mod631>::from_value(5_i64),
+        );
+        let q_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(121_i64),
+            FiniteFieldElement::<Mod631>::from_value(244_i64),
+        );
+        let s = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
+            FiniteFieldElement::<Mod631>::from_value(0_i64),
+            FiniteFieldElement::<Mod631>::from_value(36_i64),
+        );
+        let order = 5.to_bigint().unwrap();
+
+        let tate = tate_pairing(
+            p.clone(),
+            q.clone(),
+            order.clone(),
+            BigInt::from(631),
+            Some(s.clone()),
+        );
+
+        let tate_prime = tate_pairing(
+            p_prime.clone(),
+            q_prime.clone(),
+            order.clone(),
+            BigInt::from(631),
+            Some(s.clone()),
+        );
+
+        assert_eq!(
+            tate.pow(12_i32.to_bigint().unwrap()).sanitize(),
+            tate_prime.sanitize()
         );
     }
 }
