@@ -369,10 +369,7 @@ mod tests {
 
         assert_eq!(p.clone() * 3_i32.to_bigint().unwrap(), p_prime.clone());
         assert_eq!(q.clone() * 4_i32.to_bigint().unwrap(), q_prime.clone());
-        assert_eq!(
-            w.pow(12_i32.to_bigint().unwrap()).sanitize(),
-            w_prime.sanitize()
-        );
+        assert_eq!(w.pow(12_i32).sanitize(), w_prime.sanitize());
     }
 
     #[test]
@@ -415,10 +412,7 @@ mod tests {
             Some(s.clone()),
         );
 
-        assert_eq!(
-            tate.pow(12_i32.to_bigint().unwrap()).sanitize(),
-            tate_prime.sanitize()
-        );
+        assert_eq!(tate.pow(12_i32).sanitize(), tate_prime.sanitize());
     }
 
     #[test]
@@ -450,9 +444,6 @@ mod tests {
             BigInt::from(631),
         );
 
-        assert_eq!(
-            tate.pow(12_i32.to_bigint().unwrap()).sanitize(),
-            tate_prime.sanitize()
-        );
+        assert_eq!(tate.pow(12_i32).sanitize(), tate_prime.sanitize());
     }
 }
