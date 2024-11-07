@@ -34,7 +34,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
 
     fn reduce(&self) -> Self {
         Self {
-            poly: self.poly.clone() % P::modulus(),
+            poly: self.poly.reduce().clone() % P::modulus(),
             _phantom: PhantomData,
         }
     }
@@ -151,18 +151,16 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     for ExtendedFieldElement<M, P>
 {
     fn pow(&self, n: BigInt) -> Self {
-        let mut result = Self::new(Polynomial::from_monomials(
-            &[FiniteFieldElement::<M>::one()],
-        ));
         let mut base = self.clone();
-        let mut exp = n;
+        let mut exponent = n;
 
-        while exp > BigInt::zero() {
-            if &exp % BigInt::from(2) == BigInt::one() {
+        let mut result = Self::one();
+        while exponent > BigInt::zero() {
+            if &exponent % BigInt::from(2) == BigInt::one() {
                 result = result * base.clone();
             }
+            exponent /= 2;
             base = base.clone() * base;
-            exp /= 2;
         }
 
         result
@@ -197,28 +195,28 @@ mod tests {
 
     use crate::define_myzkp_modulus_type;
 
-    define_myzkp_modulus_type!(Mod7, "2");
+    define_myzkp_modulus_type!(Mod2, "2");
 
     #[test]
     fn test_extended_field_operations() {
         #[derive(Debug, Clone, PartialEq, Hash)]
-        pub struct Ip7;
+        pub struct Ip2;
 
-        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
+        impl IrreduciblePoly<FiniteFieldElement<Mod2>> for Ip2 {
             // x^2 + x + 1
-            fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
+            fn modulus() -> Polynomial<FiniteFieldElement<Mod2>> {
                 Polynomial {
                     coef: vec![
-                        FiniteFieldElement::<Mod7>::from_value(1),
-                        FiniteFieldElement::<Mod7>::from_value(1),
-                        FiniteFieldElement::<Mod7>::from_value(1),
+                        FiniteFieldElement::<Mod2>::from_value(1),
+                        FiniteFieldElement::<Mod2>::from_value(1),
+                        FiniteFieldElement::<Mod2>::from_value(1),
                     ],
                 }
             }
         }
 
         // x + 1
-        let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+        let a = ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(1),
                 FiniteFieldElement::from_value(1),
@@ -226,7 +224,7 @@ mod tests {
         });
 
         // x
-        let b = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+        let b = ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
             coef: vec![
                 FiniteFieldElement::from_value(0),
                 FiniteFieldElement::from_value(1),
@@ -237,7 +235,7 @@ mod tests {
         let sum = a.clone() + b.clone();
         assert_eq!(
             sum,
-            ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+            ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
                 coef: vec![FiniteFieldElement::from_value(1)],
             })
         );
@@ -246,7 +244,7 @@ mod tests {
         let product = a.clone() * b.clone();
         assert_eq!(
             product,
-            ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+            ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
                 coef: vec![FiniteFieldElement::from_value(1)],
             },)
         );
@@ -256,7 +254,7 @@ mod tests {
         let product = a.clone() * inv_a;
         assert_eq!(
             product,
-            ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one())
+            ExtendedFieldElement::<Mod2, Ip2>::from_base_field(FiniteFieldElement::one())
         );
     }
 }

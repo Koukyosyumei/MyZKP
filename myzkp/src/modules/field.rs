@@ -143,7 +143,7 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
 
         let mut result = FiniteFieldElement::one();
         while exponent.is_positive() && !exponent.is_zero() {
-            if exponent.clone() % 2 != BigInt::zero() {
+            if &exponent % 2 != BigInt::zero() {
                 result = result * base.clone();
             }
             exponent /= 2;

@@ -1,6 +1,7 @@
 use crate::modules::ring::Ring;
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
+use num_traits::FromPrimitive;
 use num_traits::{One, Zero};
 use std::str::FromStr;
 
@@ -181,5 +182,67 @@ impl BN128 {
             "21888242871839275222246405745257275088548364400416034343698204186575808495617",
         )
         .unwrap()
+    }
+}
+
+// Test the implementation
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fq() {
+        assert_eq!(Fq::from_value(2) * Fq::from_value(2), Fq::from_value(4));
+        assert_eq!(
+            Fq::from_value(2) / Fq::from_value(7) + Fq::from_value(9) / Fq::from_value(7),
+            Fq::from_value(11) / Fq::from_value(7)
+        );
+        assert_eq!(
+            Fq::from_value(2) * Fq::from_value(7) + Fq::from_value(9) * Fq::from_value(7),
+            Fq::from_value(11) * Fq::from_value(7)
+        );
+    }
+
+    #[test]
+    fn test_fq2() {
+        let x = Fq2::new(Polynomial {
+            coef: vec![Fq::one(), Fq::zero()],
+        });
+        let f = Fq2::new(Polynomial {
+            coef: vec![Fq::one(), Fq::from_value(2_i32)],
+        });
+        let fpx = Fq2::new(Polynomial {
+            coef: vec![Fq::from_value(2_i32), Fq::from_value(2_i32)],
+        });
+        let one = Fq2::one();
+        assert_eq!(x.clone() + f.clone(), fpx);
+        assert_eq!(f.clone() / f.clone(), one.clone());
+        assert_eq!(
+            one.clone() / f.clone() + x.clone() / f.clone(),
+            (one.clone() + x.clone()) / f.clone()
+        );
+        assert_eq!(
+            one.clone() * f.clone() + x.clone() * f.clone(),
+            (one.clone() + x.clone()) * f.clone()
+        );
+        assert_eq!(
+            x.clone()
+                .pow(BN128Modulus::modulus().pow(2) - BigInt::one()),
+            one
+        );
+    }
+
+    #[test]
+    fn test_g1() {
+        let g1 = BN128::generator_g1();
+        assert_eq!(
+            g1.clone() * BigInt::from_u8(2).unwrap() + g1.clone() + g1.clone(),
+            g1.clone() * BigInt::from_u8(2).unwrap() * BigInt::from_u8(2).unwrap()
+        );
+        assert_eq!(
+            g1.clone() * BigInt::from_u8(9).unwrap() + g1.clone() * BigInt::from_u8(5).unwrap(),
+            g1.clone() * BigInt::from_u8(12).unwrap() + g1.clone() * BigInt::from_u8(2).unwrap(),
+        );
+        assert!((g1.clone() * BN128::order()).is_point_at_infinity());
     }
 }
