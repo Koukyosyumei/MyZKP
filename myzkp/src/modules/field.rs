@@ -113,7 +113,7 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
             new_r += &modulus;
         }
 
-        let (final_r, _, mut t) = extended_euclidean(r, new_r);
+        let (_, _, mut t) = extended_euclidean(r, new_r);
 
         // At this point, r should be 1 if the inverse exists
         //if final_r == BigInt::one() {

@@ -142,7 +142,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
 {
     fn inverse(&self) -> Self {
-        let (r, s, t) = extended_euclidean(P::modulus(), self.poly.clone());
+        let (_, _, t) = extended_euclidean(P::modulus(), self.poly.clone());
         ExtendedFieldElement::<M, P>::new(t.clone())
     }
 }
