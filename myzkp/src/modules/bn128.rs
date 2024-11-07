@@ -197,6 +197,8 @@ mod tests {
 
     #[test]
     fn test_fq2() {
+        use crate::modules::field::Field;
+
         let x = Fq2::new(Polynomial {
             coef: vec![Fq::one(), Fq::zero()],
         });
@@ -206,9 +208,12 @@ mod tests {
         let fpx = Fq2::new(Polynomial {
             coef: vec![Fq::from_value(2_i32), Fq::from_value(2_i32)],
         });
+        let fpx2 = Fq2::new(Polynomial {
+            coef: vec![Fq::from_value(2_i32), Fq::from_value(1_i32)],
+        });
         let one = Fq2::one();
         assert_eq!(x.clone() + f.clone(), fpx);
-        assert_eq!(f.clone() / f.clone(), one.clone());
+        assert_eq!(fpx2.clone() / fpx2.clone(), one.clone());
         assert_eq!(
             one.clone() / f.clone() + x.clone() / f.clone(),
             (one.clone() + x.clone()) / f.clone()
@@ -249,7 +254,10 @@ mod tests {
             g2.clone().y.unwrap().pow(2) - g2.clone().x.unwrap().pow(3),
             BN128::get_b2()
         );
-        assert_eq!(g2.clone() + g2.clone() + g2.clone(), g2.clone() * 3);
+        assert_eq!(
+            g2.clone() * 2 + g2.clone() + g2.clone(),
+            (g2.clone() * 2) * 2
+        );
         assert_eq!(
             g2.clone() * 9 + g2.clone() * 5,
             g2.clone() * 12 + g2.clone() * 2,

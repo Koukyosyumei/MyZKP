@@ -67,12 +67,28 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
             (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
         }
     }
+
+    pub fn double(&self) -> Self {
+        if self.is_point_at_infinity() {
+            return self.clone();
+        }
+
+        let slope = self.clone().line_slope(self.clone());
+        let x = self.x.clone().unwrap();
+        let y = self.y.clone().unwrap();
+
+        let new_x = slope.clone() * slope.clone() - x.clone() - x.clone();
+        let new_y = -slope.clone() * new_x.clone() + slope * x - y;
+
+        Self::new(new_x, new_y)
+    }
 }
 
 impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
+        /*
         if self.is_point_at_infinity() {
             return other;
         }
@@ -113,7 +129,35 @@ impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
             let y3 = m * (x1 - x3.clone()) - y1;
 
             return EllipticCurvePoint::new(x3, y3);
+        }*/
+
+        if self.is_point_at_infinity() {
+            return other.clone();
         }
+        if other.is_point_at_infinity() {
+            return self.clone();
+        }
+
+        if self.x == other.x && self.y == other.y {
+            return self.double();
+        } else if self.x == other.x {
+            return Self::point_at_infinity();
+        }
+
+        let slope = self.line_slope(other.clone());
+        let x1 = self.x.clone().unwrap();
+        let y1 = self.y.clone().unwrap();
+        let x2 = other.x.clone().unwrap();
+        let y2 = other.y.clone().unwrap();
+
+        let new_x = slope.clone() * slope.clone() - x1.clone() - x2.clone();
+        let new_y = -slope.clone() * new_x.clone() + slope.clone() * x1.clone() - y1.clone();
+        assert!(
+            new_y.clone()
+                == -slope.clone() * new_x.clone() + slope.clone() * x2.clone() - y2.clone()
+        );
+
+        Self::new(new_x, new_y)
     }
 }
 
@@ -133,7 +177,7 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<
 
         while scalar_bits > BigInt::zero() {
             if &scalar_bits & BigInt::one() == BigInt::one() {
-                result = result + current.clone(); // Add the current point if the bit is 1
+                result = result.clone() + current.clone();
             }
             current = current.clone() + current.clone(); // Double the point
             scalar_bits >>= 1; // Move to the next bit

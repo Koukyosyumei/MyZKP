@@ -124,7 +124,8 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
-        Self::new(self.poly / other.poly)
+        //Self::new(self.poly * other.poly)
+        self * (other.inverse())
     }
 }
 
@@ -142,8 +143,30 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
 {
     fn inverse(&self) -> Self {
-        let (_, _, t) = extended_euclidean(P::modulus(), self.poly.clone());
-        ExtendedFieldElement::<M, P>::new(t.clone())
+        //if self.poly.is_zero() {
+        //    return None; // Zero has no inverse
+        //}
+
+        let mut lm = Polynomial::<FiniteFieldElement<M>>::one();
+        let mut hm = Polynomial::zero();
+        let mut low = self.poly.clone();
+        let mut high = P::modulus();
+
+        while !low.is_zero() {
+            let q = high.clone() / low.clone();
+            let r = high.clone() % low.clone();
+            let nm = hm.clone() - lm.clone() * q.clone();
+            high = low;
+            hm = lm;
+            low = r;
+            lm = nm;
+        }
+
+        //if high.degree() != 0 {
+        //    return None; // Not invertible
+        //}
+
+        Self::new(hm * high.coef[0].inverse())
     }
 }
 
@@ -198,9 +221,10 @@ mod tests {
     use crate::define_myzkp_modulus_type;
 
     define_myzkp_modulus_type!(Mod2, "2");
+    define_myzkp_modulus_type!(Mod7, "7");
 
     #[test]
-    fn test_extended_field_operations() {
+    fn test_extended_field_operations_mod2() {
         #[derive(Debug, Clone, PartialEq, Hash)]
         pub struct Ip2;
 
@@ -257,6 +281,56 @@ mod tests {
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod2, Ip2>::from_base_field(FiniteFieldElement::one())
+        );
+
+        assert_eq!(
+            a.clone() / a.clone(),
+            ExtendedFieldElement::<Mod2, Ip2>::from_base_field(FiniteFieldElement::one())
+        );
+    }
+
+    #[test]
+    fn test_extended_field_operations_mod7() {
+        #[derive(Debug, Clone, PartialEq, Hash)]
+        pub struct Ip7;
+
+        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
+            // x^2 + x + 1
+            fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
+                Polynomial {
+                    coef: vec![
+                        FiniteFieldElement::<Mod7>::from_value(1),
+                        FiniteFieldElement::<Mod7>::from_value(0),
+                        FiniteFieldElement::<Mod7>::from_value(1),
+                    ],
+                }
+            }
+        }
+
+        // x + 2
+        let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+            coef: vec![
+                FiniteFieldElement::from_value(2),
+                FiniteFieldElement::from_value(1),
+            ],
+        });
+
+        // 4x + 6
+        let b = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+            coef: vec![
+                FiniteFieldElement::from_value(6),
+                FiniteFieldElement::from_value(4),
+            ],
+        });
+
+        // Inverse
+        let inv_a = a.clone().inverse();
+        assert_eq!(inv_a.clone(), b.clone());
+
+        let product = a.clone() * inv_a;
+        assert_eq!(
+            product,
+            ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one())
         );
     }
 }
