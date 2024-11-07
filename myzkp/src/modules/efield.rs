@@ -142,12 +142,8 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
 {
     fn inverse(&self) -> Self {
-        // Implementation of inverse using extended Euclidean algorithm for polynomials
         let (r, s, t) = extended_euclidean(P::modulus(), self.poly.clone());
-        println!("r={}, s={}, t={}", r.clone(), s.clone(), t.clone());
         ExtendedFieldElement::<M, P>::new(t.clone())
-        //assert_eq!(gcd.degree(), 0, "Element is not invertible");
-        //Self::new(s * gcd.nth_coefficient(0).inverse())
     }
 }
 
@@ -257,7 +253,6 @@ mod tests {
 
         // Inverse
         let inv_a = a.clone().inverse();
-        println!("~~~~~~~~~~~~~{} {}", a.clone(), inv_a.clone());
         let product = a.clone() * inv_a;
         assert_eq!(
             product,
