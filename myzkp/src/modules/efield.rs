@@ -258,23 +258,5 @@ mod tests {
             product,
             ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one())
         );
-
-        /*
-        // Exponentiation
-        let a_cubed = a.pow(BigInt::from(3));
-        assert_eq!(
-            a_cubed,
-            ExtendedFieldElement::<Mod7>::new(
-                Polynomial {
-                    poly: vec![
-                        FiniteFieldElement::from_value(5),
-                        FiniteFieldElement::from_value(6)
-                    ],
-
-                },
-
-            )
-        );
-                */
     }
 }
