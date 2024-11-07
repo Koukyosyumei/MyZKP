@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn test_non_interactive_zkp() {
         define_myzkp_modulus_type!(Mod631, "631");
-        define_myzkp_curve_type!(CurveA30B34, "30", "34");
+        define_myzkp_curve_type!(BLS12to381, "1", "4");
         type F = FiniteFieldElement<Mod631>;
         type E = CurveA30B34;
 

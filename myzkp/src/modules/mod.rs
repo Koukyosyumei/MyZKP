@@ -1,3 +1,4 @@
+pub mod bn128;
 pub mod curve;
 pub mod educational_protocols;
 pub mod efield;

@@ -19,7 +19,7 @@ pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
 
 #[derive(Clone, Debug)]
 pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
-    poly: Polynomial<FiniteFieldElement<M>>,
+    pub poly: Polynomial<FiniteFieldElement<M>>,
     _phantom: PhantomData<P>,
 }
 
