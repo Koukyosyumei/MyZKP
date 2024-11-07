@@ -68,21 +68,7 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     }
 
     let w = Fq12::new(Polynomial {
-        coef: vec![
-            Fq::zero(),
-            Fq::one(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::one(),
-        ],
+        coef: vec![Fq::zero(), Fq::one()],
     });
 
     let x = g.x.unwrap();
@@ -105,12 +91,6 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
             Fq::zero(),
             Fq::zero(),
             x_coeff[1].clone(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::one(),
         ],
     });
     let ny = Fq12::new(Polynomial {
@@ -122,12 +102,6 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
             Fq::zero(),
             Fq::zero(),
             y_coeff[1].clone(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::zero(),
-            Fq::one(),
         ],
     });
 
@@ -183,6 +157,24 @@ impl BN128 {
         )
         .unwrap()
     }
+
+    pub fn get_b() -> Fq {
+        Fq::from_value(3_i32)
+    }
+
+    pub fn get_b2() -> Fq2 {
+        Fq2::new(Polynomial {
+            coef: vec![Fq::from_value(3_i32)],
+        }) / Fq2::new(Polynomial {
+            coef: vec![Fq::from_value(9_i32), Fq::from_value(1_i32)],
+        })
+    }
+
+    pub fn get_b12() -> Fq12 {
+        Fq12::new(Polynomial {
+            coef: vec![Fq::from_value(3_i32)],
+        })
+    }
 }
 
 // Test the implementation
@@ -236,6 +228,10 @@ mod tests {
     fn test_g1() {
         let g1 = BN128::generator_g1();
         assert_eq!(
+            g1.clone().y.unwrap().pow(2) - g1.clone().x.unwrap().pow(3),
+            BN128::get_b()
+        );
+        assert_eq!(
             g1.clone() * 2 + g1.clone() + g1.clone(),
             (g1.clone() * 2) * 2
         );
@@ -244,5 +240,20 @@ mod tests {
             g1.clone() * 12 + g1.clone() * 2,
         );
         assert!((g1.clone() * BN128::order()).is_point_at_infinity());
+    }
+
+    #[test]
+    fn test_g2() {
+        let g2 = BN128::generator_g2();
+        assert_eq!(
+            g2.clone().y.unwrap().pow(2) - g2.clone().x.unwrap().pow(3),
+            BN128::get_b2()
+        );
+        assert_eq!(g2.clone() + g2.clone() + g2.clone(), g2.clone() * 3);
+        assert_eq!(
+            g2.clone() * 9 + g2.clone() * 5,
+            g2.clone() * 12 + g2.clone() * 2,
+        );
+        assert!((g2.clone() * BN128::order()).is_point_at_infinity());
     }
 }

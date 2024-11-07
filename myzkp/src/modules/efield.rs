@@ -170,8 +170,10 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn from_value<V: Into<BigInt>>(_value: V) -> Self {
-        unimplemented!("Use from_base_field for extended field elements")
+    fn from_value<V: Into<BigInt>>(value: V) -> Self {
+        ExtendedFieldElement::<M, P>::new(
+            Polynomial::<FiniteFieldElement<M>>::one() * FiniteFieldElement::<M>::from_value(value),
+        )
     }
 
     fn random_element(_exclude_elements: &[Self]) -> Self {
