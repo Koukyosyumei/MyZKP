@@ -1,4 +1,4 @@
-use num_traits::{One, Signed, Zero};
+use num_traits::{One, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 

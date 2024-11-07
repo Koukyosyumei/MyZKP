@@ -25,7 +25,7 @@ pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldE
 
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldElement<M, P> {
     pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
-        let mut result = Self {
+        let result = Self {
             poly: poly,
             _phantom: PhantomData,
         };

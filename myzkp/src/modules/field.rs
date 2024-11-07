@@ -1,4 +1,4 @@
-use num_bigint::{BigInt, RandBigInt, ToBigInt};
+use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
 use std::fmt;
 use std::fmt::Debug;
@@ -31,7 +31,7 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
     // Constructor with optional modulus and generator_value.
     pub fn new(value: BigInt) -> Self {
         let modulus = M::modulus();
-        let mut value_sanitized = value % &modulus;
+        let value_sanitized = value % &modulus;
 
         //if value_sanitized < BigInt::zero() {
         //    value_sanitized += modulus.clone();
