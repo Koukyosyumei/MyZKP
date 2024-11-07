@@ -117,10 +117,11 @@ impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
     }
 }
 
-impl<F: Field, E: EllipticCurve> Mul<BigInt> for EllipticCurvePoint<F, E> {
+impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<F, E> {
     type Output = Self;
 
-    fn mul(self, scalar: BigInt) -> Self {
+    fn mul(self, scalar_val: V) -> Self {
+        let scalar: BigInt = scalar_val.into();
         if scalar.is_zero() {
             // Return the point at infinity for scalar * 0
             return EllipticCurvePoint::point_at_infinity();
