@@ -236,12 +236,12 @@ mod tests {
     fn test_g1() {
         let g1 = BN128::generator_g1();
         assert_eq!(
-            g1.clone() * BigInt::from_u8(2).unwrap() + g1.clone() + g1.clone(),
-            g1.clone() * BigInt::from_u8(2).unwrap() * BigInt::from_u8(2).unwrap()
+            g1.clone() * 2 + g1.clone() + g1.clone(),
+            (g1.clone() * 2) * 2
         );
         assert_eq!(
-            g1.clone() * BigInt::from_u8(9).unwrap() + g1.clone() * BigInt::from_u8(5).unwrap(),
-            g1.clone() * BigInt::from_u8(12).unwrap() + g1.clone() * BigInt::from_u8(2).unwrap(),
+            g1.clone() * 9 + g1.clone() * 5,
+            g1.clone() * 12 + g1.clone() * 2,
         );
         assert!((g1.clone() * BN128::order()).is_point_at_infinity());
     }
