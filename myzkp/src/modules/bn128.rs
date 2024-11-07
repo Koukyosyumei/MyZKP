@@ -269,6 +269,11 @@ mod tests {
     fn test_g12() {
         let g2 = BN128::generator_g2();
         let g12 = twist_G2_to_G12(g2);
+        let g12_9 = g12.clone() * 9;
+        assert_eq!(
+            g12_9.clone().y.unwrap().pow(2) - g12_9.clone().x.unwrap().pow(3),
+            BN128::get_b12()
+        );
         assert_eq!(
             g12.clone() * 2 + g12.clone() + g12.clone(),
             (g12.clone() * 2) * 2
