@@ -150,9 +150,9 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     for ExtendedFieldElement<M, P>
 {
-    fn pow(&self, n: BigInt) -> Self {
+    fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
         let mut base = self.clone();
-        let mut exponent = n;
+        let mut exponent: BigInt = n.into();
 
         let mut result = Self::one();
         while exponent > BigInt::zero() {

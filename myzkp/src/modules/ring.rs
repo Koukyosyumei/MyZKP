@@ -18,7 +18,7 @@ pub trait Ring:
     // A ring is an algebraic structure with addition and multiplication
 
     // Utility functions
-    fn pow(&self, n: BigInt) -> Self;
+    fn pow<M: Into<BigInt>>(&self, n: M) -> Self;
     fn get_value(&self) -> BigInt;
     fn from_value<M: Into<BigInt>>(value: M) -> Self;
     fn random_element(exclude_elements: &[Self]) -> Self;

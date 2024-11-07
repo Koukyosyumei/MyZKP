@@ -131,8 +131,8 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 }
 
 impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
-    fn pow(&self, n: BigInt) -> Self {
-        let mut exponent = n;
+    fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
+        let mut exponent: BigInt = n.into();
         let mut base = self.clone();
 
         if exponent.is_negative() {
@@ -339,7 +339,7 @@ mod tests {
     #[test]
     fn test_exponentiation() {
         let fe1 = FiniteFieldElement::<Mod17>::from_value(3);
-        let fe_exp = fe1.pow(4.to_bigint().unwrap());
+        let fe_exp = fe1.pow(4);
         assert_eq!(
             fe_exp.value,
             3.to_bigint().unwrap().pow(4) % 17.to_bigint().unwrap()
