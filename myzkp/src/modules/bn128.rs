@@ -264,4 +264,19 @@ mod tests {
         );
         assert!((g2.clone() * BN128::order()).is_point_at_infinity());
     }
+
+    #[test]
+    fn test_g12() {
+        let g2 = BN128::generator_g2();
+        let g12 = twist_G2_to_G12(g2);
+        assert_eq!(
+            g12.clone() * 2 + g12.clone() + g12.clone(),
+            (g12.clone() * 2) * 2
+        );
+        assert_eq!(
+            g12.clone() * 9 + g12.clone() * 5,
+            g12.clone() * 12 + g12.clone() * 2,
+        );
+        assert!((g12.clone() * BN128::order()).is_point_at_infinity());
+    }
 }
