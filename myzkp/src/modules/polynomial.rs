@@ -118,6 +118,38 @@ impl<F: Field> Polynomial<F> {
         }
         poly
     }
+
+    fn add_ref<'a, 'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero();
+
+        for i in 0..max_len {
+            let a = self.coef.get(i).unwrap_or(&zero);
+            let b = other.coef.get(i).unwrap_or(&zero);
+            result.push(a.clone() + b.clone());
+        }
+        Polynomial {
+            coef: Self::trim_trailing_zeros(result),
+        }
+    }
+
+    fn mul_ref<'a, 'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::<F>::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
+
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+            }
+        }
+        Polynomial {
+            coef: Polynomial::<F>::trim_trailing_zeros(result),
+        }
+    }
 }
 
 impl<F: Field> fmt::Display for Polynomial<F> {
@@ -179,50 +211,8 @@ impl<F: Field> One for Polynomial<F> {
 }
 
 // Arithmetic operations implementation for Polynomial.
-impl<F: Field> Add for Polynomial<F> {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Polynomial<F> {
-        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero();
-
-        for i in 0..max_len {
-            let a = self.coef.get(i).unwrap_or(&zero);
-            let b = other.coef.get(i).unwrap_or(&zero);
-            result.push(a.clone() + b.clone());
-        }
-        Polynomial {
-            coef: Self::trim_trailing_zeros(result),
-        }
-    }
-}
-
-impl<F: Field> Sub for Polynomial<F> {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Polynomial<F> {
-        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero();
-
-        for i in 0..max_len {
-            let a = self.coef.get(i).unwrap_or(&zero);
-            let b = other.coef.get(i).unwrap_or(&zero);
-            result.push(a.clone() - b.clone());
-        }
-        Polynomial {
-            coef: Self::trim_trailing_zeros(result),
-        }
-    }
-}
-
 impl<F: Field> Neg for Polynomial<F> {
     type Output = Self;
-
-    /// Negation of a polynomial.
     fn neg(self) -> Polynomial<F> {
         Polynomial {
             coef: self.coef.iter().map(|x| -x.clone()).collect(),
@@ -230,30 +220,50 @@ impl<F: Field> Neg for Polynomial<F> {
     }
 }
 
+impl<F: Field> Add for Polynomial<F> {
+    type Output = Self;
+    fn add(self, other: Self) -> Polynomial<F> {
+        self.add_ref(&other)
+    }
+}
+
+impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
+    fn add(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.add_ref(other)
+    }
+}
+
+impl<F: Field> Sub for Polynomial<F> {
+    type Output = Self;
+    fn sub(self, other: Self) -> Polynomial<F> {
+        self.add_ref(&-other)
+    }
+}
+
+impl<'a, 'b, F: Field> Sub<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
+    fn sub(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.add_ref(&-other.clone())
+    }
+}
+
 impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
     type Output = Self;
-
-    /// Multiplication of two polynomials.
     fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
-        if self.is_zero() || other.is_zero() {
-            return Polynomial::<F>::zero();
-        }
-        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
+        self.mul_ref(&other)
+    }
+}
 
-        for (i, a) in self.coef.iter().enumerate() {
-            for (j, b) in other.coef.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
-            }
-        }
-        Polynomial {
-            coef: Self::trim_trailing_zeros(result),
-        }
+impl<'a, 'b, F: Field> Mul<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
+    fn mul(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.mul_ref(other)
     }
 }
 
 impl<F: Field> Mul<F> for Polynomial<F> {
     type Output = Self;
-
     fn mul(self, scalar: F) -> Polynomial<F> {
         Polynomial {
             coef: self

@@ -155,7 +155,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         while !low.is_zero() {
             let q = high.clone() / low.clone();
             let r = high.clone() % low.clone();
-            let nm = hm.clone() - lm.clone() * q.clone();
+            let nm = hm.clone() - (&lm * &q).clone();
             high = low;
             hm = lm;
             low = r;
