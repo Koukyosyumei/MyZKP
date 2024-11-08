@@ -62,6 +62,21 @@ impl IrreduciblePoly<Fq> for Fq12Poly {
 type Fq12 = ExtendedFieldElement<BN128Modulus, Fq12Poly>;
 type G12Point = EllipticCurvePoint<Fq12, BN128Curve>;
 
+pub fn cast_G1_to_G12(g: G1Point) -> G12Point {
+    if g.is_point_at_infinity() {
+        return G12Point::point_at_infinity();
+    }
+
+    G12Point::new(
+        Fq12::new(Polynomial {
+            coef: vec![g.x.unwrap()],
+        }),
+        Fq12::new(Polynomial {
+            coef: vec![g.y.unwrap()],
+        }),
+    )
+}
+
 pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     if g.is_point_at_infinity() {
         return G12Point::point_at_infinity();
@@ -111,21 +126,81 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     );
 }
 
-/*
-pub fn optimal_ate_pairing(
-    p: G1Point,
-    q: G2Point,
-    loop_count: BigInt,
-    curve_order: BigInt,
-) -> Fq12 {
-    let f = miller(p, q, loop_count);
+pub fn linefunc(p: G12Point, q: G12Point, t: G12Point) -> Fq12 {
+    let x1 = p.x.unwrap();
+    let y1 = p.y.unwrap();
+    let x2 = q.x.unwrap();
+    let y2 = q.y.unwrap();
+    let xt = t.x.unwrap();
+    let yt = t.y.unwrap();
+
+    if x1.clone() != x2.clone() {
+        let m = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
+        return m.clone() * (xt.clone() - x1.clone()) - (yt.clone() - y1.clone());
+    } else if y1.clone() == y2.clone() {
+        let m = (x1.pow(2) * Fq12::from_value(3)) / (y1.clone() * Fq12::from_value(2));
+        return m.clone() * (xt.clone() - x1.clone()) - (yt.clone() - y1.clone());
+    } else {
+        return xt - x1;
+    }
+}
+
+pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
+    if p == q {
+        return Fq12::one();
+    }
+
+    let mut r = q.clone();
+    let mut f = Fq12::one();
+
+    let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
+    let log_ate_loop_count = 63;
+    let field_modulus = BigInt::from_str(
+        "21888242871839275222246405745257275088696311157297823662689037894645226208583",
+    )
+    .unwrap();
+
+    for i in (0..=log_ate_loop_count).rev() {
+        f = f.clone() * f.clone() * linefunc(r.clone(), r.clone(), p.clone());
+        r = r.double();
+        if ate_loop_count.bit(i) {
+            f = f.clone() * linefunc(r.clone(), q.clone(), p.clone());
+            r = r.clone() + q.clone();
+        }
+    }
+
+    // Assert: r == multiply(&q, &ate_loop_count)
+
+    let q1 = G12Point::new(
+        q.x.unwrap().pow(BN128Modulus::modulus()),
+        q.y.unwrap().pow(BN128Modulus::modulus()),
+    );
+
+    let nq2 = G12Point::new(
+        q1.x.clone().unwrap().pow(BN128Modulus::modulus()),
+        -q1.y.clone().unwrap().pow(BN128Modulus::modulus()),
+    );
+
+    f = f.clone() * (linefunc(r.clone(), q1.clone(), p.clone()));
+    r = r.clone() + q1.clone();
+    f = f.clone() * (linefunc(r, nq2.clone(), p.clone()));
+
+    f
+}
+
+pub fn optimal_ate_pairing(p: G1Point, q: G2Point) -> Fq12 {
+    let p_prime: G12Point = cast_G1_to_G12(p);
+    let q_prime: G12Point = twist_G2_to_G12(q);
+    let f = vanila_miller(
+        p_prime, q_prime,
+        //BigInt::from_str("29793968203157093288").unwrap(),
+    );
 
     // Final exponentiation
     let m = BN128Modulus::modulus();
-    let exp = (m.pow(12) - BigInt::one()) / (curve_order);
+    let exp = (m.pow(12) - BigInt::one()) / (BN128::order());
     f.pow(exp)
 }
-    */
 
 pub struct BN128;
 
@@ -283,5 +358,19 @@ mod tests {
             g12.clone() * 12 + g12.clone() * 2,
         );
         assert!((g12.clone() * BN128::order()).is_point_at_infinity());
+    }
+
+    #[test]
+    fn test_pairing() {
+        let g1 = BN128::generator_g1();
+        let g2 = BN128::generator_g2();
+        let p1 = optimal_ate_pairing(g1.clone(), g2.clone());
+        let pn1 = optimal_ate_pairing(-g1.clone(), g2.clone());
+        assert_eq!(p1.clone() * pn1.clone(), Fq12::one());
+        let np1 = optimal_ate_pairing(g1.clone(), -g2.clone());
+        assert_eq!(p1.clone() * np1.clone(), Fq12::one());
+        assert_eq!(pn1.clone(), np1.clone());
+        let p2 = optimal_ate_pairing(g1.clone() * 2, g2);
+        assert_eq!(p1.clone() * p1.clone(), p2);
     }
 }
