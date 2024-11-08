@@ -262,6 +262,25 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::
     }
 }
 
+#[macro_export]
+macro_rules! define_extension_field {
+    ($name:ident, $base_field:ty, $modulus:expr) => {
+        paste! {#[derive(Debug, Clone, PartialEq, Hash)]
+            pub struct $name;
+
+            lazy_static! {
+                static ref [<MODULUS_ $name>]: Polynomial<$base_field> = $modulus;
+            }
+
+            impl IrreduciblePoly<$base_field> for $name {
+                fn modulus() -> &'static Polynomial<$base_field> {
+                    &[<MODULUS_ $name>]
+                }
+            }
+        }
+    };
+}
+
 // Test the implementation
 #[cfg(test)]
 mod tests {
@@ -275,28 +294,32 @@ mod tests {
     define_myzkp_modulus_type!(Mod2, "2");
     define_myzkp_modulus_type!(Mod7, "7");
 
+    define_extension_field!(
+        Ip2,
+        FiniteFieldElement<Mod2>,
+        Polynomial {
+            coef: vec![
+                FiniteFieldElement::<Mod2>::from_value(1),
+                FiniteFieldElement::<Mod2>::from_value(1),
+                FiniteFieldElement::<Mod2>::from_value(1),
+            ],
+        }
+    );
+
+    define_extension_field!(
+        Ip7,
+        FiniteFieldElement<Mod7>,
+        Polynomial {
+            coef: vec![
+                FiniteFieldElement::<Mod7>::from_value(1),
+                FiniteFieldElement::<Mod7>::from_value(0),
+                FiniteFieldElement::<Mod7>::from_value(1),
+            ],
+        }
+    );
+
     #[test]
     fn test_extended_field_operations_mod2() {
-        #[derive(Debug, Clone, PartialEq, Hash)]
-        pub struct Ip2;
-
-        lazy_static! {
-            // x^2 + 1
-            static ref MODULUS_Ip2: Polynomial<FiniteFieldElement<Mod2>> = Polynomial {
-                coef: vec![
-                    FiniteFieldElement::<Mod2>::from_value(1),
-                    FiniteFieldElement::<Mod2>::from_value(1),
-                    FiniteFieldElement::<Mod2>::from_value(1),
-                ],
-            };
-        }
-
-        impl IrreduciblePoly<FiniteFieldElement<Mod2>> for Ip2 {
-            fn modulus() -> &'static Polynomial<FiniteFieldElement<Mod2>> {
-                &MODULUS_Ip2
-            }
-        }
-
         // x + 1
         let a = ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
             coef: vec![
@@ -347,41 +370,6 @@ mod tests {
 
     #[test]
     fn test_extended_field_operations_mod7() {
-        #[derive(Debug, Clone, PartialEq, Hash)]
-        pub struct Ip7;
-
-        lazy_static! {
-        // x^2 + x + 1
-            static ref MODULUS_Ip7: Polynomial<FiniteFieldElement<Mod7>> = Polynomial {
-                coef: vec![
-                    FiniteFieldElement::<Mod7>::from_value(1),
-                    FiniteFieldElement::<Mod7>::from_value(0),
-                    FiniteFieldElement::<Mod7>::from_value(1),
-                ],
-            };
-        }
-
-        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
-            fn modulus() -> &'static Polynomial<FiniteFieldElement<Mod7>> {
-                &MODULUS_Ip7
-            }
-        }
-
-        /*
-        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
-            // x^2 + x + 1
-            fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
-                Polynomial {
-                    coef: vec![
-                        FiniteFieldElement::<Mod7>::from_value(1),
-                        FiniteFieldElement::<Mod7>::from_value(0),
-                        FiniteFieldElement::<Mod7>::from_value(1),
-                    ],
-                }
-            }
-        }
-        */
-
         // x + 2
         let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
             coef: vec![
