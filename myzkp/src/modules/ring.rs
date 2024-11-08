@@ -11,6 +11,7 @@ pub trait Ring:
     + Add<Output = Self>
     + for<'a> Add<&'a Self, Output = Self>
     + Sub<Output = Self>
+    + for<'a> Sub<&'a Self, Output = Self>
     + Mul<Output = Self>
     + for<'a> Mul<&'a Self, Output = Self>
     + Neg<Output = Self>
@@ -19,6 +20,7 @@ pub trait Ring:
 {
     // A ring is an algebraic structure with addition and multiplication
     fn add_ref(&self, rhs: &Self) -> Self;
+    fn sub_ref(&self, rhs: &Self) -> Self;
     fn mul_ref(&self, rhs: &Self) -> Self;
 
     // Utility functions

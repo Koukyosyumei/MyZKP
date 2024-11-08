@@ -34,7 +34,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
 
     fn reduce(&self) -> Self {
         Self {
-            poly: self.poly.reduce().clone() % P::modulus(),
+            poly: self.poly.reduce() % P::modulus(),
             _phantom: PhantomData,
         }
     }
@@ -48,11 +48,46 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
     }
 }
 
+impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
+    for ExtendedFieldElement<M, P>
+{
+    fn inverse(&self) -> Self {
+        //if self.poly.is_zero() {
+        //    return None; // Zero has no inverse
+        //}
+
+        let mut lm = Polynomial::<FiniteFieldElement<M>>::one();
+        let mut hm = Polynomial::zero();
+        let mut low = self.poly.clone();
+        let mut high = P::modulus();
+
+        while !low.is_zero() {
+            let q = &high / &low;
+            let r = &high % &low;
+            let nm = hm - (&lm * &q);
+            high = low;
+            hm = lm;
+            low = r;
+            lm = nm;
+        }
+
+        //if high.degree() != 0 {
+        //    return None; // Not invertible
+        //}
+
+        Self::new(hm * high.coef[0].inverse())
+    }
+
+    fn div_ref(&self, other: &Self) -> Self {
+        self.mul_ref(&other.inverse())
+    }
+}
+
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash
     for ExtendedFieldElement<M, P>
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for v in &self.poly.coef.clone() {
+        for v in &self.poly.coef {
             v.hash(state);
         }
     }
@@ -94,7 +129,17 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Add
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        Self::new(self.poly + other.poly)
+        self.add_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+    Add<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
+{
+    type Output = ExtendedFieldElement<M, P>;
+
+    fn add(self, other: &'a ExtendedFieldElement<M, P>) -> ExtendedFieldElement<M, P> {
+        self.add_ref(other)
     }
 }
 
@@ -104,7 +149,17 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Sub
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        Self::new(self.poly - other.poly)
+        self.sub_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+    Sub<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
+{
+    type Output = ExtendedFieldElement<M, P>;
+
+    fn sub(self, other: &'a ExtendedFieldElement<M, P>) -> ExtendedFieldElement<M, P> {
+        self.sub_ref(other)
     }
 }
 
@@ -114,7 +169,17 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Mul
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        Self::new(self.poly * other.poly)
+        self.mul_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+    Mul<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
+{
+    type Output = ExtendedFieldElement<M, P>;
+
+    fn mul(self, other: &'a ExtendedFieldElement<M, P>) -> ExtendedFieldElement<M, P> {
+        self.mul_ref(other)
     }
 }
 
@@ -124,8 +189,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
-        //Self::new(self.poly * other.poly)
-        self * (other.inverse())
+        self.div_ref(&other)
     }
 }
 
@@ -139,40 +203,21 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Neg
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
-    for ExtendedFieldElement<M, P>
-{
-    fn inverse(&self) -> Self {
-        //if self.poly.is_zero() {
-        //    return None; // Zero has no inverse
-        //}
-
-        let mut lm = Polynomial::<FiniteFieldElement<M>>::one();
-        let mut hm = Polynomial::zero();
-        let mut low = self.poly.clone();
-        let mut high = P::modulus();
-
-        while !low.is_zero() {
-            let q = high.clone() / low.clone();
-            let r = high.clone() % low.clone();
-            let nm = hm.clone() - (&lm * &q).clone();
-            high = low;
-            hm = lm;
-            low = r;
-            lm = nm;
-        }
-
-        //if high.degree() != 0 {
-        //    return None; // Not invertible
-        //}
-
-        Self::new(hm * high.coef[0].inverse())
-    }
-}
-
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     for ExtendedFieldElement<M, P>
 {
+    fn add_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly + &other.poly)
+    }
+
+    fn mul_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly * &other.poly)
+    }
+
+    fn sub_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly - &other.poly)
+    }
+
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
         let mut base = self.clone();
         let mut exponent: BigInt = n.into();
@@ -180,10 +225,10 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
         let mut result = Self::one();
         while exponent > BigInt::zero() {
             if &exponent % BigInt::from(2) == BigInt::one() {
-                result = result * base.clone();
+                result = result.mul_ref(&base);
             }
             exponent /= 2;
-            base = base.clone() * base;
+            base = base.mul_ref(&base);
         }
 
         result
@@ -258,7 +303,7 @@ mod tests {
         });
 
         // Addition
-        let sum = a.clone() + b.clone();
+        let sum = a.add_ref(&b);
         assert_eq!(
             sum,
             ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
@@ -267,7 +312,7 @@ mod tests {
         );
 
         // Multiplication
-        let product = a.clone() * b.clone();
+        let product = a.mul_ref(&b);
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod2, Ip2>::new(Polynomial {
@@ -276,15 +321,15 @@ mod tests {
         );
 
         // Inverse
-        let inv_a = a.clone().inverse();
-        let product = a.clone() * inv_a;
+        let inv_a = a.inverse();
+        let product = a.mul_ref(&inv_a);
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod2, Ip2>::from_base_field(FiniteFieldElement::one())
         );
 
         assert_eq!(
-            a.clone() / a.clone(),
+            a.div_ref(&a),
             ExtendedFieldElement::<Mod2, Ip2>::from_base_field(FiniteFieldElement::one())
         );
     }
@@ -324,10 +369,10 @@ mod tests {
         });
 
         // Inverse
-        let inv_a = a.clone().inverse();
-        assert_eq!(inv_a.clone(), b.clone());
+        let inv_a = a.inverse();
+        assert_eq!(inv_a, b);
 
-        let product = a.clone() * inv_a;
+        let product = a.mul_ref(&inv_a);
         assert_eq!(
             product,
             ExtendedFieldElement::<Mod7, Ip7>::from_base_field(FiniteFieldElement::one())

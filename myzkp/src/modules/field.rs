@@ -15,6 +15,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     // A commutative ring with a multiplicative identity element
     // where every non-zero element has a multiplicative inverse is called a field.
     fn inverse(&self) -> Self;
+    fn div_ref(&self, other: &Self) -> Self;
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +42,7 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
 
     pub fn sanitize(&self) -> Self {
         let modulus = M::modulus();
-        let mut value_sanitized = self.value.clone() % &modulus;
+        let mut value_sanitized = &self.value % &modulus;
         if value_sanitized < BigInt::zero() {
             value_sanitized += &modulus;
         }
@@ -124,6 +125,10 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
         //    panic!("r={}: Inverse does not exist", r)
         //}
     }
+
+    fn div_ref(&self, other: &Self) -> Self {
+        self.mul_ref(&other.inverse())
+    }
 }
 
 impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
@@ -135,6 +140,11 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
     fn mul_ref(&self, other: &Self) -> Self {
         let modulus = M::modulus();
         FiniteFieldElement::<M>::new((&self.value * &other.value) % &modulus)
+    }
+
+    fn sub_ref(&self, other: &Self) -> Self {
+        let modulus = M::modulus();
+        FiniteFieldElement::<M>::new((&self.value - &other.value) % &modulus)
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
@@ -216,8 +226,15 @@ impl<M: ModulusValue> Sub for FiniteFieldElement<M> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value - &other.value) % &modulus)
+        self.sub_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue> Sub<&'a FiniteFieldElement<M>> for FiniteFieldElement<M> {
+    type Output = Self;
+
+    fn sub(self, other: &'a FiniteFieldElement<M>) -> FiniteFieldElement<M> {
+        self.sub_ref(&other)
     }
 }
 
@@ -249,7 +266,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
-        self * other.inverse()
+        self.div_ref(&other)
     }
 }
 
@@ -349,7 +366,7 @@ mod tests {
     fn test_division() {
         let fe1 = FiniteFieldElement::<Mod17>::from_value(12);
         let fe2 = FiniteFieldElement::<Mod17>::from_value(3);
-        let fe_div = fe1 / fe2.clone();
+        let fe_div = fe1.div_ref(&fe2);
         assert_eq!(
             fe_div.value,
             (12.to_bigint().unwrap() * fe2.inverse().value) % 17

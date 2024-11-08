@@ -90,7 +90,7 @@ impl<F: Field> Polynomial<F> {
             let mut denominator = F::one();
             for i in 0..x_values.len() {
                 if i != j {
-                    denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+                    denominator = denominator * (x_values[j].sub_ref(&x_values[i]));
                 }
             }
             let cur_poly = numerators
@@ -113,13 +113,13 @@ impl<F: Field> Polynomial<F> {
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
-                coef: vec![F::zero() - x.clone(), F::one()],
+                coef: vec![F::zero() - x, F::one()],
             });
         }
         poly
     }
 
-    fn add_ref<'a, 'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+    fn add_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
         let max_len = std::cmp::max(self.coef.len(), other.coef.len());
         let mut result = Vec::with_capacity(max_len);
 
@@ -128,14 +128,14 @@ impl<F: Field> Polynomial<F> {
         for i in 0..max_len {
             let a = self.coef.get(i).unwrap_or(&zero);
             let b = other.coef.get(i).unwrap_or(&zero);
-            result.push(a.clone() + b.clone());
+            result.push(a.add_ref(b));
         }
         Polynomial {
             coef: Self::trim_trailing_zeros(result),
         }
     }
 
-    fn mul_ref<'a, 'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+    fn mul_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
         if self.is_zero() || other.is_zero() {
             return Polynomial::<F>::zero();
         }
@@ -143,12 +143,45 @@ impl<F: Field> Polynomial<F> {
 
         for (i, a) in self.coef.iter().enumerate() {
             for (j, b) in other.coef.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+                result[i + j] = result[i + j].add_ref(&a.mul_ref(b));
             }
         }
         Polynomial {
             coef: Polynomial::<F>::trim_trailing_zeros(result),
         }
+    }
+
+    fn div_rem_ref<'b>(&self, other: &'b Polynomial<F>) -> (Polynomial<F>, Polynomial<F>) {
+        if self.degree() < other.degree() {
+            return (Polynomial::zero(), self.clone());
+        }
+
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
+
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&divisor_lead_inv);
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
+            quotient[deg_diff] = lead_term.clone();
+
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
+                    .sub_ref(&(lead_term.mul_ref(&divisor_coeffs[i])));
+            }
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+        }
+
+        (
+            Polynomial {
+                coef: Self::trim_trailing_zeros(quotient),
+            },
+            Polynomial {
+                coef: remainder_coeffs,
+            },
+        )
     }
 }
 
@@ -282,66 +315,32 @@ impl<F: Field> Mul<F> for Polynomial<F> {
 impl<F: Field> Div for Polynomial<F> {
     type Output = Self;
 
-    /// Division of two polynomials, returns quotient.
     fn div(self, other: Polynomial<F>) -> Polynomial<F> {
-        if self.degree() < other.degree() {
-            return self.clone();
-        }
+        self.div_rem_ref(&other).0
+    }
+}
 
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
-        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+impl<'a, 'b, F: Field> Div<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
-
-        while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
-            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
-            quotient[deg_diff] = lead_term.clone();
-
-            for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.mul_ref(&divisor_coeffs[i]));
-            }
-            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-        }
-
-        Polynomial {
-            coef: Self::trim_trailing_zeros(quotient),
-        }
+    fn div(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.div_rem_ref(other).0
     }
 }
 
 impl<F: Field> Rem for Polynomial<F> {
     type Output = Self;
 
-    /// Division of two polynomials, returns quotient.
     fn rem(self, other: Polynomial<F>) -> Polynomial<F> {
-        if self.degree() < other.degree() {
-            return self.clone();
-        }
+        self.div_rem_ref(&other).1
+    }
+}
 
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
-        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+impl<'a, 'b, F: Field> Rem<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
-
-        while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&divisor_lead_inv);
-            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
-            quotient[deg_diff] = lead_term.clone();
-
-            for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.mul_ref(&divisor_coeffs[i]));
-            }
-            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-        }
-
-        Polynomial {
-            coef: remainder_coeffs,
-        }
+    fn rem(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.div_rem_ref(other).1
     }
 }
 
@@ -472,14 +471,14 @@ mod tests {
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 1 + x
         };
-        let quotient = poly1.clone() / poly2.clone();
+        let quotient = &poly1 / &poly2;
         let expected_quotient = Polynomial {
             coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 2 + x
         };
-        let remainder = poly1.clone() % poly2.clone();
+        let remainder = &poly1 % &poly2;
         let expected_remainder = Polynomial {
             coef: vec![FiniteFieldElement::<ModEIP197>::from_value(1_i32)], // remainder is 1
         };
