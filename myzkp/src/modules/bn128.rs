@@ -126,22 +126,22 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     );
 }
 
-pub fn linefunc(p: G12Point, q: G12Point, t: G12Point) -> Fq12 {
-    let x1 = p.x.unwrap();
-    let y1 = p.y.unwrap();
-    let x2 = q.x.unwrap();
-    let y2 = q.y.unwrap();
-    let xt = t.x.unwrap();
-    let yt = t.y.unwrap();
+pub fn linefunc(p: &G12Point, q: &G12Point, t: &G12Point) -> Fq12 {
+    let x1 = p.x.as_ref().unwrap();
+    let y1 = p.y.as_ref().unwrap();
+    let x2 = q.x.as_ref().unwrap();
+    let y2 = q.y.as_ref().unwrap();
+    let xt = t.x.as_ref().unwrap();
+    let yt = t.y.as_ref().unwrap();
 
-    if x1.clone() != x2.clone() {
-        let m = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
-        return m.clone() * (xt.clone() - x1.clone()) - (yt.clone() - y1.clone());
-    } else if y1.clone() == y2.clone() {
-        let m = (x1.pow(2) * Fq12::from_value(3)) / (y1.clone() * Fq12::from_value(2));
-        return m.clone() * (xt.clone() - x1.clone()) - (yt.clone() - y1.clone());
+    if x1 != x2 {
+        let m = (y2.sub_ref(&y1)) / (x2.sub_ref(&x1));
+        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
+    } else if y1 == y2 {
+        let m = ((x1.pow(2)).mul_ref(&Fq12::from_value(3))) / (y1.mul_ref(&Fq12::from_value(2)));
+        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
     } else {
-        return xt - x1;
+        return xt.sub_ref(x1);
     }
 }
 
@@ -161,11 +161,11 @@ pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
     .unwrap();
 
     for i in (0..=log_ate_loop_count).rev() {
-        f = f.clone() * f.clone() * linefunc(r.clone(), r.clone(), p.clone());
+        f = f.mul_ref(&f) * linefunc(&r, &r, &p);
         r = r.double();
         if ate_loop_count.bit(i) {
-            f = f.clone() * linefunc(r.clone(), q.clone(), p.clone());
-            r = r.clone() + q.clone();
+            f = f.mul_ref(&linefunc(&r, &q, &p));
+            r = r.add_ref(&q);
         }
     }
 
@@ -181,9 +181,9 @@ pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
         -q1.y.clone().unwrap().pow(BN128Modulus::modulus()),
     );
 
-    f = f.clone() * (linefunc(r.clone(), q1.clone(), p.clone()));
-    r = r.clone() + q1.clone();
-    f = f.clone() * (linefunc(r, nq2.clone(), p.clone()));
+    f = f.mul_ref(&linefunc(&r, &q1, &p));
+    r = r.add_ref(&q1);
+    f = f.mul_ref(&linefunc(&r, &nq2, &p));
 
     f
 }
@@ -287,10 +287,10 @@ mod tests {
             coef: vec![Fq::from_value(2_i32), Fq::from_value(1_i32)],
         });
         let one = Fq2::one();
-        assert_eq!(x.clone() + f.clone(), fpx);
-        assert_eq!(fpx2.clone() / fpx2.clone(), one.clone());
+        assert_eq!(x.add_ref(&f), fpx);
+        assert_eq!(fpx2.div_ref(&fpx2), one);
         assert_eq!(
-            one.clone() / f.clone() + x.clone() / f.clone(),
+            one.div_ref(&f) + x.div_ref(&f),
             (one.clone() + x.clone()) / f.clone()
         );
         assert_eq!(
