@@ -33,10 +33,6 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         let modulus = M::modulus();
         let value_sanitized = value % &modulus;
 
-        //if value_sanitized < BigInt::zero() {
-        //    value_sanitized += modulus.clone();
-        //}
-
         FiniteFieldElement {
             value: value_sanitized,
             _phantom: PhantomData,
@@ -47,7 +43,7 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         let modulus = M::modulus();
         let mut value_sanitized = self.value.clone() % &modulus;
         if value_sanitized < BigInt::zero() {
-            value_sanitized += modulus.clone();
+            value_sanitized += &modulus;
         }
         FiniteFieldElement {
             value: value_sanitized,
@@ -61,12 +57,12 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         let identity = FiniteFieldElement::one();
         let mut h = identity.clone();
         for _ in 1..n {
-            h = h * self.clone();
+            h = h * self;
             if h == identity {
                 return false;
             }
         }
-        h * self.clone() == identity
+        h * self == identity
     }
 
     /*
@@ -131,6 +127,16 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 }
 
 impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
+    fn add_ref(&self, other: &Self) -> Self {
+        let modulus = M::modulus();
+        FiniteFieldElement::<M>::new((&self.value + &other.value) % &modulus)
+    }
+
+    fn mul_ref(&self, other: &Self) -> Self {
+        let modulus = M::modulus();
+        FiniteFieldElement::<M>::new((&self.value * &other.value) % &modulus)
+    }
+
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
         let mut exponent: BigInt = n.into();
         let mut base = self.clone();
@@ -144,10 +150,10 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
         let mut result = FiniteFieldElement::one();
         while exponent.is_positive() && !exponent.is_zero() {
             if &exponent % 2 != BigInt::zero() {
-                result = result * base.clone();
+                result = result * &base;
             }
             exponent /= 2;
-            base = base.clone() * base;
+            base = base.mul_ref(&base);
         }
         result
     }
@@ -194,8 +200,15 @@ impl<M: ModulusValue> Add for FiniteFieldElement<M> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value + &other.value) % &modulus)
+        self.add_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue> Add<&'a FiniteFieldElement<M>> for FiniteFieldElement<M> {
+    type Output = FiniteFieldElement<M>;
+
+    fn add(self, other: &'a FiniteFieldElement<M>) -> FiniteFieldElement<M> {
+        self.add_ref(other)
     }
 }
 
@@ -212,8 +225,15 @@ impl<M: ModulusValue> Mul<FiniteFieldElement<M>> for FiniteFieldElement<M> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value * &other.value) % &modulus)
+        self.mul_ref(&other)
+    }
+}
+
+impl<'a, M: ModulusValue> Mul<&'a FiniteFieldElement<M>> for FiniteFieldElement<M> {
+    type Output = FiniteFieldElement<M>;
+
+    fn mul(self, other: &'a FiniteFieldElement<M>) -> FiniteFieldElement<M> {
+        self.mul_ref(other)
     }
 }
 

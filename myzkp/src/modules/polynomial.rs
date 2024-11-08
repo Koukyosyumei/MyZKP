@@ -57,7 +57,7 @@ impl<F: Field> Polynomial<F> {
     pub fn eval(&self, point: &F) -> F {
         let mut result = F::zero();
         for coef in self.coef.iter().rev() {
-            result = result * point.clone() + coef.clone();
+            result = result.mul_ref(&point) + coef;
         }
         result
     }
@@ -213,6 +213,7 @@ impl<F: Field> One for Polynomial<F> {
 // Arithmetic operations implementation for Polynomial.
 impl<F: Field> Neg for Polynomial<F> {
     type Output = Self;
+
     fn neg(self) -> Polynomial<F> {
         Polynomial {
             coef: self.coef.iter().map(|x| -x.clone()).collect(),
@@ -222,6 +223,7 @@ impl<F: Field> Neg for Polynomial<F> {
 
 impl<F: Field> Add for Polynomial<F> {
     type Output = Self;
+
     fn add(self, other: Self) -> Polynomial<F> {
         self.add_ref(&other)
     }
@@ -229,6 +231,7 @@ impl<F: Field> Add for Polynomial<F> {
 
 impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
+
     fn add(self, other: &'b Polynomial<F>) -> Polynomial<F> {
         self.add_ref(other)
     }
@@ -236,6 +239,7 @@ impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
 
 impl<F: Field> Sub for Polynomial<F> {
     type Output = Self;
+
     fn sub(self, other: Self) -> Polynomial<F> {
         self.add_ref(&-other)
     }
@@ -243,6 +247,7 @@ impl<F: Field> Sub for Polynomial<F> {
 
 impl<'a, 'b, F: Field> Sub<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
+
     fn sub(self, other: &'b Polynomial<F>) -> Polynomial<F> {
         self.add_ref(&-other.clone())
     }
@@ -250,6 +255,7 @@ impl<'a, 'b, F: Field> Sub<&'b Polynomial<F>> for &'a Polynomial<F> {
 
 impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
     type Output = Self;
+
     fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
         self.mul_ref(&other)
     }
@@ -257,6 +263,7 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
 
 impl<'a, 'b, F: Field> Mul<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
+
     fn mul(self, other: &'b Polynomial<F>) -> Polynomial<F> {
         self.mul_ref(other)
     }
@@ -264,13 +271,10 @@ impl<'a, 'b, F: Field> Mul<&'b Polynomial<F>> for &'a Polynomial<F> {
 
 impl<F: Field> Mul<F> for Polynomial<F> {
     type Output = Self;
+
     fn mul(self, scalar: F) -> Polynomial<F> {
         Polynomial {
-            coef: self
-                .coef
-                .iter()
-                .map(|x| x.clone() * scalar.clone())
-                .collect(),
+            coef: self.coef.iter().map(|x| x.mul_ref(&scalar)).collect(),
         }
     }
 }
@@ -297,7 +301,7 @@ impl<F: Field> Div for Polynomial<F> {
 
             for i in 0..divisor_coeffs.len() {
                 remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
+                    - (lead_term.mul_ref(&divisor_coeffs[i]));
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
         }
@@ -324,13 +328,13 @@ impl<F: Field> Rem for Polynomial<F> {
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
         while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&divisor_lead_inv);
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
 
             for i in 0..divisor_coeffs.len() {
                 remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
+                    - (lead_term.mul_ref(&divisor_coeffs[i]));
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
         }
