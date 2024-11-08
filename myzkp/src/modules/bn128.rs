@@ -25,12 +25,16 @@ type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
 pub struct Fq2Poly;
+lazy_static! {
+    // x^2 + 1
+    static ref MODULUS_Fq2: Polynomial<Fq> = Polynomial {
+        coef: vec![Fq::one(), Fq::zero(), Fq::one()]
+    };
+}
+
 impl IrreduciblePoly<Fq> for Fq2Poly {
-    fn modulus() -> Polynomial<Fq> {
-        // x^2 + 1
-        Polynomial {
-            coef: vec![Fq::one(), Fq::zero(), Fq::one()],
-        }
+    fn modulus() -> &'static Polynomial<Fq> {
+        &MODULUS_Fq2
     }
 }
 type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
@@ -39,6 +43,33 @@ type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
 pub struct Fq12Poly;
+lazy_static! {
+    // x^2 + 1
+    static ref MODULUS_Fq12: Polynomial<Fq> = Polynomial {
+        // x^12 -18x^6 + 82
+        coef: vec![
+            Fq::from_value(82_i32),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::from_value(-18_i32),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::zero(),
+            Fq::one(),
+        ],
+    };
+}
+impl IrreduciblePoly<Fq> for Fq12Poly {
+    fn modulus() -> &'static Polynomial<Fq> {
+        &MODULUS_Fq12
+    }
+}
+/*
 impl IrreduciblePoly<Fq> for Fq12Poly {
     fn modulus() -> Polynomial<Fq> {
         // x^12 -18x^6 + 82
@@ -61,6 +92,7 @@ impl IrreduciblePoly<Fq> for Fq12Poly {
         }
     }
 }
+    */
 type Fq12 = ExtendedFieldElement<BN128Modulus, Fq12Poly>;
 type G12Point = EllipticCurvePoint<Fq12, BN128Curve>;
 

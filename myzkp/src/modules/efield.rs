@@ -14,7 +14,7 @@ use crate::modules::ring::Ring;
 use crate::modules::utils::extended_euclidean;
 
 pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
-    fn modulus() -> Polynomial<F>;
+    fn modulus() -> &'static Polynomial<F>;
 }
 
 #[derive(Clone, Debug)]
@@ -23,7 +23,9 @@ pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldE
     _phantom: PhantomData<P>,
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldElement<M, P> {
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
+    ExtendedFieldElement<M, P>
+{
     pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
         let result = Self {
             poly: poly,
@@ -34,7 +36,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
 
     fn reduce(&self) -> Self {
         Self {
-            poly: self.poly.reduce() % P::modulus(),
+            poly: &self.poly.reduce() % P::modulus(),
             _phantom: PhantomData,
         }
     }
@@ -48,7 +50,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> ExtendedFieldEl
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
 {
     fn inverse(&self) -> Self {
@@ -59,7 +61,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         let mut lm = Polynomial::<FiniteFieldElement<M>>::one();
         let mut hm = Polynomial::zero();
         let mut low = self.poly.clone();
-        let mut high = P::modulus();
+        let mut high = P::modulus().clone();
 
         while !low.is_zero() {
             let q = &high / &low;
@@ -93,7 +95,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> PartialEq
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> PartialEq
     for ExtendedFieldElement<M, P>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -101,9 +103,12 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> PartialEq
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Eq for ExtendedFieldElement<M, P> {}
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Eq
+    for ExtendedFieldElement<M, P>
+{
+}
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Zero
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Zero
     for ExtendedFieldElement<M, P>
 {
     fn zero() -> Self {
@@ -115,7 +120,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Zero
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> One
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> One
     for ExtendedFieldElement<M, P>
 {
     fn one() -> Self {
@@ -123,7 +128,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> One
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Add
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Add
     for ExtendedFieldElement<M, P>
 {
     type Output = Self;
@@ -133,7 +138,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Add
     }
 }
 
-impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     Add<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
 {
     type Output = ExtendedFieldElement<M, P>;
@@ -143,7 +148,7 @@ impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Sub
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Sub
     for ExtendedFieldElement<M, P>
 {
     type Output = Self;
@@ -153,7 +158,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Sub
     }
 }
 
-impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     Sub<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
 {
     type Output = ExtendedFieldElement<M, P>;
@@ -163,7 +168,7 @@ impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Mul
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Mul
     for ExtendedFieldElement<M, P>
 {
     type Output = Self;
@@ -173,7 +178,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Mul
     }
 }
 
-impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
+impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     Mul<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
 {
     type Output = ExtendedFieldElement<M, P>;
@@ -183,7 +188,7 @@ impl<'a, M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     for ExtendedFieldElement<M, P>
 {
     type Output = Self;
@@ -193,7 +198,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Neg
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Neg
     for ExtendedFieldElement<M, P>
 {
     type Output = Self;
@@ -203,7 +208,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Neg
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     for ExtendedFieldElement<M, P>
 {
     fn add_ref(&self, other: &Self) -> Self {
@@ -249,7 +254,7 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
     }
 }
 
-impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::Display
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::Display
     for ExtendedFieldElement<M, P>
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -275,16 +280,20 @@ mod tests {
         #[derive(Debug, Clone, PartialEq, Hash)]
         pub struct Ip2;
 
+        lazy_static! {
+            // x^2 + 1
+            static ref MODULUS_Ip2: Polynomial<FiniteFieldElement<Mod2>> = Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<Mod2>::from_value(1),
+                    FiniteFieldElement::<Mod2>::from_value(1),
+                    FiniteFieldElement::<Mod2>::from_value(1),
+                ],
+            };
+        }
+
         impl IrreduciblePoly<FiniteFieldElement<Mod2>> for Ip2 {
-            // x^2 + x + 1
-            fn modulus() -> Polynomial<FiniteFieldElement<Mod2>> {
-                Polynomial {
-                    coef: vec![
-                        FiniteFieldElement::<Mod2>::from_value(1),
-                        FiniteFieldElement::<Mod2>::from_value(1),
-                        FiniteFieldElement::<Mod2>::from_value(1),
-                    ],
-                }
+            fn modulus() -> &'static Polynomial<FiniteFieldElement<Mod2>> {
+                &MODULUS_Ip2
             }
         }
 
@@ -341,6 +350,24 @@ mod tests {
         #[derive(Debug, Clone, PartialEq, Hash)]
         pub struct Ip7;
 
+        lazy_static! {
+        // x^2 + x + 1
+            static ref MODULUS_Ip7: Polynomial<FiniteFieldElement<Mod7>> = Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<Mod7>::from_value(1),
+                    FiniteFieldElement::<Mod7>::from_value(0),
+                    FiniteFieldElement::<Mod7>::from_value(1),
+                ],
+            };
+        }
+
+        impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
+            fn modulus() -> &'static Polynomial<FiniteFieldElement<Mod7>> {
+                &MODULUS_Ip7
+            }
+        }
+
+        /*
         impl IrreduciblePoly<FiniteFieldElement<Mod7>> for Ip7 {
             // x^2 + x + 1
             fn modulus() -> Polynomial<FiniteFieldElement<Mod7>> {
@@ -353,6 +380,7 @@ mod tests {
                 }
             }
         }
+        */
 
         // x + 2
         let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
