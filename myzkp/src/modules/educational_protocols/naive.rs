@@ -74,6 +74,8 @@ mod tests {
         modules::field::{FiniteFieldElement, ModulusValue},
         modules::polynomial::Polynomial,
     };
+    use lazy_static::lazy_static;
+    use paste::paste;
 
     #[test]
     fn test_naive_protocol() {

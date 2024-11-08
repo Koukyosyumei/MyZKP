@@ -261,6 +261,8 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::Display
 #[cfg(test)]
 mod tests {
     use super::*;
+    use lazy_static::lazy_static;
+    use paste::paste;
     use std::str::FromStr;
 
     use crate::define_myzkp_modulus_type;

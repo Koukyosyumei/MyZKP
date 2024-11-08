@@ -335,7 +335,9 @@ mod tests {
         define_myzkp_modulus_type,
         modules::field::{FiniteFieldElement, ModulusValue},
     };
+    use lazy_static::lazy_static;
     use num_bigint::{BigInt, ToBigInt};
+    use paste::paste;
     use std::str::FromStr;
 
     define_myzkp_modulus_type!(Mod631, "631");

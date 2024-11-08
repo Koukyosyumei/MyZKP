@@ -1,5 +1,7 @@
+use lazy_static::lazy_static;
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
+use paste::paste;
 use std::fmt;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -25,14 +27,14 @@ pub struct FiniteFieldElement<M> {
 }
 
 pub trait ModulusValue: Debug + Clone + Hash {
-    fn modulus() -> BigInt;
+    fn modulus() -> &'static BigInt;
 }
 
 impl<M: ModulusValue> FiniteFieldElement<M> {
     // Constructor with optional modulus and generator_value.
     pub fn new(value: BigInt) -> Self {
         let modulus = M::modulus();
-        let value_sanitized = value % &modulus;
+        let value_sanitized = value % modulus;
 
         FiniteFieldElement {
             value: value_sanitized,
@@ -42,9 +44,9 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
 
     pub fn sanitize(&self) -> Self {
         let modulus = M::modulus();
-        let mut value_sanitized = &self.value % &modulus;
+        let mut value_sanitized = &self.value % modulus;
         if value_sanitized < BigInt::zero() {
-            value_sanitized += &modulus;
+            value_sanitized += modulus;
         }
         FiniteFieldElement {
             value: value_sanitized,
@@ -104,10 +106,10 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 
         // Ensure r and new_r are non-negative
         if r.is_negative() {
-            r += &modulus;
+            r += modulus;
         }
         if new_r.is_negative() {
-            new_r += &modulus;
+            new_r += modulus;
         }
 
         let (_, _, mut t) = extended_euclidean(r, new_r);
@@ -115,9 +117,9 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
         // At this point, r should be 1 if the inverse exists
         //if final_r == BigInt::one() {
         // Ensure t is within the correct range
-        t %= &modulus;
+        t %= modulus;
         if t.is_negative() {
-            t += &modulus;
+            t += modulus;
         }
 
         FiniteFieldElement::<M>::new(t)
@@ -134,17 +136,17 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
     fn add_ref(&self, other: &Self) -> Self {
         let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value + &other.value) % &modulus)
+        FiniteFieldElement::<M>::new((&self.value + &other.value) % modulus)
     }
 
     fn mul_ref(&self, other: &Self) -> Self {
         let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value * &other.value) % &modulus)
+        FiniteFieldElement::<M>::new((&self.value * &other.value) % modulus)
     }
 
     fn sub_ref(&self, other: &Self) -> Self {
         let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value - &other.value) % &modulus)
+        FiniteFieldElement::<M>::new((&self.value - &other.value) % modulus)
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
@@ -180,9 +182,9 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
     fn random_element(exclude_elements: &[FiniteFieldElement<M>]) -> Self {
         let modulus = M::modulus();
         let mut rng = rand::thread_rng();
-        let mut fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
+        let mut fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
         while exclude_elements.contains(&fe) {
-            fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), &modulus));
+            fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
         }
         fe
     }
@@ -192,7 +194,7 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
 impl<M: ModulusValue> fmt::Display for FiniteFieldElement<M> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //let modulus = M::modulus();
-        //let repr_value = (&self.value + &modulus / 2) % &modulus - &modulus / 2;
+        //let repr_value = (&self.value + modulus / 2) % modulus - modulus / 2;
         write!(f, "{}", &self.value)
     }
 }
@@ -273,13 +275,26 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 #[macro_export]
 macro_rules! define_myzkp_modulus_type {
     ($name:ident, $modulus:expr) => {
-        #[derive(Debug, Hash, Clone)]
-        pub struct $name;
+        paste! {#[derive(Debug, Hash, Clone)]
+            pub struct $name;
 
-        impl ModulusValue for $name {
-            fn modulus() -> BigInt {
-                BigInt::from_str($modulus).unwrap()
+            lazy_static! {
+                static ref [<MODULUS_ $name>]: BigInt = BigInt::from_str($modulus).unwrap();
             }
+
+            impl ModulusValue for $name {
+                fn modulus() -> &'static BigInt {
+                    &[<MODULUS_ $name>]
+                }
+            }
+
+            /*
+            impl ModulusValue for $name {
+                fn modulus() -> BigInt {
+                    BigInt::from_str($modulus).unwrap()
+                }
+            }
+            */
         }
     };
 }

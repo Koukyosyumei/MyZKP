@@ -1,8 +1,10 @@
 use crate::modules::ring::Ring;
+use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
 use num_traits::FromPrimitive;
 use num_traits::{One, Zero};
+use paste::paste;
 use std::str::FromStr;
 
 use crate::modules::curve::{miller, EllipticCurve, EllipticCurvePoint};
@@ -172,13 +174,13 @@ pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
     // Assert: r == multiply(&q, &ate_loop_count)
 
     let q1 = G12Point::new(
-        q.x.unwrap().pow(BN128Modulus::modulus()),
-        q.y.unwrap().pow(BN128Modulus::modulus()),
+        q.x.unwrap().pow(BN128Modulus::modulus().clone()),
+        q.y.unwrap().pow(BN128Modulus::modulus().clone()),
     );
 
     let nq2 = G12Point::new(
-        q1.x.clone().unwrap().pow(BN128Modulus::modulus()),
-        -q1.y.clone().unwrap().pow(BN128Modulus::modulus()),
+        q1.x.clone().unwrap().pow(BN128Modulus::modulus().clone()),
+        -q1.y.clone().unwrap().pow(BN128Modulus::modulus().clone()),
     );
 
     f = f.mul_ref(&linefunc(&r, &q1, &p));
