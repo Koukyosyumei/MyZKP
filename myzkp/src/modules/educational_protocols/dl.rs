@@ -1,8 +1,9 @@
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
 use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::Zero;
 use std::str::FromStr;
+
+use crate::modules::field::Field;
+use crate::modules::polynomial::Polynomial;
 
 pub struct Prover<F: Field> {
     pub p: Polynomial<F>,
@@ -107,8 +108,10 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::polynomial::Polynomial;
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_dl_protocol() {

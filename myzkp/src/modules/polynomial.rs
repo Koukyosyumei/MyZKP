@@ -1,37 +1,42 @@
+use num_traits::{One, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-// Assuming FiniteFieldElement is already implemented with necessary traits like Add, Sub, Mul, Div.
+use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::field::Field;
 
 /// Polynomial struct representing a polynomial over Field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial<F: Field> {
-    pub poly: Vec<F>,
-    pub var: String, // Variable for representation, default to 'x'
+    pub coef: Vec<F>,
 }
 
 impl<F: Field> Polynomial<F> {
     /// Creates a polynomial representing the variable `x`.
     pub fn x() -> Self {
         Polynomial {
-            poly: vec![F::zero(), F::one()],
-            var: "x".to_string(),
+            coef: vec![F::zero(), F::one()],
         }
     }
 
     /// Removes trailing zeroes from a polynomial's coefficients.
-    fn trim_trailing_zeros(poly: Vec<F>) -> Vec<F> {
-        let mut trimmed = poly;
+    fn trim_trailing_zeros(coef: Vec<F>) -> Vec<F> {
+        let mut trimmed = coef;
         while trimmed.last() == Some(&F::zero()) {
             trimmed.pop();
         }
         trimmed
     }
 
+    pub fn reduce(&self) -> Self {
+        Polynomial {
+            coef: Self::trim_trailing_zeros(self.coef.clone()),
+        }
+    }
+
     /// Returns the degree of the polynomial.
     pub fn degree(&self) -> isize {
-        let trimmed = Self::trim_trailing_zeros(self.poly.clone());
+        let trimmed = Self::trim_trailing_zeros(self.coef.clone());
         if trimmed.is_empty() {
             -1
         } else {
@@ -44,23 +49,34 @@ impl<F: Field> Polynomial<F> {
         if n > self.degree() as usize {
             F::zero()
         } else {
-            self.poly[n].clone()
+            self.coef[n].clone()
         }
     }
 
     /// Evaluate the polynomial at a given point.
     pub fn eval(&self, point: &F) -> F {
         let mut result = F::zero();
-        for coef in self.poly.iter().rev() {
-            result = result * point.clone() + coef.clone();
+        for coef in self.coef.iter().rev() {
+            result = result.mul_ref(&point) + coef;
         }
         result
     }
 
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
-        for (i, coef) in self.poly.iter().enumerate() {
+        for (i, coef) in self.coef.iter().enumerate() {
             result = result * powers[i].pow(coef.clone().get_value());
+        }
+        result
+    }
+
+    pub fn eval_with_powers_on_curve<E: EllipticCurve>(
+        &self,
+        powers: &[EllipticCurvePoint<F, E>],
+    ) -> EllipticCurvePoint<F, E> {
+        let mut result = EllipticCurvePoint::point_at_infinity();
+        for (i, coef) in self.coef.iter().enumerate() {
+            result = result + powers[i].clone() * coef.clone().get_value();
         }
         result
     }
@@ -74,7 +90,7 @@ impl<F: Field> Polynomial<F> {
             let mut denominator = F::one();
             for i in 0..x_values.len() {
                 if i != j {
-                    denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+                    denominator = denominator * (x_values[j].sub_ref(&x_values[i]));
                 }
             }
             let cur_poly = numerators
@@ -83,10 +99,7 @@ impl<F: Field> Polynomial<F> {
             lagrange_polys.push(cur_poly);
         }
 
-        let mut result = Polynomial {
-            poly: vec![],
-            var: "x".to_string(),
-        };
+        let mut result = Polynomial { coef: vec![] };
         for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
             result = result + lagrange_poly.clone() * y_values[j].clone();
         }
@@ -96,16 +109,79 @@ impl<F: Field> Polynomial<F> {
     /// Helper to create polynomial from a single monomial.
     pub fn from_monomials(x_values: &[F]) -> Polynomial<F> {
         let mut poly = Polynomial {
-            poly: vec![F::one()],
-            var: "x".to_string(),
+            coef: vec![F::one()],
         };
         for x in x_values {
             poly = poly.mul(Polynomial {
-                poly: vec![F::zero() - x.clone(), F::one()],
-                var: "x".to_string(),
+                coef: vec![F::zero() - x, F::one()],
             });
         }
         poly
+    }
+
+    fn add_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero();
+
+        for i in 0..max_len {
+            let a = self.coef.get(i).unwrap_or(&zero);
+            let b = other.coef.get(i).unwrap_or(&zero);
+            result.push(a.add_ref(b));
+        }
+        Polynomial {
+            coef: Self::trim_trailing_zeros(result),
+        }
+    }
+
+    fn mul_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::<F>::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
+
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].add_ref(&a.mul_ref(b));
+            }
+        }
+        Polynomial {
+            coef: Polynomial::<F>::trim_trailing_zeros(result),
+        }
+    }
+
+    fn div_rem_ref<'b>(&self, other: &'b Polynomial<F>) -> (Polynomial<F>, Polynomial<F>) {
+        if self.degree() < other.degree() {
+            return (Polynomial::zero(), self.clone());
+        }
+
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
+        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
+
+        while remainder_coeffs.len() >= divisor_coeffs.len() {
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&divisor_lead_inv);
+            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
+            quotient[deg_diff] = lead_term.clone();
+
+            for i in 0..divisor_coeffs.len() {
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
+                    .sub_ref(&(lead_term.mul_ref(&divisor_coeffs[i])));
+            }
+            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+        }
+
+        (
+            Polynomial {
+                coef: Self::trim_trailing_zeros(quotient),
+            },
+            Polynomial {
+                coef: remainder_coeffs,
+            },
+        )
     }
 }
 
@@ -113,7 +189,7 @@ impl<F: Field> fmt::Display for Polynomial<F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut terms = Vec::new();
 
-        for (i, coeff) in self.poly.iter().enumerate() {
+        for (i, coeff) in self.coef.iter().enumerate() {
             if coeff != &F::zero() {
                 let term = if i == 0 {
                     // Constant term
@@ -121,16 +197,16 @@ impl<F: Field> fmt::Display for Polynomial<F> {
                 } else if i == 1 {
                     // Linear term (e.g., 3x)
                     if coeff == &F::one() {
-                        format!("{}", self.var)
+                        format!("{}", "x")
                     } else {
-                        format!("{}{}", coeff, self.var)
+                        format!("{}{}", coeff, "x")
                     }
                 } else {
                     // Higher degree terms (e.g., 3x^2)
                     if coeff == &F::one() {
-                        format!("{}^{}", self.var, i)
+                        format!("{}^{}", "x", i)
                     } else {
-                        format!("{}{}^{}", coeff, self.var, i)
+                        format!("{}{}^{}", coeff, "x", i)
                     }
                 };
                 terms.push(term);
@@ -147,25 +223,50 @@ impl<F: Field> fmt::Display for Polynomial<F> {
     }
 }
 
+impl<F: Field> Zero for Polynomial<F> {
+    fn zero() -> Self {
+        Polynomial {
+            coef: vec![F::zero()],
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.degree() == -1
+    }
+}
+
+impl<F: Field> One for Polynomial<F> {
+    fn one() -> Self {
+        Polynomial {
+            coef: vec![F::one()],
+        }
+    }
+}
+
 // Arithmetic operations implementation for Polynomial.
+impl<F: Field> Neg for Polynomial<F> {
+    type Output = Self;
+
+    fn neg(self) -> Polynomial<F> {
+        Polynomial {
+            coef: self.coef.iter().map(|x| -x.clone()).collect(),
+        }
+    }
+}
+
 impl<F: Field> Add for Polynomial<F> {
     type Output = Self;
 
     fn add(self, other: Self) -> Polynomial<F> {
-        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
-        let mut result = Vec::with_capacity(max_len);
+        self.add_ref(&other)
+    }
+}
 
-        let zero = F::zero();
+impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-        for i in 0..max_len {
-            let a = self.poly.get(i).unwrap_or(&zero);
-            let b = other.poly.get(i).unwrap_or(&zero);
-            result.push(a.clone() + b.clone());
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+    fn add(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.add_ref(other)
     }
 }
 
@@ -173,51 +274,31 @@ impl<F: Field> Sub for Polynomial<F> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Polynomial<F> {
-        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero();
-
-        for i in 0..max_len {
-            let a = self.poly.get(i).unwrap_or(&zero);
-            let b = other.poly.get(i).unwrap_or(&zero);
-            result.push(a.clone() - b.clone());
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+        self.add_ref(&-other)
     }
 }
 
-impl<F: Field> Neg for Polynomial<F> {
-    type Output = Self;
+impl<'a, 'b, F: Field> Sub<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-    /// Negation of a polynomial.
-    fn neg(self) -> Polynomial<F> {
-        Polynomial {
-            poly: self.poly.iter().map(|x| -x.clone()).collect(),
-            var: self.var.clone(),
-        }
+    fn sub(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.add_ref(&-other.clone())
     }
 }
 
 impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
     type Output = Self;
 
-    /// Multiplication of two polynomials.
     fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut result = vec![F::zero(); self.degree() as usize + other.degree() as usize + 1];
+        self.mul_ref(&other)
+    }
+}
 
-        for (i, a) in self.poly.iter().enumerate() {
-            for (j, b) in other.poly.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
-            }
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+impl<'a, 'b, F: Field> Mul<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
+
+    fn mul(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.mul_ref(other)
     }
 }
 
@@ -226,12 +307,7 @@ impl<F: Field> Mul<F> for Polynomial<F> {
 
     fn mul(self, scalar: F) -> Polynomial<F> {
         Polynomial {
-            poly: self
-                .poly
-                .iter()
-                .map(|x| x.clone() * scalar.clone())
-                .collect(),
-            var: self.var.clone(),
+            coef: self.coef.iter().map(|x| x.mul_ref(&scalar)).collect(),
         }
     }
 }
@@ -239,90 +315,61 @@ impl<F: Field> Mul<F> for Polynomial<F> {
 impl<F: Field> Div for Polynomial<F> {
     type Output = Self;
 
-    /// Division of two polynomials, returns quotient.
     fn div(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
-        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+        self.div_rem_ref(&other).0
+    }
+}
 
-        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
+impl<'a, 'b, F: Field> Div<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-        while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
-            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
-            quotient[deg_diff] = lead_term.clone();
-
-            for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
-            }
-            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-        }
-
-        Polynomial {
-            poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
-        }
+    fn div(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.div_rem_ref(other).0
     }
 }
 
 impl<F: Field> Rem for Polynomial<F> {
     type Output = Self;
 
-    /// Division of two polynomials, returns quotient.
     fn rem(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
-        let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
+        self.div_rem_ref(&other).1
+    }
+}
 
-        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
+impl<'a, 'b, F: Field> Rem<&'b Polynomial<F>> for &'a Polynomial<F> {
+    type Output = Polynomial<F>;
 
-        while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
-            let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
-            quotient[deg_diff] = lead_term.clone();
-
-            for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
-            }
-            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-        }
-
-        Polynomial {
-            poly: remainder_coeffs,
-            var: self.var.clone(),
-        }
+    fn rem(self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        self.div_rem_ref(other).1
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::modules::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::ring::Ring;
 
     #[test]
     fn test_polynomial_addition() {
         let poly1 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ],
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(5_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 + poly2, expected);
     }
@@ -330,25 +377,22 @@ mod tests {
     #[test]
     fn test_polynomial_subtraction() {
         let poly1 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(4_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(5_i32),
             ],
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 - poly2, expected);
     }
@@ -356,18 +400,16 @@ mod tests {
     #[test]
     fn test_polynomial_negation() {
         let poly = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(4_i32),
             ],
-            var: "x".to_string(),
         };
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(-3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(-4_i32),
             ],
-            var: "x".to_string(),
         };
         assert_eq!(-poly, expected);
     }
@@ -375,26 +417,23 @@ mod tests {
     #[test]
     fn test_polynomial_multiplication() {
         let poly1 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ], // 1 + 2x
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 2 + 3x
-            var: "x".to_string(),
         };
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32), // constant term
                 FiniteFieldElement::<ModEIP197>::from_value(7_i32), // x term
                 FiniteFieldElement::<ModEIP197>::from_value(6_i32), // x^2 term
             ],
-            var: "x".to_string(),
         };
         assert_eq!(poly1 * poly2, expected);
     }
@@ -402,19 +441,17 @@ mod tests {
     #[test]
     fn test_polynomial_scalar_multiplication() {
         let poly = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
             ], // 1 + 2x
-            var: "x".to_string(),
         };
         let scalar = FiniteFieldElement::<ModEIP197>::from_value(3_i32);
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(6_i32),
             ], // 3 + 6x
-            var: "x".to_string(),
         };
         assert_eq!(poly * scalar, expected);
     }
@@ -422,32 +459,28 @@ mod tests {
     #[test]
     fn test_polynomial_division() {
         let poly1 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 3 + 3x + x^2
-            var: "x".to_string(),
         };
         let poly2 = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 1 + x
-            var: "x".to_string(),
         };
-        let quotient = poly1.clone() / poly2.clone();
+        let quotient = &poly1 / &poly2;
         let expected_quotient = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // 2 + x
-            var: "x".to_string(),
         };
-        let remainder = poly1.clone() % poly2.clone();
+        let remainder = &poly1 % &poly2;
         let expected_remainder = Polynomial {
-            poly: vec![FiniteFieldElement::<ModEIP197>::from_value(1_i32)], // remainder is 1
-            var: "x".to_string(),
+            coef: vec![FiniteFieldElement::<ModEIP197>::from_value(1_i32)], // remainder is 1
         };
         assert_eq!(quotient, expected_quotient);
         assert_eq!(remainder, expected_remainder);
@@ -456,11 +489,10 @@ mod tests {
     #[test]
     fn test_polynomial_evaluation() {
         let poly = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(2_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 2 + 3x
-            var: "x".to_string(),
         };
         let point = FiniteFieldElement::<ModEIP197>::from_value(2_i32);
         let expected = FiniteFieldElement::<ModEIP197>::from_value(8_i32); // 2 + 3 * 2 = 8
@@ -470,12 +502,11 @@ mod tests {
     #[test]
     fn test_polynomial_degree() {
         let poly = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(0_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(3_i32),
             ], // 1 + 0x + 3x^2
-            var: "x".to_string(),
         };
         assert_eq!(poly.degree(), 2); // The degree should be 2
     }
@@ -494,12 +525,11 @@ mod tests {
         ];
         let result = Polynomial::interpolate(&x_values, &y_values);
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(-1_i32).sanitize(),
                 FiniteFieldElement::<ModEIP197>::from_value(0_i32),
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32),
             ], // x^2 - 1
-            var: "x".to_string(),
         };
         assert_eq!(result, expected);
     }
@@ -513,12 +543,11 @@ mod tests {
         let result = Polynomial::from_monomials(&points);
         // (x - 2) * (x - 3) = x^2 - 5x + 6
         let expected = Polynomial {
-            poly: vec![
+            coef: vec![
                 FiniteFieldElement::<ModEIP197>::from_value(6_i32), // constant term
                 FiniteFieldElement::<ModEIP197>::from_value(-5_i32), // x term
                 FiniteFieldElement::<ModEIP197>::from_value(1_i32), // x^2 term
             ],
-            var: "x".to_string(),
         };
         assert_eq!(result, expected);
     }

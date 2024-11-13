@@ -1,0 +1,711 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Elliptic Curve - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/css/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html" class="active"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">MyZKP: Building Zero Knowledge Proof from Scratch</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="elliptic-curve"><a class="header" href="#elliptic-curve">Elliptic curve</a></h1>
+<h3 id="definition-elliptic-curve"><a class="header" href="#definition-elliptic-curve">Definition: Elliptic Curve</a></h3>
+<hr />
+<p><em>An elliptic curve \(E\) over a finite field \(\mathbb{F}_{p}\) is defined by the equation:</em></p>
+<p>\begin{equation}
+y^2 = x^3 + a x + b
+\end{equation}</p>
+<p><em>, where \(a, b \in \mathbb{F}_{p}\) and the discriminant \(\Delta_{E} = 4a^3 + 27b^2 \neq 0\).</em></p>
+<hr />
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use crate::modules::field::Field;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurve&lt;F: Field&gt; {
+    pub a: F,
+    pub b: F,
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="definition-mathbbf_p-rational-point"><a class="header" href="#definition-mathbbf_p-rational-point">Definition: \(\mathbb{F}_{p}\)-Rational Point</a></h3>
+<hr />
+<p><em>An \(\mathbb{F}_{p}\)-rational point on an elliptic curve \(E\) is a point \((x, y)\) where both \(x\) and \(y\) are elements of \(\mathbb{F}_{p}\) and satisfy the curve equation, or the point at infinity \(\mathcal{O}\).</em></p>
+<hr />
+<p>Example: For \(E: y^2 = x^3 + 3x + 4\) over \(\mathbb{F}_7\), the \(\mathbb{F}_{7}\)-rational points are:
+\(\{(0, 2), (0, 5), (1, 1), (1, 6), (2, 2), (2, 5), (5, 1), (5, 6), \mathcal{O}\}\)</p>
+<h3 id="definition-the-point-at-infinity"><a class="header" href="#definition-the-point-at-infinity">Definition: The point at infinity</a></h3>
+<hr />
+<p>The point at infinity denoted \(\mathcal{O}\), is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.</p>
+<hr />
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, PartialEq)]
+pub struct EllipticCurvePoint&lt;F: Field&gt; {
+    pub x: Option&lt;F&gt;,
+    pub y: Option&lt;F&gt;,
+    pub curve: EllipticCurve&lt;F&gt;,
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="definition-addition-on-elliptic-curve"><a class="header" href="#definition-addition-on-elliptic-curve">Definition: Addition on Elliptic Curve</a></h3>
+<hr />
+<p><em>For an elliptic curve \(E: y^2 = x^3 + ax + b\), the addition of points \(P\) and \(Q\) to get \(R = P + Q\) is defined as follows:</em></p>
+<ul>
+<li>
+<p><em>If \(P = \mathcal{O}\), \(R = Q\).</em></p>
+</li>
+<li>
+<p><em>If \(Q = \mathcal{O}\), \(R = P\).</em></p>
+</li>
+<li>
+<p><em>Otherwise, let \(P = (x_P, y_P), Q = (x_Q, y_Q)\). Then:</em></p>
+<ul>
+<li><em>If \(y_P = -y_Q\), \(R = \mathcal{O}\)</em></li>
+<li><em>If \(y_P \neq -y_Q\), \(R = (x_R = \lambda^2 - x_P - x_Q, y_R = \lambda(x_P - x_R) - y_P)\), where \(\lambda = \)</em> \( \begin{cases}
+\frac{y_P - y_Q}{x_P - x_Q} \quad &amp;\hbox{If } (x_P \neq x_Q) \\
+\frac{3^{2}_{P} + a}{2y_P} \quad &amp;\hbox{Otherwise}
+\end{cases}\)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<p>Example: On \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_{7}\), let \(P = (5, 1)\) and \(Q = (4, 4)\). Then, \(P + Q = (0, 5)\), where \(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;F: Field&gt; EllipticCurvePoint&lt;F&gt; {
+    fn new(x: F, y: F, curve: EllipticCurve&lt;F&gt;) -&gt; Self {
+        EllipticCurvePoint {
+            x: Some(x),
+            y: Some(y),
+            curve: curve,
+        }
+    }
+
+    pub fn point_at_infinity(curve: EllipticCurve&lt;F&gt;) -&gt; Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            curve: curve,
+        }
+    }
+
+    pub fn is_point_at_infinity(&amp;self) -&gt; bool {
+        self.x.is_none() || self.y.is_none()
+    }
+
+    pub fn line_slope(&amp;self, other: Self) -&gt; F {
+        let x1 = self.x.clone().unwrap();
+        let y1 = self.y.clone().unwrap();
+        let x2 = other.x.clone().unwrap();
+        let y2 = other.y.clone().unwrap();
+
+        if self.x.clone() == other.x.clone() {
+            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
+        } else {
+            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        }
+    }
+}
+
+impl&lt;F: Field&gt; Add for EllipticCurvePoint&lt;F&gt; {
+    type Output = Self;
+
+    fn add(self, other: Self) -&gt; Self {
+        if self.is_point_at_infinity() {
+            return other;
+        }
+        if other.is_point_at_infinity() {
+            return self;
+        }
+
+        let m = self.line_slope(other.clone());
+
+        if self.x == other.x {
+            if self.y != other.y {
+                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
+            } else {
+                let x1 = self.x.clone().unwrap();
+                let y1 = self.y.clone().unwrap();
+
+                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
+                let y3 = m * (x1 - x3.clone()) - y1;
+
+                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+            }
+        } else {
+            let x1 = self.x.clone().unwrap();
+            let y1 = self.y.clone().unwrap();
+            let x2 = other.x.clone().unwrap();
+            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
+            let y3 = m * (x1 - x3.clone()) - y1;
+
+            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="definition-mordell-weil-group"><a class="header" href="#definition-mordell-weil-group">Definition: Mordell-Weil Group</a></h3>
+<hr />
+<p><em>The Mordell-Weil group of an elliptic curve \(E\) is the group of rational points on \(E\) under the addition operation defined above.</em></p>
+<hr />
+<p>Example: For \(E: y^2 = x^3 + x + 6\) over \(\mathbb{F}_{11}\), the Mordell-Weil group is the set of all \(\mathbb{F}_{11}\)-rational points on \(E\) with the elliptic curve addition operation.</p>
+<h3 id="definition-group-order"><a class="header" href="#definition-group-order">Definition: Group Order</a></h3>
+<hr />
+<p><em>The group order of an elliptic curve \(E\) over \(\mathbb{F}_{p}\), denoted \(\#E(\mathbb{F}_{p})\), is the number of \(\mathbb{F}_{p}\)-rational points on \(E\), including the point at infinity.</em></p>
+<hr />
+<p>Example: For \(E: y^2 = x^3 + x + 6\) over \(\mathbb{F}_{11}\), \(\#E(\mathbb{F}_{11}) = 13\).</p>
+<h3 id="theorem-hasse-weil"><a class="header" href="#theorem-hasse-weil">Theorem: Hasse-Weil</a></h3>
+<hr />
+<p><em>Let \(\#E(\mathbb{F}_{p})\) be the group order of the elliptic curve \(E\) over \(\mathbb{F}_{p}\). Then:</em></p>
+<p>\begin{equation}
+p + 1 - 2 \sqrt{p} \leq \#E \leq p + 1 + 2 \sqrt{p}
+\end{equation}</p>
+<hr />
+<p><strong>Example:</strong> For an elliptic curve over \(\mathbb{F}_{23}\), the Hasse-Weil theorem guarantees that:</p>
+<p>\begin{equation*}
+23 + 1 - 2 \sqrt{23} \simeq 14.42 \#E(\mathbb{F}_{23}) \geq 23 + 1 + 2 \sqrt{23} \simeq 33.58
+\end{equation*}</p>
+<h3 id="definition-point-order"><a class="header" href="#definition-point-order">Definition: Point Order</a></h3>
+<p>The order of a point \(P\) on an elliptic curve is the smallest positive integer \(n\) such that \(nP = \mathcal{O}\) (where \(nP\) denotes \(P\) added to itself \(n\) times). We also denote the set of points of order \(n\), also called \textit{torsion} group, by</p>
+<p>\begin{equation}
+E[n] = \{P \in E: [n]P = \mathcal{O}\}
+\end{equation}</p>
+<p>Example: On \(E: y^2 = x^3 + 2x + 2\) over \(\mathbb{F}_{17}\), the point \(P = (5, 1)\) has order 18 because \(18P = \mathcal{O}\), and no smaller positive multiple of \(P\) equals \(\mathcal{O}\).</p>
+<p>The intuitive view is that if you continue to add points to themselves (doubling, tripling, etc.), the lines drawn between the prior point and the next point will eventually become more vertical. When the line becomes vertical, it does not intersect the elliptic curve at any finite point. In elliptic curve geometry, a vertical line is considered to "intersect" the curve at a special place called the "point at infinity," This point is like a north pole in geographic terms: no matter which direction you go, if the line becomes vertical (reaching infinitely high), it converges to this point.</p>
+<h3 id="definition-field-extension"><a class="header" href="#definition-field-extension">Definition: Field Extension</a></h3>
+<hr />
+<p><em>Let \(F\) and \(L\) be fields. If \(F \subseteq L\) and the operations of \(F\) are the same as those of \(L\), we call \(L\) a field extension of \(F\). This is denoted as \(L/F\).</em></p>
+<hr />
+<p>A field extension \(L/F\) naturally gives \(L\) the structure of a vector space over \(F\). The dimension of this vector space is called the degree of the extension.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>\(\mathbb{C}/\mathbb{R}\) is a field extension with basis \(\{1, i\}\) and degree 2.</li>
+<li>\(\mathbb{R}/\mathbb{Q}\) is an infinite degree extension.</li>
+<li>\(\mathbb{Q}(\sqrt{2})/\mathbb{Q}\) is a degree 2 extension with basis \(\{1, \sqrt{2}\}\).</li>
+</ul>
+<h3 id="definition-algebraic-extension"><a class="header" href="#definition-algebraic-extension">Definition: Algebraic Extension</a></h3>
+<hr />
+<p><em>A field extension \(L/K\) is called algebraic if every element \(\alpha \in L\) is algebraic over \(K\), i.e., \(\alpha\) is the root of some non-zero polynomial with coefficients in \(K\).</em></p>
+<p><em>For an algebraic element \(\alpha \in L\) over \(K\), we denote by \(K(\alpha)\) the smallest field containing both \(K\) and \(\alpha\).</em></p>
+<hr />
+<p><strong>Example:</strong></p>
+<ul>
+<li>\(\mathbb{C}/\mathbb{R}\) is algebraic: any \(z = a + bi \in \mathbb{C}\) is a root of \(x^2 - 2ax + (a^2 + b^2) \in \mathbb{R}[x]\).</li>
+<li>\(\mathbb{Q}(\sqrt[3]{2})/\mathbb{Q}\) is algebraic: \(\sqrt[3]{2}\) is a root of \(x^3 - 2 \in \mathbb{Q}[x]\).</li>
+<li>\(\mathbb{R}/\mathbb{Q}\) is not algebraic (a field extension that is not algebraic is called \textit{transcendental}).</li>
+</ul>
+<h3 id="definition-field-of-rational-functions"><a class="header" href="#definition-field-of-rational-functions">Definition: Field of Rational Functions</a></h3>
+<hr />
+<p><em>Let \(K\) be a field and \(X\) be indeterminate. The field of rational functions over \(K\), denoted \(K(X)\), is defined as:</em></p>
+<p>\begin{equation*}
+K(X) = \left\{ \frac{f(X)}{g(X)} \middle|\ f(X), g(X) \in K[X], g(X) \neq 0 \right\}
+\end{equation*}</p>
+<p><em>where \(K[X]\) is the ring of polynomials in \(X\) with coefficients in \(K\).</em></p>
+<hr />
+<p>\(K(X)\) can be viewed as the field obtained by adjoining a letter \(X\) to \(K\). This construction generalizes to multiple variables, e.g., \(K(X,Y)\).</p>
+<p>The concept of a function field naturally arises in the context of algebraic curves, particularly elliptic curves. Intuitively, the function field encapsulates the algebraic structure of rational functions on the curve.</p>
+<p>We first construct the coordinate ring for an elliptic curve \(E: y^2 = x^3 + ax + b\). Consider functions \(X: E \to K\) and \(Y: E \to K\) that extract the \(x\) and \(y\) coordinates, respectively, from an arbitrary point \(P \in E\). These functions generate the polynomial ring \(K[X,Y]\), subject to the relation \(Y^2 = X^3 + aX + b\).</p>
+<p>To put it simply, the function field is a field that consists of all functions that determine the value based on the point on the curve.</p>
+<h3 id="definition-coordinate-ring-of-an-elliptic-curve"><a class="header" href="#definition-coordinate-ring-of-an-elliptic-curve">Definition: Coordinate Ring of an Elliptic Curve</a></h3>
+<hr />
+<p><em>The <strong>coordinate ring</strong> of an elliptic curve \(E: y^2 = x^3 + ax + b\) over a field \(K\) is defined as:</em>
+\begin{equation}
+K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
+\end{equation}</p>
+<hr />
+<p>In other words, we can view \(K[E]\) as a ring representing all polynomial functions on \(E\). Recall that \(K[X, Y]\) is the polynomial ring in two variables \(X\) and \(Y\) over the field K, meaning that it contains all polynomials in \(X\) and \(Y\) with coefficients from \(K\). Then, the notation \(K[X, Y]/(Y^2 - X^3 - aX - b)\) denotes the quotient ring obtained by taking \(K[X, Y]\) and "modding out" by the ideal \((Y^2 - X^3 - aX - b)\).</p>
+<p><strong>Example</strong> For example, for an elliptic curve \(E: y^2 = x^3 - x\) over \(\mathbb{Q}\), some elements of the coordinate ring \(\mathbb{Q}[E]\) include:</p>
+<ul>
+<li>Constants: \(3, -2, \frac{1}{7}, \ldots\)</li>
+<li>Linear functions: \(X, Y, 2X+3Y, \ldots\)</li>
+<li>Quadratic functions: \(X^2, XY, Y^2 (= X^3 - X), \ldots\)</li>
+<li>Higher-degree functions: \(X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots\)</li>
+</ul>
+<p>Then, the function field is defined as follows:</p>
+<h3 id="definition-function-field-of-an-elliptic-curve"><a class="header" href="#definition-function-field-of-an-elliptic-curve">Definition: Function Field of an Elliptic Curve</a></h3>
+<hr />
+<p><em>Let \(E: y^2 = x^3 + ax + b\) be an elliptic curve over a field \(K\). The <strong>function field</strong> of \(E\), denoted \(K(E)\), is defined as:</em>
+\begin{equation}
+K(E) = \left\{\frac{f}{g} ,\middle|, f, g \in K[E], g \neq 0 \right\}
+\end{equation}
+<em>where \(K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)\) is the coordinate ring of \(E\).</em></p>
+<hr />
+<p>\(K(E)\) can be viewed as the field of all rational functions on \(E\).</p>
+<h3 id="definition-zero-of-a-function"><a class="header" href="#definition-zero-of-a-function">Definition: Zero of a Function</a></h3>
+<hr />
+<p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>zero</strong> of \(h\) if \(h(P) = 0\).</em></p>
+<hr />
+<h3 id="definition-pole-of-a-function"><a class="header" href="#definition-pole-of-a-function">Definition: Pole of a Function</a></h3>
+<hr />
+<p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>pole</strong> of \(h\) if \(h\) is not defined at \(P\) or, equivalently if \(1/h\) has a zero at \(P\).</em></p>
+<hr />
+<p><strong>Example</strong> Consider the elliptic curve \(E: Y^2 = X^3 - X\) over a field \(K\) of characteristic \(\neq 2, 3\). Let \(P_{-1} = (-1, 0)\), \(P_0 = (0, 0)\), and \(P_1 = (1, 0)\) be the points where \(Y = 0\).</p>
+<ul>
+<li>The function \(Y \in K(E)\) has three simple zeros: \(P_{-1}\), \(P_0\), and \(P_1\).</li>
+<li>The function \(X \in K(E)\) has a double zero at \(P_0\) (since \(P_0 = -P_0\)).</li>
+<li>The function \(X - 1 \in K(E)\) has a simple zero at \(P_1\).</li>
+<li>The function \(X^2 - 1 \in K(E)\) has two simple zeros at \(P_{-1}\) and \(P_1\).</li>
+<li>The function \(\frac{Y}{X} \in K(E)\) has a simple zero at \(P_{-1}\) and a simple pole at \(P_0\).</li>
+</ul>
+<p>An important property of functions in \(K(E)\) is that they have the same number of zeros and poles when counted with multiplicity. This is a consequence of a more general result known as the Degree-Genus Formula.</p>
+<h3 id="theorem-degree-genus-formula-for-elliptic-curves"><a class="header" href="#theorem-degree-genus-formula-for-elliptic-curves">Theorem: Degree-Genus Formula for Elliptic Curves</a></h3>
+<hr />
+<p><em>Let \(f \in K(E)\) be a non-zero rational function on an elliptic curve \(E\). Then:</em></p>
+<p>\begin{equation}
+\sum_{P \in E} ord_{P(f)} = 0
+\end{equation}</p>
+<p><em>, where \(ord_{P(f)}\) denotes the order of \(f\) at \(P\), which is positive for zeros and negative for poles.</em></p>
+<hr />
+<p>This theorem implies that the total number of zeros (counting multiplicity) equals the total number of poles for any non-zero function in \(K(E)\).</p>
+<p>We now introduce a powerful tool for analyzing functions on elliptic curves: the concept of divisors.</p>
+<h3 id="definition-divisor-of-a-function-on-an-elliptic-curve"><a class="header" href="#definition-divisor-of-a-function-on-an-elliptic-curve">Definition: Divisor of a Function on an Elliptic Curve</a></h3>
+<hr />
+<p><em>Let \(E: Y^2 = X^3 + AX + B\) be an elliptic curve over a field \(K\), and let \(f \in K(E)\) be a non-zero rational function on \(E\). The <strong>divisor</strong> of \(f\), denoted \(div(f)\), is defined as:</em>
+\begin{equation}
+div(f) = \sum_{P \in E} ord_P(f) [P]
+\end{equation}
+<em>, where \(ord_P(f)\) is the order of \(f\) at \(P\) (positive for zeros, negative for poles), and the sum is taken over all points \(P \in E\), including the point at infinity. This sum has only finitely many non-zero terms.</em></p>
+<hr />
+<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete value of a divisor.</p>
+<p><strong>Example</strong> Consider the elliptic curve \(E: Y^2 = X^3 - X\) over \(\mathbb{Q}\).</p>
+<ul>
+<li>For \(f = X\), we have \(div(X) = 2[(0,0)] - 2[\mathcal{O}]\).</li>
+<li>For \(g = Y\), we have \(div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]\).</li>
+<li>For \(h = \frac{X-1}{Y}\), we have \(div(h) = [(1,0)] - [(-1,0)]\).</li>
+</ul>
+<p>The concept of divisors can be extended to the elliptic curve itself:</p>
+<h3 id="definition-divisor-on-an-elliptic-curve"><a class="header" href="#definition-divisor-on-an-elliptic-curve">Definition: Divisor on an Elliptic Curve</a></h3>
+<hr />
+<p><em>A <strong>divisor</strong> \(D\) on an elliptic curve \(E\) is a formal sum</em>
+\begin{equation}
+D = \sum_{P \in E} n_P [P]
+\end{equation}
+<em>where \(n_P \in \mathbb{Z}\) and \(n_P = 0\) for all but finitely many \(P\).</em></p>
+<hr />
+<p><strong>Example</strong> On the curve \(E: Y^2 = X^3 - X\):</p>
+<ul>
+<li>\(D_1 = 3[(0,0)] - 2[(1,1)] - [(2,\sqrt{6})]\) is a divisor.</li>
+<li>\(D_2 = [(1,0)] + [(-1,0)] - 2[\mathcal{O}]\) is a divisor.</li>
+<li>\(D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]\) is a divisor (where \(E[2]\) are the 2-torsion points).</li>
+</ul>
+<p>To quantify the properties of divisors, we introduce two important metrics:</p>
+<h3 id="definition-degree-of-a-divisor"><a class="header" href="#definition-degree-of-a-divisor">Definition: Degree of a Divisor</a></h3>
+<hr />
+<p><em>The <strong>degree</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
+\begin{equation}
+deg(D) = \sum_{P \in E} n_P
+\end{equation}</p>
+<hr />
+<h3 id="definition-sum-of-a-divisor"><a class="header" href="#definition-sum-of-a-divisor">Definition: Sum of a Divisor</a></h3>
+<hr />
+<p><em>The <strong>sum</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
+\begin{equation}
+Sum(D) = \sum_{P \in E} n_P P
+\end{equation}
+<em>where \(n_P P\) denotes the point addition of \(P\) to itself \(n_P\) times in the group law of \(E\).</em></p>
+<hr />
+<p><strong>Example</strong> For the divisors in the previous example:</p>
+<ul>
+<li>\(deg(D_1) = 3 - 2 - 1 = 0\)</li>
+<li>\(deg(D_2) = 1 + 1 - 2 = 0\)</li>
+<li>\(deg(D_3) = 4 - 4 = 0\)</li>
+<li>\(Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}\) (since \((1,0)\) and \((-1,0)\) are 2-torsion points)</li>
+</ul>
+<p>The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:</p>
+<h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
+<hr />
+<p><em>Let \(E\) be an elliptic curve over a field \(K\).</em></p>
+<ul>
+<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^</em>\) such that \(f = cf'\).*</li>
+<li><em>A divisor \(D\) on \(E\) is the divisor of a rational function on \(E\) if and only if \(deg(D) = 0\) and \(Sum(D) = \mathcal{O}\).</em></li>
+</ul>
+<hr />
+<p><strong>Example</strong> On \(E: Y^2 = X^3 - X\):</p>
+<ul>
+<li>The function \(f = \frac{Y}{X}\) has \(div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]\). Note that \(deg(div(f)) = 0\) and \(Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}\).</li>
+<li>The divisor \(D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]\) has \(deg(D) = 0\), but \(Sum(D) \neq \mathcal{O}\). Therefore, \(D\) is not the divisor of any rational function on \(E\).</li>
+</ul>
+<h3 id="definition-pairing"><a class="header" href="#definition-pairing">Definition: Pairing</a></h3>
+<hr />
+<p><em>Let \(G_1\) and \(G_2\) be cyclic groups under addition, both of prime order \(p\), with generators \(P\) and \(Q\) respectively:</em></p>
+<p>\begin{align}
+G_1 &amp;= \{0, P, 2P, ..., (p-1)P\} \
+G_2 &amp;= \{0, Q, 2Q, ..., (p-1)Q\}
+\end{align}</p>
+<p><em>Let \(G_T\) be a cyclic group under multiplication, also of order \(p\). A pairing is a map \(e: G_1 \times G_2 \rightarrow G_T\) that satisfies the following bilinear property:</em></p>
+<p>\begin{equation}
+e(aP, bQ) = e(P, Q)^{ab}
+\end{equation} <em>for all \(a, b \in \mathbb{Z}_p\).</em></p>
+<hr />
+<p>Imagine \(G_1\) represents length, \(G_2\) represents width, and \(G_T\) represents area. The pairing function \(e\) is like calculating the area: If you double the length and triple the width, the area becomes six times larger: \(e(2P, 3Q) = e(P, Q)^{6}\)</p>
+<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
+<h3 id="definition-the-weil-pairing"><a class="header" href="#definition-the-weil-pairing">Definition: The Weil Pairing</a></h3>
+<hr />
+<p><em>Let \(E\) be an elliptic curve and \(n\) be a positive integer. For points \(P, Q \in E[n]\), where \(E[n]\) denotes the \(n\)-torsion subgroup of \(E\), we define the Weil pairing \(e_n(P, Q)\) as follows:</em></p>
+<p>Let \(f_P\) and \(f_Q\) be rational functions on \(E\) satisfying:
+\begin{align}
+div(f_P) &amp;= n[P] - n[\mathcal{O}] \
+div(f_Q) &amp;= n[Q] - n[\mathcal{O}]
+\end{align}</p>
+<p><em>Then, for an arbitrary point \(S \in E\) such that \(S \notin \{\mathcal{O}, P, -Q, P-Q\}\), the Weil pairing is given by:</em></p>
+<p>\begin{equation}
+e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
+\end{equation}</p>
+<hr />
+<p>We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.</p>
+<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem</a></h3>
+<hr />
+<p><em>Let \(E\) be an elliptic curve over a field \(K\), and let \(P = (x_P, y_P)\) and \(Q = (x_Q, y_Q)\) be non-zero points on \(E\). Define \(\lambda\) as:</em></p>
+<p>\begin{equation}
+\lambda = \begin{cases}
+\hbox{slope of the line through \(P\) and \(Q\)} &amp;\quad \hbox{if \(P \neq Q\)} \\
+\hbox{slope of the tangent line to \(E\) at \(P\)} &amp;\quad \hbox{if \(P = Q\)} \\
+\infty &amp;\quad \hbox{if the line is vertical}
+\end{cases}
+\end{equation}</p>
+<p><em>Then, the function \(g_{P,Q}: E \to K\) defined by:</em>
+\begin{equation}
+g_{P,Q} = \begin{cases}
+\frac{y - y_P - \lambda(x - x_P)}{x + x_P + x_Q - \lambda^2} &amp;\quad \hbox{if } \lambda \neq \infty \\
+x - x_P &amp;\quad \hbox{if } \lambda = \infty
+\end{cases}
+\end{equation} <em>has the following divisor:</em></p>
+<p>\begin{equation}
+div(g_{P,Q}) = [P] + [Q] - [P + Q] - [\mathcal{O}]
+\end{equation}</p>
+<hr />
+<p><strong>Proof:</strong> We consider two cases based on the value of \(\lambda\).</p>
+<p>Case 1: \(\lambda \neq \infty\)</p>
+<p>Let \(y = \lambda x + v\) be the line through \(P\) and \(Q\) (or the tangent line at \(P\) if \(P = Q\)). This line intersects \(E\) at three points: \(P\), \(Q\), and \(-P-Q\). Thus,
+\begin{equation}
+div(y - \lambda x - v) = [P] + [Q] + [-P - Q] - 3[\mathcal{O}]
+\end{equation}
+Vertical lines intersect \(E\) at points and their negatives, so:
+\begin{equation}
+div(x - x_{P+Q}) = [P + Q] + [-P - Q] - 2[\mathcal{O}]
+\end{equation}
+It follows that \(g_{P,Q} = \frac{y - \lambda x - v}{x - x_{P+Q}}\) has the desired divisor.</p>
+<p>Case 2: \(\lambda = \infty\)</p>
+<p>In this case, \(P + Q = \mathcal{O}\), so we want \(g_{P,Q}\) to have divisor \([P] + [-P] - 2[\mathcal{O}]\). The function \(x - x_P\) has this divisor.
+\end{proof}</p>
+<h3 id="theorem-millers-algorithm"><a class="header" href="#theorem-millers-algorithm">Theorem: Miller's Algorithm</a></h3>
+<hr />
+<p><em>Let \(m \geq 1\) and write its binary expansion as:</em>
+\begin{equation}
+m = m_0 + m_1 \cdot 2 + m_2 \cdot 2^2 + \cdots + m_{n-1} \cdot 2^{n-1}
+\end{equation}
+<em>where \(m_i \in \{0, 1\}\) and \(m_{n-1} \neq 0\).</em></p>
+<p><em>The following algorithm, using the function \(g_{P,Q}\) defined in the previous theorem, returns a function \(f_P\) whose divisor satisfies:</em></p>
+<p>\begin{equation}
+div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
+\end{equation}</p>
+<p>===========================</p>
+<p><strong>Miller's Algorithm</strong></p>
+<ol>
+<li>Set \(T = P\) and \(f = 1\)</li>
+<li><strong>For</strong> \(i \gets n-2 \cdots 0\) <strong>do</strong></li>
+<li>    Set \(f = f^2 \cdot g_{T, T}\)</li>
+<li>    Set \(T = 2T\)</li>
+<li>    <strong>If</strong> \(m_i = 1\) <strong>then</strong></li>
+<li>        Set \(f = f \cdot g_{T, P}\)</li>
+<li>        Set \(T = T + P\)</li>
+<li>    <strong>End if</strong></li>
+<li><strong>End for</strong></li>
+<li><strong>Return</strong> \(f\)</li>
+</ol>
+<p>===========================</p>
+<hr />
+<p><strong>Proof:</strong> TBD</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn get_lambda&lt;F: Field&gt;(
+    p: EllipticCurvePoint&lt;F&gt;,
+    q: EllipticCurvePoint&lt;F&gt;,
+    r: EllipticCurvePoint&lt;F&gt;,
+) -&gt; F {
+    let p_x = p.x.clone().unwrap();
+    let p_y = p.y.clone().unwrap();
+    let q_x = q.x.clone().unwrap();
+    // let q_y = q.y.clone().unwrap();
+    let r_x = r.x.clone().unwrap();
+    let r_y = r.y.clone().unwrap();
+
+    if (p == q &amp;&amp; p_y.clone() == F::zero()) || (p != q &amp;&amp; p_x.clone() == q_x.clone()) {
+        return r_x.clone() - p_x.clone();
+    }
+    let slope = p.line_slope(q.clone());
+    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
+    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
+    return numerator / denominator;
+}
+
+pub fn miller&lt;F: Field&gt;(p: EllipticCurvePoint&lt;F&gt;, q: EllipticCurvePoint&lt;F&gt;, m: BigInt) -&gt; F {
+    if p == q {
+        F::one();
+    }
+
+    let mut f = F::one();
+    let mut t = p.clone();
+
+    for i in (1..m.bits()).rev() {
+        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
+        t = t.clone() + t.clone();
+        if m.bit(i) {
+            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
+            t = t.clone() + p.clone();
+        }
+    }
+
+    f
+}
+
+pub fn weil_pairing&lt;F: Field&gt;(
+    p: EllipticCurvePoint&lt;F&gt;,
+    q: EllipticCurvePoint&lt;F&gt;,
+    m: BigInt,
+    s: Option&lt;EllipticCurvePoint&lt;F&gt;&gt;,
+) -&gt; F {
+    let s_value = s.unwrap();
+    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
+    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
+    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
+    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
+
+    return (fp_qs / fp_s) / (fq_ps / fq_s);
+}
+<span class="boring">}</span></code></pre></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../number_theory/subsec4.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../number_theory/subsec6.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../number_theory/subsec4.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../number_theory/subsec6.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
