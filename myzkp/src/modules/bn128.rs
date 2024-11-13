@@ -9,6 +9,7 @@ use std::str::FromStr;
 
 use crate::modules::curve::{miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
+use crate::modules::field::Field;
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};
@@ -69,30 +70,6 @@ impl IrreduciblePoly<Fq> for Fq12Poly {
         &MODULUS_Fq12
     }
 }
-/*
-impl IrreduciblePoly<Fq> for Fq12Poly {
-    fn modulus() -> Polynomial<Fq> {
-        // x^12 -18x^6 + 82
-        Polynomial {
-            coef: vec![
-                Fq::from_value(82_i32),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::from_value(-18_i32),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-            ],
-        }
-    }
-}
-    */
 type Fq12 = ExtendedFieldElement<BN128Modulus, Fq12Poly>;
 type G12Point = EllipticCurvePoint<Fq12, BN128Curve>;
 
@@ -160,7 +137,11 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     );
 }
 
-pub fn linefunc(p: &G12Point, q: &G12Point, t: &G12Point) -> Fq12 {
+pub fn linefunc<F: Field, E: EllipticCurve>(
+    p: &EllipticCurvePoint<F, E>,
+    q: &EllipticCurvePoint<F, E>,
+    t: &EllipticCurvePoint<F, E>,
+) -> F {
     let x1 = p.x.as_ref().unwrap();
     let y1 = p.y.as_ref().unwrap();
     let x2 = q.x.as_ref().unwrap();
@@ -172,20 +153,24 @@ pub fn linefunc(p: &G12Point, q: &G12Point, t: &G12Point) -> Fq12 {
         let m = (y2.sub_ref(&y1)) / (x2.sub_ref(&x1));
         return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
     } else if y1 == y2 {
-        let m = ((x1.pow(2)).mul_ref(&Fq12::from_value(3))) / (y1.mul_ref(&Fq12::from_value(2)));
+        let m = ((x1.pow(2)).mul_ref(&F::from_value(3))) / (y1.mul_ref(&F::from_value(2)));
         return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
     } else {
         return xt.sub_ref(x1);
     }
 }
 
-pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
+pub fn vanila_miller<F: Field, E: EllipticCurve>(
+    p: &EllipticCurvePoint<F, E>,
+    q: &EllipticCurvePoint<F, E>,
+    m: &BigInt,
+) -> F {
     if p == q {
-        return Fq12::one();
+        return F::one();
     }
 
     let mut r = q.clone();
-    let mut f = Fq12::one();
+    let mut f = F::one();
 
     let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
     let log_ate_loop_count = 63;
@@ -205,14 +190,14 @@ pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
 
     // Assert: r == multiply(&q, &ate_loop_count)
 
-    let q1 = G12Point::new(
-        q.x.unwrap().pow(BN128Modulus::modulus().clone()),
-        q.y.unwrap().pow(BN128Modulus::modulus().clone()),
+    let q1 = EllipticCurvePoint::<F, E>::new(
+        q.x.clone().unwrap().pow(m.clone()),
+        q.y.clone().unwrap().pow(m.clone()),
     );
 
-    let nq2 = G12Point::new(
-        q1.x.clone().unwrap().pow(BN128Modulus::modulus().clone()),
-        -q1.y.clone().unwrap().pow(BN128Modulus::modulus().clone()),
+    let nq2 = EllipticCurvePoint::<F, E>::new(
+        q1.x.clone().unwrap().pow(m.clone()),
+        -q1.y.clone().unwrap().pow(m.clone()),
     );
 
     f = f.mul_ref(&linefunc(&r, &q1, &p));
@@ -225,13 +210,9 @@ pub fn vanila_miller(p: G12Point, q: G12Point) -> Fq12 {
 pub fn optimal_ate_pairing(p: G1Point, q: G2Point) -> Fq12 {
     let p_prime: G12Point = cast_G1_to_G12(p);
     let q_prime: G12Point = twist_G2_to_G12(q);
-    let f = vanila_miller(
-        p_prime, q_prime,
-        //BigInt::from_str("29793968203157093288").unwrap(),
-    );
-
-    // Final exponentiation
     let m = BN128Modulus::modulus();
+
+    let f = vanila_miller(&p_prime, &q_prime, &m);
     let exp = (m.pow(12) - BigInt::one()) / (BN128::order());
     f.pow(exp)
 }
