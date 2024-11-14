@@ -2,14 +2,12 @@ use crate::modules::ring::Ring;
 use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
-use num_traits::FromPrimitive;
 use num_traits::{One, Zero};
 use paste::paste;
 use std::str::FromStr;
 
 use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
-use crate::modules::field::Field;
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};

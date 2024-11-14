@@ -1,9 +1,6 @@
-use crate::modules::bn128::{optimal_ate_pairing, BN128Curve, Fq, G1Point, G2Point, BN128};
-use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
-use crate::modules::field::Field;
+use crate::modules::bn128::{optimal_ate_pairing, Fq, G1Point, G2Point};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
-use num_bigint::BigInt;
 use num_traits::One;
 
 pub struct ProofKey {
@@ -118,14 +115,8 @@ pub fn non_interactive_zkp_protocol(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::str::FromStr;
-
-    use crate::modules::field::ModulusValue;
+    use crate::modules::bn128::BN128;
     use crate::modules::ring::Ring;
-    use crate::{
-        define_myzkp_curve_type, define_myzkp_modulus_type,
-        modules::field::{FiniteFieldElement, ModEIP197},
-    };
 
     #[test]
     fn test_non_interactive_zkp() {
@@ -142,7 +133,7 @@ mod tests {
 
         // Generate trusted setup
         let s = Fq::from_value(2);
-        let r = Fq::from_value(1); //Fq::from_value(456);
+        let r = Fq::from_value(456);
         let setup = TrustedSetup::generate(&g1, &g2, &t, 3, &s, &r);
 
         // Create prover and verifier
