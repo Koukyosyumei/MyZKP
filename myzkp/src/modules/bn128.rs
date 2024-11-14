@@ -160,59 +160,35 @@ pub fn linefunc<F: Field, E: EllipticCurve>(
     }
 }
 
-pub fn vanila_miller<F: Field, E: EllipticCurve>(
-    p: &EllipticCurvePoint<F, E>,
-    q: &EllipticCurvePoint<F, E>,
-    m: &BigInt,
-) -> F {
-    if p == q {
-        return F::one();
-    }
-
-    let mut r = q.clone();
-    let mut f = F::one();
-
-    let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
-    let log_ate_loop_count = 63;
-    let field_modulus = BigInt::from_str(
-        "21888242871839275222246405745257275088696311157297823662689037894645226208583",
-    )
-    .unwrap();
-
-    for i in (0..=log_ate_loop_count).rev() {
-        f = f.mul_ref(&f) * linefunc(&r, &r, &p);
-        r = r.double();
-        if ate_loop_count.bit(i) {
-            f = f.mul_ref(&linefunc(&r, &q, &p));
-            r = r.add_ref(&q);
-        }
-    }
-
-    // Assert: r == multiply(&q, &ate_loop_count)
-
-    let q1 = EllipticCurvePoint::<F, E>::new(
-        q.x.clone().unwrap().pow(m.clone()),
-        q.y.clone().unwrap().pow(m.clone()),
-    );
-
-    let nq2 = EllipticCurvePoint::<F, E>::new(
-        q1.x.clone().unwrap().pow(m.clone()),
-        -q1.y.clone().unwrap().pow(m.clone()),
-    );
-
-    f = f.mul_ref(&linefunc(&r, &q1, &p));
-    r = r.add_ref(&q1);
-    f = f.mul_ref(&linefunc(&r, &nq2, &p));
-
-    f
-}
-
-pub fn optimal_ate_pairing(p: G1Point, q: G2Point) -> Fq12 {
-    let p_prime: G12Point = cast_G1_to_G12(p);
-    let q_prime: G12Point = twist_G2_to_G12(q);
+pub fn optimal_ate_pairing(p_g1: G1Point, q_g2: G2Point) -> Fq12 {
+    let p: G12Point = cast_G1_to_G12(p_g1);
+    let q: G12Point = twist_G2_to_G12(q_g2);
     let m = BN128Modulus::modulus();
 
-    let f = vanila_miller(&p_prime, &q_prime, &m);
+    let mut f = Fq12::one();
+    if p != q {
+        let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
+
+        let out = miller(&q, &p, ate_loop_count);
+        f = out.0;
+        let mut r = out.1;
+        // Assert: r == multiply(&q, &ate_loop_count)
+
+        let q1 = G12Point::new(
+            q.x.clone().unwrap().pow(m.clone()),
+            q.y.clone().unwrap().pow(m.clone()),
+        );
+
+        let nq2 = G12Point::new(
+            q1.x.clone().unwrap().pow(m.clone()),
+            -q1.y.clone().unwrap().pow(m.clone()),
+        );
+
+        f = f.mul_ref(&linefunc(&r, &q1, &p));
+        r = r.add_ref(&q1);
+        f = f.mul_ref(&linefunc(&r, &nq2, &p));
+    }
+
     let exp = (m.pow(12) - BigInt::one()) / (BN128::order());
     f.pow(exp)
 }

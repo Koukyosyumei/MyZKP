@@ -53,7 +53,6 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
 
     pub fn line_slope(&self, other: &Self) -> F {
         let a = F::from_value(E::get_a());
-        // let b = E::get_b();
 
         let x1 = self.x.as_ref().unwrap();
         let y1 = self.y.as_ref().unwrap();
@@ -84,49 +83,6 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
     }
 
     pub fn add_ref(&self, other: &Self) -> Self {
-        /*
-        if self.is_point_at_infinity() {
-            return other;
-        }
-        if other.is_point_at_infinity() {
-            return self;
-        }
-
-        let m = self.line_slope(other.clone());
-
-        // If x coordinates are the same
-        if self.x == other.x {
-            // Check if they are inverses of each other
-            if self.y != other.y {
-                // TODO: check self.y = -other.y
-                return EllipticCurvePoint::point_at_infinity();
-            } else {
-                // P = Q, handle point doubling
-                let x1 = self.x.clone().unwrap();
-                let y1 = self.y.clone().unwrap();
-
-                // let m = ((x1.clone() * x1.clone()).mul_scalar(3_i64) + self.curve.a.clone())
-                //    / (y1.clone().mul_scalar(2_i64));
-
-                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
-                let y3 = m * (x1 - x3.clone()) - y1;
-
-                return EllipticCurvePoint::new(x3, y3);
-            }
-        } else {
-            // P != Q, handle regular addition
-            let x1 = self.x.clone().unwrap();
-            let y1 = self.y.clone().unwrap();
-            let x2 = other.x.clone().unwrap();
-            // let y2 = other.y.clone().unwrap();
-
-            // let m = (y2.clone() - y1.clone()) / (x2.clone() - x1.clone());
-            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
-            let y3 = m * (x1 - x3.clone()) - y1;
-
-            return EllipticCurvePoint::new(x3, y3);
-        }*/
-
         if self.is_point_at_infinity() {
             return other.clone();
         }
@@ -249,15 +205,15 @@ pub fn miller<F: Field, E: EllipticCurve>(
     p: &EllipticCurvePoint<F, E>,
     q: &EllipticCurvePoint<F, E>,
     m: BigInt,
-) -> F {
+) -> (F, EllipticCurvePoint<F, E>) {
     if p == q {
-        return F::one();
+        return (F::one(), p.clone());
     }
 
     let mut f = F::one();
     let mut t = p.clone();
 
-    for i in (1..m.bits()).rev() {
+    for i in (0..(m.bits() - 1)).rev() {
         f = (f.mul_ref(&f)) * (get_lambda(&t, &t, &q));
         t = t.add_ref(&t);
         if m.bit(i) {
@@ -266,7 +222,7 @@ pub fn miller<F: Field, E: EllipticCurve>(
         }
     }
 
-    f
+    (f, t)
 }
 
 pub fn weil_pairing<F: Field, E: EllipticCurve>(
@@ -276,10 +232,10 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     let s_value = s.unwrap();
-    let fp_qs = miller(&p, &q.add_ref(&s_value), m.clone());
-    let fp_s = miller(&p, &s_value, m.clone());
-    let fq_ps = miller(&q, &p.add_ref(&(s_value.clone().neg())), m.clone());
-    let fq_s = miller(&q, &(-s_value.clone()), m.clone());
+    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), m.clone());
+    let (fp_s, _) = miller(&p, &s_value, m.clone());
+    let (fq_ps, _) = miller(&q, &p.add_ref(&(s_value.clone().neg())), m.clone());
+    let (fq_s, _) = miller(&q, &(-s_value.clone()), m.clone());
 
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
@@ -292,8 +248,8 @@ pub fn general_tate_pairing<F: Field, E: EllipticCurve>(
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     let s_value = s.unwrap();
-    let fp_qs = miller(&p, &q.add_ref(&s_value), ell.clone());
-    let fp_s = miller(&p, &s_value, ell.clone());
+    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), ell.clone());
+    let (fp_s, _) = miller(&p, &s_value, ell.clone());
     let f = fp_qs.div_ref(&fp_s);
 
     return f.pow((modulus - BigInt::one()) / ell);
@@ -305,7 +261,7 @@ pub fn tate_pairing<F: Field, E: EllipticCurve>(
     ell: BigInt,
     modulus: BigInt,
 ) -> F {
-    let fp_q = miller(&p, &q, ell.clone());
+    let (fp_q, _) = miller(&p, &q, ell.clone());
 
     return fp_q.pow((modulus - BigInt::one()) / ell);
 }
@@ -359,8 +315,8 @@ mod tests {
         );
         let order = 5.to_bigint().unwrap();
 
-        let fp_qs = miller(&p, &(q.add_ref(&s)), order.clone());
-        let fp_s = miller(&p, &s, order.clone());
+        let (fp_qs, _) = miller(&p, &(q.add_ref(&s)), order.clone());
+        let (fp_s, _) = miller(&p, &s, order.clone());
         assert_eq!(fp_qs.sanitize().value, 103_i32.to_bigint().unwrap());
         assert_eq!(fp_s.sanitize().value, 219_i32.to_bigint().unwrap());
         assert_eq!(
@@ -368,8 +324,8 @@ mod tests {
             473_i32.to_bigint().unwrap()
         );
 
-        let fq_ps = miller(&q, &p.add_ref(&s.clone().neg()), order.clone());
-        let fq_s = miller(&q, &(-s.clone()), order.clone());
+        let (fq_ps, _) = miller(&q, &p.add_ref(&s.clone().neg()), order.clone());
+        let (fq_s, _) = miller(&q, &(-s.clone()), order.clone());
         assert_eq!(fq_ps.sanitize().value, 284_i32.to_bigint().unwrap());
         assert_eq!(fq_s.sanitize().value, 204_i32.to_bigint().unwrap());
         assert_eq!((fq_ps / fq_s).sanitize().value, 88_i32.to_bigint().unwrap());
