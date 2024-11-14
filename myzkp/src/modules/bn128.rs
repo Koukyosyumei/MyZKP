@@ -20,8 +20,8 @@ define_myzkp_modulus_type!(
 );
 define_myzkp_curve_type!(BN128Curve, "0", "3");
 
-type Fq = FiniteFieldElement<BN128Modulus>;
-type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
+pub type Fq = FiniteFieldElement<BN128Modulus>;
+pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
@@ -38,8 +38,8 @@ impl IrreduciblePoly<Fq> for Fq2Poly {
         &MODULUS_Fq2
     }
 }
-type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
-type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
+pub type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
+pub type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
@@ -73,7 +73,7 @@ impl IrreduciblePoly<Fq> for Fq12Poly {
 type Fq12 = ExtendedFieldElement<BN128Modulus, Fq12Poly>;
 type G12Point = EllipticCurvePoint<Fq12, BN128Curve>;
 
-pub fn cast_G1_to_G12(g: G1Point) -> G12Point {
+pub fn cast_g1_to_g12(g: G1Point) -> G12Point {
     if g.is_point_at_infinity() {
         return G12Point::point_at_infinity();
     }
@@ -88,7 +88,7 @@ pub fn cast_G1_to_G12(g: G1Point) -> G12Point {
     )
 }
 
-pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
+pub fn twist_g2_to_g12(g: G2Point) -> G12Point {
     if g.is_point_at_infinity() {
         return G12Point::point_at_infinity();
     }
@@ -139,8 +139,8 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
 
 pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
     // https://eprint.iacr.org/2010/354.pdf
-    let p: G12Point = cast_G1_to_G12(p_g1.clone());
-    let q: G12Point = twist_G2_to_G12(q_g2.clone());
+    let p: G12Point = cast_g1_to_g12(p_g1.clone());
+    let q: G12Point = twist_g2_to_g12(q_g2.clone());
     let m = BN128Modulus::modulus();
 
     let mut f = Fq12::one();
@@ -312,7 +312,7 @@ mod tests {
     #[test]
     fn test_g12() {
         let g2 = BN128::generator_g2();
-        let g12 = twist_G2_to_G12(g2);
+        let g12 = twist_g2_to_g12(g2);
         let g12_9 = g12.clone() * 9;
         assert_eq!(
             g12_9.clone().y.unwrap().pow(2) - g12_9.clone().x.unwrap().pow(3),
