@@ -1,7 +1,11 @@
+use num_bigint::{BigInt, RandBigInt};
+use num_traits::One;
+use num_traits::Zero;
+use std::str::FromStr;
+
 use crate::modules::bn128::{optimal_ate_pairing, Fq, G1Point, G2Point};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
-use num_traits::One;
 
 pub struct ProofKey {
     alpha: Vec<G1Point>,
@@ -25,14 +29,17 @@ pub struct TrustedSetup {
 }
 
 impl TrustedSetup {
-    pub fn generate(
-        g1: &G1Point,
-        g2: &G2Point,
-        t: &Polynomial<Fq>,
-        n: usize,
-        s: &Fq,
-        r: &Fq,
-    ) -> Self {
+    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<Fq>, n: usize) -> Self {
+        let mut rng = rand::thread_rng();
+        let s = Fq::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+        ));
+        let r = Fq::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+        ));
+
         let mut alpha = Vec::with_capacity(n);
         let mut alpha_prime = Vec::with_capacity(n);
 
@@ -44,7 +51,7 @@ impl TrustedSetup {
         }
 
         let g_r = g2.clone() * r.clone().get_value();
-        let g_t_s = g2.clone() * t.eval(s).get_value();
+        let g_t_s = g2.clone() * t.eval(&s).get_value();
 
         TrustedSetup {
             proof_key: ProofKey { alpha, alpha_prime },
@@ -64,7 +71,13 @@ impl Prover {
         Prover { p, h }
     }
 
-    pub fn generate_proof(&self, proof_key: &ProofKey, delta: &Fq) -> Proof {
+    pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
+        let mut rng = rand::thread_rng();
+        let delta = Fq::from_value(rng.gen_bigint_range(
+            &BigInt::zero(),
+            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+        ));
+
         let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
         let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
         let g_p_prime = self.p.eval_with_powers_on_curve(&proof_key.alpha_prime);
@@ -106,9 +119,8 @@ pub fn non_interactive_zkp_protocol(
     prover: &Prover,
     verifier: &Verifier,
     setup: &TrustedSetup,
-    delta: &Fq,
 ) -> bool {
-    let proof = prover.generate_proof(&setup.proof_key, delta);
+    let proof = prover.generate_proof(&setup.proof_key);
     verifier.verify(&proof, &setup.verification_key)
 }
 
@@ -116,7 +128,6 @@ pub fn non_interactive_zkp_protocol(
 mod tests {
     use super::*;
     use crate::modules::bn128::BN128;
-    use crate::modules::ring::Ring;
 
     #[test]
     fn test_non_interactive_zkp() {
@@ -131,18 +142,14 @@ mod tests {
         ]);
         let t = Polynomial::from_monomials(&[Fq::from_value(-1), Fq::from_value(-2)]);
 
-        // Generate trusted setup
-        let s = Fq::from_value(2);
-        let r = Fq::from_value(456);
-        let setup = TrustedSetup::generate(&g1, &g2, &t, 3, &s, &r);
+        let setup = TrustedSetup::generate(&g1, &g2, &t, 3);
 
         // Create prover and verifier
         let prover = Prover::new(p, t.clone());
         let verifier = Verifier::new(g1.clone(), g2.clone());
 
         // Run the protocol
-        let delta = Fq::from_value(23);
-        let result = non_interactive_zkp_protocol(&prover, &verifier, &setup, &delta);
+        let result = non_interactive_zkp_protocol(&prover, &verifier, &setup);
         assert!(result);
     }
 }
