@@ -7,7 +7,7 @@ use num_traits::{One, Zero};
 use paste::paste;
 use std::str::FromStr;
 
-use crate::modules::curve::{miller, EllipticCurve, EllipticCurvePoint};
+use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
 use crate::modules::field::Field;
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
@@ -137,32 +137,10 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     );
 }
 
-pub fn linefunc<F: Field, E: EllipticCurve>(
-    p: &EllipticCurvePoint<F, E>,
-    q: &EllipticCurvePoint<F, E>,
-    t: &EllipticCurvePoint<F, E>,
-) -> F {
-    let x1 = p.x.as_ref().unwrap();
-    let y1 = p.y.as_ref().unwrap();
-    let x2 = q.x.as_ref().unwrap();
-    let y2 = q.y.as_ref().unwrap();
-    let xt = t.x.as_ref().unwrap();
-    let yt = t.y.as_ref().unwrap();
-
-    if x1 != x2 {
-        let m = (y2.sub_ref(&y1)) / (x2.sub_ref(&x1));
-        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
-    } else if y1 == y2 {
-        let m = ((x1.pow(2)).mul_ref(&F::from_value(3))) / (y1.mul_ref(&F::from_value(2)));
-        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
-    } else {
-        return xt.sub_ref(x1);
-    }
-}
-
-pub fn optimal_ate_pairing(p_g1: G1Point, q_g2: G2Point) -> Fq12 {
-    let p: G12Point = cast_G1_to_G12(p_g1);
-    let q: G12Point = twist_G2_to_G12(q_g2);
+pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
+    // https://eprint.iacr.org/2010/354.pdf
+    let p: G12Point = cast_G1_to_G12(p_g1.clone());
+    let q: G12Point = twist_G2_to_G12(q_g2.clone());
     let m = BN128Modulus::modulus();
 
     let mut f = Fq12::one();
@@ -184,9 +162,9 @@ pub fn optimal_ate_pairing(p_g1: G1Point, q_g2: G2Point) -> Fq12 {
             -q1.y.clone().unwrap().pow(m.clone()),
         );
 
-        f = f.mul_ref(&linefunc(&r, &q1, &p));
+        f = f.mul_ref(&get_lambda(&r, &q1, &p));
         r = r.add_ref(&q1);
-        f = f.mul_ref(&linefunc(&r, &nq2, &p));
+        f = f.mul_ref(&get_lambda(&r, &nq2, &p));
     }
 
     let exp = (m.pow(12) - BigInt::one()) / (BN128::order());
@@ -355,21 +333,21 @@ mod tests {
     fn test_pairing() {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        let p1 = optimal_ate_pairing(g1.clone(), g2.clone());
-        let pn1 = optimal_ate_pairing(-g1.clone(), g2.clone());
+        let p1 = optimal_ate_pairing(&g1.clone(), &g2.clone());
+        let pn1 = optimal_ate_pairing(&-g1.clone(), &g2.clone());
         assert_eq!(p1.clone() * pn1.clone(), Fq12::one());
-        let np1 = optimal_ate_pairing(g1.clone(), -g2.clone());
+        let np1 = optimal_ate_pairing(&g1.clone(), &-g2.clone());
         assert_eq!(p1.clone() * np1.clone(), Fq12::one());
         assert_eq!(pn1.clone(), np1.clone());
-        let p2 = optimal_ate_pairing(g1.clone() * 2, g2.clone());
+        let p2 = optimal_ate_pairing(&(g1.clone() * 2), &g2.clone());
         assert_eq!(p1.clone() * p1.clone(), p2);
         assert!(p1 != p2);
         assert!(p1 != np1);
         assert!(p2 != np1);
-        let po2 = optimal_ate_pairing(g1.clone(), g2.clone() * 2);
+        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.clone() * 2));
         assert_eq!(p1.clone() * p1.clone(), po2);
-        let p3 = optimal_ate_pairing(g1.clone() * 37, g2.clone() * 27);
-        let po3 = optimal_ate_pairing(g1.clone() * 999, g2.clone());
+        let p3 = optimal_ate_pairing(&(g1.clone() * 37), &(g2.clone() * 27));
+        let po3 = optimal_ate_pairing(&(g1.clone() * 999), &(g2.clone()));
         assert_eq!(p3, po3);
     }
 }
