@@ -1,25 +1,33 @@
 # Polynomials
 
-Let \\(K\\) be a field.
-
 ### Definition: Polynomial
+
+---
 
 *A univariate polynomial over a commutative ring \\(R\\) with unity \\(1\\) is an expression of the form \\(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\\), where \\(x\\) is a variable and coefficients \\(a_0, \ldots, a_n\\) belong to \\(R\\). The set of all polynomials over \\(R\\) in the variable \\(x\\) is denoted as \\(R[x]\\).*
 
+---
+
 **Example:** In \\(\mathbb{Z}[x]\\), we have polynomials such as \\(2x^3 + x + 1\\), \\(x\\), and \\(1\\). In \\(\mathbb{R}[x]\\), we have polynomials like \\(\pi x^2 - \sqrt{2}x + e\\).
 
+**Implementation:**
+
 ```rust
-/// Polynomial struct representing a polynomial over Field.
+/// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial<F: Field> {
-    pub poly: Vec<F>,
-    pub var: String,
+    /// Coefficients of the polynomial in increasing order of degree.
+    pub coef: Vec<F>,
 }
 ```
 
 ### Definition: Degree
 
+---
+
 *The degree of a non-zero polynomial \\(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\\), denoted as \\(\deg f\\), is the largest integer \\(n\\) such that \\(a_n \neq 0\\). The zero polynomial is defined to have degree \\(-1\\).*
+
+---
 
 **Example**
 
@@ -27,6 +35,8 @@ pub struct Polynomial<F: Field> {
 - \\(\deg(x) = 1\\)
 - \\(\deg(1) = 0\\)
 - \\(\deg(0) = -1\\)
+
+**Implementation:**
 
 ```rust
 impl<F: Field> Polynomial<F> {
@@ -51,73 +61,107 @@ impl<F: Field> Polynomial<F> {
 }
 ```
 
-### Sum of Polynomials
+### Definition: Sum of Polynomials
+
+---
 
 *For polynomials \\(f(x) = \sum_{i=0}^n a_i x^i\\) and \\(g(x) = \sum_{i=0}^m b_i x^i\\), their sum is defined as: \\((f + g)(x) = \sum_{i=0}^{\max(n,m)} (a_i + b_i) x^i\\), where we set \\(a_i = 0\\) for \\(i > n\\) and \\(b_i = 0\\) for \\(i > m\\).*
 
+---
+
 **Example:** Let \\(f(x) = 2x^2 + 3x + 1\\) and \\(g(x) = x^3 - x + 4\\). Then, \\((f + g)(x) = x^3 + 2x^2 + 2x + 5\\)
 
+**Implementation:**
+
 ```rust
+impl<F: Field> Polynomial<F> {
+    fn add_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero();
+
+        for i in 0..max_len {
+            let a = self.coef.get(i).unwrap_or(&zero);
+            let b = other.coef.get(i).unwrap_or(&zero);
+            result.push(a.add_ref(b));
+        }
+        Polynomial {
+            coef: Self::trim_trailing_zeros(result),
+        }
+    }
+}
+
 impl<F: Field> Add for Polynomial<F> {
     type Output = Self;
 
     fn add(self, other: Self) -> Polynomial<F> {
-        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero(None);
-
-        for i in 0..max_len {
-            let a = self.poly.get(i).unwrap_or(&zero);
-            let b = other.poly.get(i).unwrap_or(&zero);
-            result.push(a.clone() + b.clone());
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+        self.add_ref(&other)
     }
 }
 ```
 
-### Product of polynomials
+### Definition: Product of polynomials
+
+---
 
 *For polynomials \\(f(x) = \sum_{i=0}^n a_i x^i\\) and \\(g(x) = \sum_{j=0}^m b_j x^j\\), their product is defined as: \\((fg)(x) = \sum_{k=0}^{n+m} c_k x^k\\), where \\(c_k = \sum_{i+j=k} a_i b_j\\)*
 
+---
+
 **Example:** Let \\(f(x) = x + 1\\) and \\(g(x) = x^2 - 1\\). Then, \\((fg)(x) = x^3 + x^2 - x - 1\\)
 
+**Implementation:**
+
 ```rust
-impl<F: Field> Mul for Polynomial<F> {
-    type Output = Self;
+impl<F: Field> Polynomial<F> {
+    fn mul_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::<F>::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
 
-    /// Multiplication of two polynomials.
-    fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
-
-        for (i, a) in self.poly.iter().enumerate() {
-            for (j, b) in other.poly.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].add_ref(&a.mul_ref(b));
             }
         }
         Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
+            coef: Polynomial::<F>::trim_trailing_zeros(result),
         }
+    }
+}
+
+impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
+    type Output = Self;
+
+    fn mul(self, other: Polynomial<F>) -> Polynomial<F> {
+        self.mul_ref(&other)
     }
 }
 ```
 
-### Lemma
+### Lemma 2.3.1
+
+Let \\(K\\) be a field.
+
+---
 
 *Let \\(f, g \in K[x]\\) be non-zero polynomials. Then, \\(\deg(fg) = \deg f + \deg g\\).*
 
+---
 
 **Example:** Let \\(f(x) = x^2 + 1\\) and \\(g(x) = x^3 - x\\) in \\(\mathbb{R}[x]\\). Then, \\(\deg(fg) = \deg(x^5 - x^3 + x^2 + 1) = 5 = 2 + 3 = \deg f + \deg g\\)
 
+### Theorem 2.3.2
+
 We can also define division in the polynomial ring \\(K[x]\\).
 
-### Theorem
+---
+
 *Let \\(f, g \in K[x]\\), with \\(g \neq 0\\). There exist unique polynomials \\(q, r \in K[x]\\) that satisfy \\(f = qg + r\\) and either \\(\deg r < \deg g\\) or \\(r = 0\\).*
+
+---
 
 **Proof**
     TBD
@@ -127,60 +171,80 @@ We can also define division in the polynomial ring \\(K[x]\\).
 **Example:** In \\(\mathbb{R}[x]\\), let \\(f(x) = x^3 + 2x^2 - x + 3\\) and \\(g(x) = x^2 + 1\\).  Then \\(f = qg + r\\) where \\(q(x) = x + 2\\) and \\(r(x) = -3x + 1\\).
 
 
-```rust
-impl<F: Field> Div for Polynomial<F> {
-    type Output = Self;
+**Implementation:**
 
-    /// Division of two polynomials, returns quotient.
-    fn div(self, other: Polynomial<F>) -> Polynomial<F> {
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+```rust
+impl<F: Field> Polynomial<F> {
+    fn div_rem_ref<'b>(&self, other: &'b Polynomial<F>) -> (Polynomial<F>, Polynomial<F>) {
+        if self.degree() < other.degree() {
+            return (Polynomial::zero(), self.clone());
+        }
+
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient =
-            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
-        let mut i = 0_i32;
         while remainder_coeffs.len() >= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&divisor_lead_inv);
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
 
             for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
+                    .sub_ref(&(lead_term.mul_ref(&divisor_coeffs[i])));
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-            i += 1;
         }
 
-        Polynomial {
-            poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
-        }
+        (
+            Polynomial {
+                coef: Self::trim_trailing_zeros(quotient),
+            },
+            Polynomial {
+                coef: remainder_coeffs,
+            },
+        )
+    }
+}
+
+impl<F: Field> Div for Polynomial<F> {
+    type Output = Self;
+
+    fn div(self, other: Polynomial<F>) -> Polynomial<F> {
+        self.div_rem_ref(&other).0
     }
 }
 ```
 
 ### Corollary
 
+---
+
 *Let \\(f \in K[x]\\) be a non-zero polynomial, and \\(a \in K\\) such that \\(f(a) = 0\\). Then, there exists a polynomial \\(q \in K[x]\\) such that \\(f(x) = (x - a)q(x)\\). In other words, \\((x - a)\\) is a factor of \\(f(x)\\).*
+
+---
 
 **Example:** Let \\(f(x) = x^2 + 1 \in (\mathbb{Z}/2\mathbb{Z})[x]\\). We have \\(f(1) = 1^2 + 1 = 0\\) in \\(\mathbb{Z}/2\mathbb{Z}\\), and indeed: \\(x^2 + 1 = (x - 1)^2 = x^2 - 2x + 1 = x^2 + 1\\) in \\((\mathbb{Z}/2\mathbb{Z})[x]\\)
 
 ### Theorem: Lagrange Interpolation
 
+---
+
 *A \\(n\\)-degre polynomial \\(P(x)\\) that goes through different \\(n + 1\\) points \\(\\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\\}\\) is uniquely represented as follows:*
 
-\begin{align*}
+\\[
     P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
-\end{align*}
+\\]
 
 *, where \\(f_i(x) = \prod_{k \neq i} (x - x_k)\\)*
 
+---
+
 **Proof** TBD
 
-For example, the quadratic polynomial that goes through \\(\\{(1, 0), (2, 3), (3, 8)\\}\\) is as follows:
+**Example:** The quadratic polynomial that goes through \\(\\{(1, 0), (2, 3), (3, 8)\\}\\) is as follows:
 
 \begin{align*}
     P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1
@@ -188,32 +252,33 @@ For example, the quadratic polynomial that goes through \\(\\{(1, 0), (2, 3), (3
 
 Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.
 
+**Implementation:**
+
 ```rust
-pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
-    let mut lagrange_polys = vec![];
-    let numerators = Polynomial::from_monomials(x_values);
+impl<F: Field> Polynomial<F> {
+    pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
+        let mut lagrange_polys = vec![];
+        let numerators = Polynomial::from_monomials(x_values);
 
-    for j in 0..x_values.len() {
-        let mut denominator = F::one(None);
-        for i in 0..x_values.len() {
-            if i != j {
-                denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+        for j in 0..x_values.len() {
+            let mut denominator = F::one();
+            for i in 0..x_values.len() {
+                if i != j {
+                    denominator = denominator * (x_values[j].sub_ref(&x_values[i]));
+                }
             }
+            let cur_poly = numerators
+                .clone()
+                .div(Polynomial::from_monomials(&[x_values[j].clone()]) * denominator);
+            lagrange_polys.push(cur_poly);
         }
-        let cur_poly = numerators
-            .clone()
-            .div(Polynomial::from_monomials(&[x_values[j].clone()]).scalar_mul(&denominator));
-        lagrange_polys.push(cur_poly);
-    }
 
-    let mut result = Polynomial {
-        poly: vec![],
-        var: "x".to_string(),
-    };
-    for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
-        result = result + lagrange_poly.scalar_mul(&y_values[j]);
+        let mut result = Polynomial { coef: vec![] };
+        for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
+            result = result + lagrange_poly.clone() * y_values[j].clone();
+        }
+        result
     }
-    result
 }
 ```
 

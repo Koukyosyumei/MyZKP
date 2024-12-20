@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Polynomials - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Polynomials - Book of MyZKP</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html" class="active"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html" class="active"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -144,7 +144,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MyZKP: Building Zero Knowledge Proof from Scratch</h1>
+                    <h1 class="menu-title">Book of MyZKP</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -177,21 +177,25 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="polynomials"><a class="header" href="#polynomials">Polynomials</a></h1>
-<p>Let \(K\) be a field.</p>
 <h3 id="definition-polynomial"><a class="header" href="#definition-polynomial">Definition: Polynomial</a></h3>
+<hr />
 <p><em>A univariate polynomial over a commutative ring \(R\) with unity \(1\) is an expression of the form \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), where \(x\) is a variable and coefficients \(a_0, \ldots, a_n\) belong to \(R\). The set of all polynomials over \(R\) in the variable \(x\) is denoted as \(R[x]\).</em></p>
+<hr />
 <p><strong>Example:</strong> In \(\mathbb{Z}[x]\), we have polynomials such as \(2x^3 + x + 1\), \(x\), and \(1\). In \(\mathbb{R}[x]\), we have polynomials like \(\pi x^2 - \sqrt{2}x + e\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>/// Polynomial struct representing a polynomial over Field.
+</span>/// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial&lt;F: Field&gt; {
-    pub poly: Vec&lt;F&gt;,
-    pub var: String,
+    /// Coefficients of the polynomial in increasing order of degree.
+    pub coef: Vec&lt;F&gt;,
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-degree"><a class="header" href="#definition-degree">Definition: Degree</a></h3>
+<hr />
 <p><em>The degree of a non-zero polynomial \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), denoted as \(\deg f\), is the largest integer \(n\) such that \(a_n \neq 0\). The zero polynomial is defined to have degree \(-1\).</em></p>
+<hr />
 <p><strong>Example</strong></p>
 <ul>
 <li>\(\deg(2x^3 + x + 1) = 3\)</li>
@@ -199,6 +203,7 @@ pub struct Polynomial&lt;F: Field&gt; {
 <li>\(\deg(1) = 0\)</li>
 <li>\(\deg(0) = -1\)</li>
 </ul>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
@@ -222,143 +227,181 @@ pub struct Polynomial&lt;F: Field&gt; {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="sum-of-polynomials"><a class="header" href="#sum-of-polynomials">Sum of Polynomials</a></h3>
+<h3 id="definition-sum-of-polynomials"><a class="header" href="#definition-sum-of-polynomials">Definition: Sum of Polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{i=0}^m b_i x^i\), their sum is defined as: \((f + g)(x) = \sum_{i=0}^{\max(n,m)} (a_i + b_i) x^i\), where we set \(a_i = 0\) for \(i &gt; n\) and \(b_i = 0\) for \(i &gt; m\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = 2x^2 + 3x + 1\) and \(g(x) = x^3 - x + 4\). Then, \((f + g)(x) = x^3 + 2x^2 + 2x + 5\)</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Add for Polynomial&lt;F&gt; {
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn add_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero();
+
+        for i in 0..max_len {
+            let a = self.coef.get(i).unwrap_or(&amp;zero);
+            let b = other.coef.get(i).unwrap_or(&amp;zero);
+            result.push(a.add_ref(b));
+        }
+        Polynomial {
+            coef: Self::trim_trailing_zeros(result),
+        }
+    }
+}
+
+impl&lt;F: Field&gt; Add for Polynomial&lt;F&gt; {
     type Output = Self;
 
     fn add(self, other: Self) -&gt; Polynomial&lt;F&gt; {
-        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero(None);
-
-        for i in 0..max_len {
-            let a = self.poly.get(i).unwrap_or(&amp;zero);
-            let b = other.poly.get(i).unwrap_or(&amp;zero);
-            result.push(a.clone() + b.clone());
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+        self.add_ref(&amp;other)
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="product-of-polynomials"><a class="header" href="#product-of-polynomials">Product of polynomials</a></h3>
+<h3 id="definition-product-of-polynomials"><a class="header" href="#definition-product-of-polynomials">Definition: Product of polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{j=0}^m b_j x^j\), their product is defined as: \((fg)(x) = \sum_{k=0}^{n+m} c_k x^k\), where \(c_k = \sum_{i+j=k} a_i b_j\)</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x + 1\) and \(g(x) = x^2 - 1\). Then, \((fg)(x) = x^3 + x^2 - x - 1\)</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Mul for Polynomial&lt;F&gt; {
-    type Output = Self;
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn mul_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::&lt;F&gt;::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
 
-    /// Multiplication of two polynomials.
-    fn mul(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
-        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
-
-        for (i, a) in self.poly.iter().enumerate() {
-            for (j, b) in other.poly.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].add_ref(&amp;a.mul_ref(b));
             }
         }
         Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
+            coef: Polynomial::&lt;F&gt;::trim_trailing_zeros(result),
         }
     }
 }
+
+impl&lt;F: Field&gt; Mul&lt;Polynomial&lt;F&gt;&gt; for Polynomial&lt;F&gt; {
+    type Output = Self;
+
+    fn mul(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        self.mul_ref(&amp;other)
+    }
+}
 <span class="boring">}</span></code></pre></pre>
-<h3 id="lemma"><a class="header" href="#lemma">Lemma</a></h3>
+<h3 id="lemma-231"><a class="header" href="#lemma-231">Lemma 2.3.1</a></h3>
+<p>Let \(K\) be a field.</p>
+<hr />
 <p><em>Let \(f, g \in K[x]\) be non-zero polynomials. Then, \(\deg(fg) = \deg f + \deg g\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1\) and \(g(x) = x^3 - x\) in \(\mathbb{R}[x]\). Then, \(\deg(fg) = \deg(x^5 - x^3 + x^2 + 1) = 5 = 2 + 3 = \deg f + \deg g\)</p>
+<h3 id="theorem-232"><a class="header" href="#theorem-232">Theorem 2.3.2</a></h3>
 <p>We can also define division in the polynomial ring \(K[x]\).</p>
-<h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
+<hr />
 <p><em>Let \(f, g \in K[x]\), with \(g \neq 0\). There exist unique polynomials \(q, r \in K[x]\) that satisfy \(f = qg + r\) and either \(\deg r &lt; \deg g\) or \(r = 0\).</em></p>
+<hr />
 <p><strong>Proof</strong>
 TBD</p>
 <p>\(q\) is called the quotient of \(f\) divided by \(g\), and \(r\) is called the remainder; we write \(r = f \bmod g\).</p>
 <p><strong>Example:</strong> In \(\mathbb{R}[x]\), let \(f(x) = x^3 + 2x^2 - x + 3\) and \(g(x) = x^2 + 1\).  Then \(f = qg + r\) where \(q(x) = x + 2\) and \(r(x) = -3x + 1\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Div for Polynomial&lt;F&gt; {
-    type Output = Self;
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn div_rem_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; (Polynomial&lt;F&gt;, Polynomial&lt;F&gt;) {
+        if self.degree() &lt; other.degree() {
+            return (Polynomial::zero(), self.clone());
+        }
 
-    /// Division of two polynomials, returns quotient.
-    fn div(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient =
-            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
-        let mut i = 0_i32;
         while remainder_coeffs.len() &gt;= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&amp;divisor_lead_inv);
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
 
             for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
+                    .sub_ref(&amp;(lead_term.mul_ref(&amp;divisor_coeffs[i])));
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-            i += 1;
         }
 
-        Polynomial {
-            poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
-        }
+        (
+            Polynomial {
+                coef: Self::trim_trailing_zeros(quotient),
+            },
+            Polynomial {
+                coef: remainder_coeffs,
+            },
+        )
+    }
+}
+
+impl&lt;F: Field&gt; Div for Polynomial&lt;F&gt; {
+    type Output = Self;
+
+    fn div(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        self.div_rem_ref(&amp;other).0
     }
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="corollary"><a class="header" href="#corollary">Corollary</a></h3>
+<hr />
 <p><em>Let \(f \in K[x]\) be a non-zero polynomial, and \(a \in K\) such that \(f(a) = 0\). Then, there exists a polynomial \(q \in K[x]\) such that \(f(x) = (x - a)q(x)\). In other words, \((x - a)\) is a factor of \(f(x)\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1 \in (\mathbb{Z}/2\mathbb{Z})[x]\). We have \(f(1) = 1^2 + 1 = 0\) in \(\mathbb{Z}/2\mathbb{Z}\), and indeed: \(x^2 + 1 = (x - 1)^2 = x^2 - 2x + 1 = x^2 + 1\) in \((\mathbb{Z}/2\mathbb{Z})[x]\)</p>
 <h3 id="theorem-lagrange-interpolation"><a class="header" href="#theorem-lagrange-interpolation">Theorem: Lagrange Interpolation</a></h3>
+<hr />
 <p><em>A \(n\)-degre polynomial \(P(x)\) that goes through different \(n + 1\) points \(\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\}\) is uniquely represented as follows:</em></p>
-<p>\begin{align*}
+<p>\[
 P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
-\end{align*}</p>
+\]</p>
 <p><em>, where \(f_i(x) = \prod_{k \neq i} (x - x_k)\)</em></p>
+<hr />
 <p><strong>Proof</strong> TBD</p>
-<p>For example, the quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
+<p><strong>Example:</strong> The quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
 <p>\begin{align*}
 P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1
 \end{align*}</p>
 <p>Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn interpolate(x_values: &amp;[F], y_values: &amp;[F]) -&gt; Polynomial&lt;F&gt; {
-    let mut lagrange_polys = vec![];
-    let numerators = Polynomial::from_monomials(x_values);
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    pub fn interpolate(x_values: &amp;[F], y_values: &amp;[F]) -&gt; Polynomial&lt;F&gt; {
+        let mut lagrange_polys = vec![];
+        let numerators = Polynomial::from_monomials(x_values);
 
-    for j in 0..x_values.len() {
-        let mut denominator = F::one(None);
-        for i in 0..x_values.len() {
-            if i != j {
-                denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+        for j in 0..x_values.len() {
+            let mut denominator = F::one();
+            for i in 0..x_values.len() {
+                if i != j {
+                    denominator = denominator * (x_values[j].sub_ref(&amp;x_values[i]));
+                }
             }
+            let cur_poly = numerators
+                .clone()
+                .div(Polynomial::from_monomials(&amp;[x_values[j].clone()]) * denominator);
+            lagrange_polys.push(cur_poly);
         }
-        let cur_poly = numerators
-            .clone()
-            .div(Polynomial::from_monomials(&amp;[x_values[j].clone()]).scalar_mul(&amp;denominator));
-        lagrange_polys.push(cur_poly);
-    }
 
-    let mut result = Polynomial {
-        poly: vec![],
-        var: "x".to_string(),
-    };
-    for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
-        result = result + lagrange_poly.scalar_mul(&amp;y_values[j]);
+        let mut result = Polynomial { coef: vec![] };
+        for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
+            result = result + lagrange_poly.clone() * y_values[j].clone();
+        }
+        result
     }
-    result
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="proposition-homomorphisms-of-lagrange-interpolation"><a class="header" href="#proposition-homomorphisms-of-lagrange-interpolation">Proposition: Homomorphisms of Lagrange Interpolation</a></h3>
@@ -403,6 +446,22 @@ L(\gamma v) &amp;= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

@@ -3,8 +3,9 @@ authors = ["Koukyosyumei"]
 language = "en"
 multilingual = false
 src = "src"
-title = "MyZKP: Building Zero Knowledge Proof from Scratch"
+title = "Book of MyZKP"
 
 [output.html]
 mathjax-support = true
 additional-css = ["theme/css/custom.css"]
+it-repository-url = "https://github.com/Koukyosyumei/MyZKP/tree/main"

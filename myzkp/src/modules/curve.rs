@@ -205,7 +205,7 @@ pub fn get_lambda<F: Field, E: EllipticCurve>(
 pub fn miller<F: Field, E: EllipticCurve>(
     p: &EllipticCurvePoint<F, E>,
     q: &EllipticCurvePoint<F, E>,
-    m: BigInt,
+    m: &BigInt,
 ) -> (F, EllipticCurvePoint<F, E>) {
     if p == q {
         return (F::one(), p.clone());
@@ -229,14 +229,14 @@ pub fn miller<F: Field, E: EllipticCurve>(
 pub fn weil_pairing<F: Field, E: EllipticCurve>(
     p: &EllipticCurvePoint<F, E>,
     q: &EllipticCurvePoint<F, E>,
-    m: BigInt,
+    m: &BigInt,
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     let s_value = s.unwrap();
-    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), m.clone());
-    let (fp_s, _) = miller(&p, &s_value, m.clone());
-    let (fq_ps, _) = miller(&q, &p.add_ref(&(s_value.clone().neg())), m.clone());
-    let (fq_s, _) = miller(&q, &(-s_value.clone()), m.clone());
+    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), m);
+    let (fp_s, _) = miller(&p, &s_value, m);
+    let (fq_ps, _) = miller(&q, &p.add_ref(&(s_value.clone().neg())), m);
+    let (fq_s, _) = miller(&q, &(-s_value.clone()), m);
 
     return (fp_qs / fp_s) / (fq_ps / fq_s);
 }
@@ -244,25 +244,25 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
 pub fn general_tate_pairing<F: Field, E: EllipticCurve>(
     p: &EllipticCurvePoint<F, E>,
     q: &EllipticCurvePoint<F, E>,
-    ell: BigInt,
-    modulus: BigInt,
+    ell: &BigInt,
+    modulus: &BigInt,
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     let s_value = s.unwrap();
-    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), ell.clone());
-    let (fp_s, _) = miller(&p, &s_value, ell.clone());
+    let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), ell);
+    let (fp_s, _) = miller(&p, &s_value, ell);
     let f = fp_qs.div_ref(&fp_s);
 
     return f.pow((modulus - BigInt::one()) / ell);
 }
 
 pub fn tate_pairing<F: Field, E: EllipticCurve>(
-    p: EllipticCurvePoint<F, E>,
-    q: EllipticCurvePoint<F, E>,
-    ell: BigInt,
-    modulus: BigInt,
+    p: &EllipticCurvePoint<F, E>,
+    q: &EllipticCurvePoint<F, E>,
+    ell: &BigInt,
+    modulus: &BigInt,
 ) -> F {
-    let (fp_q, _) = miller(&p, &q, ell.clone());
+    let (fp_q, _) = miller(p, q, ell);
 
     return fp_q.pow((modulus - BigInt::one()) / ell);
 }
@@ -316,8 +316,8 @@ mod tests {
         );
         let order = 5.to_bigint().unwrap();
 
-        let (fp_qs, _) = miller(&p, &(q.add_ref(&s)), order.clone());
-        let (fp_s, _) = miller(&p, &s, order.clone());
+        let (fp_qs, _) = miller(&p, &(q.add_ref(&s)), &order);
+        let (fp_s, _) = miller(&p, &s, &order);
         assert_eq!(fp_qs.sanitize().value, 103_i32.to_bigint().unwrap());
         assert_eq!(fp_s.sanitize().value, 219_i32.to_bigint().unwrap());
         assert_eq!(
@@ -325,13 +325,13 @@ mod tests {
             473_i32.to_bigint().unwrap()
         );
 
-        let (fq_ps, _) = miller(&q, &p.add_ref(&s.clone().neg()), order.clone());
-        let (fq_s, _) = miller(&q, &(-s.clone()), order.clone());
+        let (fq_ps, _) = miller(&q, &p.add_ref(&s.clone().neg()), &order);
+        let (fq_s, _) = miller(&q, &(-s.clone()), &order);
         assert_eq!(fq_ps.sanitize().value, 284_i32.to_bigint().unwrap());
         assert_eq!(fq_s.sanitize().value, 204_i32.to_bigint().unwrap());
         assert_eq!((fq_ps / fq_s).sanitize().value, 88_i32.to_bigint().unwrap());
 
-        let w = weil_pairing(&p, &q, order.clone(), Some(&s));
+        let w = weil_pairing(&p, &q, &order, Some(&s));
         assert_eq!(w.sanitize().value, 242.to_bigint().unwrap());
 
         let p_prime = EllipticCurvePoint::<FiniteFieldElement<Mod631>, CurveA30B34>::new(
@@ -343,16 +343,16 @@ mod tests {
             FiniteFieldElement::<Mod631>::from_value(244_i64),
         );
 
-        let w_prime = weil_pairing(&p_prime, &q_prime, order.clone(), Some(&s));
+        let w_prime = weil_pairing(&p_prime, &q_prime, &order, Some(&s));
         assert_eq!(w_prime.sanitize().value, 512_i32.to_bigint().unwrap());
 
-        let y_prime = weil_pairing(&p_prime, &p_prime, order.clone(), Some(&s));
+        let y_prime = weil_pairing(&p_prime, &p_prime, &order, Some(&s));
         assert_eq!(y_prime.sanitize().value, 1_i32.to_bigint().unwrap());
 
         let y_prime2 = weil_pairing(
             &(p_prime.clone() * 3_i32.to_bigint().unwrap()),
             &(p_prime.clone() * 2_i32.to_bigint().unwrap()),
-            order.clone(),
+            &order,
             Some(&s),
         );
         assert_eq!(y_prime2.sanitize().value, 1_i32.to_bigint().unwrap());
@@ -360,7 +360,7 @@ mod tests {
         let y_prime2 = weil_pairing(
             &(p_prime.clone() * 3647912234556789907_i64.to_bigint().unwrap()),
             &(p_prime.clone() * 289_i32.to_bigint().unwrap()),
-            order.clone(),
+            &order,
             Some(&s),
         );
         assert_eq!(y_prime2.sanitize().value, 1_i32.to_bigint().unwrap());
@@ -394,15 +394,10 @@ mod tests {
         );
         let order = 5.to_bigint().unwrap();
 
-        let tate = general_tate_pairing(&p, &q, order.clone(), BigInt::from(631), Some(&s));
+        let tate = general_tate_pairing(&p, &q, &order, &BigInt::from(631), Some(&s));
 
-        let tate_prime = general_tate_pairing(
-            &p_prime,
-            &q_prime,
-            order.clone(),
-            BigInt::from(631),
-            Some(&s),
-        );
+        let tate_prime =
+            general_tate_pairing(&p_prime, &q_prime, &order, &BigInt::from(631), Some(&s));
 
         assert_eq!(tate.pow(12_i32).sanitize(), tate_prime.sanitize());
     }
@@ -427,9 +422,9 @@ mod tests {
         );
         let order = 5.to_bigint().unwrap();
 
-        let tate = tate_pairing(p, q, order.clone(), BigInt::from(631));
+        let tate = tate_pairing(&p, &q, &order, &BigInt::from(631));
 
-        let tate_prime = tate_pairing(p_prime, q_prime, order.clone(), BigInt::from(631));
+        let tate_prime = tate_pairing(&p_prime, &q_prime, &order, &BigInt::from(631));
 
         assert_eq!(tate.pow(12_i32).sanitize(), tate_prime.sanitize());
     }

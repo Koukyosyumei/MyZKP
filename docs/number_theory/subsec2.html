@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Semigroup, Group, Ring - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Semigroup, Group, Ring - Book of MyZKP</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html" class="active"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html" class="active"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -144,7 +144,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MyZKP: Building Zero Knowledge Proof from Scratch</h1>
+                    <h1 class="menu-title">Book of MyZKP</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -181,45 +181,48 @@
 <hr />
 <p><em>A pair \((H, \circ)\), where \(H\) is a non-empty set and \(\circ\) is an associative binary operation on \(H\), is called a semigroup.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \(\{1, 2, 3, 4, 5\}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
+<p><strong>Example:</strong> The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \(\{1, 2, 3, 4, 5\}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
 <h3 id="definition-abelian-semigroup"><a class="header" href="#definition-abelian-semigroup">Definition: Abelian Semigroup</a></h3>
 <hr />
 <p><em>A semigroup whose operation is commutative is called an abelian semigroup.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
+<p><strong>Example:</strong> The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
 <h3 id="definition-identity-element"><a class="header" href="#definition-identity-element">Definition: Identity Element</a></h3>
 <hr />
 <p><em>An element \(e \in H\) is an identity element of \(H\) if it satisfies \(e \circ a = a \circ e = a\) for any \(a \in H\).</em></p>
 <hr />
-<p><strong>Example</strong>: 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
+<p><strong>Example:</strong> 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
 <h3 id="definition-monoid"><a class="header" href="#definition-monoid">Definition: Monoid</a></h3>
 <hr />
 <p><em>A semigroup with an identity element is called a monoid.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \(\{0, 1, 2, 3, 4\}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
+<p><strong>Example:</strong> The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \(\{0, 1, 2, 3, 4\}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
 <h3 id="definition-inverse"><a class="header" href="#definition-inverse">Definition: Inverse</a></h3>
 <hr />
 <p><em>For an element \(a \in H\), an element \(b \in H\) is an inverse of \(a\) if \(a \circ b = b \circ a = e\), where \(e\) is the identity element.</em></p>
 <hr />
-<p><strong>Example</strong>: In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
+<p><strong>Example:</strong> In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
 <h3 id="definition-group"><a class="header" href="#definition-group">Definition: Group</a></h3>
 <hr />
 <p><em>A monoid in which every element has an inverse is called a group.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \(\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}\) has an inverse, making it a group.</p>
+<p><strong>Example:</strong> The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \(\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}\) has an inverse, making it a group.</p>
 <h3 id="definition-order-of-a-group"><a class="header" href="#definition-order-of-a-group">Definition: Order of a Group</a></h3>
 <hr />
 <p><em>The order of a group is the number of elements in the group.</em></p>
 <hr />
-<p><strong>Example</strong>: The group of integers modulo 4 under addition has order 4, because the set of elements is \(\{0, 1, 2, 3\}\).</p>
+<p><strong>Example:</strong> The group of integers modulo 4 under addition has order 4, because the set of elements is \(\{0, 1, 2, 3\}\).</p>
 <h3 id="definition-ring"><a class="header" href="#definition-ring">Definition: Ring</a></h3>
 <hr />
 <p><em>A triple \((R, +, \cdot)\) is a ring if \((R, +)\) is an abelian group, \((R, \cdot)\) is a semigroup, and the distributive property holds: \(x \cdot (y + z) = (x \cdot y) + (x \cdot z)\) and \((x + y) \cdot z = (x \cdot z) + (y \cdot z)\) for all \(x, y, z \in R\).</em></p>
 <hr />
-<p><strong>Example</strong>: The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
+<p><strong>Example:</strong> The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use std::fmt;
+</span>use num_bigint::BigInt;
+use num_traits::{One, Zero};
+use std::fmt;
 use std::ops::{Add, Mul, Neg, Sub};
 
 pub trait Ring:
@@ -228,14 +231,25 @@ pub trait Ring:
     + PartialEq
     + fmt::Display
     + Add&lt;Output = Self&gt;
+    + for&lt;'a&gt; Add&lt;&amp;'a Self, Output = Self&gt;
     + Sub&lt;Output = Self&gt;
+    + for&lt;'a&gt; Sub&lt;&amp;'a Self, Output = Self&gt;
     + Mul&lt;Output = Self&gt;
-    + Mul&lt;i64, Output = Self&gt;
+    + for&lt;'a&gt; Mul&lt;&amp;'a Self, Output = Self&gt;
     + Neg&lt;Output = Self&gt;
+    + One
+    + Zero
 {
     // A ring is an algebraic structure with addition and multiplication
-    fn zero() -&gt; Self;
-    fn one() -&gt; Self;
+    fn add_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+    fn sub_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+    fn mul_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+
+    // Utility functions
+    fn pow&lt;M: Into&lt;BigInt&gt;&gt;(&amp;self, n: M) -&gt; Self;
+    fn get_value(&amp;self) -&gt; BigInt;
+    fn from_value&lt;M: Into&lt;BigInt&gt;&gt;(value: M) -&gt; Self;
+    fn random_element(exclude_elements: &amp;[Self]) -&gt; Self;
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-communicative-ring"><a class="header" href="#definition-communicative-ring">Definition: Communicative Ring</a></h3>
@@ -248,12 +262,13 @@ pub trait Ring:
 <p><em>A commutative ring with a multiplicative identity element where every non-zero element has a multiplicative inverse is called a field.</em></p>
 <hr />
 <p><strong>Example</strong> The set of rational numbers under usual addition and multiplication forms a field.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use crate::modules::ring::Ring;
-
-pub trait Field: Ring + Div&lt;Output = Self&gt; {
+</span>pub trait Field: Ring + Div&lt;Output = Self&gt; + PartialEq + Eq + Hash {
+    /// Computes the multiplicative inverse of the element.
     fn inverse(&amp;self) -&gt; Self;
+    fn div_ref(&amp;self, other: &amp;Self) -&gt; Self;
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-residue-class"><a class="header" href="#definition-residue-class">Definition: Residue Class</a></h3>
@@ -266,12 +281,12 @@ pub trait Field: Ring + Div&lt;Output = Self&gt; {
 <p><em>We denote the set of all residue classes modulo \( m \) as \( \mathbb{Z} / m\mathbb{Z} \). We say that \( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z} / m\mathbb{Z} \) if and only if there exists a solution for \( ax \equiv 1 \pmod{m} \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/5\mathbb{Z} \), \( 3 + 5\mathbb{Z} \) is invertible because \( \gcd(3, 5) = 1 \) (since \( 3\cdot2 \equiv 1 \pmod{5} \)). However, in \( \mathbb{Z}/6\mathbb{Z} \), \( 3 + 6\mathbb{Z} \) is not invertible because \( \gcd(3, 6) = 3 \neq 1 \).</p>
-<h3 id="lemma-121"><a class="header" href="#lemma-121">Lemma 1.2.1</a></h3>
+<h3 id="lemma-221"><a class="header" href="#lemma-221">Lemma 2.2.1</a></h3>
 <hr />
 <p><em>If \( a \) and \( b \) are coprime, the residues of \( a \), \( 2a \), \( 3a \), ..., \( (b-1)a \) modulo \( b \) are all distinct.</em></p>
 <hr />
 <p><strong>Proof:</strong> Suppose, for contradiction, that there exist \( x, y \in \{1, 2, \dots, b-1\} \) with \( x \neq y \) such that \( xa \equiv ya \pmod{b} \). Then \( (x-y)a \equiv 0 \pmod{b} \), implying \( b \mid (x-y)a \). Since \( a \) and \( b \) are coprime, we must have \( b \mid (x-y) \). However, \( |x-y| &lt; b \), so this is only possible if \( x = y \), contradicting our assumption. Therefore, all residues must be distinct.</p>
-<h3 id="theorem-122"><a class="header" href="#theorem-122">Theorem 1.2.2</a></h3>
+<h3 id="theorem-222"><a class="header" href="#theorem-222">Theorem 2.2.2</a></h3>
 <hr />
 <p><em>For any integers \( a \) and \( b \), the equation \( ax + by = 1 \) has a solution in integers \( x \) and \( y \) if and only if \( a \) and \( b \) are coprime.</em></p>
 <hr />
@@ -292,13 +307,13 @@ a\mathbb{Z} + b \mathbb{Z} = \gcd(a, b)\mathbb{Z}
 <ul>
 <li><strong>(\( \Rightarrow \))</strong> If \( ax + by = c \) for some integers \( x \) and \( y \), then \( \gcd(a,b) \mid a \) and \( \gcd(a,b) \mid b \), so \( \gcd(a,b) \mid (ax + by) = c \).</li>
 <li><strong>(\( \Leftarrow \))</strong> Let \( c = k\gcd(a,b) \) for some integer \( k \). We can write \( a = p\gcd(a,b) \) and \( b = q\gcd(a,b) \), where \( p \) and \( q \) are coprime. By the previous theorem, there exist integers \( m \) and \( n \) such that \( pm + qn = 1 \). Multiplying both sides by \( k\gcd(a,b) \), we get:
-[
+\[
 akm + bkn = c
-]
+\]
 Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).</li>
 </ul>
 <p>This theorem implies that for any integers \( a \), \( b \), and \( n \), the equation \( ax + by = n \) has an integer solution if and only if \( \gcd(a,b) \mid n \).</p>
-<h3 id="theorem-123"><a class="header" href="#theorem-123">Theorem 1.2.3</a></h3>
+<h3 id="theorem-223"><a class="header" href="#theorem-223">Theorem 2.2.3</a></h3>
 <hr />
 <p><em>\( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z}/m\mathbb{Z} \) if and only if \( \gcd(a,m) = 1 \).</em></p>
 <hr />
@@ -308,14 +323,16 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <li><strong>(\( \Leftarrow \))</strong> Suppose \( \gcd(a,m) = 1 \). By Bézout's identity, there exist integers \( x \) and \( y \) such that \( ax + my = 1 \). Thus, \( x + m\mathbb{Z} \) is the multiplicative inverse of \( a + m\mathbb{Z} \) in \( \mathbb{Z}/m\mathbb{Z} \).</li>
 </ul>
 <h3 id="definition-residue-class-ring"><a class="header" href="#definition-residue-class-ring">Definition: Residue Class Ring</a></h3>
+<hr />
 <p><em>\( (\mathbb{Z} / m \mathbb{Z}, +, \cdot) \) is a commutative ring where \( 1 + m \mathbb{Z} \) is the multiplicative identity element. This ring is called the residue class ring modulo \( m \).</em></p>
+<hr />
 <p><strong>Example:</strong> \( \mathbb{Z}/4\mathbb{Z} = \{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\} \).</p>
 <h3 id="definition-primitive-residue-class"><a class="header" href="#definition-primitive-residue-class">Definition: Primitive Residue Class</a></h3>
 <hr />
 <p><em>A residue class \( a + m\mathbb{Z} \) is called primitive if \( \gcd(a, m) = 1 \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/6\mathbb{Z} \), the primitive residue classes are \( 1 + 6\mathbb{Z} \) and \( 5 + 6\mathbb{Z} \).</p>
-<h3 id="theorem-124"><a class="header" href="#theorem-124">Theorem 1.2.4</a></h3>
+<h3 id="theorem-224"><a class="header" href="#theorem-224">Theorem 2.2.4</a></h3>
 <hr />
 <p><em>A residue ring \( \mathbb{Z} / m\mathbb{Z} \) is a field if and only if \( m \) is a prime number.</em></p>
 <hr />
@@ -331,60 +348,60 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <hr />
 <p><em>Euler's totient function \(\phi(m)\) is equal to the order of the primitive residue class group modulo \(m\), which is the number of integers less than \(m\) and coprime to \(m\).</em></p>
 <hr />
-<p><strong>Example</strong>: For \(m = 12\), \(\phi(12) = 4\) because there are 4 integers less than 12 that are coprime to 12: \({1, 5, 7, 11}\).</p>
+<p><strong>Example:</strong> For \(m = 12\), \(\phi(12) = 4\) because there are 4 integers less than 12 that are coprime to 12: \({1, 5, 7, 11}\).</p>
 <p>For \(m = 10\), \(\phi(10) = 4\), as there are also 4 integers less than 10 that are coprime to 10: \({1, 3, 7, 9}\).</p>
 <h3 id="definition-order-of-an-element-within-a-group"><a class="header" href="#definition-order-of-an-element-within-a-group">Definition: Order of an Element within a Group</a></h3>
 <hr />
 <p><em>The order of \(g \in G\) is the smallest natural number \(e\) such that \(g^{e} = 1\). We denote it as \(\text{order}_g(g)\)or \(\text{order } g\).</em></p>
 <hr />
-<p><strong>Example</strong>: In \((\mathbb{Z}/7\mathbb{Z})^{\times}\), the element 3 has order 6 because \(3^6 \bmod 7 = 1\). In other words, \(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\), and 6 is the smallest such exponent.</p>
+<p><strong>Example:</strong> In \((\mathbb{Z}/7\mathbb{Z})^{\times}\), the element 3 has order 6 because \(3^6 \bmod 7 = 1\). In other words, \(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\), and 6 is the smallest such exponent.</p>
 <h3 id="definition-subgroup"><a class="header" href="#definition-subgroup">Definition: Subgroup</a></h3>
 <hr />
 <p><em>A subset \(U \subseteq G\) is a subgroup of \(G\) if \(U\) itself is a group under the operation of \(G\).</em></p>
 <hr />
-<p><strong>Example</strong>: Consider \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\) under multiplication modulo 8. The subset \({1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\(7 \times 7 \equiv 1 \bmod 8\)).</p>
+<p><strong>Example:</strong> Consider \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\) under multiplication modulo 8. The subset \({1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\(7 \times 7 \equiv 1 \bmod 8\)).</p>
 <h3 id="definition-subgroup-generated-by-g"><a class="header" href="#definition-subgroup-generated-by-g">Definition: Subgroup Generated by \(g\)</a></h3>
 <hr />
 <p><em>The set \(\{g^{k} : k \in \mathbb{Z}\}\), for some element \(g \in G\), forms a subgroup of \(G\) and is called the subgroup generated by \(g\), denoted by \(\langle g \rangle\).</em></p>
 <hr />
-<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle =\) \(\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 =\) \(\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
+<p><strong>Example:</strong> Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle =\) \(\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 =\) \(\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
 <p>If \(g\) has a finite order \(e\), we have that \(\langle g \rangle = \{g^{k}: 0 \leq k \leq e\}\), meaning \(e\) is the order of \(\langle g \rangle\).</p>
 <h3 id="definition-cyclic-group"><a class="header" href="#definition-cyclic-group">Definition: Cyclic Group</a></h3>
 <hr />
 <p><em>A group \(G\) is called a cyclic group if there exists an element \(g \in G\) such that \(G = \langle g \rangle\). In this case, \(g\) is called a generator of \(G\).</em></p>
 <hr />
-<p><strong>Example</strong>: The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
-<h3 id="theorem-125"><a class="header" href="#theorem-125">Theorem 1.2.5</a></h3>
+<p><strong>Example:</strong> The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
+<h3 id="theorem-225"><a class="header" href="#theorem-225">Theorem 2.2.5</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, it has \(\phi(|G|)\)generators, and each generator has order \(|G|\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
-<h3 id="theorem-126"><a class="header" href="#theorem-126">Theorem 1.2.6</a></h3>
+<p><strong>Example:</strong> Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
+<h3 id="theorem-226"><a class="header" href="#theorem-226">Theorem 2.2.6</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, the order of any subgroup of \(G\) divides the order of \(G\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Consider the cyclic group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6. If we take the subgroup \(\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
+<p><strong>Example:</strong> Consider the cyclic group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6. If we take the subgroup \(\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
 <h3 id="theorem-fermats-little-theorem"><a class="header" href="#theorem-fermats-little-theorem">Theorem: Fermat's Little Theorem</a></h3>
 <hr />
 <p><em>If \(\gcd(a, m) = 1\), then \(a^{\phi(m)} \equiv 1 \pmod{m}\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
+<p><strong>Example:</strong> Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
 <p>This theorem suggests that \(a^{\phi(m) - 1} + m \mathbb{Z}\) is the inverse residue class of \(a + m \mathbb{Z}\).</p>
-<h3 id="theorem-127"><a class="header" href="#theorem-127">Theorem 1.2.7</a></h3>
+<h3 id="theorem-227"><a class="header" href="#theorem-227">Theorem 2.2.7</a></h3>
 <hr />
 <p><em>The order of any element in a group divides the order of the group.</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), consider the element \(3 + 7\mathbb{Z}\). The order of \(3 + 7\mathbb{Z}\) is 6, as \(3^6 \equiv 1 \bmod 7\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
+<p><strong>Example:</strong> In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), consider the element \(3 + 7\mathbb{Z}\). The order of \(3 + 7\mathbb{Z}\) is 6, as \(3^6 \equiv 1 \bmod 7\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
 <h3 id="theorem-generalization-of-fermats-little-theorem"><a class="header" href="#theorem-generalization-of-fermats-little-theorem">Theorem: Generalization of Fermat's Little Theorem</a></h3>
 <hr />
 <p><em>For any element \(g \in G\), we have \(g^{|G|} = 1\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
+<p><strong>Example:</strong> In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
 
                     </main>
 
@@ -415,6 +432,22 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

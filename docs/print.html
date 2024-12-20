@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Book of MyZKP</title>
         <meta name="robots" content="noindex">
 
 
@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -145,7 +145,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MyZKP: Building Zero Knowledge Proof from Scratch</h1>
+                    <h1 class="menu-title">Book of MyZKP</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -177,67 +177,78 @@
 
                 <div id="content" class="content">
                     <main>
-                        <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
+                        <h1 id="myzkp-building-zero-knowledge-proof-from-scratch-in-rust"><a class="header" href="#myzkp-building-zero-knowledge-proof-from-scratch-in-rust">MyZKP: Building Zero Knowledge Proof from Scratch in Rust</a></h1>
+<pre><code>███╗   ███╗  ██╗   ██╗  ███████╗  ██╗  ██╗  ██████╗  
+████╗ ████║  ╚██╗ ██╔╝  ╚══███╔╝  ██║ ██╔╝  ██╔══██╗ 
+██╔████╔██║   ╚████╔╝     ███╔╝   █████╔╝   ██████╔╝ 
+██║╚██╔╝██║    ╚██╔╝     ███╔╝    ██╔═██╗   ██╔═══╝  
+██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║      
+╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝     
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h1>
 <h3 id="definition-binary-operation"><a class="header" href="#definition-binary-operation">Definition: Binary Operation</a></h3>
 <hr />
 <p><em>A mapping \(\circ: X \times X \rightarrow X\) is a binary operation on \(X\) if for any pair of elements \((x_1, x_2)\) in \(X\), \(x_1 \circ x_2\) is also in \(X\).</em></p>
 <hr />
-<p><strong>Example</strong>: Addition (+) on the set of integers is a binary operation. For example, \(5 + 3 = 8\), and both \(5, 3, 8\) are integers, staying within the set of integers.</p>
+<p><strong>Example:</strong> Addition (+) on the set of integers is a binary operation. For example, \(5 + 3 = 8\), and both \(5, 3, 8\) are integers, staying within the set of integers.</p>
 <h3 id="definition-associative-property"><a class="header" href="#definition-associative-property">Definition: Associative Property</a></h3>
 <hr />
 <p><em>A binary operation \(\circ\) is associative if \((a \circ b) \circ c = a \circ (b \circ c)\) for all \(a, b, c \in X\).</em></p>
 <hr />
-<p><strong>Example</strong>: Multiplication of real numbers is associative: \((2 \times 3) \times 4 = 2 \times (3 \times 4) = 24\). In a modular context, we also have addition modulo \(n\) being associative. For example, for \(n = 5\), \((2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4\).</p>
+<p><strong>Example:</strong> Multiplication of real numbers is associative: \((2 \times 3) \times 4 = 2 \times (3 \times 4) = 24\). In a modular context, we also have addition modulo \(n\) being associative. For example, for \(n = 5\), \((2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4\).</p>
 <h3 id="definition-commutative-property"><a class="header" href="#definition-commutative-property">Definition: Commutative Property</a></h3>
 <hr />
 <p><em>A binary operation \(\circ\) is commutative if \(a \circ b = b \circ a\) for all \(a, b \in X\).</em></p>
 <hr />
-<p><strong>Example</strong>: Addition modulo \(n\) is also commutative. For \(n = 7\), \(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\).</p>
+<p><strong>Example:</strong> Addition modulo \(n\) is also commutative. For \(n = 7\), \(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\).</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="semigroup-group-ring"><a class="header" href="#semigroup-group-ring">Semigroup, Group, Ring</a></h1>
 <h3 id="definition-semigroup"><a class="header" href="#definition-semigroup">Definition: Semigroup</a></h3>
 <hr />
 <p><em>A pair \((H, \circ)\), where \(H\) is a non-empty set and \(\circ\) is an associative binary operation on \(H\), is called a semigroup.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \(\{1, 2, 3, 4, 5\}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
+<p><strong>Example:</strong> The set of positive integers under multiplication modulo \(n\) forms a semigroup. For instance, with \(n = 6\), the elements \(\{1, 2, 3, 4, 5\}\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.</p>
 <h3 id="definition-abelian-semigroup"><a class="header" href="#definition-abelian-semigroup">Definition: Abelian Semigroup</a></h3>
 <hr />
 <p><em>A semigroup whose operation is commutative is called an abelian semigroup.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
+<p><strong>Example:</strong> The set of natural numbers under addition modulo \(n\) forms an abelian semigroup. For \(n = 7\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.</p>
 <h3 id="definition-identity-element"><a class="header" href="#definition-identity-element">Definition: Identity Element</a></h3>
 <hr />
 <p><em>An element \(e \in H\) is an identity element of \(H\) if it satisfies \(e \circ a = a \circ e = a\) for any \(a \in H\).</em></p>
 <hr />
-<p><strong>Example</strong>: 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
+<p><strong>Example:</strong> 0 is the identity element for addition modulo \(n\). For example, \(0 + a \bmod 5 = a + 0 \bmod 5 = a\). Similarly, 1 is the identity element for multiplication modulo \(n\). For example, \(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\).</p>
 <h3 id="definition-monoid"><a class="header" href="#definition-monoid">Definition: Monoid</a></h3>
 <hr />
 <p><em>A semigroup with an identity element is called a monoid.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \(\{0, 1, 2, 3, 4\}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
+<p><strong>Example:</strong> The set of non-negative integers under addition modulo \(n\) forms a monoid. For \(n = 5\), the set \(\{0, 1, 2, 3, 4\}\) under addition modulo 5 forms a monoid with 0 as the identity element.</p>
 <h3 id="definition-inverse"><a class="header" href="#definition-inverse">Definition: Inverse</a></h3>
 <hr />
 <p><em>For an element \(a \in H\), an element \(b \in H\) is an inverse of \(a\) if \(a \circ b = b \circ a = e\), where \(e\) is the identity element.</em></p>
 <hr />
-<p><strong>Example</strong>: In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
+<p><strong>Example:</strong> In modulo \(n\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \(3 \times 5 \bmod 7 = 1\), where 1 is the identity element for multiplication.</p>
 <h3 id="definition-group"><a class="header" href="#definition-group">Definition: Group</a></h3>
 <hr />
 <p><em>A monoid in which every element has an inverse is called a group.</em></p>
 <hr />
-<p><strong>Example</strong>: The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \(\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}\) has an inverse, making it a group.</p>
+<p><strong>Example:</strong> The set of integers modulo a prime \(p\) under multiplication forms a group (Can you prove it?). For instance, in \(\mathbb{Z}/5\mathbb{Z}\), every non-zero element \(\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\}\) has an inverse, making it a group.</p>
 <h3 id="definition-order-of-a-group"><a class="header" href="#definition-order-of-a-group">Definition: Order of a Group</a></h3>
 <hr />
 <p><em>The order of a group is the number of elements in the group.</em></p>
 <hr />
-<p><strong>Example</strong>: The group of integers modulo 4 under addition has order 4, because the set of elements is \(\{0, 1, 2, 3\}\).</p>
+<p><strong>Example:</strong> The group of integers modulo 4 under addition has order 4, because the set of elements is \(\{0, 1, 2, 3\}\).</p>
 <h3 id="definition-ring"><a class="header" href="#definition-ring">Definition: Ring</a></h3>
 <hr />
 <p><em>A triple \((R, +, \cdot)\) is a ring if \((R, +)\) is an abelian group, \((R, \cdot)\) is a semigroup, and the distributive property holds: \(x \cdot (y + z) = (x \cdot y) + (x \cdot z)\) and \((x + y) \cdot z = (x \cdot z) + (y \cdot z)\) for all \(x, y, z \in R\).</em></p>
 <hr />
-<p><strong>Example</strong>: The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
+<p><strong>Example:</strong> The set of integers with usual addition and multiplication modulo \(n\) forms a ring. For example, in \(\mathbb{Z}/6\mathbb{Z}\), addition and multiplication modulo 6 form a ring.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use std::fmt;
+</span>use num_bigint::BigInt;
+use num_traits::{One, Zero};
+use std::fmt;
 use std::ops::{Add, Mul, Neg, Sub};
 
 pub trait Ring:
@@ -246,14 +257,25 @@ pub trait Ring:
     + PartialEq
     + fmt::Display
     + Add&lt;Output = Self&gt;
+    + for&lt;'a&gt; Add&lt;&amp;'a Self, Output = Self&gt;
     + Sub&lt;Output = Self&gt;
+    + for&lt;'a&gt; Sub&lt;&amp;'a Self, Output = Self&gt;
     + Mul&lt;Output = Self&gt;
-    + Mul&lt;i64, Output = Self&gt;
+    + for&lt;'a&gt; Mul&lt;&amp;'a Self, Output = Self&gt;
     + Neg&lt;Output = Self&gt;
+    + One
+    + Zero
 {
     // A ring is an algebraic structure with addition and multiplication
-    fn zero() -&gt; Self;
-    fn one() -&gt; Self;
+    fn add_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+    fn sub_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+    fn mul_ref(&amp;self, rhs: &amp;Self) -&gt; Self;
+
+    // Utility functions
+    fn pow&lt;M: Into&lt;BigInt&gt;&gt;(&amp;self, n: M) -&gt; Self;
+    fn get_value(&amp;self) -&gt; BigInt;
+    fn from_value&lt;M: Into&lt;BigInt&gt;&gt;(value: M) -&gt; Self;
+    fn random_element(exclude_elements: &amp;[Self]) -&gt; Self;
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-communicative-ring"><a class="header" href="#definition-communicative-ring">Definition: Communicative Ring</a></h3>
@@ -266,12 +288,13 @@ pub trait Ring:
 <p><em>A commutative ring with a multiplicative identity element where every non-zero element has a multiplicative inverse is called a field.</em></p>
 <hr />
 <p><strong>Example</strong> The set of rational numbers under usual addition and multiplication forms a field.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use crate::modules::ring::Ring;
-
-pub trait Field: Ring + Div&lt;Output = Self&gt; {
+</span>pub trait Field: Ring + Div&lt;Output = Self&gt; + PartialEq + Eq + Hash {
+    /// Computes the multiplicative inverse of the element.
     fn inverse(&amp;self) -&gt; Self;
+    fn div_ref(&amp;self, other: &amp;Self) -&gt; Self;
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-residue-class"><a class="header" href="#definition-residue-class">Definition: Residue Class</a></h3>
@@ -284,12 +307,12 @@ pub trait Field: Ring + Div&lt;Output = Self&gt; {
 <p><em>We denote the set of all residue classes modulo \( m \) as \( \mathbb{Z} / m\mathbb{Z} \). We say that \( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z} / m\mathbb{Z} \) if and only if there exists a solution for \( ax \equiv 1 \pmod{m} \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/5\mathbb{Z} \), \( 3 + 5\mathbb{Z} \) is invertible because \( \gcd(3, 5) = 1 \) (since \( 3\cdot2 \equiv 1 \pmod{5} \)). However, in \( \mathbb{Z}/6\mathbb{Z} \), \( 3 + 6\mathbb{Z} \) is not invertible because \( \gcd(3, 6) = 3 \neq 1 \).</p>
-<h3 id="lemma-121"><a class="header" href="#lemma-121">Lemma 1.2.1</a></h3>
+<h3 id="lemma-221"><a class="header" href="#lemma-221">Lemma 2.2.1</a></h3>
 <hr />
 <p><em>If \( a \) and \( b \) are coprime, the residues of \( a \), \( 2a \), \( 3a \), ..., \( (b-1)a \) modulo \( b \) are all distinct.</em></p>
 <hr />
 <p><strong>Proof:</strong> Suppose, for contradiction, that there exist \( x, y \in \{1, 2, \dots, b-1\} \) with \( x \neq y \) such that \( xa \equiv ya \pmod{b} \). Then \( (x-y)a \equiv 0 \pmod{b} \), implying \( b \mid (x-y)a \). Since \( a \) and \( b \) are coprime, we must have \( b \mid (x-y) \). However, \( |x-y| &lt; b \), so this is only possible if \( x = y \), contradicting our assumption. Therefore, all residues must be distinct.</p>
-<h3 id="theorem-122"><a class="header" href="#theorem-122">Theorem 1.2.2</a></h3>
+<h3 id="theorem-222"><a class="header" href="#theorem-222">Theorem 2.2.2</a></h3>
 <hr />
 <p><em>For any integers \( a \) and \( b \), the equation \( ax + by = 1 \) has a solution in integers \( x \) and \( y \) if and only if \( a \) and \( b \) are coprime.</em></p>
 <hr />
@@ -310,13 +333,13 @@ a\mathbb{Z} + b \mathbb{Z} = \gcd(a, b)\mathbb{Z}
 <ul>
 <li><strong>(\( \Rightarrow \))</strong> If \( ax + by = c \) for some integers \( x \) and \( y \), then \( \gcd(a,b) \mid a \) and \( \gcd(a,b) \mid b \), so \( \gcd(a,b) \mid (ax + by) = c \).</li>
 <li><strong>(\( \Leftarrow \))</strong> Let \( c = k\gcd(a,b) \) for some integer \( k \). We can write \( a = p\gcd(a,b) \) and \( b = q\gcd(a,b) \), where \( p \) and \( q \) are coprime. By the previous theorem, there exist integers \( m \) and \( n \) such that \( pm + qn = 1 \). Multiplying both sides by \( k\gcd(a,b) \), we get:
-[
+\[
 akm + bkn = c
-]
+\]
 Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).</li>
 </ul>
 <p>This theorem implies that for any integers \( a \), \( b \), and \( n \), the equation \( ax + by = n \) has an integer solution if and only if \( \gcd(a,b) \mid n \).</p>
-<h3 id="theorem-123"><a class="header" href="#theorem-123">Theorem 1.2.3</a></h3>
+<h3 id="theorem-223"><a class="header" href="#theorem-223">Theorem 2.2.3</a></h3>
 <hr />
 <p><em>\( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z}/m\mathbb{Z} \) if and only if \( \gcd(a,m) = 1 \).</em></p>
 <hr />
@@ -326,14 +349,16 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <li><strong>(\( \Leftarrow \))</strong> Suppose \( \gcd(a,m) = 1 \). By Bézout's identity, there exist integers \( x \) and \( y \) such that \( ax + my = 1 \). Thus, \( x + m\mathbb{Z} \) is the multiplicative inverse of \( a + m\mathbb{Z} \) in \( \mathbb{Z}/m\mathbb{Z} \).</li>
 </ul>
 <h3 id="definition-residue-class-ring"><a class="header" href="#definition-residue-class-ring">Definition: Residue Class Ring</a></h3>
+<hr />
 <p><em>\( (\mathbb{Z} / m \mathbb{Z}, +, \cdot) \) is a commutative ring where \( 1 + m \mathbb{Z} \) is the multiplicative identity element. This ring is called the residue class ring modulo \( m \).</em></p>
+<hr />
 <p><strong>Example:</strong> \( \mathbb{Z}/4\mathbb{Z} = \{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\} \).</p>
 <h3 id="definition-primitive-residue-class"><a class="header" href="#definition-primitive-residue-class">Definition: Primitive Residue Class</a></h3>
 <hr />
 <p><em>A residue class \( a + m\mathbb{Z} \) is called primitive if \( \gcd(a, m) = 1 \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/6\mathbb{Z} \), the primitive residue classes are \( 1 + 6\mathbb{Z} \) and \( 5 + 6\mathbb{Z} \).</p>
-<h3 id="theorem-124"><a class="header" href="#theorem-124">Theorem 1.2.4</a></h3>
+<h3 id="theorem-224"><a class="header" href="#theorem-224">Theorem 2.2.4</a></h3>
 <hr />
 <p><em>A residue ring \( \mathbb{Z} / m\mathbb{Z} \) is a field if and only if \( m \) is a prime number.</em></p>
 <hr />
@@ -349,76 +374,80 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <hr />
 <p><em>Euler's totient function \(\phi(m)\) is equal to the order of the primitive residue class group modulo \(m\), which is the number of integers less than \(m\) and coprime to \(m\).</em></p>
 <hr />
-<p><strong>Example</strong>: For \(m = 12\), \(\phi(12) = 4\) because there are 4 integers less than 12 that are coprime to 12: \({1, 5, 7, 11}\).</p>
+<p><strong>Example:</strong> For \(m = 12\), \(\phi(12) = 4\) because there are 4 integers less than 12 that are coprime to 12: \({1, 5, 7, 11}\).</p>
 <p>For \(m = 10\), \(\phi(10) = 4\), as there are also 4 integers less than 10 that are coprime to 10: \({1, 3, 7, 9}\).</p>
 <h3 id="definition-order-of-an-element-within-a-group"><a class="header" href="#definition-order-of-an-element-within-a-group">Definition: Order of an Element within a Group</a></h3>
 <hr />
 <p><em>The order of \(g \in G\) is the smallest natural number \(e\) such that \(g^{e} = 1\). We denote it as \(\text{order}_g(g)\)or \(\text{order } g\).</em></p>
 <hr />
-<p><strong>Example</strong>: In \((\mathbb{Z}/7\mathbb{Z})^{\times}\), the element 3 has order 6 because \(3^6 \bmod 7 = 1\). In other words, \(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\), and 6 is the smallest such exponent.</p>
+<p><strong>Example:</strong> In \((\mathbb{Z}/7\mathbb{Z})^{\times}\), the element 3 has order 6 because \(3^6 \bmod 7 = 1\). In other words, \(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\), and 6 is the smallest such exponent.</p>
 <h3 id="definition-subgroup"><a class="header" href="#definition-subgroup">Definition: Subgroup</a></h3>
 <hr />
 <p><em>A subset \(U \subseteq G\) is a subgroup of \(G\) if \(U\) itself is a group under the operation of \(G\).</em></p>
 <hr />
-<p><strong>Example</strong>: Consider \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\) under multiplication modulo 8. The subset \({1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\(7 \times 7 \equiv 1 \bmod 8\)).</p>
+<p><strong>Example:</strong> Consider \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\) under multiplication modulo 8. The subset \({1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}}\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\(7 \times 7 \equiv 1 \bmod 8\)).</p>
 <h3 id="definition-subgroup-generated-by-g"><a class="header" href="#definition-subgroup-generated-by-g">Definition: Subgroup Generated by \(g\)</a></h3>
 <hr />
 <p><em>The set \(\{g^{k} : k \in \mathbb{Z}\}\), for some element \(g \in G\), forms a subgroup of \(G\) and is called the subgroup generated by \(g\), denoted by \(\langle g \rangle\).</em></p>
 <hr />
-<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle =\) \(\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 =\) \(\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
+<p><strong>Example:</strong> Consider the group \((\mathbb{Z}/7\mathbb{Z})^{\times} = \{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\}\) under multiplication modulo 7. If we take \(g = 3\), then \(\langle 3 +7\mathbb{Z} \rangle =\) \(\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\} \bmod 7 =\) \(\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\}\), which forms a subgroup generated by 3. This subgroup contains all elements of \((\mathbb{Z}/7\mathbb{Z})^{\times}\), making 3 a generator of the entire group.</p>
 <p>If \(g\) has a finite order \(e\), we have that \(\langle g \rangle = \{g^{k}: 0 \leq k \leq e\}\), meaning \(e\) is the order of \(\langle g \rangle\).</p>
 <h3 id="definition-cyclic-group"><a class="header" href="#definition-cyclic-group">Definition: Cyclic Group</a></h3>
 <hr />
 <p><em>A group \(G\) is called a cyclic group if there exists an element \(g \in G\) such that \(G = \langle g \rangle\). In this case, \(g\) is called a generator of \(G\).</em></p>
 <hr />
-<p><strong>Example</strong>: The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
-<h3 id="theorem-125"><a class="header" href="#theorem-125">Theorem 1.2.5</a></h3>
+<p><strong>Example:</strong> The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
+<h3 id="theorem-225"><a class="header" href="#theorem-225">Theorem 2.2.5</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, it has \(\phi(|G|)\)generators, and each generator has order \(|G|\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
-<h3 id="theorem-126"><a class="header" href="#theorem-126">Theorem 1.2.6</a></h3>
+<p><strong>Example:</strong> Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
+<h3 id="theorem-226"><a class="header" href="#theorem-226">Theorem 2.2.6</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, the order of any subgroup of \(G\) divides the order of \(G\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Consider the cyclic group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6. If we take the subgroup \(\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
+<p><strong>Example:</strong> Consider the cyclic group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6. If we take the subgroup \(\langle 5+6\mathbb{Z} \rangle = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.</p>
 <h3 id="theorem-fermats-little-theorem"><a class="header" href="#theorem-fermats-little-theorem">Theorem: Fermat's Little Theorem</a></h3>
 <hr />
 <p><em>If \(\gcd(a, m) = 1\), then \(a^{\phi(m)} \equiv 1 \pmod{m}\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
+<p><strong>Example:</strong> Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
 <p>This theorem suggests that \(a^{\phi(m) - 1} + m \mathbb{Z}\) is the inverse residue class of \(a + m \mathbb{Z}\).</p>
-<h3 id="theorem-127"><a class="header" href="#theorem-127">Theorem 1.2.7</a></h3>
+<h3 id="theorem-227"><a class="header" href="#theorem-227">Theorem 2.2.7</a></h3>
 <hr />
 <p><em>The order of any element in a group divides the order of the group.</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), consider the element \(3 + 7\mathbb{Z}\). The order of \(3 + 7\mathbb{Z}\) is 6, as \(3^6 \equiv 1 \bmod 7\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
+<p><strong>Example:</strong> In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), consider the element \(3 + 7\mathbb{Z}\). The order of \(3 + 7\mathbb{Z}\) is 6, as \(3^6 \equiv 1 \bmod 7\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.</p>
 <h3 id="theorem-generalization-of-fermats-little-theorem"><a class="header" href="#theorem-generalization-of-fermats-little-theorem">Theorem: Generalization of Fermat's Little Theorem</a></h3>
 <hr />
 <p><em>For any element \(g \in G\), we have \(g^{|G|} = 1\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
-<p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
+<p><strong>Example:</strong> In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="polynomials"><a class="header" href="#polynomials">Polynomials</a></h1>
-<p>Let \(K\) be a field.</p>
 <h3 id="definition-polynomial"><a class="header" href="#definition-polynomial">Definition: Polynomial</a></h3>
+<hr />
 <p><em>A univariate polynomial over a commutative ring \(R\) with unity \(1\) is an expression of the form \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), where \(x\) is a variable and coefficients \(a_0, \ldots, a_n\) belong to \(R\). The set of all polynomials over \(R\) in the variable \(x\) is denoted as \(R[x]\).</em></p>
+<hr />
 <p><strong>Example:</strong> In \(\mathbb{Z}[x]\), we have polynomials such as \(2x^3 + x + 1\), \(x\), and \(1\). In \(\mathbb{R}[x]\), we have polynomials like \(\pi x^2 - \sqrt{2}x + e\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>/// Polynomial struct representing a polynomial over Field.
+</span>/// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial&lt;F: Field&gt; {
-    pub poly: Vec&lt;F&gt;,
-    pub var: String,
+    /// Coefficients of the polynomial in increasing order of degree.
+    pub coef: Vec&lt;F&gt;,
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-degree"><a class="header" href="#definition-degree">Definition: Degree</a></h3>
+<hr />
 <p><em>The degree of a non-zero polynomial \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), denoted as \(\deg f\), is the largest integer \(n\) such that \(a_n \neq 0\). The zero polynomial is defined to have degree \(-1\).</em></p>
+<hr />
 <p><strong>Example</strong></p>
 <ul>
 <li>\(\deg(2x^3 + x + 1) = 3\)</li>
@@ -426,6 +455,7 @@ pub struct Polynomial&lt;F: Field&gt; {
 <li>\(\deg(1) = 0\)</li>
 <li>\(\deg(0) = -1\)</li>
 </ul>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
@@ -449,143 +479,181 @@ pub struct Polynomial&lt;F: Field&gt; {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="sum-of-polynomials"><a class="header" href="#sum-of-polynomials">Sum of Polynomials</a></h3>
+<h3 id="definition-sum-of-polynomials"><a class="header" href="#definition-sum-of-polynomials">Definition: Sum of Polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{i=0}^m b_i x^i\), their sum is defined as: \((f + g)(x) = \sum_{i=0}^{\max(n,m)} (a_i + b_i) x^i\), where we set \(a_i = 0\) for \(i &gt; n\) and \(b_i = 0\) for \(i &gt; m\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = 2x^2 + 3x + 1\) and \(g(x) = x^3 - x + 4\). Then, \((f + g)(x) = x^3 + 2x^2 + 2x + 5\)</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Add for Polynomial&lt;F&gt; {
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn add_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        let mut result = Vec::with_capacity(max_len);
+
+        let zero = F::zero();
+
+        for i in 0..max_len {
+            let a = self.coef.get(i).unwrap_or(&amp;zero);
+            let b = other.coef.get(i).unwrap_or(&amp;zero);
+            result.push(a.add_ref(b));
+        }
+        Polynomial {
+            coef: Self::trim_trailing_zeros(result),
+        }
+    }
+}
+
+impl&lt;F: Field&gt; Add for Polynomial&lt;F&gt; {
     type Output = Self;
 
     fn add(self, other: Self) -&gt; Polynomial&lt;F&gt; {
-        let max_len = std::cmp::max(self.poly.len(), other.poly.len());
-        let mut result = Vec::with_capacity(max_len);
-
-        let zero = F::zero(None);
-
-        for i in 0..max_len {
-            let a = self.poly.get(i).unwrap_or(&amp;zero);
-            let b = other.poly.get(i).unwrap_or(&amp;zero);
-            result.push(a.clone() + b.clone());
-        }
-        Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
-        }
+        self.add_ref(&amp;other)
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="product-of-polynomials"><a class="header" href="#product-of-polynomials">Product of polynomials</a></h3>
+<h3 id="definition-product-of-polynomials"><a class="header" href="#definition-product-of-polynomials">Definition: Product of polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{j=0}^m b_j x^j\), their product is defined as: \((fg)(x) = \sum_{k=0}^{n+m} c_k x^k\), where \(c_k = \sum_{i+j=k} a_i b_j\)</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x + 1\) and \(g(x) = x^2 - 1\). Then, \((fg)(x) = x^3 + x^2 - x - 1\)</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Mul for Polynomial&lt;F&gt; {
-    type Output = Self;
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn mul_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        if self.is_zero() || other.is_zero() {
+            return Polynomial::&lt;F&gt;::zero();
+        }
+        let mut result = vec![F::zero(); (self.degree() + other.degree() + 1) as usize];
 
-    /// Multiplication of two polynomials.
-    fn mul(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
-        let mut result = vec![F::zero(None); self.degree() as usize + other.degree() as usize + 1];
-
-        for (i, a) in self.poly.iter().enumerate() {
-            for (j, b) in other.poly.iter().enumerate() {
-                result[i + j] = result[i + j].clone() + (a.clone() * b.clone());
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].add_ref(&amp;a.mul_ref(b));
             }
         }
         Polynomial {
-            poly: Self::trim_trailing_zeros(result),
-            var: self.var.clone(),
+            coef: Polynomial::&lt;F&gt;::trim_trailing_zeros(result),
         }
     }
 }
+
+impl&lt;F: Field&gt; Mul&lt;Polynomial&lt;F&gt;&gt; for Polynomial&lt;F&gt; {
+    type Output = Self;
+
+    fn mul(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        self.mul_ref(&amp;other)
+    }
+}
 <span class="boring">}</span></code></pre></pre>
-<h3 id="lemma"><a class="header" href="#lemma">Lemma</a></h3>
+<h3 id="lemma-231"><a class="header" href="#lemma-231">Lemma 2.3.1</a></h3>
+<p>Let \(K\) be a field.</p>
+<hr />
 <p><em>Let \(f, g \in K[x]\) be non-zero polynomials. Then, \(\deg(fg) = \deg f + \deg g\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1\) and \(g(x) = x^3 - x\) in \(\mathbb{R}[x]\). Then, \(\deg(fg) = \deg(x^5 - x^3 + x^2 + 1) = 5 = 2 + 3 = \deg f + \deg g\)</p>
+<h3 id="theorem-232"><a class="header" href="#theorem-232">Theorem 2.3.2</a></h3>
 <p>We can also define division in the polynomial ring \(K[x]\).</p>
-<h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
+<hr />
 <p><em>Let \(f, g \in K[x]\), with \(g \neq 0\). There exist unique polynomials \(q, r \in K[x]\) that satisfy \(f = qg + r\) and either \(\deg r &lt; \deg g\) or \(r = 0\).</em></p>
+<hr />
 <p><strong>Proof</strong>
 TBD</p>
 <p>\(q\) is called the quotient of \(f\) divided by \(g\), and \(r\) is called the remainder; we write \(r = f \bmod g\).</p>
 <p><strong>Example:</strong> In \(\mathbb{R}[x]\), let \(f(x) = x^3 + 2x^2 - x + 3\) and \(g(x) = x^2 + 1\).  Then \(f = qg + r\) where \(q(x) = x + 2\) and \(r(x) = -3x + 1\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; Div for Polynomial&lt;F&gt; {
-    type Output = Self;
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    fn div_rem_ref&lt;'b&gt;(&amp;self, other: &amp;'b Polynomial&lt;F&gt;) -&gt; (Polynomial&lt;F&gt;, Polynomial&lt;F&gt;) {
+        if self.degree() &lt; other.degree() {
+            return (Polynomial::zero(), self.clone());
+        }
 
-    /// Division of two polynomials, returns quotient.
-    fn div(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.poly.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.poly.clone());
+        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
+        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
-        let mut quotient =
-            vec![F::zero(None); self.degree() as usize - other.degree() as usize + 1];
+        let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
 
-        let mut i = 0_i32;
         while remainder_coeffs.len() &gt;= divisor_coeffs.len() {
-            let lead_term = remainder_coeffs.last().unwrap().clone() * divisor_lead_inv.clone();
+            let lead_term = remainder_coeffs.last().unwrap().mul_ref(&amp;divisor_lead_inv);
             let deg_diff = remainder_coeffs.len() - divisor_coeffs.len();
             quotient[deg_diff] = lead_term.clone();
 
             for i in 0..divisor_coeffs.len() {
-                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i].clone()
-                    - (lead_term.clone() * divisor_coeffs[i].clone());
+                remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
+                    .sub_ref(&amp;(lead_term.mul_ref(&amp;divisor_coeffs[i])));
             }
             remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
-            i += 1;
         }
 
-        Polynomial {
-            poly: Self::trim_trailing_zeros(quotient),
-            var: self.var.clone(),
-        }
+        (
+            Polynomial {
+                coef: Self::trim_trailing_zeros(quotient),
+            },
+            Polynomial {
+                coef: remainder_coeffs,
+            },
+        )
+    }
+}
+
+impl&lt;F: Field&gt; Div for Polynomial&lt;F&gt; {
+    type Output = Self;
+
+    fn div(self, other: Polynomial&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+        self.div_rem_ref(&amp;other).0
     }
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="corollary"><a class="header" href="#corollary">Corollary</a></h3>
+<hr />
 <p><em>Let \(f \in K[x]\) be a non-zero polynomial, and \(a \in K\) such that \(f(a) = 0\). Then, there exists a polynomial \(q \in K[x]\) such that \(f(x) = (x - a)q(x)\). In other words, \((x - a)\) is a factor of \(f(x)\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1 \in (\mathbb{Z}/2\mathbb{Z})[x]\). We have \(f(1) = 1^2 + 1 = 0\) in \(\mathbb{Z}/2\mathbb{Z}\), and indeed: \(x^2 + 1 = (x - 1)^2 = x^2 - 2x + 1 = x^2 + 1\) in \((\mathbb{Z}/2\mathbb{Z})[x]\)</p>
 <h3 id="theorem-lagrange-interpolation"><a class="header" href="#theorem-lagrange-interpolation">Theorem: Lagrange Interpolation</a></h3>
+<hr />
 <p><em>A \(n\)-degre polynomial \(P(x)\) that goes through different \(n + 1\) points \(\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\}\) is uniquely represented as follows:</em></p>
-<p>\begin{align*}
+<p>\[
 P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
-\end{align*}</p>
+\]</p>
 <p><em>, where \(f_i(x) = \prod_{k \neq i} (x - x_k)\)</em></p>
+<hr />
 <p><strong>Proof</strong> TBD</p>
-<p>For example, the quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
+<p><strong>Example:</strong> The quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
 <p>\begin{align*}
 P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1
 \end{align*}</p>
 <p>Note that Lagrange interpolation finds the lowest degree of interpolating polynomial for the given vector.</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn interpolate(x_values: &amp;[F], y_values: &amp;[F]) -&gt; Polynomial&lt;F&gt; {
-    let mut lagrange_polys = vec![];
-    let numerators = Polynomial::from_monomials(x_values);
+</span>impl&lt;F: Field&gt; Polynomial&lt;F&gt; {
+    pub fn interpolate(x_values: &amp;[F], y_values: &amp;[F]) -&gt; Polynomial&lt;F&gt; {
+        let mut lagrange_polys = vec![];
+        let numerators = Polynomial::from_monomials(x_values);
 
-    for j in 0..x_values.len() {
-        let mut denominator = F::one(None);
-        for i in 0..x_values.len() {
-            if i != j {
-                denominator = denominator * (x_values[j].clone() - x_values[i].clone());
+        for j in 0..x_values.len() {
+            let mut denominator = F::one();
+            for i in 0..x_values.len() {
+                if i != j {
+                    denominator = denominator * (x_values[j].sub_ref(&amp;x_values[i]));
+                }
             }
+            let cur_poly = numerators
+                .clone()
+                .div(Polynomial::from_monomials(&amp;[x_values[j].clone()]) * denominator);
+            lagrange_polys.push(cur_poly);
         }
-        let cur_poly = numerators
-            .clone()
-            .div(Polynomial::from_monomials(&amp;[x_values[j].clone()]).scalar_mul(&amp;denominator));
-        lagrange_polys.push(cur_poly);
-    }
 
-    let mut result = Polynomial {
-        poly: vec![],
-        var: "x".to_string(),
-    };
-    for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
-        result = result + lagrange_poly.scalar_mul(&amp;y_values[j]);
+        let mut result = Polynomial { coef: vec![] };
+        for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
+            result = result + lagrange_poly.clone() * y_values[j].clone();
+        }
+        result
     }
-    result
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="proposition-homomorphisms-of-lagrange-interpolation"><a class="header" href="#proposition-homomorphisms-of-lagrange-interpolation">Proposition: Homomorphisms of Lagrange Interpolation</a></h3>
@@ -611,8 +679,15 @@ L(\gamma v) &amp;= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i
 <li>\(X^2 + X + 1\) is irreducible</li>
 <li>\(X^2 + 1 = (X + 1)^2\) is reducible</li>
 </ul>
-<p>To construct \(GF(p^n)\), we use an irreducible polynomial of degree \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait IrreduciblePoly&lt;F: Field&gt;: Debug + Clone + Hash {
+    fn modulus() -&gt; &amp;'static Polynomial&lt;F&gt;;
+}
+<span class="boring">}</span></code></pre></pre>
 <h3 id="definition-residue-class-modulo-a-polynomial"><a class="header" href="#definition-residue-class-modulo-a-polynomial">Definition: Residue Class modulo a Polynomial</a></h3>
+<p>To construct \(GF(p^n)\), we use an irreducible polynomial of degree \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
 <hr />
 <p><em>For \(f, g \in (\mathbb{Z}/p\mathbb{Z})[X]\), the residue class of \(g \bmod f\) is the set of all polynomials \(h \in (\mathbb{Z}/p\mathbb{Z})[X]\) such that \(h \equiv g \pmod{f}\). This class is denoted as:</em></p>
 <p>\[ g + f(\mathbb{Z}/p\mathbb{Z})[X] = \{g + hf : h \in (\mathbb{Z}/p\mathbb{Z})[X]\} \]</p>
@@ -625,16 +700,92 @@ L(\gamma v) &amp;= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i
 <li>\((X + 1) + f(\mathbb{Z}/2\mathbb{Z})[X] = \{X + 1, X^2, X^2 + X + 1, X^2 + X, 1, 0, X^2 + 1, X\}\)</li>
 </ul>
 <p>These four residue classes form \(GF(4)\).</p>
-<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem:</a></h3>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt;
+    ExtendedFieldElement&lt;M, P&gt;
+{
+    pub fn new(poly: Polynomial&lt;FiniteFieldElement&lt;M&gt;&gt;) -&gt; Self {
+        let result = Self {
+            poly: poly,
+            _phantom: PhantomData,
+        };
+        result.reduce()
+    }
+
+    fn reduce(&amp;self) -&gt; Self {
+        Self {
+            poly: &amp;self.poly.reduce() % P::modulus(),
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn degree(&amp;self) -&gt; isize {
+        P::modulus().degree()
+    }
+
+    pub fn from_base_field(value: FiniteFieldElement&lt;M&gt;) -&gt; Self {
+        Self::new((Polynomial { coef: vec![value] }).reduce()).reduce()
+    }
+}
+
+impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt; Field
+    for ExtendedFieldElement&lt;M, P&gt;
+{
+    fn inverse(&amp;self) -&gt; Self {
+        let mut lm = Polynomial::&lt;FiniteFieldElement&lt;M&gt;&gt;::one();
+        let mut hm = Polynomial::zero();
+        let mut low = self.poly.clone();
+        let mut high = P::modulus().clone();
+
+        while !low.is_zero() {
+            let q = &amp;high / &amp;low;
+            let r = &amp;high % &amp;low;
+            let nm = hm - (&amp;lm * &amp;q);
+            high = low;
+            hm = lm;
+            low = r;
+            lm = nm;
+        }
+
+        Self::new(hm * high.coef[0].inverse())
+    }
+
+    fn div_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        self.mul_ref(&amp;other.inverse())
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="theorem"><a class="header" href="#theorem">Theorem:</a></h3>
 <hr />
 <p><em>If \(f \in (\mathbb{Z}/p\mathbb{Z})[X]\) is an irreducible polynomial of degree \(n\), then the residue ring \((\mathbb{Z}/p\mathbb{Z})[X]/(f)\) is a field with \(p^n\) elements, isomorphic to \(GF(p^n)\).</em></p>
 <hr />
 <p><strong>Proof</strong> (Outline) The irreducibility of \(f\) ensures that \((f)\) is a maximal ideal in \((\mathbb{Z}/p\mathbb{Z})[X]\), making the quotient ring a field. The number of elements is \(p^n\) because there are \(p^n\) polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
 <p>This construction allows us to represent elements of \(GF(p^n)\) as polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\). Addition is performed coefficient-wise modulo \(p\), while multiplication is performed modulo the irreducible polynomial \(f\).</p>
 <p><strong>Example:</strong> To construct \(GF(8)\), we can use the irreducible polynomial \(f(X) = X^3 + X + 1\) over \(\mathbb{Z}/2\mathbb{Z}\). The elements of \(GF(8)\) are represented by:
-[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} ]
+\[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} \]
 For instance, multiplication in \(GF(8)\):
-[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} ]</p>
+\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \]</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt; Ring
+    for ExtendedFieldElement&lt;M, P&gt;
+{
+    fn add_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly + &amp;other.poly)
+    }
+
+    fn mul_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly * &amp;other.poly)
+    }
+
+    fn sub_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly - &amp;other.poly)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
 <h3 id="lemma-schwartz---zippel-lemma"><a class="header" href="#lemma-schwartz---zippel-lemma">Lemma: Schwartz - Zippel Lemma</a></h3>
 <hr />
 <p><em>Let \(\mathbb{F}\) be a field and \(P: F^m \rightarrow \mathbb{F}\) and \(Q: \mathbb{F}^m \rightarrow \mathbb{F}\) be two distinct multivariate polynomials of total degree at most \(n\). For any finite subset \(\mathbb{S} \subseteq \mathbb{F}\), we have:</em></p>
@@ -654,14 +805,19 @@ y^2 = x^3 + a x + b
 \end{equation}</p>
 <p><em>, where \(a, b \in \mathbb{F}_{p}\) and the discriminant \(\Delta_{E} = 4a^3 + 27b^2 \neq 0\).</em></p>
 <hr />
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use crate::modules::field::Field;
+</span>pub trait EllipticCurve: Debug + Clone + PartialEq {
+    fn get_a() -&gt; BigInt;
+    fn get_b() -&gt; BigInt;
+}
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurve&lt;F: Field&gt; {
-    pub a: F,
-    pub b: F,
+pub struct EllipticCurvePoint&lt;F: Field, E: EllipticCurve&gt; {
+    pub x: Option&lt;F&gt;,
+    pub y: Option&lt;F&gt;,
+    _phantom: PhantomData&lt;E&gt;,
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-mathbbf_p-rational-point"><a class="header" href="#definition-mathbbf_p-rational-point">Definition: \(\mathbb{F}_{p}\)-Rational Point</a></h3>
@@ -674,13 +830,21 @@ pub struct EllipticCurve&lt;F: Field&gt; {
 <hr />
 <p>The point at infinity denoted \(\mathcal{O}\), is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.</p>
 <hr />
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>#[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurvePoint&lt;F: Field&gt; {
-    pub x: Option&lt;F&gt;,
-    pub y: Option&lt;F&gt;,
-    pub curve: EllipticCurve&lt;F&gt;,
+</span>impl&lt;F: Field, E: EllipticCurve&gt; EllipticCurvePoint&lt;F, E&gt; {
+    pub fn point_at_infinity() -&gt; Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn is_point_at_infinity(&amp;self) -&gt; bool {
+        self.x.is_none() || self.y.is_none()
+    }
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-addition-on-elliptic-curve"><a class="header" href="#definition-addition-on-elliptic-curve">Definition: Addition on Elliptic Curve</a></h3>
@@ -705,78 +869,44 @@ pub struct EllipticCurvePoint&lt;F: Field&gt; {
 </li>
 </ul>
 <hr />
-<p>Example: On \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_{7}\), let \(P = (5, 1)\) and \(Q = (4, 4)\). Then, \(P + Q = (0, 5)\), where \(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\).</p>
+<p><strong>Example:</strong> On \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_{7}\), let \(P = (5, 1)\) and \(Q = (4, 4)\). Then, \(P + Q = (0, 5)\), where \(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; EllipticCurvePoint&lt;F&gt; {
-    fn new(x: F, y: F, curve: EllipticCurve&lt;F&gt;) -&gt; Self {
-        EllipticCurvePoint {
-            x: Some(x),
-            y: Some(y),
-            curve: curve,
+</span>impl&lt;F: Field, E: EllipticCurve&gt; EllipticCurvePoint&lt;F, E&gt; {
+    pub fn add_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        if self.is_point_at_infinity() {
+            return other.clone();
         }
-    }
-
-    pub fn point_at_infinity(curve: EllipticCurve&lt;F&gt;) -&gt; Self {
-        EllipticCurvePoint {
-            x: None,
-            y: None,
-            curve: curve,
+        if other.is_point_at_infinity() {
+            return self.clone();
         }
-    }
 
-    pub fn is_point_at_infinity(&amp;self) -&gt; bool {
-        self.x.is_none() || self.y.is_none()
-    }
-
-    pub fn line_slope(&amp;self, other: Self) -&gt; F {
-        let x1 = self.x.clone().unwrap();
-        let y1 = self.y.clone().unwrap();
-        let x2 = other.x.clone().unwrap();
-        let y2 = other.y.clone().unwrap();
-
-        if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
-        } else {
-            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        if self.x == other.x &amp;&amp; self.y == other.y {
+            return self.double();
+        } else if self.x == other.x {
+            return Self::point_at_infinity();
         }
+
+        let slope = self.line_slope(&amp;other);
+        let x1 = self.x.as_ref().unwrap();
+        let y1 = self.y.as_ref().unwrap();
+        let x2 = other.x.as_ref().unwrap();
+        let y2 = other.y.as_ref().unwrap();
+
+        let new_x = slope.mul_ref(&amp;slope).sub_ref(&amp;x1).sub_ref(&amp;x2);
+        let new_y = ((-slope.clone()).mul_ref(&amp;new_x)) + (&amp;slope.mul_ref(&amp;x1).sub_ref(&amp;y1));
+        assert!(new_y == -slope.clone() * &amp;new_x + slope.mul_ref(&amp;x2).sub_ref(&amp;y2));
+
+        Self::new(new_x, new_y)
     }
 }
 
-impl&lt;F: Field&gt; Add for EllipticCurvePoint&lt;F&gt; {
+impl&lt;F: Field, E: EllipticCurve&gt; Add for EllipticCurvePoint&lt;F, E&gt; {
     type Output = Self;
 
     fn add(self, other: Self) -&gt; Self {
-        if self.is_point_at_infinity() {
-            return other;
-        }
-        if other.is_point_at_infinity() {
-            return self;
-        }
-
-        let m = self.line_slope(other.clone());
-
-        if self.x == other.x {
-            if self.y != other.y {
-                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
-            } else {
-                let x1 = self.x.clone().unwrap();
-                let y1 = self.y.clone().unwrap();
-
-                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
-                let y3 = m * (x1 - x3.clone()) - y1;
-
-                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-            }
-        } else {
-            let x1 = self.x.clone().unwrap();
-            let y1 = self.y.clone().unwrap();
-            let x2 = other.x.clone().unwrap();
-            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
-            let y3 = m * (x1 - x3.clone()) - y1;
-
-            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-        }
+        self.add_ref(&amp;other)
     }
 }
 <span class="boring">}</span></code></pre></pre>
@@ -857,8 +987,8 @@ K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
 <li>Quadratic functions: \(X^2, XY, Y^2 (= X^3 - X), \ldots\)</li>
 <li>Higher-degree functions: \(X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots\)</li>
 </ul>
-<p>Then, the function field is defined as follows:</p>
 <h3 id="definition-function-field-of-an-elliptic-curve"><a class="header" href="#definition-function-field-of-an-elliptic-curve">Definition: Function Field of an Elliptic Curve</a></h3>
+<p>Then, the function field is defined as follows:</p>
 <hr />
 <p><em>Let \(E: y^2 = x^3 + ax + b\) be an elliptic curve over a field \(K\). The <strong>function field</strong> of \(E\), denoted \(K(E)\), is defined as:</em>
 \begin{equation}
@@ -867,11 +997,10 @@ K(E) = \left\{\frac{f}{g} ,\middle|, f, g \in K[E], g \neq 0 \right\}
 <em>where \(K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)\) is the coordinate ring of \(E\).</em></p>
 <hr />
 <p>\(K(E)\) can be viewed as the field of all rational functions on \(E\).</p>
-<h3 id="definition-zero-of-a-function"><a class="header" href="#definition-zero-of-a-function">Definition: Zero of a Function</a></h3>
+<h3 id="definition-zeropole-of-a-function"><a class="header" href="#definition-zeropole-of-a-function">Definition: Zero/Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>zero</strong> of \(h\) if \(h(P) = 0\).</em></p>
 <hr />
-<h3 id="definition-pole-of-a-function"><a class="header" href="#definition-pole-of-a-function">Definition: Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>pole</strong> of \(h\) if \(h\) is not defined at \(P\) or, equivalently if \(1/h\) has a zero at \(P\).</em></p>
 <hr />
@@ -902,15 +1031,15 @@ div(f) = \sum_{P \in E} ord_P(f) [P]
 \end{equation}
 <em>, where \(ord_P(f)\) is the order of \(f\) at \(P\) (positive for zeros, negative for poles), and the sum is taken over all points \(P \in E\), including the point at infinity. This sum has only finitely many non-zero terms.</em></p>
 <hr />
-<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete value of a divisor.</p>
+<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete numerical value of a divisor.</p>
 <p><strong>Example</strong> Consider the elliptic curve \(E: Y^2 = X^3 - X\) over \(\mathbb{Q}\).</p>
 <ul>
 <li>For \(f = X\), we have \(div(X) = 2[(0,0)] - 2[\mathcal{O}]\).</li>
 <li>For \(g = Y\), we have \(div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]\).</li>
 <li>For \(h = \frac{X-1}{Y}\), we have \(div(h) = [(1,0)] - [(-1,0)]\).</li>
 </ul>
-<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <h3 id="definition-divisor-on-an-elliptic-curve"><a class="header" href="#definition-divisor-on-an-elliptic-curve">Definition: Divisor on an Elliptic Curve</a></h3>
+<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <hr />
 <p><em>A <strong>divisor</strong> \(D\) on an elliptic curve \(E\) is a formal sum</em>
 \begin{equation}
@@ -925,14 +1054,13 @@ D = \sum_{P \in E} n_P [P]
 <li>\(D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]\) is a divisor (where \(E[2]\) are the 2-torsion points).</li>
 </ul>
 <p>To quantify the properties of divisors, we introduce two important metrics:</p>
-<h3 id="definition-degree-of-a-divisor"><a class="header" href="#definition-degree-of-a-divisor">Definition: Degree of a Divisor</a></h3>
+<h3 id="definition-degreesum-of-a-divisor"><a class="header" href="#definition-degreesum-of-a-divisor">Definition: Degree/Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>degree</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
 deg(D) = \sum_{P \in E} n_P
 \end{equation}</p>
 <hr />
-<h3 id="definition-sum-of-a-divisor"><a class="header" href="#definition-sum-of-a-divisor">Definition: Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>sum</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
@@ -947,12 +1075,12 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>\(deg(D_3) = 4 - 4 = 0\)</li>
 <li>\(Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}\) (since \((1,0)\) and \((-1,0)\) are 2-torsion points)</li>
 </ul>
+<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem</a></h3>
 <p>The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:</p>
-<h3 id="theorem-2"><a class="header" href="#theorem-2">Theorem</a></h3>
 <hr />
 <p><em>Let \(E\) be an elliptic curve over a field \(K\).</em></p>
 <ul>
-<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^</em>\) such that \(f = cf'\).*</li>
+<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^*\) such that \(f = cf'\).</em></li>
 <li><em>A divisor \(D\) on \(E\) is the divisor of a rational function on \(E\) if and only if \(deg(D) = 0\) and \(Sum(D) = \mathcal{O}\).</em></li>
 </ul>
 <hr />
@@ -961,6 +1089,7 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>The function \(f = \frac{Y}{X}\) has \(div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]\). Note that \(deg(div(f)) = 0\) and \(Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}\).</li>
 <li>The divisor \(D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]\) has \(deg(D) = 0\), but \(Sum(D) \neq \mathcal{O}\). Therefore, \(D\) is not the divisor of any rational function on \(E\).</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pairing"><a class="header" href="#pairing">Pairing</a></h1>
 <h3 id="definition-pairing"><a class="header" href="#definition-pairing">Definition: Pairing</a></h3>
 <hr />
 <p><em>Let \(G_1\) and \(G_2\) be cyclic groups under addition, both of prime order \(p\), with generators \(P\) and \(Q\) respectively:</em></p>
@@ -974,8 +1103,8 @@ e(aP, bQ) = e(P, Q)^{ab}
 \end{equation} <em>for all \(a, b \in \mathbb{Z}_p\).</em></p>
 <hr />
 <p>Imagine \(G_1\) represents length, \(G_2\) represents width, and \(G_T\) represents area. The pairing function \(e\) is like calculating the area: If you double the length and triple the width, the area becomes six times larger: \(e(2P, 3Q) = e(P, Q)^{6}\)</p>
-<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
 <h3 id="definition-the-weil-pairing"><a class="header" href="#definition-the-weil-pairing">Definition: The Weil Pairing</a></h3>
+<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
 <hr />
 <p><em>Let \(E\) be an elliptic curve and \(n\) be a positive integer. For points \(P, Q \in E[n]\), where \(E[n]\) denotes the \(n\)-torsion subgroup of \(E\), we define the Weil pairing \(e_n(P, Q)\) as follows:</em></p>
 <p>Let \(f_P\) and \(f_Q\) be rational functions on \(E\) satisfying:
@@ -989,7 +1118,7 @@ e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
 \end{equation}</p>
 <hr />
 <p>We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.</p>
-<h3 id="theorem-3"><a class="header" href="#theorem-3">Theorem</a></h3>
+<h3 id="theorem-2"><a class="header" href="#theorem-2">Theorem</a></h3>
 <hr />
 <p><em>Let \(E\) be an elliptic curve over a field \(K\), and let \(P = (x_P, y_P)\) and \(Q = (x_Q, y_Q)\) be non-zero points on \(E\). Define \(\lambda\) as:</em></p>
 <p>\begin{equation}
@@ -1052,62 +1181,55 @@ div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
 <p>===========================</p>
 <hr />
 <p><strong>Proof:</strong> TBD</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn get_lambda&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    r: EllipticCurvePoint&lt;F&gt;,
+</span>pub fn get_lambda&lt;F: Field, E: EllipticCurve&gt;(
+    p: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    q: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    r: &amp;EllipticCurvePoint&lt;F, E&gt;,
 ) -&gt; F {
-    let p_x = p.x.clone().unwrap();
-    let p_y = p.y.clone().unwrap();
-    let q_x = q.x.clone().unwrap();
+    let p_x = p.x.as_ref().unwrap();
+    let p_y = p.y.as_ref().unwrap();
+    let q_x = q.x.as_ref().unwrap();
     // let q_y = q.y.clone().unwrap();
-    let r_x = r.x.clone().unwrap();
-    let r_y = r.y.clone().unwrap();
+    let r_x = r.x.as_ref().unwrap();
+    let r_y = r.y.as_ref().unwrap();
 
-    if (p == q &amp;&amp; p_y.clone() == F::zero()) || (p != q &amp;&amp; p_x.clone() == q_x.clone()) {
-        return r_x.clone() - p_x.clone();
+    if (p == q &amp;&amp; *p_y == F::zero()) || (p != q &amp;&amp; *p_x == *q_x) {
+        return r_x.sub_ref(&amp;p_x);
     }
-    let slope = p.line_slope(q.clone());
-    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
-    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
+    let slope = p.line_slope(&amp;q);
+    let numerator = (r_y.sub_ref(&amp;p_y)).sub_ref(&amp;slope.mul_ref(&amp;(r_x.sub_ref(&amp;p_x))));
+    let denominator = r_x
+        .add_ref(&amp;p_x)
+        .add_ref(&amp;q_x)
+        .sub_ref(&amp;slope.mul_ref(&amp;slope));
     return numerator / denominator;
 }
 
-pub fn miller&lt;F: Field&gt;(p: EllipticCurvePoint&lt;F&gt;, q: EllipticCurvePoint&lt;F&gt;, m: BigInt) -&gt; F {
+pub fn miller&lt;F: Field, E: EllipticCurve&gt;(
+    p: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    q: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    m: &amp;BigInt,
+) -&gt; (F, EllipticCurvePoint&lt;F, E&gt;) {
     if p == q {
-        F::one();
+        return (F::one(), p.clone());
     }
 
     let mut f = F::one();
     let mut t = p.clone();
 
-    for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
-        t = t.clone() + t.clone();
+    for i in (0..(m.bits() - 1)).rev() {
+        f = (f.mul_ref(&amp;f)) * (get_lambda(&amp;t, &amp;t, &amp;q));
+        t = t.add_ref(&amp;t);
         if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
-            t = t.clone() + p.clone();
+            f = f * (get_lambda(&amp;t, &amp;p, &amp;q));
+            t = t.add_ref(&amp;p);
         }
     }
 
-    f
-}
-
-pub fn weil_pairing&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    m: BigInt,
-    s: Option&lt;EllipticCurvePoint&lt;F&gt;&gt;,
-) -&gt; F {
-    let s_value = s.unwrap();
-    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
-    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
-
-    return (fp_qs / fp_s) / (fq_ps / fq_s);
+    (f, t)
 }
 <span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h1>
@@ -1123,11 +1245,11 @@ pub fn weil_pairing&lt;F: Field&gt;(
 <p>This assumption is an elliptic curve version of the Discrete Logarithm Problem.</p>
 <h3 id="assumption-knowledge-of-exponent-assumption"><a class="header" href="#assumption-knowledge-of-exponent-assumption">Assumption: Knowledge of Exponent Assumption</a></h3>
 <hr />
-<p>Let \(G\) be a cyclic group of prime order \(q\) with generator \(g \in G\). For any probabilistic polynomial-time algorithm \(\mathcal{A}\) that outputs:</p>
+<p><em>Let \(G\) be a cyclic group of prime order \(q\) with generator \(g \in G\). For any probabilistic polynomial-time algorithm \(\mathcal{A}\) that outputs:</em></p>
 <p>\begin{equation}
 \mathcal{A}(g, g^x) = (h, h') \quad s.t. \quad h' = h^x
 \end{equation}
-, there exists an efficient extractor \(\mathcal{E}\) such that:
+<em>, there exists an efficient extractor \(\mathcal{E}\) such that:</em>
 \begin{equation}
 \mathcal{E}(\mathcal{A}, g, g^x) = y \quad s.t. \quad h = g^y
 \end{equation}</p>
@@ -1149,7 +1271,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arithmetization"><a class="header" href="#arithmetization">Arithmetization</a></h1>
-<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.</p>
+<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called <strong>arithmetization</strong>.</p>
 <p>To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.</p>
 <p>However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression \(z = x \land y\) can be represented as \(x(x-1) = 0\), \(y(y-1) = 0\), and \(z = xy\) in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.</p>
 <h2 id="rank-1-constraint-system-r1cs"><a class="header" href="#rank-1-constraint-system-r1cs">Rank-1 Constraint System (R1CS)</a></h2>
@@ -1158,7 +1280,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <p>An R1CS structure \(\mathcal{S}\) consists of:</p>
 <ul>
 <li>Size bounds \(m, d, \ell \in \mathbb{N}\) where \(d &gt; \ell\)</li>
-<li>Three matrices \(O, L, R \in \mathbb{F}^{m\ times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
+<li>Three matrices \(O, L, R \in \mathbb{F}^{m \times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
 </ul>
 <p>An R1CS instance includes a public input \(p \in \mathbb{F}^\ell\), while an R1CS witness is a vector \(w \in \mathbb{F}^{d - \ell - 1}\).
 A structure-instance tuple \((S, p)\) is satisfied by a witness \(w\) if:
@@ -1176,9 +1298,9 @@ where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multip
 <p><strong>Single Multiplication</strong></p>
 <p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
 <ul>
-<li>\textbf{Witness vector}: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
-<li>\textbf{Number of witnesses}: \(m = 4\)</li>
-<li>\textbf{Number of constraints}: \(d = 1\)</li>
+<li><strong>Witness vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li><strong>Number of witnesses</strong>: \(m = 4\)</li>
+<li><strong>Number of constraints</strong>: \(d = 1\)</li>
 </ul>
 <p>The R1CS constraint for \(z = x \cdot y\) is satisfied when:</p>
 <p>\begin{align*}
@@ -1264,7 +1386,7 @@ O &amp;= \begin{bmatrix}
 0 &amp; 1 &amp; 0 &amp; -1
 \end{bmatrix}
 \end{align*}</p>
-<h2 id="uadratic-arithmetic-program-qap"><a class="header" href="#uadratic-arithmetic-program-qap">uadratic Arithmetic Program (QAP)</a></h2>
+<h2 id="quadratic-arithmetic-program-qap"><a class="header" href="#quadratic-arithmetic-program-qap">Quadratic Arithmetic Program (QAP)</a></h2>
 <p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
 <p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
 <p>\begin{align*}
@@ -1321,25 +1443,176 @@ P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}</p>
 <p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(d &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_d\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\). Note that the Prover also knows \(T(x)\).</p>
 <p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
-<h3 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h3>
+<h2 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h2>
 <p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
-<p><em>Naive Approach</em></p>
+<p><strong>Protocol:</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</em></li>
 </ul>
 <p>This protocol is highly inefficient, requiring \(\mathcal{O}(|\mathbb{F}|)\) evaluations and communications.</p>
-<h3 id="-schwartz-zippel-lemma"><a class="header" href="#-schwartz-zippel-lemma">\(+\) Schwartz-Zippel Lemma</a></h3>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Prover&lt;F: Field&gt; {
+    pub p: Polynomial&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+    pub h: Polynomial&lt;F&gt;,
+}
+
+pub struct Verifier&lt;F: Field&gt; {
+    pub t: Polynomial&lt;F&gt;,
+    pub known_roots: Vec&lt;F&gt;,
+}
+
+impl&lt;F: Field&gt; Prover&lt;F&gt; {
+    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
+        let h = p.clone() / t.clone();
+        Prover { p, t, h }
+    }
+
+    pub fn compute_all_values(&amp;self, modulus: i128) -&gt; (HashMap&lt;F, F&gt;, HashMap&lt;F, F&gt;) {
+        let mut h_values = HashMap::new();
+        let mut p_values = HashMap::new();
+
+        for i in 0..modulus {
+            let x = F::from_value(i);
+            h_values.insert(x.clone(), self.h.eval(&amp;x));
+            p_values.insert(x.clone(), self.p.eval(&amp;x));
+        }
+
+        (h_values, p_values)
+    }
+}
+
+impl&lt;F: Field&gt; Verifier&lt;F&gt; {
+    pub fn new(known_roots: Vec&lt;F&gt;) -&gt; Self {
+        let t = Polynomial::from_monomials(&amp;known_roots);
+        Verifier { t, known_roots }
+    }
+
+    pub fn verify(&amp;self, h_values: &amp;HashMap&lt;F, F&gt;, p_values: &amp;HashMap&lt;F, F&gt;) -&gt; bool {
+        for (x, h_x) in h_values {
+            let t_x = self.t.eval(x);
+            let p_x = p_values.get(x).unwrap();
+            if h_x.clone() * t_x != *p_x {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+pub fn naive_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;, modulus: i128) -&gt; bool {
+    // Step 1: Verifier sends all possible values (implicitly done by Prover computing all values)
+
+    // Step 2: Prover computes and sends all possible outputs
+    let (h_values, p_values) = prover.compute_all_values(modulus);
+
+    // Step 3: Verifier checks whether H(a)T(a) = P(a) holds for any a in F
+    verifier.verify(&amp;h_values, &amp;p_values)
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="-schwartz-zippel-lemma"><a class="header" href="#-schwartz-zippel-lemma">\(+\) Schwartz-Zippel Lemma</a></h2>
 <p>Instead of evaluating polynomials at all values in \(\mathbb{F}\), we can leverage the Schwartz-Zippel Lemma: if \(H(s) = \frac{P(s)}{T(s)}\) or equivalently \(H(s)T(s) = P(s)\) for a random element \(s\), we can conclude that \(H(x) = \frac{P(x)}{T(x)}\) with high probability. Thus, the Prover \(\mathcal{A}\) only needs to send evaluations of \(P(s)\) and \(H(s)\) for a random input \(s\) received from \(\mathcal{B}\).</p>
-<p><em>\(+\) Schwartz-Zippel Lemma</em></p>
+<p><strong>Protocol:</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) draws random \(s\) from \(\mathbb{F}\) and sends it to \(\mathcal{A}\).</em></li>
 <li><em>\(\mathcal{A}\) computes \(h = H(s)\) and \(p = P(s)\) and send them to \(\mathcal{B}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(p = t h\), where \(t\) denotes \(T(s)\).</em></li>
 </ul>
-<p>This protocol is efficient, requiring only a constant number of evaluations and communications. However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
-<h3 id="-discrete-logarithm-assumption"><a class="header" href="#-discrete-logarithm-assumption">\(+\) Discrete Logarithm Assumption</a></h3>
+<p>This protocol is efficient, requiring only a constant number of evaluations and communications.</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Prover&lt;F: Field&gt; {
+    pub p: Polynomial&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+    pub h: Polynomial&lt;F&gt;,
+}
+
+pub struct Verifier&lt;F: Field&gt; {
+    pub t: Polynomial&lt;F&gt;,
+}
+
+impl&lt;F: Field&gt; Prover&lt;F&gt; {
+    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
+        let h = p.clone() / t.clone();
+        Prover { p, t, h }
+    }
+
+    pub fn compute_values(&amp;self, s: &amp;F) -&gt; (F, F) {
+        let h_s = self.h.eval(s);
+        let p_s = self.p.eval(s);
+        (h_s, p_s)
+    }
+}
+
+impl&lt;F: Field&gt; Verifier&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
+        Verifier { t }
+    }
+
+    pub fn generate_challenge(&amp;self) -&gt; F {
+        F::random_element(&amp;[])
+    }
+
+    pub fn verify(&amp;self, s: &amp;F, h: &amp;F, p: &amp;F) -&gt; bool {
+        let t_s = self.t.eval(s);
+        h.clone() * t_s == *p
+    }
+}
+
+// Simulating a malicious prover
+pub struct MaliciousProver&lt;F: Field&gt; {
+    t: Polynomial&lt;F&gt;,
+}
+
+impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
+        MaliciousProver { t }
+    }
+
+    pub fn compute_malicious_values(&amp;self, s: &amp;F) -&gt; (F, F) {
+        let h_prime = F::random_element(&amp;[]);
+        let t_s = self.t.eval(s);
+        let p_prime = h_prime.clone() * t_s;
+        (h_prime, p_prime)
+    }
+}
+
+pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Prover computes and sends h and p
+    let (h, p) = prover.compute_values(&amp;s);
+
+    // Step 3: Verifier checks whether p = t * h
+    verifier.verify(&amp;s, &amp;h, &amp;p)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
+    prover: &amp;MaliciousProver&lt;F&gt;,
+    verifier: &amp;Verifier&lt;F&gt;,
+) -&gt; bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Malicious Prover computes and sends h' and p'
+    let (h_prime, p_prime) = prover.compute_malicious_values(&amp;s);
+
+    // Step 3: Verifier checks whether p' = t * h'
+    verifier.verify(&amp;s, &amp;h_prime, &amp;p_prime)
+}
+
+<span class="boring">}</span></code></pre></pre>
+<h2 id="-discrete-logarithm-assumption"><a class="header" href="#-discrete-logarithm-assumption">\(+\) Discrete Logarithm Assumption</a></h2>
 <p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\alpha\), where \(\alpha = g^s \bmod p\). Thus, it's safe for the Verifier to send \(\alpha\), as the Prover cannot easily derive \(s\) from it.</p>
 <p>An interesting property of polynomial exponentiation is:</p>
 <p>\begin{align}
@@ -1350,7 +1623,7 @@ g^{P(x)} &amp;= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})
 g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
 \end{equation}</p>
 <p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
-<p><em>\(+\) Discrete Logarithm Assumption</em></p>
+<p><strong>Protocol:</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{B}\) computes and sends \(\{\alpha, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_i= g^{(s^{i})}\).</em></li>
@@ -1358,8 +1631,113 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
 </ul>
 <p>This approach prevents the Prover from obtaining \(s\) or \(t = T(s)\), making it impossible to send fake \((h', p')\) such that \(p' = h't\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Prover&lt;F: Field&gt; {
+    pub p: Polynomial&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+    pub h: Polynomial&lt;F&gt;,
+}
+
+pub struct Verifier&lt;F: Field&gt; {
+    t: Polynomial&lt;F&gt;,
+    s: F,
+    g: F,
+}
+
+impl&lt;F: Field&gt; Prover&lt;F&gt; {
+    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
+        let h = p.clone() / t.clone();
+        Prover { p, t, h }
+    }
+
+    pub fn compute_values(&amp;self, alpha_powers: &amp;[F]) -&gt; (F, F) {
+        let g_p = self.p.eval_with_powers(alpha_powers);
+        let g_h = self.h.eval_with_powers(alpha_powers);
+        (g_p, g_h)
+    }
+}
+
+impl&lt;F: Field&gt; Verifier&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
+        let mut rng = rand::thread_rng();
+        let s = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+        let g = F::from_value(generator);
+        Verifier { t, s, g }
+    }
+
+    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; Vec&lt;F&gt; {
+        let mut alpha_powers = vec![];
+        for i in 0..(max_degree + 1) {
+            alpha_powers.push(
+                self.g
+                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+            );
+        }
+        alpha_powers
+    }
+
+    pub fn verify(&amp;self, u: &amp;F, v: &amp;F) -&gt; bool {
+        let t_s = self.t.eval(&amp;self.s);
+        u == &amp;v.pow(t_s.get_value())
+    }
+}
+
+// Simulating a malicious prover
+pub struct MaliciousProver&lt;F: Field&gt; {
+    t: Polynomial&lt;F&gt;,
+}
+
+impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
+        MaliciousProver { t }
+    }
+
+    pub fn compute_malicious_values(&amp;self, alpha_powers: &amp;[F]) -&gt; (F, F) {
+        let g_t = self.t.eval_with_powers(alpha_powers);
+        let z = F::random_element(&amp;[]);
+        let g = &amp;alpha_powers[0];
+        let fake_v = g.pow(z.get_value());
+        let fake_u = g_t.pow(z.get_value());
+        (fake_u, fake_v)
+    }
+}
+
+pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = prover.p.degree();
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Prover computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&amp;alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t
+    verifier.verify(&amp;u, &amp;v)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
 <p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
-<h3 id="-knowledge-of-exponent-assumption"><a class="header" href="#-knowledge-of-exponent-assumption">\(+\) Knowledge of Exponent Assumption</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
+    prover: &amp;MaliciousProver&lt;F&gt;,
+    verifier: &amp;Verifier&lt;F&gt;,
+) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = prover.t.degree() as usize;
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Malicious Prover computes and sends fake u and v
+    let (fake_u, fake_v) = prover.compute_malicious_values(&amp;alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t (which will pass for the fake values)
+    verifier.verify(&amp;fake_u, &amp;fake_v)
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="-knowledge-of-exponent-assumption"><a class="header" href="#-knowledge-of-exponent-assumption">\(+\) Knowledge of Exponent Assumption</a></h2>
 <p>To address the vulnerability where the verifier \(\mathcal{B}\) cannot distinguish if \(v (= g^h)\) from the prover is a power of \(\alpha_i = g^{(s^i)}\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:</p>
 <ul>
 <li>\(\mathcal{B}\) sends both \(\alpha_i\) and \(\alpha'_i = \alpha_i^r\) for a new random value \(r\).</li>
@@ -1367,7 +1745,7 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li>\(\mathcal{B}\) can conclude that \(a\) is a power of \(\alpha_i\) if \(a^r = a'\).</li>
 </ul>
 <p>Based on this assumption, we can design an improved protocol:</p>
-<p><em>\(+\) Knowledge of Exponent Assumption</em></p>
+<p><strong>Protocol:</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{B}\) computes and sends \({\alpha_1, \alpha_2, ..., \alpha_{n}}\) and \({\alpha'_1, \alpha'_2, ..., \alpha'_{n}}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
@@ -1376,9 +1754,98 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
 </ul>
 <p>The prover can compute \(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
-<h3 id="-zero-knowledge"><a class="header" href="#-zero-knowledge">\(+\) Zero Knowledge</a></h3>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Prover&lt;F: Field&gt; {
+    pub p: Polynomial&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+    pub h: Polynomial&lt;F&gt;,
+}
+
+pub struct Verifier&lt;F: Field&gt; {
+    t: Polynomial&lt;F&gt;,
+    s: F,
+    r: F,
+    g: F,
+}
+
+impl&lt;F: Field&gt; Prover&lt;F&gt; {
+    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
+        let h = p.clone() / t.clone();
+        Prover { p, t, h }
+    }
+
+    pub fn compute_values(&amp;self, alpha_powers: &amp;[F], alpha_prime_powers: &amp;[F]) -&gt; (F, F, F) {
+        let g_p = self.p.eval_with_powers(alpha_powers);
+        let g_h = self.h.eval_with_powers(alpha_powers);
+        let g_p_prime = self.p.eval_with_powers(alpha_prime_powers);
+        (g_p, g_h, g_p_prime)
+    }
+}
+
+impl&lt;F: Field&gt; Verifier&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
+        let mut rng = rand::thread_rng();
+        let s = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+        let r = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+        let g = F::from_value(generator);
+        Verifier { t, s, r, g }
+    }
+
+    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; (Vec&lt;F&gt;, Vec&lt;F&gt;) {
+        let mut alpha_powers = vec![];
+        let mut alpha_prime_powers = vec![];
+
+        for i in 0..(max_degree + 1) {
+            alpha_powers.push(
+                self.g
+                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+            );
+            alpha_prime_powers.push(alpha_powers.last().unwrap().pow(self.r.get_value()));
+        }
+
+        (alpha_powers, alpha_prime_powers)
+    }
+
+    pub fn verify(&amp;self, u: &amp;F, v: &amp;F, w: &amp;F) -&gt; bool {
+        let t_s = self.t.eval(&amp;self.s);
+        let u_r = u.pow(self.r.clone().get_value());
+
+        // Check 1: u^r = w
+        let check1 = u_r == *w;
+
+        // Check 2: u = v^t
+        let check2 = *u == v.pow(t_s.get_value());
+
+        check1 &amp;&amp; check2
+    }
+}
+
+pub fn knowledge_of_exponent_protocol&lt;F: Field&gt;(
+    prover: &amp;Prover&lt;F&gt;,
+    verifier: &amp;Verifier&lt;F&gt;,
+) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
+    let (alpha_powers, alpha_prime_powers) = verifier.generate_challenge(max_degree + 1);
+
+    // Step 3: Prover computes and sends u = g^p, v = g^h, and w = g^p'
+    let (u, v, w) = prover.compute_values(&amp;alpha_powers, &amp;alpha_prime_powers);
+
+    // Step 4 &amp; 5: Verifier checks whether u^r = w and u = v^t
+    verifier.verify(&amp;u, &amp;v, &amp;w)
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="-zero-knowledge"><a class="header" href="#-zero-knowledge">\(+\) Zero Knowledge</a></h2>
 <p>To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \(P(x)\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \(\delta\):</p>
-<p><em>\(+\) Zero Knowledge</em></p>
+<p><strong>Protocol:</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</em></li>
@@ -1388,9 +1855,106 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
 </ul>
 <p>By introducing the random value \(\delta\), the verifier can no longer learn anything about \(p\), \(h\), or \(w\), thus achieving zero knowledge.</p>
-<h3 id="-non-interactivity"><a class="header" href="#-non-interactivity">\(+\) Non-interactivity</a></h3>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Prover&lt;F: Field&gt; {
+    pub p: Polynomial&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+    pub h: Polynomial&lt;F&gt;,
+}
+
+pub struct Verifier&lt;F: Field&gt; {
+    t: Polynomial&lt;F&gt;,
+    s: F,
+    r: F,
+    g: F,
+}
+
+impl&lt;F: Field&gt; Prover&lt;F&gt; {
+    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
+        let h = p.clone() / t.clone();
+        Prover { p, t, h }
+    }
+
+    pub fn compute_values(&amp;self, alpha_powers: &amp;[F], alpha_prime_powers: &amp;[F]) -&gt; (F, F, F) {
+        let mut rng = rand::thread_rng();
+        let delta = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+
+        let g_p = self.p.eval_with_powers(alpha_powers);
+        let g_h = self.h.eval_with_powers(alpha_powers);
+        let g_p_prime = self.p.eval_with_powers(alpha_prime_powers);
+
+        let u_prime = g_p.pow(delta.get_value());
+        let v_prime = g_h.pow(delta.get_value());
+        let w_prime = g_p_prime.pow(delta.get_value());
+
+        (u_prime, v_prime, w_prime)
+    }
+}
+
+impl&lt;F: Field&gt; Verifier&lt;F&gt; {
+    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
+        let mut rng = rand::thread_rng();
+        let s = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+        let r = F::from_value(rng.gen_bigint_range(
+            &amp;BigInt::zero(),
+            &amp;BigInt::from(std::u64::MAX),
+        ));
+        let g = F::from_value(generator);
+        Verifier { t, s, r, g }
+    }
+
+    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; (Vec&lt;F&gt;, Vec&lt;F&gt;) {
+        let mut alpha_powers = vec![];
+        let mut alpha_prime_powers = vec![];
+
+        for i in 0..(max_degree + 1) {
+            alpha_powers.push(
+                self.g
+                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+            );
+            alpha_prime_powers.push(alpha_powers.last().unwrap().pow(self.r.get_value()));
+        }
+
+        (alpha_powers, alpha_prime_powers)
+    }
+
+    pub fn verify(&amp;self, u_prime: &amp;F, v_prime: &amp;F, w_prime: &amp;F) -&gt; bool {
+        let t_s = self.t.eval(&amp;self.s);
+        let u_prime_r = u_prime.pow(self.r.clone().get_value());
+
+        // Check 1: u'^r = w'
+        let check1 = u_prime_r == *w_prime;
+
+        // Check 2: u' = v'^t
+        let check2 = *u_prime == v_prime.pow(t_s.get_value());
+
+        check1 &amp;&amp; check2
+    }
+}
+
+pub fn zk_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
+    let (alpha_powers, alpha_prime_powers) = verifier.generate_challenge(max_degree + 1);
+
+    // Step 3 &amp; 4: Prover computes and sends u' = (g^p)^δ, v' = (g^h)^δ, and w' = (g^p')^δ
+    let (u_prime, v_prime, w_prime) = prover.compute_values(&amp;alpha_powers, &amp;alpha_prime_powers);
+
+    // Step 5 &amp; 6: Verifier checks whether u'^r = w' and u' = v'^t
+    verifier.verify(&amp;u_prime, &amp;v_prime, &amp;w_prime)
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="-non-interactivity"><a class="header" href="#-non-interactivity">\(+\) Non-interactivity</a></h2>
 <p>The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.</p>
-<p><em>\(+\) Non-Interactive: Trusted Setup</em></p>
+<p><strong>Protocol (Trusted Setup):</strong></p>
 <ul>
 <li><em><strong>Secret Seed:</strong> A trusted third party generates the random values \(s\) and \(r\)</em></li>
 <li><em><strong>Proof Key:</strong> Provided to the prover</em>
@@ -1408,20 +1972,132 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <li><em>After distribution, the original \(s\) and \(r\) values are securely destroyed.</em></li>
 </ul>
 <p>Then, the non-interactive protocol consists of two main parts: proof generation and verification.</p>
-<p><em>\(+\) Non-Interactive: Proof</em></p>
+<p><strong>Protocol (Proof):</strong></p>
 <ul>
 <li><em>\(\mathcal{A}\) receives the proof key</em></li>
 <li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{A}\) broadcast the proof \(\pi = (u' = (g^{p})^{\delta}, v' = (g^{h})^{\delta}, w' = (g^{p'})^{\delta})\)</em></li>
 </ul>
 <p>Since \(r\) is not shared and already destroyed, the verifier \(\mathcal{B}\) cannot calculate \(u'^{r}\) to check \(u'^{r} = w'\). Instead, the verifier can use a paring with bilinear mapping; \(u'^{r} = w'\) is equivalent to \(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\).</p>
-<p><em>\(+\) Non-Interactive: Verification</em></p>
+<p><strong>Protocol (Verification):</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) receives the verification key.</em></li>
 <li><em>\(\mathcal{B}\) receives the proof \(\pi\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(e(u', g^{r}) = e(w', g)\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
 </ul>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ProofKey {
+    alpha: Vec&lt;G1Point&gt;,
+    alpha_prime: Vec&lt;G1Point&gt;,
+}
+
+pub struct VerificationKey {
+    g_r: G2Point,
+    g_t_s: G2Point,
+}
+
+pub struct Proof {
+    u_prime: G1Point,
+    v_prime: G1Point,
+    w_prime: G1Point,
+}
+
+pub struct TrustedSetup {
+    proof_key: ProofKey,
+    verification_key: VerificationKey,
+}
+
+impl TrustedSetup {
+    pub fn generate(g1: &amp;G1Point, g2: &amp;G2Point, t: &amp;Polynomial&lt;Fq&gt;, n: usize) -&gt; Self {
+        let mut rng = rand::thread_rng();
+        let s = Fq::from_value(rng.gen_bigint_range(&amp;BigInt::zero(), &amp;BigInt::from(std::u32::MAX)));
+        let r = Fq::from_value(rng.gen_bigint_range(&amp;BigInt::zero(), &amp;BigInt::from(std::u32::MAX)));
+
+        let mut alpha = Vec::with_capacity(n);
+        let mut alpha_prime = Vec::with_capacity(n);
+
+        let mut s_power = Fq::one();
+        for _ in 0..1 + n {
+            alpha.push(g1.clone() * s_power.clone().get_value());
+            alpha_prime.push(g1.clone() * (s_power.clone() * r.clone()).get_value());
+            s_power = s_power * s.clone();
+        }
+
+        let g_r = g2.clone() * r.clone().get_value();
+        let g_t_s = g2.clone() * t.eval(&amp;s).get_value();
+
+        TrustedSetup {
+            proof_key: ProofKey { alpha, alpha_prime },
+            verification_key: VerificationKey { g_r, g_t_s },
+        }
+    }
+}
+
+pub struct Prover {
+    pub p: Polynomial&lt;Fq&gt;,
+    pub h: Polynomial&lt;Fq&gt;,
+}
+
+impl Prover {
+    pub fn new(p: Polynomial&lt;Fq&gt;, t: Polynomial&lt;Fq&gt;) -&gt; Self {
+        let h = p.clone() / t;
+        Prover { p, h }
+    }
+
+    pub fn generate_proof(&amp;self, proof_key: &amp;ProofKey) -&gt; Proof {
+        let mut rng = rand::thread_rng();
+        let delta =
+            Fq::from_value(rng.gen_bigint_range(&amp;BigInt::zero(), &amp;BigInt::from(std::u32::MAX)));
+
+        let g_p = self.p.eval_with_powers_on_curve(&amp;proof_key.alpha);
+        let g_h = self.h.eval_with_powers_on_curve(&amp;proof_key.alpha);
+        let g_p_prime = self.p.eval_with_powers_on_curve(&amp;proof_key.alpha_prime);
+
+        Proof {
+            u_prime: g_p * delta.get_value(),
+            v_prime: g_h * delta.get_value(),
+            w_prime: g_p_prime * delta.get_value(),
+        }
+    }
+}
+
+pub struct Verifier {
+    pub g1: G1Point,
+    pub g2: G2Point,
+}
+
+impl Verifier {
+    pub fn new(g1: G1Point, g2: G2Point) -&gt; Self {
+        Verifier { g1, g2 }
+    }
+
+    pub fn verify(&amp;self, proof: &amp;Proof, vk: &amp;VerificationKey) -&gt; bool {
+        // Check e(u', g^r) = e(w', g)
+        let pairing1 = optimal_ate_pairing(&amp;proof.u_prime, &amp;vk.g_r);
+        let pairing2 = optimal_ate_pairing(&amp;proof.w_prime, &amp;self.g2);
+        let check1 = pairing1 == pairing2;
+
+        // Check e(u', g^t) = e(v', g)
+        let pairing3 = optimal_ate_pairing(&amp;proof.u_prime, &amp;self.g2);
+        let pairing4 = optimal_ate_pairing(&amp;proof.v_prime, &amp;vk.g_t_s);
+        let check2 = pairing3 == pairing4;
+
+        check1 &amp;&amp; check2
+    }
+}
+
+pub fn non_interactive_zkp_protocol(
+    prover: &amp;Prover,
+    verifier: &amp;Verifier,
+    setup: &amp;TrustedSetup,
+) -&gt; bool {
+    let proof = prover.generate_proof(&amp;setup.proof_key);
+    verifier.verify(&amp;proof, &amp;setup.verification_key)
+}
+<span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
@@ -1440,6 +2116,22 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

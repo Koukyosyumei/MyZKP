@@ -14,13 +14,19 @@
 
 ---
 
+**Implementation:**
+
 ```rust
-use crate::modules::field::Field;
+pub trait EllipticCurve: Debug + Clone + PartialEq {
+    fn get_a() -> BigInt;
+    fn get_b() -> BigInt;
+}
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurve<F: Field> {
-    pub a: F,
-    pub b: F,
+pub struct EllipticCurvePoint<F: Field, E: EllipticCurve> {
+    pub x: Option<F>,
+    pub y: Option<F>,
+    _phantom: PhantomData<E>,
 }
 ```
 
@@ -43,12 +49,21 @@ The point at infinity denoted \\(\mathcal{O}\\), is a special point on the ellip
 
 ---
 
+**Implementation:**
+
 ```rust
-#[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurvePoint<F: Field> {
-    pub x: Option<F>,
-    pub y: Option<F>,
-    pub curve: EllipticCurve<F>,
+impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
+    pub fn point_at_infinity() -> Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn is_point_at_infinity(&self) -> bool {
+        self.x.is_none() || self.y.is_none()
+    }
 }
 ```
 
@@ -72,78 +87,45 @@ pub struct EllipticCurvePoint<F: Field> {
 ---
 
 
-Example: On \\(E: y^2 = x^3 + 2x + 3\\) over \\(\mathbb{F}_{7}\\), let \\(P = (5, 1)\\) and \\(Q = (4, 4)\\). Then, \\(P + Q = (0, 5)\\), where \\(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\\).
+**Example:** On \\(E: y^2 = x^3 + 2x + 3\\) over \\(\mathbb{F}_{7}\\), let \\(P = (5, 1)\\) and \\(Q = (4, 4)\\). Then, \\(P + Q = (0, 5)\\), where \\(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\\).
+
+**Implementation:**
 
 ```rust
-impl<F: Field> EllipticCurvePoint<F> {
-    fn new(x: F, y: F, curve: EllipticCurve<F>) -> Self {
-        EllipticCurvePoint {
-            x: Some(x),
-            y: Some(y),
-            curve: curve,
+impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
+    pub fn add_ref(&self, other: &Self) -> Self {
+        if self.is_point_at_infinity() {
+            return other.clone();
         }
-    }
-
-    pub fn point_at_infinity(curve: EllipticCurve<F>) -> Self {
-        EllipticCurvePoint {
-            x: None,
-            y: None,
-            curve: curve,
+        if other.is_point_at_infinity() {
+            return self.clone();
         }
-    }
 
-    pub fn is_point_at_infinity(&self) -> bool {
-        self.x.is_none() || self.y.is_none()
-    }
-
-    pub fn line_slope(&self, other: Self) -> F {
-        let x1 = self.x.clone().unwrap();
-        let y1 = self.y.clone().unwrap();
-        let x2 = other.x.clone().unwrap();
-        let y2 = other.y.clone().unwrap();
-
-        if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
-        } else {
-            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        if self.x == other.x && self.y == other.y {
+            return self.double();
+        } else if self.x == other.x {
+            return Self::point_at_infinity();
         }
+
+        let slope = self.line_slope(&other);
+        let x1 = self.x.as_ref().unwrap();
+        let y1 = self.y.as_ref().unwrap();
+        let x2 = other.x.as_ref().unwrap();
+        let y2 = other.y.as_ref().unwrap();
+
+        let new_x = slope.mul_ref(&slope).sub_ref(&x1).sub_ref(&x2);
+        let new_y = ((-slope.clone()).mul_ref(&new_x)) + (&slope.mul_ref(&x1).sub_ref(&y1));
+        assert!(new_y == -slope.clone() * &new_x + slope.mul_ref(&x2).sub_ref(&y2));
+
+        Self::new(new_x, new_y)
     }
 }
 
-impl<F: Field> Add for EllipticCurvePoint<F> {
+impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        if self.is_point_at_infinity() {
-            return other;
-        }
-        if other.is_point_at_infinity() {
-            return self;
-        }
-
-        let m = self.line_slope(other.clone());
-
-        if self.x == other.x {
-            if self.y != other.y {
-                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
-            } else {
-                let x1 = self.x.clone().unwrap();
-                let y1 = self.y.clone().unwrap();
-
-                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
-                let y3 = m * (x1 - x3.clone()) - y1;
-
-                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-            }
-        } else {
-            let x1 = self.x.clone().unwrap();
-            let y1 = self.y.clone().unwrap();
-            let x2 = other.x.clone().unwrap();
-            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
-            let y3 = m * (x1 - x3.clone()) - y1;
-
-            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-        }
+        self.add_ref(&other)
     }
 }
 ```
@@ -277,10 +259,9 @@ In other words, we can view \\(K[E]\\) as a ring representing all polynomial fun
 - Quadratic functions: \\(X^2, XY, Y^2 (= X^3 - X), \ldots\\)
 - Higher-degree functions: \\(X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots\\)
 
+### Definition: Function Field of an Elliptic Curve
 
 Then, the function field is defined as follows:
-
-### Definition: Function Field of an Elliptic Curve
 
 ---
 
@@ -294,15 +275,13 @@ Then, the function field is defined as follows:
 
 \\(K(E)\\) can be viewed as the field of all rational functions on \\(E\\).
 
-### Definition: Zero of a Function
+### Definition: Zero/Pole of a Function
 
 ---
 
 *Let \\(h \in K(E)\\) be a non-zero function. A point \\(P \in E\\) is called a **zero** of \\(h\\) if \\(h(P) = 0\\).*
 
 ---
-
-### Definition: Pole of a Function
 
 ---
 
@@ -353,7 +332,7 @@ We now introduce a powerful tool for analyzing functions on elliptic curves: the
 
 ---
 
-Note that this \\(\sum_{P \in E}\\) is a symbolic summation, and we do not calculate the concrete value of a divisor.
+Note that this \\(\sum_{P \in E}\\) is a symbolic summation, and we do not calculate the concrete numerical value of a divisor.
 
 **Example** Consider the elliptic curve \\(E: Y^2 = X^3 - X\\) over \\(\mathbb{Q}\\).
 
@@ -362,9 +341,9 @@ Note that this \\(\sum_{P \in E}\\) is a symbolic summation, and we do not calcu
 - For \\(h = \frac{X-1}{Y}\\), we have \\(div(h) = [(1,0)] - [(-1,0)]\\).
 
 
-The concept of divisors can be extended to the elliptic curve itself:
-
 ### Definition: Divisor on an Elliptic Curve
+
+The concept of divisors can be extended to the elliptic curve itself:
 
 ---
 
@@ -385,7 +364,8 @@ The concept of divisors can be extended to the elliptic curve itself:
 
 To quantify the properties of divisors, we introduce two important metrics:
 
-### Definition: Degree of a Divisor
+
+### Definition: Degree/Sum of a Divisor
 
 ---
 
@@ -395,8 +375,6 @@ To quantify the properties of divisors, we introduce two important metrics:
 \end{equation}
 
 ---
-
-### Definition: Sum of a Divisor
 
 ---
 
@@ -415,17 +393,16 @@ To quantify the properties of divisors, we introduce two important metrics:
 - \\(deg(D_3) = 4 - 4 = 0\\)
 - \\(Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}\\) (since \\((1,0)\\) and \\((-1,0)\\) are 2-torsion points)
 
+### Theorem 
 
 The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:
-
-### Theorem 
 
 ---
 
 *Let \\(E\\) be an elliptic curve over a field \\(K\\).*
 
 
-- *If \\(f, f' \in K(E)\\) are non-zero rational functions on \\(E\\) with \\(div(f) = div(f')\\), then there exists a non-zero constant \\(c \in K^*\\) such that \\(f = cf'\\).*
+- *If \\(f, f' \in K(E)\\) are non-zero rational functions on \\(E\\) with \\(div(f) = div(f')\\), then there exists a non-zero constant \\(c \in K^\*\\) such that \\(f = cf'\\).*
 - *A divisor \\(D\\) on \\(E\\) is the divisor of a rational function on \\(E\\) if and only if \\(deg(D) = 0\\) and \\(Sum(D) = \mathcal{O}\\).*
 
 
@@ -435,191 +412,3 @@ The following theorem characterizes divisors of functions and provides a criteri
 
 - The function \\(f = \frac{Y}{X}\\) has \\(div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]\\). Note that \\(deg(div(f)) = 0\\) and \\(Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}\\).
 - The divisor \\(D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]\\) has \\(deg(D) = 0\\), but \\(Sum(D) \neq \mathcal{O}\\). Therefore, \\(D\\) is not the divisor of any rational function on \\(E\\).
-
-
-### Definition: Pairing
-
----
-
-*Let \\(G_1\\) and \\(G_2\\) be cyclic groups under addition, both of prime order \\(p\\), with generators \\(P\\) and \\(Q\\) respectively:*
-
-\begin{align}
-    G_1 &= \\{0, P, 2P, ..., (p-1)P\\} \\
-    G_2 &= \\{0, Q, 2Q, ..., (p-1)Q\\}
-\end{align}
-
-*Let \\(G_T\\) be a cyclic group under multiplication, also of order \\(p\\). A pairing is a map \\(e: G_1 \times G_2 \rightarrow G_T\\) that satisfies the following bilinear property:*
-
-\begin{equation}
-    e(aP, bQ) = e(P, Q)^{ab}
-\end{equation} *for all \\(a, b \in \mathbb{Z}_p\\).*
-
----
-
-Imagine \\(G_1\\) represents length, \\(G_2\\) represents width, and \\(G_T\\) represents area. The pairing function \\(e\\) is like calculating the area: If you double the length and triple the width, the area becomes six times larger: \\(e(2P, 3Q) = e(P, Q)^{6}\\)
-
-The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.
-
-### Definition: The Weil Pairing
-
----
-
-*Let \\(E\\) be an elliptic curve and \\(n\\) be a positive integer. For points \\(P, Q \in E[n]\\), where \\(E[n]\\) denotes the \\(n\\)-torsion subgroup of \\(E\\), we define the Weil pairing \\(e_n(P, Q)\\) as follows:*
-
-Let \\(f_P\\) and \\(f_Q\\) be rational functions on \\(E\\) satisfying:
-\begin{align}
-    div(f_P) &= n[P] - n[\mathcal{O}] \\
-    div(f_Q) &= n[Q] - n[\mathcal{O}]
-\end{align}
-
-*Then, for an arbitrary point \\(S \in E\\) such that \\(S \notin \\{\mathcal{O}, P, -Q, P-Q\\}\\), the Weil pairing is given by:*
-
-\begin{equation}
-e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
-\end{equation}
-
----
-
-We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.
-
-### Theorem
-
----
-
-*Let \\(E\\) be an elliptic curve over a field \\(K\\), and let \\(P = (x_P, y_P)\\) and \\(Q = (x_Q, y_Q)\\) be non-zero points on \\(E\\). Define \\(\lambda\\) as:*
-
-\begin{equation}
-    \lambda = \begin{cases}
-        \hbox{slope of the line through \\(P\\) and \\(Q\\)} &\quad \hbox{if \\(P \neq Q\\)} \\\\
-        \hbox{slope of the tangent line to \\(E\\) at \\(P\\)} &\quad \hbox{if \\(P = Q\\)} \\\\
-        \infty &\quad \hbox{if the line is vertical}
-    \end{cases}
-\end{equation}
-
-*Then, the function \\(g_{P,Q}: E \to K\\) defined by:*
-\begin{equation}
-g_{P,Q} = \begin{cases}
-\frac{y - y_P - \lambda(x - x_P)}{x + x_P + x_Q - \lambda^2} &\quad \hbox{if } \lambda \neq \infty \\\\
-x - x_P &\quad \hbox{if } \lambda = \infty
-\end{cases}
-\end{equation} *has the following divisor:*
-
-\begin{equation}
-div(g_{P,Q}) = [P] + [Q] - [P + Q] - [\mathcal{O}]
-\end{equation}
-
----
-
-**Proof:** We consider two cases based on the value of \\(\lambda\\).
-
-Case 1: \\(\lambda \neq \infty\\)
-
-Let \\(y = \lambda x + v\\) be the line through \\(P\\) and \\(Q\\) (or the tangent line at \\(P\\) if \\(P = Q\\)). This line intersects \\(E\\) at three points: \\(P\\), \\(Q\\), and \\(-P-Q\\). Thus,
-\begin{equation}
-div(y - \lambda x - v) = [P] + [Q] + [-P - Q] - 3[\mathcal{O}]
-\end{equation}
-Vertical lines intersect \\(E\\) at points and their negatives, so:
-\begin{equation}
-div(x - x_{P+Q}) = [P + Q] + [-P - Q] - 2[\mathcal{O}]
-\end{equation}
-It follows that \\(g_{P,Q} = \frac{y - \lambda x - v}{x - x_{P+Q}}\\) has the desired divisor.
-
-Case 2: \\(\lambda = \infty\\)
-
-In this case, \\(P + Q = \mathcal{O}\\), so we want \\(g_{P,Q}\\) to have divisor \\([P] + [-P] - 2[\mathcal{O}]\\). The function \\(x - x_P\\) has this divisor.
-\end{proof}
-
-### Theorem: Miller's Algorithm
-
----
-
-*Let \\(m \geq 1\\) and write its binary expansion as:*
-\begin{equation}
-m = m_0 + m_1 \cdot 2 + m_2 \cdot 2^2 + \cdots + m_{n-1} \cdot 2^{n-1}
-\end{equation}
-*where \\(m_i \in \\{0, 1\\}\\) and \\(m_{n-1} \neq 0\\).*
-
-*The following algorithm, using the function \\(g_{P,Q}\\) defined in the previous theorem, returns a function \\(f_P\\) whose divisor satisfies:*
-
-\begin{equation}
-    div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
-\end{equation}
-
-===========================
-
-**Miller's Algorithm**
-
-1. Set \\(T = P\\) and \\(f = 1\\)
-2. **For** \\(i \gets n-2 \cdots 0\\) **do**
-3. &nbsp;&nbsp;&nbsp;&nbsp;Set \\(f = f^2 \cdot g_{T, T}\\)
-4. &nbsp;&nbsp;&nbsp;&nbsp;Set \\(T = 2T\\)
-5. &nbsp;&nbsp;&nbsp;&nbsp;**If** \\(m_i = 1\\) **then**
-6. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set \\(f = f \cdot g_{T, P}\\)
-7. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set \\(T = T + P\\)
-8. &nbsp;&nbsp;&nbsp;&nbsp;**End if**
-9. **End for**
-10. **Return** \\(f\\)
-    
-===========================
-
----
-
-**Proof:** TBD
-
-```rust
-pub fn get_lambda<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    r: EllipticCurvePoint<F>,
-) -> F {
-    let p_x = p.x.clone().unwrap();
-    let p_y = p.y.clone().unwrap();
-    let q_x = q.x.clone().unwrap();
-    // let q_y = q.y.clone().unwrap();
-    let r_x = r.x.clone().unwrap();
-    let r_y = r.y.clone().unwrap();
-
-    if (p == q && p_y.clone() == F::zero()) || (p != q && p_x.clone() == q_x.clone()) {
-        return r_x.clone() - p_x.clone();
-    }
-    let slope = p.line_slope(q.clone());
-    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
-    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
-    return numerator / denominator;
-}
-
-pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: BigInt) -> F {
-    if p == q {
-        F::one();
-    }
-
-    let mut f = F::one();
-    let mut t = p.clone();
-
-    for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
-        t = t.clone() + t.clone();
-        if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
-            t = t.clone() + p.clone();
-        }
-    }
-
-    f
-}
-
-pub fn weil_pairing<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    m: BigInt,
-    s: Option<EllipticCurvePoint<F>>,
-) -> F {
-    let s_value = s.unwrap();
-    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
-    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
-
-    return (fp_qs / fp_s) / (fq_ps / fq_s);
-}
-```

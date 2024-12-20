@@ -31,14 +31,8 @@ pub struct TrustedSetup {
 impl TrustedSetup {
     pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<Fq>, n: usize) -> Self {
         let mut rng = rand::thread_rng();
-        let s = Fq::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
-        let r = Fq::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+        let r = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
 
         let mut alpha = Vec::with_capacity(n);
         let mut alpha_prime = Vec::with_capacity(n);
@@ -73,10 +67,8 @@ impl Prover {
 
     pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
         let mut rng = rand::thread_rng();
-        let delta = Fq::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let delta =
+            Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
 
         let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
         let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);

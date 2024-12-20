@@ -1,8 +1,8 @@
 //! # Polynomial Module
 //!
 //! This module provides an implementation of polynomials over a finite field defined by the `Field` trait.
-//! It includes various polynomial operations such as addition, subtraction, multiplication, division, 
-//! evaluation, and interpolation. The `Polynomial` struct is generic and works with any field that 
+//! It includes various polynomial operations such as addition, subtraction, multiplication, division,
+//! evaluation, and interpolation. The `Polynomial` struct is generic and works with any field that
 //! implements the `Field` trait.
 //!
 //! ## Key Components
@@ -40,8 +40,8 @@
 //!
 //! // Create a polynomial 2 + 3x + x^2
 //! let poly = Polynomial::<FiniteFieldElement<Mod7>> {
-//!     coef: vec![FiniteFieldElement::<Mod7>::from_value(2), 
-//!                 FiniteFieldElement::<Mod7>::from_value(3), 
+//!     coef: vec![FiniteFieldElement::<Mod7>::from_value(2),
+//!                 FiniteFieldElement::<Mod7>::from_value(3),
 //!                 FiniteFieldElement::<Mod7>::from_value(1)],
 //! };
 //!
@@ -52,7 +52,7 @@
 //! ## Note
 //!
 //! This implementation assumes that the underlying field supports necessary operations such as addition,
-//! multiplication, and inversion. It relies on the `num_traits` crate for numeric operations and 
+//! multiplication, and inversion. It relies on the `num_traits` crate for numeric operations and
 //! the `lazy_static` crate for defining modulus types.
 
 use std::fmt;
@@ -126,7 +126,7 @@ impl<F: Field> Polynomial<F> {
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result * powers[i].pow(coef.clone().get_value());
+            result = result * powers[i].pow(coef.get_value());
         }
         result
     }
@@ -138,7 +138,7 @@ impl<F: Field> Polynomial<F> {
     ) -> EllipticCurvePoint<F, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result + powers[i].clone() * coef.clone().get_value();
+            result = result + powers[i].clone() * coef.get_value();
         }
         result
     }
