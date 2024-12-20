@@ -145,6 +145,50 @@ O &= \begin{bmatrix}
 \end{bmatrix}
 \end{align*}
 
+**Implementation:**
+
+```rust
+fn dot<F: Field>(a: &Vec<F>, b: &Vec<F>) -> F {
+    let mut result = F::zero();
+    for (a_i, b_i) in a.iter().zip(b.iter()) {
+        result = result + a_i.clone() * b_i.clone();
+    }
+    result
+}
+
+#[derive(Debug, Clone)]
+pub struct R1CS<F: Field> {
+    pub left: Vec<Vec<F>>,
+    pub right: Vec<Vec<F>>,
+    pub out: Vec<Vec<F>>,
+    pub m: usize,
+    pub d: usize,
+}
+
+impl<F: Field> R1CS<F> {
+    pub fn new(left: Vec<Vec<F>>, right: Vec<Vec<F>>, out: Vec<Vec<F>>) -> Self {
+        let d = left.len();
+        let m = if d == 0 { 0 } else { left[0].len() };
+        R1CS {
+            left,
+            right,
+            out,
+            m,
+            d,
+        }
+    }
+
+    pub fn is_satisfied(&self, a: &Vec<F>) -> bool {
+        let zero = F::zero();
+        self.left
+            .iter()
+            .zip(self.right.iter())
+            .zip(self.out.iter())
+            .all(|((l, r), o)| dot(&l, &a) * dot(&r, &a) - dot(&o, &a) == zero)
+    }
+}
+```
+
 ## Quadratic Arithmetic Program (QAP)
 
 Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
