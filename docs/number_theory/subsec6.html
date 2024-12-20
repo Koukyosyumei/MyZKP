@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Pairing - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Pairing - Book of MyZKP</title>
 
 
         <!-- Custom HTML head -->
@@ -144,7 +144,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">MyZKP: Building Zero Knowledge Proof from Scratch</h1>
+                    <h1 class="menu-title">Book of MyZKP</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -268,62 +268,55 @@ div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
 <p>===========================</p>
 <hr />
 <p><strong>Proof:</strong> TBD</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn get_lambda&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    r: EllipticCurvePoint&lt;F&gt;,
+</span>pub fn get_lambda&lt;F: Field, E: EllipticCurve&gt;(
+    p: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    q: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    r: &amp;EllipticCurvePoint&lt;F, E&gt;,
 ) -&gt; F {
-    let p_x = p.x.clone().unwrap();
-    let p_y = p.y.clone().unwrap();
-    let q_x = q.x.clone().unwrap();
+    let p_x = p.x.as_ref().unwrap();
+    let p_y = p.y.as_ref().unwrap();
+    let q_x = q.x.as_ref().unwrap();
     // let q_y = q.y.clone().unwrap();
-    let r_x = r.x.clone().unwrap();
-    let r_y = r.y.clone().unwrap();
+    let r_x = r.x.as_ref().unwrap();
+    let r_y = r.y.as_ref().unwrap();
 
-    if (p == q &amp;&amp; p_y.clone() == F::zero()) || (p != q &amp;&amp; p_x.clone() == q_x.clone()) {
-        return r_x.clone() - p_x.clone();
+    if (p == q &amp;&amp; *p_y == F::zero()) || (p != q &amp;&amp; *p_x == *q_x) {
+        return r_x.sub_ref(&amp;p_x);
     }
-    let slope = p.line_slope(q.clone());
-    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
-    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
+    let slope = p.line_slope(&amp;q);
+    let numerator = (r_y.sub_ref(&amp;p_y)).sub_ref(&amp;slope.mul_ref(&amp;(r_x.sub_ref(&amp;p_x))));
+    let denominator = r_x
+        .add_ref(&amp;p_x)
+        .add_ref(&amp;q_x)
+        .sub_ref(&amp;slope.mul_ref(&amp;slope));
     return numerator / denominator;
 }
 
-pub fn miller&lt;F: Field&gt;(p: EllipticCurvePoint&lt;F&gt;, q: EllipticCurvePoint&lt;F&gt;, m: BigInt) -&gt; F {
+pub fn miller&lt;F: Field, E: EllipticCurve&gt;(
+    p: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    q: &amp;EllipticCurvePoint&lt;F, E&gt;,
+    m: &amp;BigInt,
+) -&gt; (F, EllipticCurvePoint&lt;F, E&gt;) {
     if p == q {
-        F::one();
+        return (F::one(), p.clone());
     }
 
     let mut f = F::one();
     let mut t = p.clone();
 
-    for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
-        t = t.clone() + t.clone();
+    for i in (0..(m.bits() - 1)).rev() {
+        f = (f.mul_ref(&amp;f)) * (get_lambda(&amp;t, &amp;t, &amp;q));
+        t = t.add_ref(&amp;t);
         if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
-            t = t.clone() + p.clone();
+            f = f * (get_lambda(&amp;t, &amp;p, &amp;q));
+            t = t.add_ref(&amp;p);
         }
     }
 
-    f
-}
-
-pub fn weil_pairing&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    m: BigInt,
-    s: Option&lt;EllipticCurvePoint&lt;F&gt;&gt;,
-) -&gt; F {
-    let s_value = s.unwrap();
-    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
-    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
-
-    return (fp_qs / fp_s) / (fq_ps / fq_s);
+    (f, t)
 }
 <span class="boring">}</span></code></pre></pre>
 

@@ -129,60 +129,54 @@ m = m_0 + m_1 \cdot 2 + m_2 \cdot 2^2 + \cdots + m_{n-1} \cdot 2^{n-1}
 
 **Proof:** TBD
 
-```rust
-pub fn get_lambda<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    r: EllipticCurvePoint<F>,
-) -> F {
-    let p_x = p.x.clone().unwrap();
-    let p_y = p.y.clone().unwrap();
-    let q_x = q.x.clone().unwrap();
-    // let q_y = q.y.clone().unwrap();
-    let r_x = r.x.clone().unwrap();
-    let r_y = r.y.clone().unwrap();
+**Implementation:**
 
-    if (p == q && p_y.clone() == F::zero()) || (p != q && p_x.clone() == q_x.clone()) {
-        return r_x.clone() - p_x.clone();
+```rust
+pub fn get_lambda<F: Field, E: EllipticCurve>(
+    p: &EllipticCurvePoint<F, E>,
+    q: &EllipticCurvePoint<F, E>,
+    r: &EllipticCurvePoint<F, E>,
+) -> F {
+    let p_x = p.x.as_ref().unwrap();
+    let p_y = p.y.as_ref().unwrap();
+    let q_x = q.x.as_ref().unwrap();
+    // let q_y = q.y.clone().unwrap();
+    let r_x = r.x.as_ref().unwrap();
+    let r_y = r.y.as_ref().unwrap();
+
+    if (p == q && *p_y == F::zero()) || (p != q && *p_x == *q_x) {
+        return r_x.sub_ref(&p_x);
     }
-    let slope = p.line_slope(q.clone());
-    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
-    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
+    let slope = p.line_slope(&q);
+    let numerator = (r_y.sub_ref(&p_y)).sub_ref(&slope.mul_ref(&(r_x.sub_ref(&p_x))));
+    let denominator = r_x
+        .add_ref(&p_x)
+        .add_ref(&q_x)
+        .sub_ref(&slope.mul_ref(&slope));
     return numerator / denominator;
 }
 
-pub fn miller<F: Field>(p: EllipticCurvePoint<F>, q: EllipticCurvePoint<F>, m: BigInt) -> F {
+pub fn miller<F: Field, E: EllipticCurve>(
+    p: &EllipticCurvePoint<F, E>,
+    q: &EllipticCurvePoint<F, E>,
+    m: &BigInt,
+) -> (F, EllipticCurvePoint<F, E>) {
     if p == q {
-        F::one();
+        return (F::one(), p.clone());
     }
 
     let mut f = F::one();
     let mut t = p.clone();
 
-    for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
-        t = t.clone() + t.clone();
+    for i in (0..(m.bits() - 1)).rev() {
+        f = (f.mul_ref(&f)) * (get_lambda(&t, &t, &q));
+        t = t.add_ref(&t);
         if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
-            t = t.clone() + p.clone();
+            f = f * (get_lambda(&t, &p, &q));
+            t = t.add_ref(&p);
         }
     }
 
-    f
-}
-
-pub fn weil_pairing<F: Field>(
-    p: EllipticCurvePoint<F>,
-    q: EllipticCurvePoint<F>,
-    m: BigInt,
-    s: Option<EllipticCurvePoint<F>>,
-) -> F {
-    let s_value = s.unwrap();
-    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
-    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
-
-    return (fp_qs / fp_s) / (fq_ps / fq_s);
+    (f, t)
 }
 ```

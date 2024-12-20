@@ -1,5 +1,3 @@
-# MyZKP: Building Zero Knowledge Proof from Scratch
-
 ```
  ███╗   ███╗  ██╗   ██╗  ███████╗  ██╗  ██╗  ██████╗  
  ████╗ ████║  ╚██╗ ██╔╝  ╚══███╔╝  ██║ ██╔╝  ██╔══██╗ 
@@ -8,3 +6,6 @@
  ██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║      
  ╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝     
 ```
+
+# Building Zero Knowledge Proof from Scratch in Rust
+
