@@ -28,7 +28,7 @@ impl<F: Field> Prover<F> {
         let mut rng = rand::thread_rng();
         let delta = F::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+            &BigInt::from(std::u64::MAX),
         ));
 
         let g_p = self.p.eval_with_powers(alpha_powers);
@@ -48,11 +48,11 @@ impl<F: Field> Verifier<F> {
         let mut rng = rand::thread_rng();
         let s = F::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+            &BigInt::from(std::u64::MAX),
         ));
         let r = F::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+            &BigInt::from(std::u64::MAX),
         ));
         let g = F::from_value(generator);
         Verifier { t, s, r, g }

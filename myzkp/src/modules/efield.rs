@@ -1,12 +1,81 @@
-use num_bigint::BigInt;
-use num_traits::One;
-use num_traits::Zero;
+//! # Extended Finite Field Element Implementation
+//!
+//! This module provides an implementation of extended finite field elements,
+//! which are built on top of base finite fields. It includes structures and
+//! traits for defining and working with extended finite fields, as well as
+//! implementations of arithmetic operations in these fields.
+//!
+//! ## Key Components
+//!
+//! - `IrreduciblePoly` trait: Defines the irreducible polynomial for the field extension.
+//! - `ExtendedFieldElement<M, P>` struct: Represents an element in an extended finite field.
+//! - Arithmetic operations: Addition, subtraction, multiplication, and division.
+//!
+//! ## Features
+//!
+//! - Creation of extended field elements from base field polynomials.
+//! - Arithmetic operations in the extended field.
+//! - Reduction of elements modulo the irreducible polynomial.
+//! - Inverse computation in the extended field.
+//! - Conversion between base field elements and extended field elements.
+//!
+//! ## Usage
+//!
+//! To use this module, define a base field, an irreducible polynomial, and then
+//! create `ExtendedFieldElement` instances:
+//!
+//! ```
+//! use std::str::FromStr;
+//! use paste::paste;
+//! use num_bigint::BigInt;
+//! use lazy_static::lazy_static;
+//! use myzkp::define_myzkp_modulus_type;
+//! use myzkp::define_extension_field;
+//! use myzkp::modules::ring::Ring;
+//! use myzkp::modules::field::ModulusValue;
+//! use myzkp::modules::field::FiniteFieldElement;
+//! use myzkp::modules::polynomial::Polynomial;
+//! use myzkp::modules::efield::IrreduciblePoly;
+//! use myzkp::modules::efield::ExtendedFieldElement;
+//! 
+//! define_myzkp_modulus_type!(Mod7, "7");
+//! define_extension_field!(
+//!     Ip7,
+//!     FiniteFieldElement<Mod7>,
+//!     Polynomial {
+//!         coef: vec![
+//!             FiniteFieldElement::<Mod7>::from_value(1),
+//!             FiniteFieldElement::<Mod7>::from_value(0),
+//!             FiniteFieldElement::<Mod7>::from_value(1),
+//!         ],
+//!     }
+//! );
+//! 
+//! let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
+//!     coef: vec![
+//!         FiniteFieldElement::from_value(2),
+//!         FiniteFieldElement::from_value(1),
+//!     ],
+//! });
+//! ```
+//!
+//! ## Note
+//!
+//! This implementation builds upon the base finite field implementation and uses
+//! the `Polynomial` struct for representing elements. It is designed to work with
+//! various base fields and irreducible polynomials, allowing for flexible creation
+//! of field extensions.
+
 use std::fmt;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use num_bigint::BigInt;
+use num_traits::One;
+use num_traits::Zero;
 
 use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;

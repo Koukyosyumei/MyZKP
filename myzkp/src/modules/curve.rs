@@ -1,9 +1,10 @@
-use num_bigint::BigInt;
-use num_traits::{One, Zero};
 use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::{Add, Mul, Neg, Sub};
+
+use num_bigint::BigInt;
+use num_traits::{One, Zero};
 
 use crate::modules::field::Field;
 

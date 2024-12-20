@@ -1,7 +1,49 @@
-use lazy_static::lazy_static;
-use num_bigint::{BigInt, RandBigInt};
-use num_traits::{One, Signed, Zero};
-use paste::paste;
+//! # Finite Field Element Implementation
+//!
+//! This module provides a generic implementation of finite field elements and related operations.
+//! It includes traits and structures for working with finite fields, as well as utility functions
+//! for arithmetic operations in finite fields.
+//!
+//! ## Key Components
+//!
+//! - `Field` trait: Defines the interface for field operations.
+//! - `FiniteFieldElement<M>` struct: Represents an element in a finite field.
+//! - `ModulusValue` trait: Defines the modulus for a specific finite field.
+//!
+//! ## Features
+//!
+//! - Arithmetic operations: addition, subtraction, multiplication, division, and exponentiation.
+//! - Modular arithmetic with arbitrary precision integers.
+//! - Random element generation.
+//! - Order checking for field elements.
+//! - Macro for easy definition of new modulus types.
+//!
+//! ## Usage
+//!
+//! To use this module, you need to define a modulus type using the `define_myzkp_modulus_type` macro,
+//! and then create `FiniteFieldElement` instances with that modulus.
+//!
+//! ```
+//! use std::str::FromStr;
+//! use paste::paste;
+//! use num_bigint::BigInt;
+//! use lazy_static::lazy_static;
+//! use myzkp::define_myzkp_modulus_type;
+//! use myzkp::modules::ring::Ring;
+//! use myzkp::modules::field::ModulusValue;
+//! use myzkp::modules::field::FiniteFieldElement;
+//! 
+//! define_myzkp_modulus_type!(Mod17, "17");
+//! let a = FiniteFieldElement::<Mod17>::from_value(5);
+//! let b = FiniteFieldElement::<Mod17>::from_value(3);
+//! let c = a + b; // Performs addition modulo 17
+//! ```
+//!
+//! ## Note
+//!
+//! This implementation uses the `num_bigint` crate for arbitrary-precision integer arithmetic,
+//! allowing for operations on large finite fields commonly used in cryptographic applications.
+
 use std::fmt;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -10,28 +52,42 @@ use std::marker::PhantomData;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::str::FromStr;
 
+use lazy_static::lazy_static;
+use num_bigint::{BigInt, RandBigInt};
+use num_traits::{One, Signed, Zero};
+use paste::paste;
+
 use crate::modules::ring::Ring;
 use crate::modules::utils::extended_euclidean;
 
+/// Trait representing a field in abstract algebra.
+///
+/// This trait extends the `Ring` trait and adds operations specific to fields,
+/// such as division and finding multiplicative inverses.
 pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
-    // A commutative ring with a multiplicative identity element
-    // where every non-zero element has a multiplicative inverse is called a field.
+    /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
     fn div_ref(&self, other: &Self) -> Self;
 }
 
+/// Represents an element in a finite field.
+///
+/// The type parameter `M` specifies the modulus of the field.
 #[derive(Debug, Clone)]
 pub struct FiniteFieldElement<M> {
     pub value: BigInt,
     _phantom: PhantomData<M>,
 }
 
+/// Trait for defining the modulus of a finite field.
 pub trait ModulusValue: Debug + Clone + Hash {
     fn modulus() -> &'static BigInt;
 }
 
 impl<M: ModulusValue> FiniteFieldElement<M> {
-    // Constructor with optional modulus and generator_value.
+    /// Creates a new `FiniteFieldElement` with the given value.
+    ///
+    /// The value is automatically reduced modulo the field's modulus.
     pub fn new(value: BigInt) -> Self {
         let modulus = M::modulus();
         let value_sanitized = value % modulus;
@@ -42,6 +98,7 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         }
     }
 
+    /// Ensures the element's value is within the correct range for the field.
     pub fn sanitize(&self) -> Self {
         let modulus = M::modulus();
         let mut value_sanitized = &self.value % modulus;
@@ -54,7 +111,15 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         }
     }
 
-    // Check the order of an element.
+    /// Checks if the element has the given order in the field.
+    ///
+    /// # Arguments
+    ///
+    /// * `n` - The order to check.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the element has order `n`, `false` otherwise.
     pub fn is_order(&self, n: u64) -> bool {
         assert!(n >= 1);
         let identity = FiniteFieldElement::one();
@@ -67,13 +132,6 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         }
         h * self == identity
     }
-
-    /*
-    // Serialize method.
-    fn serialize(&self) -> String {
-        self.value.to_string()
-    }
-    */
 }
 
 impl<M: ModulusValue> Zero for FiniteFieldElement<M> {
@@ -272,6 +330,24 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
     }
 }
 
+/// Macro for defining a new modulus type.
+///
+/// This macro creates a new type that implements `ModulusValue` with the specified modulus.
+///
+/// # Example
+///
+/// ```
+/// use std::str::FromStr;
+/// use paste::paste;
+/// use num_bigint::BigInt;
+/// use lazy_static::lazy_static;
+/// use myzkp::define_myzkp_modulus_type;
+/// use myzkp::modules::ring::Ring;
+/// use myzkp::modules::field::ModulusValue;
+/// use myzkp::modules::field::FiniteFieldElement;
+/// 
+/// define_myzkp_modulus_type!(Mod17, "17");
+/// ```
 #[macro_export]
 macro_rules! define_myzkp_modulus_type {
     ($name:ident, $modulus:expr) => {
@@ -287,18 +363,11 @@ macro_rules! define_myzkp_modulus_type {
                     &[<MODULUS_ $name>]
                 }
             }
-
-            /*
-            impl ModulusValue for $name {
-                fn modulus() -> BigInt {
-                    BigInt::from_str($modulus).unwrap()
-                }
-            }
-            */
         }
     };
 }
 
+// Pre-defined modulus for EIP-197
 define_myzkp_modulus_type!(
     ModEIP197,
     "21888242871839275222246405745257275088548364400416034343698204186575808495617"

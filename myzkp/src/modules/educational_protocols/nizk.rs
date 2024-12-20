@@ -33,11 +33,11 @@ impl TrustedSetup {
         let mut rng = rand::thread_rng();
         let s = Fq::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+            &BigInt::from(std::u64::MAX),
         ));
         let r = Fq::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+            &BigInt::from(std::u64::MAX),
         ));
 
         let mut alpha = Vec::with_capacity(n);
@@ -75,7 +75,7 @@ impl Prover {
         let mut rng = rand::thread_rng();
         let delta = Fq::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("18446744073709551616").unwrap(), // 2^64
+            &BigInt::from(std::u64::MAX),
         ));
 
         let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);

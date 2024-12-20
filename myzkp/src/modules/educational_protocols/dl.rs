@@ -35,7 +35,7 @@ impl<F: Field> Verifier<F> {
         let mut rng = rand::thread_rng();
         let s = F::from_value(rng.gen_bigint_range(
             &BigInt::zero(),
-            &BigInt::from_str("4835703278458516698824704").unwrap(), // 2^82
+            &BigInt::from(std::u64::MAX),
         ));
         let g = F::from_value(generator);
         Verifier { t, s, g }

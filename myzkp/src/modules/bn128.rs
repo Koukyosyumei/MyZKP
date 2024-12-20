@@ -1,11 +1,12 @@
-use crate::modules::ring::Ring;
+use std::str::FromStr;
+
 use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
 use num_traits::{One, Zero};
 use paste::paste;
-use std::str::FromStr;
 
+use crate::modules::ring::Ring;
 use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
