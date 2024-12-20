@@ -187,8 +187,15 @@
 <li>\(X^2 + X + 1\) is irreducible</li>
 <li>\(X^2 + 1 = (X + 1)^2\) is reducible</li>
 </ul>
-<p>To construct \(GF(p^n)\), we use an irreducible polynomial of degree \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait IrreduciblePoly&lt;F: Field&gt;: Debug + Clone + Hash {
+    fn modulus() -&gt; &amp;'static Polynomial&lt;F&gt;;
+}
+<span class="boring">}</span></code></pre></pre>
 <h3 id="definition-residue-class-modulo-a-polynomial"><a class="header" href="#definition-residue-class-modulo-a-polynomial">Definition: Residue Class modulo a Polynomial</a></h3>
+<p>To construct \(GF(p^n)\), we use an irreducible polynomial of degree \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
 <hr />
 <p><em>For \(f, g \in (\mathbb{Z}/p\mathbb{Z})[X]\), the residue class of \(g \bmod f\) is the set of all polynomials \(h \in (\mathbb{Z}/p\mathbb{Z})[X]\) such that \(h \equiv g \pmod{f}\). This class is denoted as:</em></p>
 <p>\[ g + f(\mathbb{Z}/p\mathbb{Z})[X] = \{g + hf : h \in (\mathbb{Z}/p\mathbb{Z})[X]\} \]</p>
@@ -201,6 +208,63 @@
 <li>\((X + 1) + f(\mathbb{Z}/2\mathbb{Z})[X] = \{X + 1, X^2, X^2 + X + 1, X^2 + X, 1, 0, X^2 + 1, X\}\)</li>
 </ul>
 <p>These four residue classes form \(GF(4)\).</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt;
+    ExtendedFieldElement&lt;M, P&gt;
+{
+    pub fn new(poly: Polynomial&lt;FiniteFieldElement&lt;M&gt;&gt;) -&gt; Self {
+        let result = Self {
+            poly: poly,
+            _phantom: PhantomData,
+        };
+        result.reduce()
+    }
+
+    fn reduce(&amp;self) -&gt; Self {
+        Self {
+            poly: &amp;self.poly.reduce() % P::modulus(),
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn degree(&amp;self) -&gt; isize {
+        P::modulus().degree()
+    }
+
+    pub fn from_base_field(value: FiniteFieldElement&lt;M&gt;) -&gt; Self {
+        Self::new((Polynomial { coef: vec![value] }).reduce()).reduce()
+    }
+}
+
+impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt; Field
+    for ExtendedFieldElement&lt;M, P&gt;
+{
+    fn inverse(&amp;self) -&gt; Self {
+        let mut lm = Polynomial::&lt;FiniteFieldElement&lt;M&gt;&gt;::one();
+        let mut hm = Polynomial::zero();
+        let mut low = self.poly.clone();
+        let mut high = P::modulus().clone();
+
+        while !low.is_zero() {
+            let q = &amp;high / &amp;low;
+            let r = &amp;high % &amp;low;
+            let nm = hm - (&amp;lm * &amp;q);
+            high = low;
+            hm = lm;
+            low = r;
+            lm = nm;
+        }
+
+        Self::new(hm * high.coef[0].inverse())
+    }
+
+    fn div_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        self.mul_ref(&amp;other.inverse())
+    }
+}
+<span class="boring">}</span></code></pre></pre>
 <h3 id="theorem"><a class="header" href="#theorem">Theorem:</a></h3>
 <hr />
 <p><em>If \(f \in (\mathbb{Z}/p\mathbb{Z})[X]\) is an irreducible polynomial of degree \(n\), then the residue ring \((\mathbb{Z}/p\mathbb{Z})[X]/(f)\) is a field with \(p^n\) elements, isomorphic to \(GF(p^n)\).</em></p>
@@ -211,6 +275,25 @@
 \[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} \]
 For instance, multiplication in \(GF(8)\):
 \[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \]</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;M: ModulusValue + 'static, P: IrreduciblePoly&lt;FiniteFieldElement&lt;M&gt;&gt;&gt; Ring
+    for ExtendedFieldElement&lt;M, P&gt;
+{
+    fn add_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly + &amp;other.poly)
+    }
+
+    fn mul_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly * &amp;other.poly)
+    }
+
+    fn sub_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        Self::new(&amp;self.poly - &amp;other.poly)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
 <h3 id="lemma-schwartz---zippel-lemma"><a class="header" href="#lemma-schwartz---zippel-lemma">Lemma: Schwartz - Zippel Lemma</a></h3>
 <hr />
 <p><em>Let \(\mathbb{F}\) be a field and \(P: F^m \rightarrow \mathbb{F}\) and \(Q: \mathbb{F}^m \rightarrow \mathbb{F}\) be two distinct multivariate polynomials of total degree at most \(n\). For any finite subset \(\mathbb{S} \subseteq \mathbb{F}\), we have:</em></p>

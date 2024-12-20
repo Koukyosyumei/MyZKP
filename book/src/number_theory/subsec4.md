@@ -16,10 +16,17 @@ We will now discuss the construction of finite fields with \\(p^n\\) elements, w
 - \\(X^2 + X + 1\\) is irreducible
 - \\(X^2 + 1 = (X + 1)^2\\) is reducible
 
+**Implementation:**
 
-To construct \\(GF(p^n)\\), we use an irreducible polynomial of degree \\(n\\) over \\(\mathbb{Z}/p\mathbb{Z}\\).
+```rust
+pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
+    fn modulus() -> &'static Polynomial<F>;
+}
+```
 
 ### Definition: Residue Class modulo a Polynomial
+
+To construct \\(GF(p^n)\\), we use an irreducible polynomial of degree \\(n\\) over \\(\mathbb{Z}/p\mathbb{Z}\\).
 
 ---
 
@@ -38,6 +45,64 @@ To construct \\(GF(p^n)\\), we use an irreducible polynomial of degree \\(n\\) o
 
 These four residue classes form \\(GF(4)\\).
 
+**Implementation:**
+
+```rust
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
+    ExtendedFieldElement<M, P>
+{
+    pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
+        let result = Self {
+            poly: poly,
+            _phantom: PhantomData,
+        };
+        result.reduce()
+    }
+
+    fn reduce(&self) -> Self {
+        Self {
+            poly: &self.poly.reduce() % P::modulus(),
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn degree(&self) -> isize {
+        P::modulus().degree()
+    }
+
+    pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
+        Self::new((Polynomial { coef: vec![value] }).reduce()).reduce()
+    }
+}
+
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
+    for ExtendedFieldElement<M, P>
+{
+    fn inverse(&self) -> Self {
+        let mut lm = Polynomial::<FiniteFieldElement<M>>::one();
+        let mut hm = Polynomial::zero();
+        let mut low = self.poly.clone();
+        let mut high = P::modulus().clone();
+
+        while !low.is_zero() {
+            let q = &high / &low;
+            let r = &high % &low;
+            let nm = hm - (&lm * &q);
+            high = low;
+            hm = lm;
+            low = r;
+            lm = nm;
+        }
+
+        Self::new(hm * high.coef[0].inverse())
+    }
+
+    fn div_ref(&self, other: &Self) -> Self {
+        self.mul_ref(&other.inverse())
+    }
+}
+```
+
 ### Theorem:
 
 ---
@@ -55,6 +120,26 @@ This construction allows us to represent elements of \\(GF(p^n)\\) as polynomial
 \\[ \\{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\\} \\]
 For instance, multiplication in \\(GF(8)\\):
 \\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \\]
+
+**Implementation:**
+
+```rust
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
+    for ExtendedFieldElement<M, P>
+{
+    fn add_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly + &other.poly)
+    }
+
+    fn mul_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly * &other.poly)
+    }
+
+    fn sub_ref(&self, other: &Self) -> Self {
+        Self::new(&self.poly - &other.poly)
+    }
+}
+```
 
 ### Lemma: Schwartz - Zippel Lemma
 

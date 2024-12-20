@@ -9,7 +9,7 @@
 
 ---
 
-**Example**: Addition (+) on the set of integers is a binary operation. For example, \\(5 + 3 = 8\\), and both \\(5, 3, 8\\) are integers, staying within the set of integers.
+**Example:** Addition (+) on the set of integers is a binary operation. For example, \\(5 + 3 = 8\\), and both \\(5, 3, 8\\) are integers, staying within the set of integers.
 
 ### Definition: Associative Property
 
@@ -19,7 +19,7 @@
 
 ---
 
-**Example**: Multiplication of real numbers is associative: \\((2 \times 3) \times 4 = 2 \times (3 \times 4) = 24\\). In a modular context, we also have addition modulo \\(n\\) being associative. For example, for \\(n = 5\\), \\((2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4\\).
+**Example:** Multiplication of real numbers is associative: \\((2 \times 3) \times 4 = 2 \times (3 \times 4) = 24\\). In a modular context, we also have addition modulo \\(n\\) being associative. For example, for \\(n = 5\\), \\((2 + 3) \bmod 5 + 4 \bmod 5 = 2 + (3 \bmod 5 + 4) \bmod 5 = 4\\).
 
 ### Definition: Commutative Property
 
@@ -29,4 +29,4 @@
 
 ---
 
-**Example**: Addition modulo \\(n\\) is also commutative. For \\(n = 7\\), \\(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\\).
+**Example:** Addition modulo \\(n\\) is also commutative. For \\(n = 7\\), \\(5 + 3 \bmod 7 = 3 + 5 \bmod 7 = 1\\).

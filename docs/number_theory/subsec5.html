@@ -185,14 +185,19 @@ y^2 = x^3 + a x + b
 \end{equation}</p>
 <p><em>, where \(a, b \in \mathbb{F}_{p}\) and the discriminant \(\Delta_{E} = 4a^3 + 27b^2 \neq 0\).</em></p>
 <hr />
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use crate::modules::field::Field;
+</span>pub trait EllipticCurve: Debug + Clone + PartialEq {
+    fn get_a() -&gt; BigInt;
+    fn get_b() -&gt; BigInt;
+}
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurve&lt;F: Field&gt; {
-    pub a: F,
-    pub b: F,
+pub struct EllipticCurvePoint&lt;F: Field, E: EllipticCurve&gt; {
+    pub x: Option&lt;F&gt;,
+    pub y: Option&lt;F&gt;,
+    _phantom: PhantomData&lt;E&gt;,
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-mathbbf_p-rational-point"><a class="header" href="#definition-mathbbf_p-rational-point">Definition: \(\mathbb{F}_{p}\)-Rational Point</a></h3>
@@ -205,13 +210,21 @@ pub struct EllipticCurve&lt;F: Field&gt; {
 <hr />
 <p>The point at infinity denoted \(\mathcal{O}\), is a special point on the elliptic curve that serves as the identity element for the group operation. It can be visualized as the point where all vertical lines on the curve meet.</p>
 <hr />
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>#[derive(Debug, Clone, PartialEq)]
-pub struct EllipticCurvePoint&lt;F: Field&gt; {
-    pub x: Option&lt;F&gt;,
-    pub y: Option&lt;F&gt;,
-    pub curve: EllipticCurve&lt;F&gt;,
+</span>impl&lt;F: Field, E: EllipticCurve&gt; EllipticCurvePoint&lt;F, E&gt; {
+    pub fn point_at_infinity() -&gt; Self {
+        EllipticCurvePoint {
+            x: None,
+            y: None,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn is_point_at_infinity(&amp;self) -&gt; bool {
+        self.x.is_none() || self.y.is_none()
+    }
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-addition-on-elliptic-curve"><a class="header" href="#definition-addition-on-elliptic-curve">Definition: Addition on Elliptic Curve</a></h3>
@@ -236,78 +249,44 @@ pub struct EllipticCurvePoint&lt;F: Field&gt; {
 </li>
 </ul>
 <hr />
-<p>Example: On \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_{7}\), let \(P = (5, 1)\) and \(Q = (4, 4)\). Then, \(P + Q = (0, 5)\), where \(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\).</p>
+<p><strong>Example:</strong> On \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_{7}\), let \(P = (5, 1)\) and \(Q = (4, 4)\). Then, \(P + Q = (0, 5)\), where \(\lambda = \frac{1 - 4}{5 - 4} \equiv 4 \bmod 7\).</p>
+<p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl&lt;F: Field&gt; EllipticCurvePoint&lt;F&gt; {
-    fn new(x: F, y: F, curve: EllipticCurve&lt;F&gt;) -&gt; Self {
-        EllipticCurvePoint {
-            x: Some(x),
-            y: Some(y),
-            curve: curve,
+</span>impl&lt;F: Field, E: EllipticCurve&gt; EllipticCurvePoint&lt;F, E&gt; {
+    pub fn add_ref(&amp;self, other: &amp;Self) -&gt; Self {
+        if self.is_point_at_infinity() {
+            return other.clone();
         }
-    }
-
-    pub fn point_at_infinity(curve: EllipticCurve&lt;F&gt;) -&gt; Self {
-        EllipticCurvePoint {
-            x: None,
-            y: None,
-            curve: curve,
+        if other.is_point_at_infinity() {
+            return self.clone();
         }
-    }
 
-    pub fn is_point_at_infinity(&amp;self) -&gt; bool {
-        self.x.is_none() || self.y.is_none()
-    }
-
-    pub fn line_slope(&amp;self, other: Self) -&gt; F {
-        let x1 = self.x.clone().unwrap();
-        let y1 = self.y.clone().unwrap();
-        let x2 = other.x.clone().unwrap();
-        let y2 = other.y.clone().unwrap();
-
-        if self.x.clone() == other.x.clone() {
-            ((x1.clone() * x1.clone()) * (3_i64) + self.curve.a.clone()) / (y1.clone() * (2_i64))
-        } else {
-            (y2.clone() - y1.clone()) / (x2.clone() - x1.clone())
+        if self.x == other.x &amp;&amp; self.y == other.y {
+            return self.double();
+        } else if self.x == other.x {
+            return Self::point_at_infinity();
         }
+
+        let slope = self.line_slope(&amp;other);
+        let x1 = self.x.as_ref().unwrap();
+        let y1 = self.y.as_ref().unwrap();
+        let x2 = other.x.as_ref().unwrap();
+        let y2 = other.y.as_ref().unwrap();
+
+        let new_x = slope.mul_ref(&amp;slope).sub_ref(&amp;x1).sub_ref(&amp;x2);
+        let new_y = ((-slope.clone()).mul_ref(&amp;new_x)) + (&amp;slope.mul_ref(&amp;x1).sub_ref(&amp;y1));
+        assert!(new_y == -slope.clone() * &amp;new_x + slope.mul_ref(&amp;x2).sub_ref(&amp;y2));
+
+        Self::new(new_x, new_y)
     }
 }
 
-impl&lt;F: Field&gt; Add for EllipticCurvePoint&lt;F&gt; {
+impl&lt;F: Field, E: EllipticCurve&gt; Add for EllipticCurvePoint&lt;F, E&gt; {
     type Output = Self;
 
     fn add(self, other: Self) -&gt; Self {
-        if self.is_point_at_infinity() {
-            return other;
-        }
-        if other.is_point_at_infinity() {
-            return self;
-        }
-
-        let m = self.line_slope(other.clone());
-
-        if self.x == other.x {
-            if self.y != other.y {
-                return EllipticCurvePoint::point_at_infinity(self.curve.clone());
-            } else {
-                let x1 = self.x.clone().unwrap();
-                let y1 = self.y.clone().unwrap();
-
-                let x3 = m.clone() * m.clone() - x1.clone() - x1.clone();
-                let y3 = m * (x1 - x3.clone()) - y1;
-
-                return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-            }
-        } else {
-            let x1 = self.x.clone().unwrap();
-            let y1 = self.y.clone().unwrap();
-            let x2 = other.x.clone().unwrap();
-            let x3 = m.clone() * m.clone() - x1.clone() - x2.clone();
-            let y3 = m * (x1 - x3.clone()) - y1;
-
-            return EllipticCurvePoint::new(x3, y3, self.curve.clone());
-        }
+        self.add_ref(&amp;other)
     }
 }
 <span class="boring">}</span></code></pre></pre>

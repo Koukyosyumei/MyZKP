@@ -8,7 +8,7 @@
 
 ---
 
-**Example**: The set of positive integers under multiplication modulo \\(n\\) forms a semigroup. For instance, with \\(n = 6\\), the elements \\(\\{1, 2, 3, 4, 5\\}\\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.
+**Example:** The set of positive integers under multiplication modulo \\(n\\) forms a semigroup. For instance, with \\(n = 6\\), the elements \\(\\{1, 2, 3, 4, 5\\}\\) under multiplication modulo 6 form a semigroup, since multiplication modulo 6 is associative.
 
 
 ### Definition: Abelian Semigroup
@@ -19,7 +19,7 @@
 
 ---
 
-**Example**: The set of natural numbers under addition modulo \\(n\\) forms an abelian semigroup. For \\(n = 7\\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.
+**Example:** The set of natural numbers under addition modulo \\(n\\) forms an abelian semigroup. For \\(n = 7\\), addition modulo 7 is both associative and commutative, so it is an abelian semigroup.
 
 
 ### Definition: Identity Element
@@ -30,7 +30,7 @@
 
 ---
 
-**Example**: 0 is the identity element for addition modulo \\(n\\). For example, \\(0 + a \bmod 5 = a + 0 \bmod 5 = a\\). Similarly, 1 is the identity element for multiplication modulo \\(n\\). For example, \\(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\\).
+**Example:** 0 is the identity element for addition modulo \\(n\\). For example, \\(0 + a \bmod 5 = a + 0 \bmod 5 = a\\). Similarly, 1 is the identity element for multiplication modulo \\(n\\). For example, \\(1 \times a \bmod 7 = a \times 1 \bmod 7 = a\\).
 
 ### Definition: Monoid
 
@@ -40,7 +40,7 @@
 
 ---
 
-**Example**: The set of non-negative integers under addition modulo \\(n\\) forms a monoid. For \\(n = 5\\), the set \\(\\{0, 1, 2, 3, 4\\}\\) under addition modulo 5 forms a monoid with 0 as the identity element.
+**Example:** The set of non-negative integers under addition modulo \\(n\\) forms a monoid. For \\(n = 5\\), the set \\(\\{0, 1, 2, 3, 4\\}\\) under addition modulo 5 forms a monoid with 0 as the identity element.
 
 ### Definition: Inverse
 
@@ -50,7 +50,7 @@
 
 ---
 
-**Example**: In modulo \\(n\\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \\(3 \times 5 \bmod 7 = 1\\), where 1 is the identity element for multiplication.
+**Example:** In modulo \\(n\\) arithmetic (addition), the inverse of an element exists if it can cancel itself out to yield the identity element. In the set of integers modulo 7, the inverse of 3 is 5, because \\(3 \times 5 \bmod 7 = 1\\), where 1 is the identity element for multiplication.
 
 ### Definition: Group
 
@@ -60,7 +60,7 @@
 
 ---
 
-**Example**: The set of integers modulo a prime \\(p\\) under multiplication forms a group (Can you prove it?). For instance, in \\(\mathbb{Z}/5\mathbb{Z}\\), every non-zero element \\(\\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\\}\\) has an inverse, making it a group.
+**Example:** The set of integers modulo a prime \\(p\\) under multiplication forms a group (Can you prove it?). For instance, in \\(\mathbb{Z}/5\mathbb{Z}\\), every non-zero element \\(\\{1 + 5\mathbb{Z}, 2 + 5\mathbb{Z}, 3 + 5\mathbb{Z}, 4 + 5\mathbb{Z}\\}\\) has an inverse, making it a group.
 
 ### Definition: Order of a Group
 
@@ -70,7 +70,7 @@
 
 ---
 
-**Example**: The group of integers modulo 4 under addition has order 4, because the set of elements is \\(\\{0, 1, 2, 3\\}\\).
+**Example:** The group of integers modulo 4 under addition has order 4, because the set of elements is \\(\\{0, 1, 2, 3\\}\\).
 
 
 ### Definition: Ring
@@ -81,9 +81,13 @@
 
 ---
 
-**Example**: The set of integers with usual addition and multiplication modulo \\(n\\) forms a ring. For example, in \\(\mathbb{Z}/6\mathbb{Z}\\), addition and multiplication modulo 6 form a ring.
+**Example:** The set of integers with usual addition and multiplication modulo \\(n\\) forms a ring. For example, in \\(\mathbb{Z}/6\mathbb{Z}\\), addition and multiplication modulo 6 form a ring.
+
+**Implementation:**
 
 ```rust
+use num_bigint::BigInt;
+use num_traits::{One, Zero};
 use std::fmt;
 use std::ops::{Add, Mul, Neg, Sub};
 
@@ -93,14 +97,25 @@ pub trait Ring:
     + PartialEq
     + fmt::Display
     + Add<Output = Self>
+    + for<'a> Add<&'a Self, Output = Self>
     + Sub<Output = Self>
+    + for<'a> Sub<&'a Self, Output = Self>
     + Mul<Output = Self>
-    + Mul<i64, Output = Self>
+    + for<'a> Mul<&'a Self, Output = Self>
     + Neg<Output = Self>
+    + One
+    + Zero
 {
     // A ring is an algebraic structure with addition and multiplication
-    fn zero() -> Self;
-    fn one() -> Self;
+    fn add_ref(&self, rhs: &Self) -> Self;
+    fn sub_ref(&self, rhs: &Self) -> Self;
+    fn mul_ref(&self, rhs: &Self) -> Self;
+
+    // Utility functions
+    fn pow<M: Into<BigInt>>(&self, n: M) -> Self;
+    fn get_value(&self) -> BigInt;
+    fn from_value<M: Into<BigInt>>(value: M) -> Self;
+    fn random_element(exclude_elements: &[Self]) -> Self;
 }
 ```
 
@@ -124,11 +139,13 @@ pub trait Ring:
 
 **Example** The set of rational numbers under usual addition and multiplication forms a field.
 
-```rust
-use crate::modules::ring::Ring;
+**Implementation:**
 
-pub trait Field: Ring + Div<Output = Self> {
+```rust
+pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
+    /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
+    fn div_ref(&self, other: &Self) -> Self;
 }
 ```
 
@@ -265,7 +282,7 @@ Contrast this with \\( m = 9 \\). The primitive residue class group is \\((\math
 
 ---
 
-**Example**: For \\(m = 12\\), \\(\phi(12) = 4\\) because there are 4 integers less than 12 that are coprime to 12: \\(\{1, 5, 7, 11\}\\).
+**Example:** For \\(m = 12\\), \\(\phi(12) = 4\\) because there are 4 integers less than 12 that are coprime to 12: \\(\{1, 5, 7, 11\}\\).
 
 For \\(m = 10\\), \\(\phi(10) = 4\\), as there are also 4 integers less than 10 that are coprime to 10: \\(\{1, 3, 7, 9\}\\).
 
@@ -277,7 +294,7 @@ For \\(m = 10\\), \\(\phi(10) = 4\\), as there are also 4 integers less than 10 
 
 ---
 
-**Example**: In \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), the element 3 has order 6 because \\(3^6 \bmod 7 = 1\\). In other words, \\(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\\), and 6 is the smallest such exponent.
+**Example:** In \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), the element 3 has order 6 because \\(3^6 \bmod 7 = 1\\). In other words, \\(3 \times 3 \times 3 \times 3 \times 3 \times 3 \bmod 7 = 1\\), and 6 is the smallest such exponent.
 
 ### Definition: Subgroup
 
@@ -287,7 +304,7 @@ For \\(m = 10\\), \\(\phi(10) = 4\\), as there are also 4 integers less than 10 
 
 ---
 
-**Example**: Consider \\((\mathbb{Z}/8\mathbb{Z})^{\times} = \\{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\\}\\) under multiplication modulo 8. The subset \\(\{1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\\(7 \times 7 \equiv 1 \bmod 8\\)).
+**Example:** Consider \\((\mathbb{Z}/8\mathbb{Z})^{\times} = \\{1 + 8\mathbb{Z}, 3+ 8\mathbb{Z}, 5+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\\}\\) under multiplication modulo 8. The subset \\(\{1+ 8\mathbb{Z}, 7+ 8\mathbb{Z}\}\\) forms a subgroup because it satisfies the group properties: closed under multiplication, contains the identity element (1), and every element has an inverse (\\(7 \times 7 \equiv 1 \bmod 8\\)).
 
 ### Definition: Subgroup Generated by \\(g\\)
 
@@ -297,7 +314,7 @@ For \\(m = 10\\), \\(\phi(10) = 4\\), as there are also 4 integers less than 10 
 
 ---
 
-**Example**: Consider the group \\((\mathbb{Z}/7\mathbb{Z})^{\times} = \\{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\\}\\) under multiplication modulo 7. If we take \\(g = 3\\), then \\(\langle 3 +7\mathbb{Z} \rangle =\\) \\(\\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\\} \bmod 7 =\\) \\(\\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\\}\\), which forms a subgroup generated by 3. This subgroup contains all elements of \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), making 3 a generator of the entire group.
+**Example:** Consider the group \\((\mathbb{Z}/7\mathbb{Z})^{\times} = \\{1+ 7\mathbb{Z}, 2+ 7\mathbb{Z}, 3+ 7\mathbb{Z}, 4+ 7\mathbb{Z}, 5+ 7\mathbb{Z}, 6+ 7\mathbb{Z}\\}\\) under multiplication modulo 7. If we take \\(g = 3\\), then \\(\langle 3 +7\mathbb{Z} \rangle =\\) \\(\\{3^1+7\mathbb{Z}, 3^2+7\mathbb{Z}, 3^3+7\mathbb{Z}, 3^4+7\mathbb{Z}, 3^5+7\mathbb{Z}, 3^6+7\mathbb{Z}\\} \bmod 7 =\\) \\(\\{3+7\mathbb{Z}, 2+7\mathbb{Z}, 6+7\mathbb{Z}, 4+7\mathbb{Z}, 5+7\mathbb{Z}, 1+7\mathbb{Z}\\}\\), which forms a subgroup generated by 3. This subgroup contains all elements of \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), making 3 a generator of the entire group.
 
 If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^{k}: 0 \leq k \leq e\\}\\), meaning \\(e\\) is the order of \\(\langle g \rangle\\).
 
@@ -309,7 +326,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 ---
 
-**Example**: The group \\((\mathbb{Z}/6\mathbb{Z})^{\times} = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \\(\langle 5 +6\mathbb{Z} \rangle = \\{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\\}\\). Since 5 generates all the elements of the group, \\(G\\) is cyclic.
+**Example:** The group \\((\mathbb{Z}/6\mathbb{Z})^{\times} = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \\(\langle 5 +6\mathbb{Z} \rangle = \\{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\\}\\). Since 5 generates all the elements of the group, \\(G\\) is cyclic.
 
 ### Theorem 2.2.5
 
@@ -321,7 +338,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 **Proof**: TBD
 
-**Example**: Consider the group \\((\mathbb{Z}/8\mathbb{Z})^{\times} = \\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\). This group is cyclic, and \\(\phi(8) = 4\\). The generators of this group are \\(\\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \\(|G| = 4\\).
+**Example:** Consider the group \\((\mathbb{Z}/8\mathbb{Z})^{\times} = \\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\). This group is cyclic, and \\(\phi(8) = 4\\). The generators of this group are \\(\\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \\(|G| = 4\\).
 
 ### Theorem 2.2.6
 
@@ -333,7 +350,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 **Proof**: TBD
 
-**Example**: Consider the cyclic group \\((\mathbb{Z}/6\mathbb{Z})^{\times} = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\) under multiplication modulo 6. If we take the subgroup \\(\langle 5+6\mathbb{Z} \rangle = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.
+**Example:** Consider the cyclic group \\((\mathbb{Z}/6\mathbb{Z})^{\times} = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\) under multiplication modulo 6. If we take the subgroup \\(\langle 5+6\mathbb{Z} \rangle = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\), this is a subgroup of order 2, and 2 divides the order of the original group, which is 6. This theorem generalizes this property: for any subgroup of a cyclic group, its order divides the order of the group.
 
 ### Theorem: Fermat's Little Theorem
 
@@ -345,7 +362,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 **Proof**: TBD
 
-**Example**: Take \\(a = 2\\) and \\(m = 5\\). Since \\(\gcd(2, 5) = 1\\), Fermat's Little Theorem tells us that \\(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\\). Indeed, \\(2^4 = 16\\) and \\(16 \bmod 5 = 1\\).
+**Example:** Take \\(a = 2\\) and \\(m = 5\\). Since \\(\gcd(2, 5) = 1\\), Fermat's Little Theorem tells us that \\(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\\). Indeed, \\(2^4 = 16\\) and \\(16 \bmod 5 = 1\\).
 
 This theorem suggests that \\(a^{\phi(m) - 1} + m \mathbb{Z}\\) is the inverse residue class of \\(a + m \mathbb{Z}\\).
 
@@ -359,7 +376,7 @@ This theorem suggests that \\(a^{\phi(m) - 1} + m \mathbb{Z}\\) is the inverse r
 
 **Proof**: TBD
 
-**Example**: In the group \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), consider the element \\(3 + 7\mathbb{Z}\\). The order of \\(3 + 7\mathbb{Z}\\) is 6, as \\(3^6 \equiv 1 \bmod 7\\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.
+**Example:** In the group \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), consider the element \\(3 + 7\mathbb{Z}\\). The order of \\(3 + 7\mathbb{Z}\\) is 6, as \\(3^6 \equiv 1 \bmod 7\\). The order of the group itself is also 6, and indeed, the order of the element divides the order of the group.
 
 ### Theorem: Generalization of Fermat's Little Theorem
 
@@ -371,7 +388,7 @@ This theorem suggests that \\(a^{\phi(m) - 1} + m \mathbb{Z}\\) is the inverse r
 
 **Proof**: TBD
 
-**Example**: In the group \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), for any element \\(g\\), such as \\(g = 3 + 7\mathbb{Z}\\), we have \\(3^6 \equiv 1 \bmod 7\\). This holds for any \\(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\\) because the order of the group is 6. Thus, \\(g^{|G|} = 1\\) is satisfied.
+**Example:** In the group \\((\mathbb{Z}/7\mathbb{Z})^{\times}\\), for any element \\(g\\), such as \\(g = 3 + 7\mathbb{Z}\\), we have \\(3^6 \equiv 1 \bmod 7\\). This holds for any \\(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\\) because the order of the group is 6. Thus, \\(g^{|G|} = 1\\) is satisfied.
 
 
 
