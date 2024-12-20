@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html" class="active"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html" class="active"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -388,8 +388,8 @@ K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
 <li>Quadratic functions: \(X^2, XY, Y^2 (= X^3 - X), \ldots\)</li>
 <li>Higher-degree functions: \(X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots\)</li>
 </ul>
-<p>Then, the function field is defined as follows:</p>
 <h3 id="definition-function-field-of-an-elliptic-curve"><a class="header" href="#definition-function-field-of-an-elliptic-curve">Definition: Function Field of an Elliptic Curve</a></h3>
+<p>Then, the function field is defined as follows:</p>
 <hr />
 <p><em>Let \(E: y^2 = x^3 + ax + b\) be an elliptic curve over a field \(K\). The <strong>function field</strong> of \(E\), denoted \(K(E)\), is defined as:</em>
 \begin{equation}
@@ -398,11 +398,10 @@ K(E) = \left\{\frac{f}{g} ,\middle|, f, g \in K[E], g \neq 0 \right\}
 <em>where \(K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)\) is the coordinate ring of \(E\).</em></p>
 <hr />
 <p>\(K(E)\) can be viewed as the field of all rational functions on \(E\).</p>
-<h3 id="definition-zero-of-a-function"><a class="header" href="#definition-zero-of-a-function">Definition: Zero of a Function</a></h3>
+<h3 id="definition-zeropole-of-a-function"><a class="header" href="#definition-zeropole-of-a-function">Definition: Zero/Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>zero</strong> of \(h\) if \(h(P) = 0\).</em></p>
 <hr />
-<h3 id="definition-pole-of-a-function"><a class="header" href="#definition-pole-of-a-function">Definition: Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>pole</strong> of \(h\) if \(h\) is not defined at \(P\) or, equivalently if \(1/h\) has a zero at \(P\).</em></p>
 <hr />
@@ -433,15 +432,15 @@ div(f) = \sum_{P \in E} ord_P(f) [P]
 \end{equation}
 <em>, where \(ord_P(f)\) is the order of \(f\) at \(P\) (positive for zeros, negative for poles), and the sum is taken over all points \(P \in E\), including the point at infinity. This sum has only finitely many non-zero terms.</em></p>
 <hr />
-<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete value of a divisor.</p>
+<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete numerical value of a divisor.</p>
 <p><strong>Example</strong> Consider the elliptic curve \(E: Y^2 = X^3 - X\) over \(\mathbb{Q}\).</p>
 <ul>
 <li>For \(f = X\), we have \(div(X) = 2[(0,0)] - 2[\mathcal{O}]\).</li>
 <li>For \(g = Y\), we have \(div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]\).</li>
 <li>For \(h = \frac{X-1}{Y}\), we have \(div(h) = [(1,0)] - [(-1,0)]\).</li>
 </ul>
-<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <h3 id="definition-divisor-on-an-elliptic-curve"><a class="header" href="#definition-divisor-on-an-elliptic-curve">Definition: Divisor on an Elliptic Curve</a></h3>
+<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <hr />
 <p><em>A <strong>divisor</strong> \(D\) on an elliptic curve \(E\) is a formal sum</em>
 \begin{equation}
@@ -456,14 +455,13 @@ D = \sum_{P \in E} n_P [P]
 <li>\(D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]\) is a divisor (where \(E[2]\) are the 2-torsion points).</li>
 </ul>
 <p>To quantify the properties of divisors, we introduce two important metrics:</p>
-<h3 id="definition-degree-of-a-divisor"><a class="header" href="#definition-degree-of-a-divisor">Definition: Degree of a Divisor</a></h3>
+<h3 id="definition-degreesum-of-a-divisor"><a class="header" href="#definition-degreesum-of-a-divisor">Definition: Degree/Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>degree</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
 deg(D) = \sum_{P \in E} n_P
 \end{equation}</p>
 <hr />
-<h3 id="definition-sum-of-a-divisor"><a class="header" href="#definition-sum-of-a-divisor">Definition: Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>sum</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
@@ -478,12 +476,12 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>\(deg(D_3) = 4 - 4 = 0\)</li>
 <li>\(Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}\) (since \((1,0)\) and \((-1,0)\) are 2-torsion points)</li>
 </ul>
-<p>The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:</p>
 <h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
+<p>The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:</p>
 <hr />
 <p><em>Let \(E\) be an elliptic curve over a field \(K\).</em></p>
 <ul>
-<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^</em>\) such that \(f = cf'\).*</li>
+<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^*\) such that \(f = cf'\).</em></li>
 <li><em>A divisor \(D\) on \(E\) is the divisor of a rational function on \(E\) if and only if \(deg(D) = 0\) and \(Sum(D) = \mathcal{O}\).</em></li>
 </ul>
 <hr />
@@ -492,155 +490,6 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>The function \(f = \frac{Y}{X}\) has \(div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]\). Note that \(deg(div(f)) = 0\) and \(Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}\).</li>
 <li>The divisor \(D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]\) has \(deg(D) = 0\), but \(Sum(D) \neq \mathcal{O}\). Therefore, \(D\) is not the divisor of any rational function on \(E\).</li>
 </ul>
-<h3 id="definition-pairing"><a class="header" href="#definition-pairing">Definition: Pairing</a></h3>
-<hr />
-<p><em>Let \(G_1\) and \(G_2\) be cyclic groups under addition, both of prime order \(p\), with generators \(P\) and \(Q\) respectively:</em></p>
-<p>\begin{align}
-G_1 &amp;= \{0, P, 2P, ..., (p-1)P\} \
-G_2 &amp;= \{0, Q, 2Q, ..., (p-1)Q\}
-\end{align}</p>
-<p><em>Let \(G_T\) be a cyclic group under multiplication, also of order \(p\). A pairing is a map \(e: G_1 \times G_2 \rightarrow G_T\) that satisfies the following bilinear property:</em></p>
-<p>\begin{equation}
-e(aP, bQ) = e(P, Q)^{ab}
-\end{equation} <em>for all \(a, b \in \mathbb{Z}_p\).</em></p>
-<hr />
-<p>Imagine \(G_1\) represents length, \(G_2\) represents width, and \(G_T\) represents area. The pairing function \(e\) is like calculating the area: If you double the length and triple the width, the area becomes six times larger: \(e(2P, 3Q) = e(P, Q)^{6}\)</p>
-<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
-<h3 id="definition-the-weil-pairing"><a class="header" href="#definition-the-weil-pairing">Definition: The Weil Pairing</a></h3>
-<hr />
-<p><em>Let \(E\) be an elliptic curve and \(n\) be a positive integer. For points \(P, Q \in E[n]\), where \(E[n]\) denotes the \(n\)-torsion subgroup of \(E\), we define the Weil pairing \(e_n(P, Q)\) as follows:</em></p>
-<p>Let \(f_P\) and \(f_Q\) be rational functions on \(E\) satisfying:
-\begin{align}
-div(f_P) &amp;= n[P] - n[\mathcal{O}] \
-div(f_Q) &amp;= n[Q] - n[\mathcal{O}]
-\end{align}</p>
-<p><em>Then, for an arbitrary point \(S \in E\) such that \(S \notin \{\mathcal{O}, P, -Q, P-Q\}\), the Weil pairing is given by:</em></p>
-<p>\begin{equation}
-e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
-\end{equation}</p>
-<hr />
-<p>We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.</p>
-<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem</a></h3>
-<hr />
-<p><em>Let \(E\) be an elliptic curve over a field \(K\), and let \(P = (x_P, y_P)\) and \(Q = (x_Q, y_Q)\) be non-zero points on \(E\). Define \(\lambda\) as:</em></p>
-<p>\begin{equation}
-\lambda = \begin{cases}
-\hbox{slope of the line through \(P\) and \(Q\)} &amp;\quad \hbox{if \(P \neq Q\)} \\
-\hbox{slope of the tangent line to \(E\) at \(P\)} &amp;\quad \hbox{if \(P = Q\)} \\
-\infty &amp;\quad \hbox{if the line is vertical}
-\end{cases}
-\end{equation}</p>
-<p><em>Then, the function \(g_{P,Q}: E \to K\) defined by:</em>
-\begin{equation}
-g_{P,Q} = \begin{cases}
-\frac{y - y_P - \lambda(x - x_P)}{x + x_P + x_Q - \lambda^2} &amp;\quad \hbox{if } \lambda \neq \infty \\
-x - x_P &amp;\quad \hbox{if } \lambda = \infty
-\end{cases}
-\end{equation} <em>has the following divisor:</em></p>
-<p>\begin{equation}
-div(g_{P,Q}) = [P] + [Q] - [P + Q] - [\mathcal{O}]
-\end{equation}</p>
-<hr />
-<p><strong>Proof:</strong> We consider two cases based on the value of \(\lambda\).</p>
-<p>Case 1: \(\lambda \neq \infty\)</p>
-<p>Let \(y = \lambda x + v\) be the line through \(P\) and \(Q\) (or the tangent line at \(P\) if \(P = Q\)). This line intersects \(E\) at three points: \(P\), \(Q\), and \(-P-Q\). Thus,
-\begin{equation}
-div(y - \lambda x - v) = [P] + [Q] + [-P - Q] - 3[\mathcal{O}]
-\end{equation}
-Vertical lines intersect \(E\) at points and their negatives, so:
-\begin{equation}
-div(x - x_{P+Q}) = [P + Q] + [-P - Q] - 2[\mathcal{O}]
-\end{equation}
-It follows that \(g_{P,Q} = \frac{y - \lambda x - v}{x - x_{P+Q}}\) has the desired divisor.</p>
-<p>Case 2: \(\lambda = \infty\)</p>
-<p>In this case, \(P + Q = \mathcal{O}\), so we want \(g_{P,Q}\) to have divisor \([P] + [-P] - 2[\mathcal{O}]\). The function \(x - x_P\) has this divisor.
-\end{proof}</p>
-<h3 id="theorem-millers-algorithm"><a class="header" href="#theorem-millers-algorithm">Theorem: Miller's Algorithm</a></h3>
-<hr />
-<p><em>Let \(m \geq 1\) and write its binary expansion as:</em>
-\begin{equation}
-m = m_0 + m_1 \cdot 2 + m_2 \cdot 2^2 + \cdots + m_{n-1} \cdot 2^{n-1}
-\end{equation}
-<em>where \(m_i \in \{0, 1\}\) and \(m_{n-1} \neq 0\).</em></p>
-<p><em>The following algorithm, using the function \(g_{P,Q}\) defined in the previous theorem, returns a function \(f_P\) whose divisor satisfies:</em></p>
-<p>\begin{equation}
-div(f_P) = m[P] - m[P] - (m - 1)[\mathcal{O}]
-\end{equation}</p>
-<p>===========================</p>
-<p><strong>Miller's Algorithm</strong></p>
-<ol>
-<li>Set \(T = P\) and \(f = 1\)</li>
-<li><strong>For</strong> \(i \gets n-2 \cdots 0\) <strong>do</strong></li>
-<li>    Set \(f = f^2 \cdot g_{T, T}\)</li>
-<li>    Set \(T = 2T\)</li>
-<li>    <strong>If</strong> \(m_i = 1\) <strong>then</strong></li>
-<li>        Set \(f = f \cdot g_{T, P}\)</li>
-<li>        Set \(T = T + P\)</li>
-<li>    <strong>End if</strong></li>
-<li><strong>End for</strong></li>
-<li><strong>Return</strong> \(f\)</li>
-</ol>
-<p>===========================</p>
-<hr />
-<p><strong>Proof:</strong> TBD</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn get_lambda&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    r: EllipticCurvePoint&lt;F&gt;,
-) -&gt; F {
-    let p_x = p.x.clone().unwrap();
-    let p_y = p.y.clone().unwrap();
-    let q_x = q.x.clone().unwrap();
-    // let q_y = q.y.clone().unwrap();
-    let r_x = r.x.clone().unwrap();
-    let r_y = r.y.clone().unwrap();
-
-    if (p == q &amp;&amp; p_y.clone() == F::zero()) || (p != q &amp;&amp; p_x.clone() == q_x.clone()) {
-        return r_x.clone() - p_x.clone();
-    }
-    let slope = p.line_slope(q.clone());
-    let numerator = r_y.clone() - p_y.clone() - slope.clone() * (r_x.clone() - p_x.clone());
-    let denominator = r_x.clone() + p_x.clone() + q_x.clone() - slope.clone() * slope.clone();
-    return numerator / denominator;
-}
-
-pub fn miller&lt;F: Field&gt;(p: EllipticCurvePoint&lt;F&gt;, q: EllipticCurvePoint&lt;F&gt;, m: BigInt) -&gt; F {
-    if p == q {
-        F::one();
-    }
-
-    let mut f = F::one();
-    let mut t = p.clone();
-
-    for i in (1..m.bits()).rev() {
-        f = (f.clone() * f.clone()) * (get_lambda(t.clone(), t.clone(), q.clone()));
-        t = t.clone() + t.clone();
-        if m.bit(i) {
-            f = f * (get_lambda(t.clone(), p.clone(), q.clone()));
-            t = t.clone() + p.clone();
-        }
-    }
-
-    f
-}
-
-pub fn weil_pairing&lt;F: Field&gt;(
-    p: EllipticCurvePoint&lt;F&gt;,
-    q: EllipticCurvePoint&lt;F&gt;,
-    m: BigInt,
-    s: Option&lt;EllipticCurvePoint&lt;F&gt;&gt;,
-) -&gt; F {
-    let s_value = s.unwrap();
-    let fp_qs = miller(p.clone(), q.clone() + s_value.clone(), m.clone());
-    let fp_s = miller(p.clone(), s_value.clone(), m.clone());
-    let fq_ps = miller(q.clone(), p.clone() - s_value.clone(), m.clone());
-    let fq_s = miller(q.clone(), -s_value.clone(), m.clone());
-
-    return (fp_qs / fp_s) / (fq_ps / fq_s);
-}
-<span class="boring">}</span></code></pre></pre>
 
                     </main>
 
@@ -671,6 +520,22 @@ pub fn weil_pairing&lt;F: Field&gt;(
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

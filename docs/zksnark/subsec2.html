@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html" class="active"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html" class="active"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -177,7 +177,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="arithmetization"><a class="header" href="#arithmetization">Arithmetization</a></h1>
-<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.</p>
+<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called <strong>arithmetization</strong>.</p>
 <p>To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.</p>
 <p>However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression \(z = x \land y\) can be represented as \(x(x-1) = 0\), \(y(y-1) = 0\), and \(z = xy\) in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.</p>
 <h2 id="rank-1-constraint-system-r1cs"><a class="header" href="#rank-1-constraint-system-r1cs">Rank-1 Constraint System (R1CS)</a></h2>
@@ -186,7 +186,7 @@
 <p>An R1CS structure \(\mathcal{S}\) consists of:</p>
 <ul>
 <li>Size bounds \(m, d, \ell \in \mathbb{N}\) where \(d &gt; \ell\)</li>
-<li>Three matrices \(O, L, R \in \mathbb{F}^{m\ times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
+<li>Three matrices \(O, L, R \in \mathbb{F}^{m \times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
 </ul>
 <p>An R1CS instance includes a public input \(p \in \mathbb{F}^\ell\), while an R1CS witness is a vector \(w \in \mathbb{F}^{d - \ell - 1}\).
 A structure-instance tuple \((S, p)\) is satisfied by a witness \(w\) if:
@@ -204,9 +204,9 @@ where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multip
 <p><strong>Single Multiplication</strong></p>
 <p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
 <ul>
-<li>\textbf{Witness vector}: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
-<li>\textbf{Number of witnesses}: \(m = 4\)</li>
-<li>\textbf{Number of constraints}: \(d = 1\)</li>
+<li><strong>Witness vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li><strong>Number of witnesses</strong>: \(m = 4\)</li>
+<li><strong>Number of constraints</strong>: \(d = 1\)</li>
 </ul>
 <p>The R1CS constraint for \(z = x \cdot y\) is satisfied when:</p>
 <p>\begin{align*}
@@ -292,7 +292,7 @@ O &amp;= \begin{bmatrix}
 0 &amp; 1 &amp; 0 &amp; -1
 \end{bmatrix}
 \end{align*}</p>
-<h2 id="uadratic-arithmetic-program-qap"><a class="header" href="#uadratic-arithmetic-program-qap">uadratic Arithmetic Program (QAP)</a></h2>
+<h2 id="quadratic-arithmetic-program-qap"><a class="header" href="#quadratic-arithmetic-program-qap">Quadratic Arithmetic Program (QAP)</a></h2>
 <p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
 <p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
 <p>\begin{align*}
@@ -372,6 +372,22 @@ L([(1, 1), (2, 3)]) &amp;= 2x + 10
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

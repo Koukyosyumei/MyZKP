@@ -1,10 +1,12 @@
 # Polynomials
 
-Let \\(K\\) be a field.
-
 ### Definition: Polynomial
 
+---
+
 *A univariate polynomial over a commutative ring \\(R\\) with unity \\(1\\) is an expression of the form \\(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\\), where \\(x\\) is a variable and coefficients \\(a_0, \ldots, a_n\\) belong to \\(R\\). The set of all polynomials over \\(R\\) in the variable \\(x\\) is denoted as \\(R[x]\\).*
+
+---
 
 **Example:** In \\(\mathbb{Z}[x]\\), we have polynomials such as \\(2x^3 + x + 1\\), \\(x\\), and \\(1\\). In \\(\mathbb{R}[x]\\), we have polynomials like \\(\pi x^2 - \sqrt{2}x + e\\).
 
@@ -19,7 +21,11 @@ pub struct Polynomial<F: Field> {
 
 ### Definition: Degree
 
+---
+
 *The degree of a non-zero polynomial \\(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\\), denoted as \\(\deg f\\), is the largest integer \\(n\\) such that \\(a_n \neq 0\\). The zero polynomial is defined to have degree \\(-1\\).*
+
+---
 
 **Example**
 
@@ -51,9 +57,13 @@ impl<F: Field> Polynomial<F> {
 }
 ```
 
-### Sum of Polynomials
+### Definition: Sum of Polynomials
+
+---
 
 *For polynomials \\(f(x) = \sum_{i=0}^n a_i x^i\\) and \\(g(x) = \sum_{i=0}^m b_i x^i\\), their sum is defined as: \\((f + g)(x) = \sum_{i=0}^{\max(n,m)} (a_i + b_i) x^i\\), where we set \\(a_i = 0\\) for \\(i > n\\) and \\(b_i = 0\\) for \\(i > m\\).*
+
+---
 
 **Example:** Let \\(f(x) = 2x^2 + 3x + 1\\) and \\(g(x) = x^3 - x + 4\\). Then, \\((f + g)(x) = x^3 + 2x^2 + 2x + 5\\)
 
@@ -80,9 +90,13 @@ impl<F: Field> Add for Polynomial<F> {
 }
 ```
 
-### Product of polynomials
+### Definition: Product of polynomials
+
+---
 
 *For polynomials \\(f(x) = \sum_{i=0}^n a_i x^i\\) and \\(g(x) = \sum_{j=0}^m b_j x^j\\), their product is defined as: \\((fg)(x) = \sum_{k=0}^{n+m} c_k x^k\\), where \\(c_k = \sum_{i+j=k} a_i b_j\\)*
+
+---
 
 **Example:** Let \\(f(x) = x + 1\\) and \\(g(x) = x^2 - 1\\). Then, \\((fg)(x) = x^3 + x^2 - x - 1\\)
 
@@ -107,17 +121,27 @@ impl<F: Field> Mul for Polynomial<F> {
 }
 ```
 
-### Lemma
+### Lemma 2.3.1
+
+Let \\(K\\) be a field.
+
+---
 
 *Let \\(f, g \in K[x]\\) be non-zero polynomials. Then, \\(\deg(fg) = \deg f + \deg g\\).*
 
+---
 
 **Example:** Let \\(f(x) = x^2 + 1\\) and \\(g(x) = x^3 - x\\) in \\(\mathbb{R}[x]\\). Then, \\(\deg(fg) = \deg(x^5 - x^3 + x^2 + 1) = 5 = 2 + 3 = \deg f + \deg g\\)
 
+### Theorem 2.3.2
+
 We can also define division in the polynomial ring \\(K[x]\\).
 
-### Theorem
+---
+
 *Let \\(f, g \in K[x]\\), with \\(g \neq 0\\). There exist unique polynomials \\(q, r \in K[x]\\) that satisfy \\(f = qg + r\\) and either \\(\deg r < \deg g\\) or \\(r = 0\\).*
+
+---
 
 **Proof**
     TBD
@@ -164,23 +188,31 @@ impl<F: Field> Div for Polynomial<F> {
 
 ### Corollary
 
+---
+
 *Let \\(f \in K[x]\\) be a non-zero polynomial, and \\(a \in K\\) such that \\(f(a) = 0\\). Then, there exists a polynomial \\(q \in K[x]\\) such that \\(f(x) = (x - a)q(x)\\). In other words, \\((x - a)\\) is a factor of \\(f(x)\\).*
+
+---
 
 **Example:** Let \\(f(x) = x^2 + 1 \in (\mathbb{Z}/2\mathbb{Z})[x]\\). We have \\(f(1) = 1^2 + 1 = 0\\) in \\(\mathbb{Z}/2\mathbb{Z}\\), and indeed: \\(x^2 + 1 = (x - 1)^2 = x^2 - 2x + 1 = x^2 + 1\\) in \\((\mathbb{Z}/2\mathbb{Z})[x]\\)
 
 ### Theorem: Lagrange Interpolation
 
+---
+
 *A \\(n\\)-degre polynomial \\(P(x)\\) that goes through different \\(n + 1\\) points \\(\\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\\}\\) is uniquely represented as follows:*
 
-\begin{align*}
+\\[
     P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
-\end{align*}
+\\]
 
 *, where \\(f_i(x) = \prod_{k \neq i} (x - x_k)\\)*
 
+---
+
 **Proof** TBD
 
-For example, the quadratic polynomial that goes through \\(\\{(1, 0), (2, 3), (3, 8)\\}\\) is as follows:
+**Example:** The quadratic polynomial that goes through \\(\\{(1, 0), (2, 3), (3, 8)\\}\\) is as follows:
 
 \begin{align*}
     P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1

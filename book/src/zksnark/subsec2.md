@@ -1,6 +1,6 @@
 # Arithmetization
 
-The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.
+The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called **arithmetization**.
 
 To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.
 
@@ -15,7 +15,7 @@ There are many formats to represent arithmetic circuits, and one of the most pop
 An R1CS structure \\(\mathcal{S}\\) consists of:
 
 - Size bounds \\(m, d, \ell \in \mathbb{N}\\) where \\(d > \ell\\)
-- Three matrices \\(O, L, R \in \mathbb{F}^{m\ times d}\\) with at most \\(\Omega(\max(m, d))\\) non-zero entries in total
+- Three matrices \\(O, L, R \in \mathbb{F}^{m \times d}\\) with at most \\(\Omega(\max(m, d))\\) non-zero entries in total
 
 
 An R1CS instance includes a public input \\(p \in \mathbb{F}^\ell\\), while an R1CS witness is a vector \\(w \in \mathbb{F}^{d - \ell - 1}\\).
@@ -38,9 +38,9 @@ The intuitive interpretation of each matrix is as follows:
 
 Let's consider a simple example where we want to prove \\(z = x \cdot y\\), with \\(z = 3690\\), \\(x = 82\\), and \\(y = 45\\).
 
-- \textbf{Witness vector}: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
-- \textbf{Number of witnesses}: \\(m = 4\\)
-- \textbf{Number of constraints}: \\(d = 1\\)
+- **Witness vector**: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
+- **Number of witnesses**: \\(m = 4\\)
+- **Number of constraints**: \\(d = 1\\)
 
 
 The R1CS constraint for \\(z = x \cdot y\\) is satisfied when:
@@ -145,7 +145,7 @@ O &= \begin{bmatrix}
 \end{bmatrix}
 \end{align*}
 
-## uadratic Arithmetic Program (QAP)
+## Quadratic Arithmetic Program (QAP)
 
 Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
 

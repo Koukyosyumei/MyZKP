@@ -52,9 +52,9 @@ This construction allows us to represent elements of \\(GF(p^n)\\) as polynomial
 
 
 **Example:** To construct \\(GF(8)\\), we can use the irreducible polynomial \\(f(X) = X^3 + X + 1\\) over \\(\mathbb{Z}/2\mathbb{Z}\\). The elements of \\(GF(8)\\) are represented by:
-\[ \\{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\\} \]
+\\[ \\{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\\} \\]
 For instance, multiplication in \\(GF(8)\\):
-\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \]
+\\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \\]
 
 ### Lemma: Schwartz - Zippel Lemma
 

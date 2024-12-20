@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Galoid Field - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Galois Field - MyZKP: Building Zero Knowledge Proof from Scratch</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html" class="active"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html" class="active"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -208,9 +208,9 @@
 <p><strong>Proof</strong> (Outline) The irreducibility of \(f\) ensures that \((f)\) is a maximal ideal in \((\mathbb{Z}/p\mathbb{Z})[X]\), making the quotient ring a field. The number of elements is \(p^n\) because there are \(p^n\) polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
 <p>This construction allows us to represent elements of \(GF(p^n)\) as polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\). Addition is performed coefficient-wise modulo \(p\), while multiplication is performed modulo the irreducible polynomial \(f\).</p>
 <p><strong>Example:</strong> To construct \(GF(8)\), we can use the irreducible polynomial \(f(X) = X^3 + X + 1\) over \(\mathbb{Z}/2\mathbb{Z}\). The elements of \(GF(8)\) are represented by:
-[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} ]
+\[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} \]
 For instance, multiplication in \(GF(8)\):
-[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} ]</p>
+\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \]</p>
 <h3 id="lemma-schwartz---zippel-lemma"><a class="header" href="#lemma-schwartz---zippel-lemma">Lemma: Schwartz - Zippel Lemma</a></h3>
 <hr />
 <p><em>Let \(\mathbb{F}\) be a field and \(P: F^m \rightarrow \mathbb{F}\) and \(Q: \mathbb{F}^m \rightarrow \mathbb{F}\) be two distinct multivariate polynomials of total degree at most \(n\). For any finite subset \(\mathbb{S} \subseteq \mathbb{F}\), we have:</em></p>
@@ -251,6 +251,22 @@ Pr_{u \sim \mathbb{S}^{m}}[P(u) = Q(u)] \leq \frac{n}{|\mathbb{S}|}
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

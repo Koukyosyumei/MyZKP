@@ -153,7 +153,7 @@ pub trait Field: Ring + Div<Output = Self> {
 
 **Example:** In \\( \mathbb{Z}/5\mathbb{Z} \\), \\( 3 + 5\mathbb{Z} \\) is invertible because \\( \gcd(3, 5) = 1 \\) (since \\( 3\cdot2 \equiv 1 \pmod{5} \\)). However, in \\( \mathbb{Z}/6\mathbb{Z} \\), \\( 3 + 6\mathbb{Z} \\) is not invertible because \\( \gcd(3, 6) = 3 \neq 1 \\).
 
-### Lemma 1.2.1 
+### Lemma 2.2.1 
 
 ---
 
@@ -163,7 +163,7 @@ pub trait Field: Ring + Div<Output = Self> {
 
 **Proof:** Suppose, for contradiction, that there exist \\( x, y \in \\{1, 2, \dots, b-1\\} \\) with \\( x \neq y \\) such that \\( xa \equiv ya \pmod{b} \\). Then \\( (x-y)a \equiv 0 \pmod{b} \\), implying \\( b \mid (x-y)a \\). Since \\( a \\) and \\( b \\) are coprime, we must have \\( b \mid (x-y) \\). However, \\( |x-y| < b \\), so this is only possible if \\( x = y \\), contradicting our assumption. Therefore, all residues must be distinct.
 
-### Theorem 1.2.2
+### Theorem 2.2.2
 
 ---
 
@@ -193,14 +193,14 @@ This statement is equivalent to proving that \\( ax + by = c \\) has an integer 
 
 - **(\\( \Rightarrow \\))** If \\( ax + by = c \\) for some integers \\( x \\) and \\( y \\), then \\( \gcd(a,b) \mid a \\) and \\( \gcd(a,b) \mid b \\), so \\( \gcd(a,b) \mid (ax + by) = c \\).
 - **(\\( \Leftarrow \\))** Let \\( c = k\gcd(a,b) \\) for some integer \\( k \\). We can write \\( a = p\gcd(a,b) \\) and \\( b = q\gcd(a,b) \\), where \\( p \\) and \\( q \\) are coprime. By the previous theorem, there exist integers \\( m \\) and \\( n \\) such that \\( pm + qn = 1 \\). Multiplying both sides by \\( k\gcd(a,b) \\), we get:
-  \[
+  \\[
   akm + bkn = c
-  \]
+  \\]
   Thus, \\( x = km \\) and \\( y = kn \\) are integer solutions to \\( ax + by = c \\).
 
 This theorem implies that for any integers \\( a \\), \\( b \\), and \\( n \\), the equation \\( ax + by = n \\) has an integer solution if and only if \\( \gcd(a,b) \mid n \\).
 
-### Theorem 1.2.3
+### Theorem 2.2.3
 
 ---
 
@@ -215,7 +215,11 @@ This theorem implies that for any integers \\( a \\), \\( b \\), and \\( n \\), 
 
 ### Definition: Residue Class Ring
 
+---
+
 *\\( (\mathbb{Z} / m \mathbb{Z}, +, \cdot) \\) is a commutative ring where \\( 1 + m \mathbb{Z} \\) is the multiplicative identity element. This ring is called the residue class ring modulo \\( m \\).*
+
+---
 
 **Example:** \\( \mathbb{Z}/4\mathbb{Z} = \\{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\\} \\).
 
@@ -229,7 +233,7 @@ This theorem implies that for any integers \\( a \\), \\( b \\), and \\( n \\), 
 
 **Example:** In \\( \mathbb{Z}/6\mathbb{Z} \\), the primitive residue classes are \\( 1 + 6\mathbb{Z} \\) and \\( 5 + 6\mathbb{Z} \\).
 
-### Theorem 1.2.4
+### Theorem 2.2.4
 
 ---
 
@@ -307,7 +311,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 **Example**: The group \\((\mathbb{Z}/6\mathbb{Z})^{\times} = \\{1+6\mathbb{Z}, 5+6\mathbb{Z}\\}\\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \\(\langle 5 +6\mathbb{Z} \rangle = \\{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\\}\\). Since 5 generates all the elements of the group, \\(G\\) is cyclic.
 
-### Theorem 1.2.5
+### Theorem 2.2.5
 
 ---
 
@@ -319,7 +323,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 **Example**: Consider the group \\((\mathbb{Z}/8\mathbb{Z})^{\times} = \\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\). This group is cyclic, and \\(\phi(8) = 4\\). The generators of this group are \\(\\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\\}\\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \\(|G| = 4\\).
 
-### Theorem 1.2.6
+### Theorem 2.2.6
 
 ---
 
@@ -345,7 +349,7 @@ If \\(g\\) has a finite order \\(e\\), we have that \\(\langle g \rangle = \\{g^
 
 This theorem suggests that \\(a^{\phi(m) - 1} + m \mathbb{Z}\\) is the inverse residue class of \\(a + m \mathbb{Z}\\).
 
-### Theorem 1.2.7
+### Theorem 2.2.7
 
 ---
 

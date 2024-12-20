@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -177,7 +177,14 @@
 
                 <div id="content" class="content">
                     <main>
-                        <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
+                        <pre><code>                    ███╗   ███╗  ██╗   ██╗  ███████╗  ██╗  ██╗  ██████╗  
+                    ████╗ ████║  ╚██╗ ██╔╝  ╚══███╔╝  ██║ ██╔╝  ██╔══██╗ 
+                    ██╔████╔██║   ╚████╔╝     ███╔╝   █████╔╝   ██████╔╝ 
+                    ██║╚██╔╝██║    ╚██╔╝     ███╔╝    ██╔═██╗   ██╔═══╝  
+                    ██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║      
+                    ╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝     
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-number-theory"><a class="header" href="#basics-of-number-theory">Basics of Number Theory</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="computation-rule-and-properties"><a class="header" href="#computation-rule-and-properties">Computation Rule and Properties</a></h1>
 <h3 id="definition-binary-operation"><a class="header" href="#definition-binary-operation">Definition: Binary Operation</a></h3>
 <hr />
@@ -284,12 +291,12 @@ pub trait Field: Ring + Div&lt;Output = Self&gt; {
 <p><em>We denote the set of all residue classes modulo \( m \) as \( \mathbb{Z} / m\mathbb{Z} \). We say that \( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z} / m\mathbb{Z} \) if and only if there exists a solution for \( ax \equiv 1 \pmod{m} \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/5\mathbb{Z} \), \( 3 + 5\mathbb{Z} \) is invertible because \( \gcd(3, 5) = 1 \) (since \( 3\cdot2 \equiv 1 \pmod{5} \)). However, in \( \mathbb{Z}/6\mathbb{Z} \), \( 3 + 6\mathbb{Z} \) is not invertible because \( \gcd(3, 6) = 3 \neq 1 \).</p>
-<h3 id="lemma-121"><a class="header" href="#lemma-121">Lemma 1.2.1</a></h3>
+<h3 id="lemma-221"><a class="header" href="#lemma-221">Lemma 2.2.1</a></h3>
 <hr />
 <p><em>If \( a \) and \( b \) are coprime, the residues of \( a \), \( 2a \), \( 3a \), ..., \( (b-1)a \) modulo \( b \) are all distinct.</em></p>
 <hr />
 <p><strong>Proof:</strong> Suppose, for contradiction, that there exist \( x, y \in \{1, 2, \dots, b-1\} \) with \( x \neq y \) such that \( xa \equiv ya \pmod{b} \). Then \( (x-y)a \equiv 0 \pmod{b} \), implying \( b \mid (x-y)a \). Since \( a \) and \( b \) are coprime, we must have \( b \mid (x-y) \). However, \( |x-y| &lt; b \), so this is only possible if \( x = y \), contradicting our assumption. Therefore, all residues must be distinct.</p>
-<h3 id="theorem-122"><a class="header" href="#theorem-122">Theorem 1.2.2</a></h3>
+<h3 id="theorem-222"><a class="header" href="#theorem-222">Theorem 2.2.2</a></h3>
 <hr />
 <p><em>For any integers \( a \) and \( b \), the equation \( ax + by = 1 \) has a solution in integers \( x \) and \( y \) if and only if \( a \) and \( b \) are coprime.</em></p>
 <hr />
@@ -310,13 +317,13 @@ a\mathbb{Z} + b \mathbb{Z} = \gcd(a, b)\mathbb{Z}
 <ul>
 <li><strong>(\( \Rightarrow \))</strong> If \( ax + by = c \) for some integers \( x \) and \( y \), then \( \gcd(a,b) \mid a \) and \( \gcd(a,b) \mid b \), so \( \gcd(a,b) \mid (ax + by) = c \).</li>
 <li><strong>(\( \Leftarrow \))</strong> Let \( c = k\gcd(a,b) \) for some integer \( k \). We can write \( a = p\gcd(a,b) \) and \( b = q\gcd(a,b) \), where \( p \) and \( q \) are coprime. By the previous theorem, there exist integers \( m \) and \( n \) such that \( pm + qn = 1 \). Multiplying both sides by \( k\gcd(a,b) \), we get:
-[
+\[
 akm + bkn = c
-]
+\]
 Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).</li>
 </ul>
 <p>This theorem implies that for any integers \( a \), \( b \), and \( n \), the equation \( ax + by = n \) has an integer solution if and only if \( \gcd(a,b) \mid n \).</p>
-<h3 id="theorem-123"><a class="header" href="#theorem-123">Theorem 1.2.3</a></h3>
+<h3 id="theorem-223"><a class="header" href="#theorem-223">Theorem 2.2.3</a></h3>
 <hr />
 <p><em>\( a + m\mathbb{Z} \) is invertible in \( \mathbb{Z}/m\mathbb{Z} \) if and only if \( \gcd(a,m) = 1 \).</em></p>
 <hr />
@@ -326,14 +333,16 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <li><strong>(\( \Leftarrow \))</strong> Suppose \( \gcd(a,m) = 1 \). By Bézout's identity, there exist integers \( x \) and \( y \) such that \( ax + my = 1 \). Thus, \( x + m\mathbb{Z} \) is the multiplicative inverse of \( a + m\mathbb{Z} \) in \( \mathbb{Z}/m\mathbb{Z} \).</li>
 </ul>
 <h3 id="definition-residue-class-ring"><a class="header" href="#definition-residue-class-ring">Definition: Residue Class Ring</a></h3>
+<hr />
 <p><em>\( (\mathbb{Z} / m \mathbb{Z}, +, \cdot) \) is a commutative ring where \( 1 + m \mathbb{Z} \) is the multiplicative identity element. This ring is called the residue class ring modulo \( m \).</em></p>
+<hr />
 <p><strong>Example:</strong> \( \mathbb{Z}/4\mathbb{Z} = \{0 + 4\mathbb{Z}, 1 + 4\mathbb{Z}, 2 + 4\mathbb{Z}, 3 + 4\mathbb{Z}\} \).</p>
 <h3 id="definition-primitive-residue-class"><a class="header" href="#definition-primitive-residue-class">Definition: Primitive Residue Class</a></h3>
 <hr />
 <p><em>A residue class \( a + m\mathbb{Z} \) is called primitive if \( \gcd(a, m) = 1 \).</em></p>
 <hr />
 <p><strong>Example:</strong> In \( \mathbb{Z}/6\mathbb{Z} \), the primitive residue classes are \( 1 + 6\mathbb{Z} \) and \( 5 + 6\mathbb{Z} \).</p>
-<h3 id="theorem-124"><a class="header" href="#theorem-124">Theorem 1.2.4</a></h3>
+<h3 id="theorem-224"><a class="header" href="#theorem-224">Theorem 2.2.4</a></h3>
 <hr />
 <p><em>A residue ring \( \mathbb{Z} / m\mathbb{Z} \) is a field if and only if \( m \) is a prime number.</em></p>
 <hr />
@@ -372,13 +381,13 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <p><em>A group \(G\) is called a cyclic group if there exists an element \(g \in G\) such that \(G = \langle g \rangle\). In this case, \(g\) is called a generator of \(G\).</em></p>
 <hr />
 <p><strong>Example</strong>: The group \((\mathbb{Z}/6\mathbb{Z})^{\times} = \{1+6\mathbb{Z}, 5+6\mathbb{Z}\}\) under multiplication modulo 6 is a cyclic group. In this case, both 1 and 5 are generators of the group because \(\langle 5 +6\mathbb{Z} \rangle = \{(5^1 \bmod 6)+6\mathbb{Z} = 5 +6\mathbb{Z}, (5^2 \bmod 6)+6\mathbb{Z} = 1+6\mathbb{Z}\}\). Since 5 generates all the elements of the group, \(G\) is cyclic.</p>
-<h3 id="theorem-125"><a class="header" href="#theorem-125">Theorem 1.2.5</a></h3>
+<h3 id="theorem-225"><a class="header" href="#theorem-225">Theorem 2.2.5</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, it has \(\phi(|G|)\)generators, and each generator has order \(|G|\).</em></p>
 <hr />
 <p><strong>Proof</strong>: TBD</p>
 <p><strong>Example</strong>: Consider the group \((\mathbb{Z}/8\mathbb{Z})^{\times} = \{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\). This group is cyclic, and \(\phi(8) = 4\). The generators of this group are \(\{1+8\mathbb{Z}, 3+8\mathbb{Z}, 5+8\mathbb{Z}, 7+8\mathbb{Z}\}\), each of which generates the entire group when raised to successive powers modulo 8. Each generator has the same order, which is \(|G| = 4\).</p>
-<h3 id="theorem-126"><a class="header" href="#theorem-126">Theorem 1.2.6</a></h3>
+<h3 id="theorem-226"><a class="header" href="#theorem-226">Theorem 2.2.6</a></h3>
 <hr />
 <p><em>If \(G\) is a finite cyclic group, the order of any subgroup of \(G\) divides the order of \(G\).</em></p>
 <hr />
@@ -391,7 +400,7 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <p><strong>Proof</strong>: TBD</p>
 <p><strong>Example</strong>: Take \(a = 2\) and \(m = 5\). Since \(\gcd(2, 5) = 1\), Fermat's Little Theorem tells us that \(2^{\phi(5)} = 2^4 \equiv 1 \bmod 5\). Indeed, \(2^4 = 16\) and \(16 \bmod 5 = 1\).</p>
 <p>This theorem suggests that \(a^{\phi(m) - 1} + m \mathbb{Z}\) is the inverse residue class of \(a + m \mathbb{Z}\).</p>
-<h3 id="theorem-127"><a class="header" href="#theorem-127">Theorem 1.2.7</a></h3>
+<h3 id="theorem-227"><a class="header" href="#theorem-227">Theorem 2.2.7</a></h3>
 <hr />
 <p><em>The order of any element in a group divides the order of the group.</em></p>
 <hr />
@@ -404,9 +413,10 @@ Thus, \( x = km \) and \( y = kn \) are integer solutions to \( ax + by = c \).<
 <p><strong>Proof</strong>: TBD</p>
 <p><strong>Example</strong>: In the group \((\mathbb{Z}/7\mathbb{Z})^{\times}\), for any element \(g\), such as \(g = 3 + 7\mathbb{Z}\), we have \(3^6 \equiv 1 \bmod 7\). This holds for any \(g \in (\mathbb{Z}/7\mathbb{Z})^{\times}\) because the order of the group is 6. Thus, \(g^{|G|} = 1\) is satisfied.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="polynomials"><a class="header" href="#polynomials">Polynomials</a></h1>
-<p>Let \(K\) be a field.</p>
 <h3 id="definition-polynomial"><a class="header" href="#definition-polynomial">Definition: Polynomial</a></h3>
+<hr />
 <p><em>A univariate polynomial over a commutative ring \(R\) with unity \(1\) is an expression of the form \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), where \(x\) is a variable and coefficients \(a_0, \ldots, a_n\) belong to \(R\). The set of all polynomials over \(R\) in the variable \(x\) is denoted as \(R[x]\).</em></p>
+<hr />
 <p><strong>Example:</strong> In \(\mathbb{Z}[x]\), we have polynomials such as \(2x^3 + x + 1\), \(x\), and \(1\). In \(\mathbb{R}[x]\), we have polynomials like \(\pi x^2 - \sqrt{2}x + e\).</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -418,7 +428,9 @@ pub struct Polynomial&lt;F: Field&gt; {
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="definition-degree"><a class="header" href="#definition-degree">Definition: Degree</a></h3>
+<hr />
 <p><em>The degree of a non-zero polynomial \(f(x) = a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_1 x + a_0\), denoted as \(\deg f\), is the largest integer \(n\) such that \(a_n \neq 0\). The zero polynomial is defined to have degree \(-1\).</em></p>
+<hr />
 <p><strong>Example</strong></p>
 <ul>
 <li>\(\deg(2x^3 + x + 1) = 3\)</li>
@@ -449,8 +461,10 @@ pub struct Polynomial&lt;F: Field&gt; {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="sum-of-polynomials"><a class="header" href="#sum-of-polynomials">Sum of Polynomials</a></h3>
+<h3 id="definition-sum-of-polynomials"><a class="header" href="#definition-sum-of-polynomials">Definition: Sum of Polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{i=0}^m b_i x^i\), their sum is defined as: \((f + g)(x) = \sum_{i=0}^{\max(n,m)} (a_i + b_i) x^i\), where we set \(a_i = 0\) for \(i &gt; n\) and \(b_i = 0\) for \(i &gt; m\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = 2x^2 + 3x + 1\) and \(g(x) = x^3 - x + 4\). Then, \((f + g)(x) = x^3 + 2x^2 + 2x + 5\)</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -475,8 +489,10 @@ pub struct Polynomial&lt;F: Field&gt; {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="product-of-polynomials"><a class="header" href="#product-of-polynomials">Product of polynomials</a></h3>
+<h3 id="definition-product-of-polynomials"><a class="header" href="#definition-product-of-polynomials">Definition: Product of polynomials</a></h3>
+<hr />
 <p><em>For polynomials \(f(x) = \sum_{i=0}^n a_i x^i\) and \(g(x) = \sum_{j=0}^m b_j x^j\), their product is defined as: \((fg)(x) = \sum_{k=0}^{n+m} c_k x^k\), where \(c_k = \sum_{i+j=k} a_i b_j\)</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x + 1\) and \(g(x) = x^2 - 1\). Then, \((fg)(x) = x^3 + x^2 - x - 1\)</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -499,12 +515,17 @@ pub struct Polynomial&lt;F: Field&gt; {
     }
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="lemma"><a class="header" href="#lemma">Lemma</a></h3>
+<h3 id="lemma-231"><a class="header" href="#lemma-231">Lemma 2.3.1</a></h3>
+<p>Let \(K\) be a field.</p>
+<hr />
 <p><em>Let \(f, g \in K[x]\) be non-zero polynomials. Then, \(\deg(fg) = \deg f + \deg g\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1\) and \(g(x) = x^3 - x\) in \(\mathbb{R}[x]\). Then, \(\deg(fg) = \deg(x^5 - x^3 + x^2 + 1) = 5 = 2 + 3 = \deg f + \deg g\)</p>
+<h3 id="theorem-232"><a class="header" href="#theorem-232">Theorem 2.3.2</a></h3>
 <p>We can also define division in the polynomial ring \(K[x]\).</p>
-<h3 id="theorem"><a class="header" href="#theorem">Theorem</a></h3>
+<hr />
 <p><em>Let \(f, g \in K[x]\), with \(g \neq 0\). There exist unique polynomials \(q, r \in K[x]\) that satisfy \(f = qg + r\) and either \(\deg r &lt; \deg g\) or \(r = 0\).</em></p>
+<hr />
 <p><strong>Proof</strong>
 TBD</p>
 <p>\(q\) is called the quotient of \(f\) divided by \(g\), and \(r\) is called the remainder; we write \(r = f \bmod g\).</p>
@@ -545,16 +566,20 @@ TBD</p>
 }
 <span class="boring">}</span></code></pre></pre>
 <h3 id="corollary"><a class="header" href="#corollary">Corollary</a></h3>
+<hr />
 <p><em>Let \(f \in K[x]\) be a non-zero polynomial, and \(a \in K\) such that \(f(a) = 0\). Then, there exists a polynomial \(q \in K[x]\) such that \(f(x) = (x - a)q(x)\). In other words, \((x - a)\) is a factor of \(f(x)\).</em></p>
+<hr />
 <p><strong>Example:</strong> Let \(f(x) = x^2 + 1 \in (\mathbb{Z}/2\mathbb{Z})[x]\). We have \(f(1) = 1^2 + 1 = 0\) in \(\mathbb{Z}/2\mathbb{Z}\), and indeed: \(x^2 + 1 = (x - 1)^2 = x^2 - 2x + 1 = x^2 + 1\) in \((\mathbb{Z}/2\mathbb{Z})[x]\)</p>
 <h3 id="theorem-lagrange-interpolation"><a class="header" href="#theorem-lagrange-interpolation">Theorem: Lagrange Interpolation</a></h3>
+<hr />
 <p><em>A \(n\)-degre polynomial \(P(x)\) that goes through different \(n + 1\) points \(\{(x_1, y_1), (x_2, y_2), \cdots (x_{n + 1}, y_{n + 1})\}\) is uniquely represented as follows:</em></p>
-<p>\begin{align*}
+<p>\[
 P(x) = \sum^{n+1}_{i=1} y_i \frac{f_i(x)}{f_i(x_i)}
-\end{align*}</p>
+\]</p>
 <p><em>, where \(f_i(x) = \prod_{k \neq i} (x - x_k)\)</em></p>
+<hr />
 <p><strong>Proof</strong> TBD</p>
-<p>For example, the quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
+<p><strong>Example:</strong> The quadratic polynomial that goes through \(\{(1, 0), (2, 3), (3, 8)\}\) is as follows:</p>
 <p>\begin{align*}
 P(x) = 0 \frac{(x - 2)(x - 3)}{(1 - 2) (1 - 3)} + 3 \frac{(x - 1)(x - 3)}{(2 - 1) (2 - 3)} + 8 \frac{(x - 1)(x - 2)}{(3 - 1) (3 - 2)} = x^{2} - 1
 \end{align*}</p>
@@ -625,16 +650,16 @@ L(\gamma v) &amp;= \sum_{i=1}^n (\gamma v_i) \prod_{j \neq i} \frac{x - x_j}{x_i
 <li>\((X + 1) + f(\mathbb{Z}/2\mathbb{Z})[X] = \{X + 1, X^2, X^2 + X + 1, X^2 + X, 1, 0, X^2 + 1, X\}\)</li>
 </ul>
 <p>These four residue classes form \(GF(4)\).</p>
-<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem:</a></h3>
+<h3 id="theorem"><a class="header" href="#theorem">Theorem:</a></h3>
 <hr />
 <p><em>If \(f \in (\mathbb{Z}/p\mathbb{Z})[X]\) is an irreducible polynomial of degree \(n\), then the residue ring \((\mathbb{Z}/p\mathbb{Z})[X]/(f)\) is a field with \(p^n\) elements, isomorphic to \(GF(p^n)\).</em></p>
 <hr />
 <p><strong>Proof</strong> (Outline) The irreducibility of \(f\) ensures that \((f)\) is a maximal ideal in \((\mathbb{Z}/p\mathbb{Z})[X]\), making the quotient ring a field. The number of elements is \(p^n\) because there are \(p^n\) polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\).</p>
 <p>This construction allows us to represent elements of \(GF(p^n)\) as polynomials of degree less than \(n\) over \(\mathbb{Z}/p\mathbb{Z}\). Addition is performed coefficient-wise modulo \(p\), while multiplication is performed modulo the irreducible polynomial \(f\).</p>
 <p><strong>Example:</strong> To construct \(GF(8)\), we can use the irreducible polynomial \(f(X) = X^3 + X + 1\) over \(\mathbb{Z}/2\mathbb{Z}\). The elements of \(GF(8)\) are represented by:
-[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} ]
+\[ \{0, 1, X, X+1, X^2, X^2+1, X^2+X, X^2+X+1\} \]
 For instance, multiplication in \(GF(8)\):
-[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} ]</p>
+\[ (X^2 + 1)(X + 1) = X^3 + X^2 + X + 1 \equiv X^2 \pmod{X^3 + X + 1} \]</p>
 <h3 id="lemma-schwartz---zippel-lemma"><a class="header" href="#lemma-schwartz---zippel-lemma">Lemma: Schwartz - Zippel Lemma</a></h3>
 <hr />
 <p><em>Let \(\mathbb{F}\) be a field and \(P: F^m \rightarrow \mathbb{F}\) and \(Q: \mathbb{F}^m \rightarrow \mathbb{F}\) be two distinct multivariate polynomials of total degree at most \(n\). For any finite subset \(\mathbb{S} \subseteq \mathbb{F}\), we have:</em></p>
@@ -857,8 +882,8 @@ K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)
 <li>Quadratic functions: \(X^2, XY, Y^2 (= X^3 - X), \ldots\)</li>
 <li>Higher-degree functions: \(X^3, X^2Y, XY^2 (= X^4 - X^2), \ldots\)</li>
 </ul>
-<p>Then, the function field is defined as follows:</p>
 <h3 id="definition-function-field-of-an-elliptic-curve"><a class="header" href="#definition-function-field-of-an-elliptic-curve">Definition: Function Field of an Elliptic Curve</a></h3>
+<p>Then, the function field is defined as follows:</p>
 <hr />
 <p><em>Let \(E: y^2 = x^3 + ax + b\) be an elliptic curve over a field \(K\). The <strong>function field</strong> of \(E\), denoted \(K(E)\), is defined as:</em>
 \begin{equation}
@@ -867,11 +892,10 @@ K(E) = \left\{\frac{f}{g} ,\middle|, f, g \in K[E], g \neq 0 \right\}
 <em>where \(K[E] = K[X, Y]/(Y^2 - X^3 - aX - b)\) is the coordinate ring of \(E\).</em></p>
 <hr />
 <p>\(K(E)\) can be viewed as the field of all rational functions on \(E\).</p>
-<h3 id="definition-zero-of-a-function"><a class="header" href="#definition-zero-of-a-function">Definition: Zero of a Function</a></h3>
+<h3 id="definition-zeropole-of-a-function"><a class="header" href="#definition-zeropole-of-a-function">Definition: Zero/Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>zero</strong> of \(h\) if \(h(P) = 0\).</em></p>
 <hr />
-<h3 id="definition-pole-of-a-function"><a class="header" href="#definition-pole-of-a-function">Definition: Pole of a Function</a></h3>
 <hr />
 <p><em>Let \(h \in K(E)\) be a non-zero function. A point \(P \in E\) is called a <strong>pole</strong> of \(h\) if \(h\) is not defined at \(P\) or, equivalently if \(1/h\) has a zero at \(P\).</em></p>
 <hr />
@@ -902,15 +926,15 @@ div(f) = \sum_{P \in E} ord_P(f) [P]
 \end{equation}
 <em>, where \(ord_P(f)\) is the order of \(f\) at \(P\) (positive for zeros, negative for poles), and the sum is taken over all points \(P \in E\), including the point at infinity. This sum has only finitely many non-zero terms.</em></p>
 <hr />
-<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete value of a divisor.</p>
+<p>Note that this \(\sum_{P \in E}\) is a symbolic summation, and we do not calculate the concrete numerical value of a divisor.</p>
 <p><strong>Example</strong> Consider the elliptic curve \(E: Y^2 = X^3 - X\) over \(\mathbb{Q}\).</p>
 <ul>
 <li>For \(f = X\), we have \(div(X) = 2[(0,0)] - 2[\mathcal{O}]\).</li>
 <li>For \(g = Y\), we have \(div(Y) = [(1,0)] + [(0,0)] + [(-1,0)] - 3[\mathcal{O}]\).</li>
 <li>For \(h = \frac{X-1}{Y}\), we have \(div(h) = [(1,0)] - [(-1,0)]\).</li>
 </ul>
-<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <h3 id="definition-divisor-on-an-elliptic-curve"><a class="header" href="#definition-divisor-on-an-elliptic-curve">Definition: Divisor on an Elliptic Curve</a></h3>
+<p>The concept of divisors can be extended to the elliptic curve itself:</p>
 <hr />
 <p><em>A <strong>divisor</strong> \(D\) on an elliptic curve \(E\) is a formal sum</em>
 \begin{equation}
@@ -925,14 +949,13 @@ D = \sum_{P \in E} n_P [P]
 <li>\(D_3 = \sum_{P \in E[2]} [P] - 4[\mathcal{O}]\) is a divisor (where \(E[2]\) are the 2-torsion points).</li>
 </ul>
 <p>To quantify the properties of divisors, we introduce two important metrics:</p>
-<h3 id="definition-degree-of-a-divisor"><a class="header" href="#definition-degree-of-a-divisor">Definition: Degree of a Divisor</a></h3>
+<h3 id="definition-degreesum-of-a-divisor"><a class="header" href="#definition-degreesum-of-a-divisor">Definition: Degree/Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>degree</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
 deg(D) = \sum_{P \in E} n_P
 \end{equation}</p>
 <hr />
-<h3 id="definition-sum-of-a-divisor"><a class="header" href="#definition-sum-of-a-divisor">Definition: Sum of a Divisor</a></h3>
 <hr />
 <p><em>The <strong>sum</strong> of a divisor \(D = \sum_{P \in E} n_P [P]\) is defined as:</em>
 \begin{equation}
@@ -947,12 +970,12 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>\(deg(D_3) = 4 - 4 = 0\)</li>
 <li>\(Sum(D_2) = (1,0) + (-1,0) - 2\mathcal{O} = \mathcal{O}\) (since \((1,0)\) and \((-1,0)\) are 2-torsion points)</li>
 </ul>
+<h3 id="theorem-1"><a class="header" href="#theorem-1">Theorem</a></h3>
 <p>The following theorem characterizes divisors of functions and provides a criterion for when a divisor is the divisor of a function:</p>
-<h3 id="theorem-2"><a class="header" href="#theorem-2">Theorem</a></h3>
 <hr />
 <p><em>Let \(E\) be an elliptic curve over a field \(K\).</em></p>
 <ul>
-<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^</em>\) such that \(f = cf'\).*</li>
+<li><em>If \(f, f' \in K(E)\) are non-zero rational functions on \(E\) with \(div(f) = div(f')\), then there exists a non-zero constant \(c \in K^*\) such that \(f = cf'\).</em></li>
 <li><em>A divisor \(D\) on \(E\) is the divisor of a rational function on \(E\) if and only if \(deg(D) = 0\) and \(Sum(D) = \mathcal{O}\).</em></li>
 </ul>
 <hr />
@@ -961,6 +984,7 @@ Sum(D) = \sum_{P \in E} n_P P
 <li>The function \(f = \frac{Y}{X}\) has \(div(f) = [(1,0)] + [(-1,0)] - 2[(0,0)]\). Note that \(deg(div(f)) = 0\) and \(Sum(div(f)) = (1,0) + (-1,0) - 2(0,0) = \mathcal{O}\).</li>
 <li>The divisor \(D = 2[(1,1)] - [(2,\sqrt{6})] - [(0,0)]\) has \(deg(D) = 0\), but \(Sum(D) \neq \mathcal{O}\). Therefore, \(D\) is not the divisor of any rational function on \(E\).</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pairing"><a class="header" href="#pairing">Pairing</a></h1>
 <h3 id="definition-pairing"><a class="header" href="#definition-pairing">Definition: Pairing</a></h3>
 <hr />
 <p><em>Let \(G_1\) and \(G_2\) be cyclic groups under addition, both of prime order \(p\), with generators \(P\) and \(Q\) respectively:</em></p>
@@ -974,8 +998,8 @@ e(aP, bQ) = e(P, Q)^{ab}
 \end{equation} <em>for all \(a, b \in \mathbb{Z}_p\).</em></p>
 <hr />
 <p>Imagine \(G_1\) represents length, \(G_2\) represents width, and \(G_T\) represents area. The pairing function \(e\) is like calculating the area: If you double the length and triple the width, the area becomes six times larger: \(e(2P, 3Q) = e(P, Q)^{6}\)</p>
-<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
 <h3 id="definition-the-weil-pairing"><a class="header" href="#definition-the-weil-pairing">Definition: The Weil Pairing</a></h3>
+<p>The Weil pairing is one of the bilinear pairings for elliptic curves. We begin with its formal definition.</p>
 <hr />
 <p><em>Let \(E\) be an elliptic curve and \(n\) be a positive integer. For points \(P, Q \in E[n]\), where \(E[n]\) denotes the \(n\)-torsion subgroup of \(E\), we define the Weil pairing \(e_n(P, Q)\) as follows:</em></p>
 <p>Let \(f_P\) and \(f_Q\) be rational functions on \(E\) satisfying:
@@ -989,7 +1013,7 @@ e_n(P, Q) = \frac{f_P(Q + S)}{f_P(S)} /\ \frac{f_Q(P - S)}{f_Q(-S)}
 \end{equation}</p>
 <hr />
 <p>We introduce a crucial theorem about a specific rational function on elliptic curves to construct the functions required for the Weil pairing.</p>
-<h3 id="theorem-3"><a class="header" href="#theorem-3">Theorem</a></h3>
+<h3 id="theorem-2"><a class="header" href="#theorem-2">Theorem</a></h3>
 <hr />
 <p><em>Let \(E\) be an elliptic curve over a field \(K\), and let \(P = (x_P, y_P)\) and \(Q = (x_Q, y_Q)\) be non-zero points on \(E\). Define \(\lambda\) as:</em></p>
 <p>\begin{equation}
@@ -1123,11 +1147,11 @@ pub fn weil_pairing&lt;F: Field&gt;(
 <p>This assumption is an elliptic curve version of the Discrete Logarithm Problem.</p>
 <h3 id="assumption-knowledge-of-exponent-assumption"><a class="header" href="#assumption-knowledge-of-exponent-assumption">Assumption: Knowledge of Exponent Assumption</a></h3>
 <hr />
-<p>Let \(G\) be a cyclic group of prime order \(q\) with generator \(g \in G\). For any probabilistic polynomial-time algorithm \(\mathcal{A}\) that outputs:</p>
+<p><em>Let \(G\) be a cyclic group of prime order \(q\) with generator \(g \in G\). For any probabilistic polynomial-time algorithm \(\mathcal{A}\) that outputs:</em></p>
 <p>\begin{equation}
 \mathcal{A}(g, g^x) = (h, h') \quad s.t. \quad h' = h^x
 \end{equation}
-, there exists an efficient extractor \(\mathcal{E}\) such that:
+<em>, there exists an efficient extractor \(\mathcal{E}\) such that:</em>
 \begin{equation}
 \mathcal{E}(\mathcal{A}, g, g^x) = y \quad s.t. \quad h = g^y
 \end{equation}</p>
@@ -1149,7 +1173,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arithmetization"><a class="header" href="#arithmetization">Arithmetization</a></h1>
-<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called \textit{arithmetization}.</p>
+<p>The ultimate goal of Zero-Knowledge Proofs (ZKP) is to allow the prover to demonstrate their knowledge to the verifier without revealing any additional information. This knowledge typically involves solving complex problems, such as finding a secret input value that corresponds to a given public hash. ZKP protocols usually convert these statements into polynomial constraints. This process is often called <strong>arithmetization</strong>.</p>
 <p>To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.</p>
 <p>However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression \(z = x \land y\) can be represented as \(x(x-1) = 0\), \(y(y-1) = 0\), and \(z = xy\) in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.</p>
 <h2 id="rank-1-constraint-system-r1cs"><a class="header" href="#rank-1-constraint-system-r1cs">Rank-1 Constraint System (R1CS)</a></h2>
@@ -1158,7 +1182,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <p>An R1CS structure \(\mathcal{S}\) consists of:</p>
 <ul>
 <li>Size bounds \(m, d, \ell \in \mathbb{N}\) where \(d &gt; \ell\)</li>
-<li>Three matrices \(O, L, R \in \mathbb{F}^{m\ times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
+<li>Three matrices \(O, L, R \in \mathbb{F}^{m \times d}\) with at most \(\Omega(\max(m, d))\) non-zero entries in total</li>
 </ul>
 <p>An R1CS instance includes a public input \(p \in \mathbb{F}^\ell\), while an R1CS witness is a vector \(w \in \mathbb{F}^{d - \ell - 1}\).
 A structure-instance tuple \((S, p)\) is satisfied by a witness \(w\) if:
@@ -1176,9 +1200,9 @@ where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multip
 <p><strong>Single Multiplication</strong></p>
 <p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
 <ul>
-<li>\textbf{Witness vector}: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
-<li>\textbf{Number of witnesses}: \(m = 4\)</li>
-<li>\textbf{Number of constraints}: \(d = 1\)</li>
+<li><strong>Witness vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li><strong>Number of witnesses</strong>: \(m = 4\)</li>
+<li><strong>Number of constraints</strong>: \(d = 1\)</li>
 </ul>
 <p>The R1CS constraint for \(z = x \cdot y\) is satisfied when:</p>
 <p>\begin{align*}
@@ -1264,7 +1288,7 @@ O &amp;= \begin{bmatrix}
 0 &amp; 1 &amp; 0 &amp; -1
 \end{bmatrix}
 \end{align*}</p>
-<h2 id="uadratic-arithmetic-program-qap"><a class="header" href="#uadratic-arithmetic-program-qap">uadratic Arithmetic Program (QAP)</a></h2>
+<h2 id="quadratic-arithmetic-program-qap"><a class="header" href="#quadratic-arithmetic-program-qap">Quadratic Arithmetic Program (QAP)</a></h2>
 <p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
 <p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
 <p>\begin{align*}
@@ -1440,6 +1464,22 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 
