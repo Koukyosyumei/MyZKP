@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Useful Assumptions - MyZKP: Building Zero Knowledge Proof from Scratch</title>
+        <title>Basics of zkVM - MyZKP: Building Zero Knowledge Proof from Scratch</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html" class="active"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galoid Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html" class="active"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -176,55 +176,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="assumptions"><a class="header" href="#assumptions">Assumptions</a></h1>
-<h3 id="assumption-discrete-logarithm-problem"><a class="header" href="#assumption-discrete-logarithm-problem">Assumption: Discrete Logarithm Problem</a></h3>
-<hr />
-<p><em>Let \(G\) be a finite cyclic group of order \(n\), with \(\gamma\) as its generator and \(1\) as the identity element. For any element \(\alpha \in G\), there is currently no known efficient (polynomial-time) algorithm to compute the smallest non-negative integer \(x\) such that \(\alpha = \gamma^{x}\).</em></p>
-<hr />
-<p>The Discrete Logarithm Problem can be thought of as a one-way function. It's easy to compute \(g^{x}\) given \(g\) and \(x\), but it's computationally difficult to find \(x\) given \(g\) and \(g^{x}\).</p>
-<h3 id="assumption-elliptic-curve-discrete-logarithm-problem"><a class="header" href="#assumption-elliptic-curve-discrete-logarithm-problem">Assumption: Elliptic Curve Discrete Logarithm Problem</a></h3>
-<hr />
-<p><em>Let \(E\) be an elliptic curve defined over a finite field \(\mathbb{F}_q\), where \(q\) is a prime power. Let \(P\) be a point on \(E\) of point order \(n\), and let \(\langle P \rangle\) be the cyclic subgroup of \(E\) generated by \(P\). For any element \(Q \in \langle P \rangle\), there is currently no known efficient (polynomial-time) algorithm to compute the unique integer \(k\), \(0 \leq k &lt; n\), such that \(Q = kP\).</em></p>
-<hr />
-<p>This assumption is an elliptic curve version of the Discrete Logarithm Problem.</p>
-<h3 id="assumption-knowledge-of-exponent-assumption"><a class="header" href="#assumption-knowledge-of-exponent-assumption">Assumption: Knowledge of Exponent Assumption</a></h3>
-<hr />
-<p>Let \(G\) be a cyclic group of prime order \(q\) with generator \(g \in G\). For any probabilistic polynomial-time algorithm \(\mathcal{A}\) that outputs:</p>
-<p>\begin{equation}
-\mathcal{A}(g, g^x) = (h, h') \quad s.t. \quad h' = h^x
-\end{equation}
-, there exists an efficient extractor \(\mathcal{E}\) such that:
-\begin{equation}
-\mathcal{E}(\mathcal{A}, g, g^x) = y \quad s.t. \quad h = g^y
-\end{equation}</p>
-<hr />
-<p>This assumption states that if \(\mathcal{A}\) can compute the pair \((g^y, g^{xy})\) from \((g, g^x)\), then \(\mathcal{A}\) must "know" the value \(y\), in the sense that \(\mathcal{E}\) can extract \(y\) from \(\mathcal{A}\)'s internal state.
-The Knowledge of Exponent Assumption is useful for constructing verifiable exponential calculation algorithms. Consider a scenario where Alice has a secret value \(a\), and Bob has a secret value \(b\). Bob wants to obtain \(g^{ab}\). This can be achieved through the following protocol:</p>
-<p><strong>Verifiable Exponential Calculation Algorithm</strong></p>
-<ol>
-<li>Bob sends \((g, g'=g^{b})\) to Alice</li>
-<li>Alice sends \((h=g^{a}, h'=g'^{a})\) to Bob</li>
-<li>Bob checks \(h^{b} = h'\).</li>
-</ol>
-<p>Thanks to the Discrete Logarithm Assumption and the Knowledge of Exponent Assumption, the following properties hold:</p>
-<ul>
-<li>Bob cannot derive \(a\) from \((h, h')\).</li>
-<li>Alice cannot derive \(b\) from \((g, g')\).</li>
-<li>Alice cannot generate \((t, t')\) such that \(t \neq h\) and \(t^{b} = t'\).</li>
-<li>If \(h^{b} = h'\), Bob can conclude that \(h\) is the power of \(g\).</li>
-</ul>
-
+                        
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../number_theory/subsec5.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../zkstark/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zksnark/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -232,33 +192,14 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../number_theory/subsec5.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../zkstark/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zksnark/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
