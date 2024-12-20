@@ -1,13 +1,72 @@
-use num_traits::{One, Zero};
+//! # Polynomial Module
+//!
+//! This module provides an implementation of polynomials over a finite field defined by the `Field` trait.
+//! It includes various polynomial operations such as addition, subtraction, multiplication, division, 
+//! evaluation, and interpolation. The `Polynomial` struct is generic and works with any field that 
+//! implements the `Field` trait.
+//!
+//! ## Key Components
+//!
+//! - `Polynomial<F>`: A struct representing a polynomial with coefficients of type `F`, where `F`
+//!   must implement the `Field` trait.
+//! - Various methods for polynomial arithmetic (addition, subtraction, multiplication, division).
+//! - Methods for evaluating polynomials at specific points or using precomputed powers.
+//! - Lagrange interpolation to compute polynomials that pass through given points.
+//!
+//! ## Features
+//!
+//! - **Polynomial Creation**: Create polynomials from coefficients or monomials.
+//! - **Arithmetic Operations**: Supports addition, subtraction, multiplication, and division of polynomials.
+//! - **Evaluation**: Evaluate polynomials at specific points in the field or using powers.
+//! - **Interpolation**: Compute Lagrange interpolating polynomials based on input x and y values.
+//!
+//! ## Usage
+//!
+//! To use this module, define a finite field type and create polynomial instances using the provided methods:
+//!
+//! ```
+//! use std::str::FromStr;
+//! use paste::paste;
+//! use num_bigint::BigInt;
+//! use lazy_static::lazy_static;
+//! use myzkp::define_myzkp_modulus_type;
+//! use myzkp::modules::ring::Ring;
+//! use myzkp::modules::field::ModulusValue;
+//! use myzkp::modules::field::FiniteFieldElement;
+//! use myzkp::modules::polynomial::Polynomial;
+//!
+//! // Example finite field type
+//! define_myzkp_modulus_type!(Mod7, "7");
+//!
+//! // Create a polynomial 2 + 3x + x^2
+//! let poly = Polynomial::<FiniteFieldElement<Mod7>> {
+//!     coef: vec![FiniteFieldElement::<Mod7>::from_value(2), 
+//!                 FiniteFieldElement::<Mod7>::from_value(3), 
+//!                 FiniteFieldElement::<Mod7>::from_value(1)],
+//! };
+//!
+//! // Evaluate the polynomial at x = 1
+//! let result = poly.eval(&FiniteFieldElement::<Mod7>::from_value(1));
+//! ```
+//!
+//! ## Note
+//!
+//! This implementation assumes that the underlying field supports necessary operations such as addition,
+//! multiplication, and inversion. It relies on the `num_traits` crate for numeric operations and 
+//! the `lazy_static` crate for defining modulus types.
+
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+
+use num_traits::{One, Zero};
 
 use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::field::Field;
 
-/// Polynomial struct representing a polynomial over Field.
+/// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial<F: Field> {
+    /// Coefficients of the polynomial in increasing order of degree.
     pub coef: Vec<F>,
 }
 
@@ -28,6 +87,7 @@ impl<F: Field> Polynomial<F> {
         trimmed
     }
 
+    /// Reduces the polynomial by trimming trailing zeros.
     pub fn reduce(&self) -> Self {
         Polynomial {
             coef: Self::trim_trailing_zeros(self.coef.clone()),
@@ -62,6 +122,7 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    /// Evaluates the polynomial using precomputed powers.
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
         for (i, coef) in self.coef.iter().enumerate() {
@@ -70,6 +131,7 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    /// Evaluates the polynomial at given elliptic curve points.
     pub fn eval_with_powers_on_curve<E: EllipticCurve>(
         &self,
         powers: &[EllipticCurvePoint<F, E>],
@@ -81,7 +143,7 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
-    /// Lagrange interpolation to compute polynomials.
+    /// Performs Lagrange interpolation to compute polynomials passing through given points.
     pub fn interpolate(x_values: &[F], y_values: &[F]) -> Polynomial<F> {
         let mut lagrange_polys = vec![];
         let numerators = Polynomial::from_monomials(x_values);
