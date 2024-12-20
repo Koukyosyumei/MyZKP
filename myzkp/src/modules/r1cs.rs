@@ -3,7 +3,7 @@ use num_traits::Zero;
 
 use crate::modules::field::Field;
 
-fn dot<F: Field>(a: &Vec<F>, b: &Vec<F>) -> F {
+pub fn dot<F: Field>(a: &Vec<F>, b: &Vec<F>) -> F {
     let mut result = F::zero();
     for (a_i, b_i) in a.iter().zip(b.iter()) {
         result = result + a_i.clone() * b_i.clone();
