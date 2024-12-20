@@ -8,4 +8,4 @@ title = "Book of MyZKP"
 [output.html]
 mathjax-support = true
 additional-css = ["theme/css/custom.css"]
-it-repository-url = "https://github.com/Koukyosyumei/MyZKP/tree/main"
+git-repository-url = "https://github.com/Koukyosyumei/MyZKP/tree/main"
