@@ -6,11 +6,11 @@ use num_bigint::ToBigInt;
 use num_traits::{One, Zero};
 use paste::paste;
 
-use crate::modules::ring::Ring;
 use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
+use crate::modules::ring::Ring;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};
 
 define_myzkp_modulus_type!(
@@ -146,7 +146,7 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
     if p != q {
         let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
 
-        let out = miller(&q, &p, ate_loop_count);
+        let out = miller(&q, &p, &ate_loop_count);
         f = out.0;
         let mut r = out.1;
         // Assert: r == multiply(&q, &ate_loop_count)
