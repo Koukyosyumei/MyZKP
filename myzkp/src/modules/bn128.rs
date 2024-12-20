@@ -2,14 +2,12 @@ use crate::modules::ring::Ring;
 use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_bigint::ToBigInt;
-use num_traits::FromPrimitive;
 use num_traits::{One, Zero};
 use paste::paste;
 use std::str::FromStr;
 
-use crate::modules::curve::{miller, EllipticCurve, EllipticCurvePoint};
+use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
-use crate::modules::field::Field;
 use crate::modules::field::{FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};
@@ -20,8 +18,8 @@ define_myzkp_modulus_type!(
 );
 define_myzkp_curve_type!(BN128Curve, "0", "3");
 
-type Fq = FiniteFieldElement<BN128Modulus>;
-type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
+pub type Fq = FiniteFieldElement<BN128Modulus>;
+pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
@@ -38,8 +36,8 @@ impl IrreduciblePoly<Fq> for Fq2Poly {
         &MODULUS_Fq2
     }
 }
-type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
-type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
+pub type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
+pub type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
 #[derive(Debug, Clone, PartialEq, Hash)]
@@ -73,7 +71,7 @@ impl IrreduciblePoly<Fq> for Fq12Poly {
 type Fq12 = ExtendedFieldElement<BN128Modulus, Fq12Poly>;
 type G12Point = EllipticCurvePoint<Fq12, BN128Curve>;
 
-pub fn cast_G1_to_G12(g: G1Point) -> G12Point {
+pub fn cast_g1_to_g12(g: G1Point) -> G12Point {
     if g.is_point_at_infinity() {
         return G12Point::point_at_infinity();
     }
@@ -88,7 +86,7 @@ pub fn cast_G1_to_G12(g: G1Point) -> G12Point {
     )
 }
 
-pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
+pub fn twist_g2_to_g12(g: G2Point) -> G12Point {
     if g.is_point_at_infinity() {
         return G12Point::point_at_infinity();
     }
@@ -137,82 +135,36 @@ pub fn twist_G2_to_G12(g: G2Point) -> G12Point {
     );
 }
 
-pub fn linefunc<F: Field, E: EllipticCurve>(
-    p: &EllipticCurvePoint<F, E>,
-    q: &EllipticCurvePoint<F, E>,
-    t: &EllipticCurvePoint<F, E>,
-) -> F {
-    let x1 = p.x.as_ref().unwrap();
-    let y1 = p.y.as_ref().unwrap();
-    let x2 = q.x.as_ref().unwrap();
-    let y2 = q.y.as_ref().unwrap();
-    let xt = t.x.as_ref().unwrap();
-    let yt = t.y.as_ref().unwrap();
-
-    if x1 != x2 {
-        let m = (y2.sub_ref(&y1)) / (x2.sub_ref(&x1));
-        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
-    } else if y1 == y2 {
-        let m = ((x1.pow(2)).mul_ref(&F::from_value(3))) / (y1.mul_ref(&F::from_value(2)));
-        return (m.mul_ref(&xt.sub_ref(&x1))).sub_ref(&yt.sub_ref(&y1));
-    } else {
-        return xt.sub_ref(x1);
-    }
-}
-
-pub fn vanila_miller<F: Field, E: EllipticCurve>(
-    p: &EllipticCurvePoint<F, E>,
-    q: &EllipticCurvePoint<F, E>,
-    m: &BigInt,
-) -> F {
-    if p == q {
-        return F::one();
-    }
-
-    let mut r = q.clone();
-    let mut f = F::one();
-
-    let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
-    let log_ate_loop_count = 63;
-    let field_modulus = BigInt::from_str(
-        "21888242871839275222246405745257275088696311157297823662689037894645226208583",
-    )
-    .unwrap();
-
-    for i in (0..=log_ate_loop_count).rev() {
-        f = f.mul_ref(&f) * linefunc(&r, &r, &p);
-        r = r.double();
-        if ate_loop_count.bit(i) {
-            f = f.mul_ref(&linefunc(&r, &q, &p));
-            r = r.add_ref(&q);
-        }
-    }
-
-    // Assert: r == multiply(&q, &ate_loop_count)
-
-    let q1 = EllipticCurvePoint::<F, E>::new(
-        q.x.clone().unwrap().pow(m.clone()),
-        q.y.clone().unwrap().pow(m.clone()),
-    );
-
-    let nq2 = EllipticCurvePoint::<F, E>::new(
-        q1.x.clone().unwrap().pow(m.clone()),
-        -q1.y.clone().unwrap().pow(m.clone()),
-    );
-
-    f = f.mul_ref(&linefunc(&r, &q1, &p));
-    r = r.add_ref(&q1);
-    f = f.mul_ref(&linefunc(&r, &nq2, &p));
-
-    f
-}
-
-pub fn optimal_ate_pairing(p: G1Point, q: G2Point) -> Fq12 {
-    let p_prime: G12Point = cast_G1_to_G12(p);
-    let q_prime: G12Point = twist_G2_to_G12(q);
+pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
+    // https://eprint.iacr.org/2010/354.pdf
+    let p: G12Point = cast_g1_to_g12(p_g1.clone());
+    let q: G12Point = twist_g2_to_g12(q_g2.clone());
     let m = BN128Modulus::modulus();
 
-    let f = vanila_miller(&p_prime, &q_prime, &m);
+    let mut f = Fq12::one();
+    if p != q {
+        let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
+
+        let out = miller(&q, &p, ate_loop_count);
+        f = out.0;
+        let mut r = out.1;
+        // Assert: r == multiply(&q, &ate_loop_count)
+
+        let q1 = G12Point::new(
+            q.x.clone().unwrap().pow(m.clone()),
+            q.y.clone().unwrap().pow(m.clone()),
+        );
+
+        let nq2 = G12Point::new(
+            q1.x.clone().unwrap().pow(m.clone()),
+            -q1.y.clone().unwrap().pow(m.clone()),
+        );
+
+        f = f.mul_ref(&get_lambda(&r, &q1, &p));
+        r = r.add_ref(&q1);
+        f = f.mul_ref(&get_lambda(&r, &nq2, &p));
+    }
+
     let exp = (m.pow(12) - BigInt::one()) / (BN128::order());
     f.pow(exp)
 }
@@ -358,7 +310,7 @@ mod tests {
     #[test]
     fn test_g12() {
         let g2 = BN128::generator_g2();
-        let g12 = twist_G2_to_G12(g2);
+        let g12 = twist_g2_to_g12(g2);
         let g12_9 = g12.clone() * 9;
         assert_eq!(
             g12_9.clone().y.unwrap().pow(2) - g12_9.clone().x.unwrap().pow(3),
@@ -379,21 +331,21 @@ mod tests {
     fn test_pairing() {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        let p1 = optimal_ate_pairing(g1.clone(), g2.clone());
-        let pn1 = optimal_ate_pairing(-g1.clone(), g2.clone());
+        let p1 = optimal_ate_pairing(&g1.clone(), &g2.clone());
+        let pn1 = optimal_ate_pairing(&-g1.clone(), &g2.clone());
         assert_eq!(p1.clone() * pn1.clone(), Fq12::one());
-        let np1 = optimal_ate_pairing(g1.clone(), -g2.clone());
+        let np1 = optimal_ate_pairing(&g1.clone(), &-g2.clone());
         assert_eq!(p1.clone() * np1.clone(), Fq12::one());
         assert_eq!(pn1.clone(), np1.clone());
-        let p2 = optimal_ate_pairing(g1.clone() * 2, g2.clone());
+        let p2 = optimal_ate_pairing(&(g1.clone() * 2), &g2.clone());
         assert_eq!(p1.clone() * p1.clone(), p2);
         assert!(p1 != p2);
         assert!(p1 != np1);
         assert!(p2 != np1);
-        let po2 = optimal_ate_pairing(g1.clone(), g2.clone() * 2);
+        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.clone() * 2));
         assert_eq!(p1.clone() * p1.clone(), po2);
-        let p3 = optimal_ate_pairing(g1.clone() * 37, g2.clone() * 27);
-        let po3 = optimal_ate_pairing(g1.clone() * 999, g2.clone());
+        let p3 = optimal_ate_pairing(&(g1.clone() * 37), &(g2.clone() * 27));
+        let po3 = optimal_ate_pairing(&(g1.clone() * 999), &(g2.clone()));
         assert_eq!(p3, po3);
     }
 }

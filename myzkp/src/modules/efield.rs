@@ -11,7 +11,6 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
-use crate::modules::utils::extended_euclidean;
 
 pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> &'static Polynomial<F>;
