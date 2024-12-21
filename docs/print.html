@@ -1430,6 +1430,49 @@ O &amp;= \begin{bmatrix}
 0 &amp; 1 &amp; 0 &amp; -1
 \end{bmatrix}
 \end{align*}</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn dot&lt;F: Field&gt;(a: &amp;Vec&lt;F&gt;, b: &amp;Vec&lt;F&gt;) -&gt; F {
+    let mut result = F::zero();
+    for (a_i, b_i) in a.iter().zip(b.iter()) {
+        result = result + a_i.clone() * b_i.clone();
+    }
+    result
+}
+
+#[derive(Debug, Clone)]
+pub struct R1CS&lt;F: Field&gt; {
+    pub left: Vec&lt;Vec&lt;F&gt;&gt;,
+    pub right: Vec&lt;Vec&lt;F&gt;&gt;,
+    pub out: Vec&lt;Vec&lt;F&gt;&gt;,
+    pub m: usize,
+    pub d: usize,
+}
+
+impl&lt;F: Field&gt; R1CS&lt;F&gt; {
+    pub fn new(left: Vec&lt;Vec&lt;F&gt;&gt;, right: Vec&lt;Vec&lt;F&gt;&gt;, out: Vec&lt;Vec&lt;F&gt;&gt;) -&gt; Self {
+        let d = left.len();
+        let m = if d == 0 { 0 } else { left[0].len() };
+        R1CS {
+            left,
+            right,
+            out,
+            m,
+            d,
+        }
+    }
+
+    pub fn is_satisfied(&amp;self, a: &amp;Vec&lt;F&gt;) -&gt; bool {
+        let zero = F::zero();
+        self.left
+            .iter()
+            .zip(self.right.iter())
+            .zip(self.out.iter())
+            .all(|((l, r), o)| dot(&amp;l, &amp;a) * dot(&amp;r, &amp;a) - dot(&amp;o, &amp;a) == zero)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
 <h2 id="quadratic-arithmetic-program-qap"><a class="header" href="#quadratic-arithmetic-program-qap">Quadratic Arithmetic Program (QAP)</a></h2>
 <p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
 <p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
@@ -1480,6 +1523,59 @@ L([(1, 1), (2, 3)]) &amp;= 2x + 10
 \ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
 \end{equation}</p>
 <p>where \(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.</p>
+<p><strong>Implementation:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+pub struct QAP&lt;'a, F: Field&gt; {
+    pub r1cs: &amp;'a R1CS&lt;F&gt;,
+    pub t: Polynomial&lt;F&gt;,
+}
+
+impl&lt;'a, F: Field&gt; QAP&lt;'a, F&gt; {
+    fn new(r1cs: &amp;'a R1CS&lt;F&gt;) -&gt; Self {
+        QAP {
+            r1cs: r1cs,
+            t: Polynomial::&lt;F&gt;::from_monomials(
+                &amp;(1..=r1cs.d).map(|i| F::from_value(i)).collect::&lt;Vec&lt;F&gt;&gt;(),
+            ),
+        }
+    }
+
+    fn generate_polynomials(&amp;self, a: &amp;Vec&lt;F&gt;) -&gt; (Polynomial&lt;F&gt;, Polynomial&lt;F&gt;, Polynomial&lt;F&gt;) {
+        let left_dot_products = self
+            .r1cs
+            .left
+            .iter()
+            .map(|v| dot(&amp;v, &amp;a))
+            .collect::&lt;Vec&lt;F&gt;&gt;();
+        let right_dot_products = self
+            .r1cs
+            .right
+            .iter()
+            .map(|v| dot(&amp;v, &amp;a))
+            .collect::&lt;Vec&lt;F&gt;&gt;();
+        let out_dot_products = self
+            .r1cs
+            .out
+            .iter()
+            .map(|v| dot(&amp;v, &amp;a))
+            .collect::&lt;Vec&lt;F&gt;&gt;();
+
+        let x = (1..=self.r1cs.m)
+            .map(|i| F::from_value(i))
+            .collect::&lt;Vec&lt;F&gt;&gt;();
+        let left_interpolated_polynomial = Polynomial::&lt;F&gt;::interpolate(&amp;x, &amp;left_dot_products);
+        let right_interpolated_polynomial = Polynomial::&lt;F&gt;::interpolate(&amp;x, &amp;right_dot_products);
+        let out_interpolated_polynomial = Polynomial::&lt;F&gt;::interpolate(&amp;x, &amp;out_dot_products);
+        (
+            left_interpolated_polynomial,
+            right_interpolated_polynomial,
+            out_interpolated_polynomial,
+        )
+    }
+}
+<span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="proving-single-polynomial"><a class="header" href="#proving-single-polynomial">Proving Single Polynomial</a></h1>
 <p>Before dealing with all of \(\ell(x)\), \(r(x)\), and \(o(x)\) at once, we design a protocol that allows the Prover \(\mathcal{A}\) to convince the Verifier \(\mathcal{B}\) that \(\mathcal{A}\) knows a specific polynomial. Let's denote this polynomial of degree \(n\) with coefficients in a finite field as:</p>
 <p>\begin{equation}
