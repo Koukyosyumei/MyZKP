@@ -145,6 +145,50 @@ O &= \begin{bmatrix}
 \end{bmatrix}
 \end{align*}
 
+**Implementation:**
+
+```rust
+fn dot<F: Field>(a: &Vec<F>, b: &Vec<F>) -> F {
+    let mut result = F::zero();
+    for (a_i, b_i) in a.iter().zip(b.iter()) {
+        result = result + a_i.clone() * b_i.clone();
+    }
+    result
+}
+
+#[derive(Debug, Clone)]
+pub struct R1CS<F: Field> {
+    pub left: Vec<Vec<F>>,
+    pub right: Vec<Vec<F>>,
+    pub out: Vec<Vec<F>>,
+    pub m: usize,
+    pub d: usize,
+}
+
+impl<F: Field> R1CS<F> {
+    pub fn new(left: Vec<Vec<F>>, right: Vec<Vec<F>>, out: Vec<Vec<F>>) -> Self {
+        let d = left.len();
+        let m = if d == 0 { 0 } else { left[0].len() };
+        R1CS {
+            left,
+            right,
+            out,
+            m,
+            d,
+        }
+    }
+
+    pub fn is_satisfied(&self, a: &Vec<F>) -> bool {
+        let zero = F::zero();
+        self.left
+            .iter()
+            .zip(self.right.iter())
+            .zip(self.out.iter())
+            .all(|((l, r), o)| dot(&l, &a) * dot(&r, &a) - dot(&o, &a) == zero)
+    }
+}
+```
+
 ## Quadratic Arithmetic Program (QAP)
 
 Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
@@ -210,3 +254,57 @@ To address this discrepancy, we introduce a degree \\(d\\) polynomial \\(t(x) = 
 \end{equation}
 
 where \\(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
+
+**Implementation:**
+
+```rust
+#[derive(Debug, Clone)]
+pub struct QAP<'a, F: Field> {
+    pub r1cs: &'a R1CS<F>,
+    pub t: Polynomial<F>,
+}
+
+impl<'a, F: Field> QAP<'a, F> {
+    fn new(r1cs: &'a R1CS<F>) -> Self {
+        QAP {
+            r1cs: r1cs,
+            t: Polynomial::<F>::from_monomials(
+                &(1..=r1cs.d).map(|i| F::from_value(i)).collect::<Vec<F>>(),
+            ),
+        }
+    }
+
+    fn generate_polynomials(&self, a: &Vec<F>) -> (Polynomial<F>, Polynomial<F>, Polynomial<F>) {
+        let left_dot_products = self
+            .r1cs
+            .left
+            .iter()
+            .map(|v| dot(&v, &a))
+            .collect::<Vec<F>>();
+        let right_dot_products = self
+            .r1cs
+            .right
+            .iter()
+            .map(|v| dot(&v, &a))
+            .collect::<Vec<F>>();
+        let out_dot_products = self
+            .r1cs
+            .out
+            .iter()
+            .map(|v| dot(&v, &a))
+            .collect::<Vec<F>>();
+
+        let x = (1..=self.r1cs.m)
+            .map(|i| F::from_value(i))
+            .collect::<Vec<F>>();
+        let left_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &left_dot_products);
+        let right_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &right_dot_products);
+        let out_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &out_dot_products);
+        (
+            left_interpolated_polynomial,
+            right_interpolated_polynomial,
+            out_interpolated_polynomial,
+        )
+    }
+}
+```
