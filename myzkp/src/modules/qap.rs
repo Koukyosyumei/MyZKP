@@ -54,3 +54,31 @@ impl<'a, F: Field> QAP<'a, F> {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::modules::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::ring::Ring;
+
+    type F = FiniteFieldElement<ModEIP197>;
+
+    #[test]
+    fn test_qap_single_multiplication() {
+        // z = x * y
+        // (1, z, x, y) = (1, 3690, 82, 45)
+        let left = vec![vec![F::zero(), F::zero(), F::one(), F::zero()]];
+        let right = vec![vec![F::zero(), F::zero(), F::zero(), F::one()]];
+        let out = vec![vec![F::zero(), F::one(), F::zero(), F::zero()]];
+        let a = vec![
+            F::one(),
+            F::from_value(3690),
+            F::from_value(82),
+            F::from_value(45),
+        ];
+        let r1cs = R1CS::new(left, right, out);
+        let qap = QAP::new(&r1cs);
+        let (_, _, _) = qap.generate_polynomials(&a);
+    }
+}

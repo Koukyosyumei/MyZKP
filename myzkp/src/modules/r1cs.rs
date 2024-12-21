@@ -22,8 +22,8 @@ pub struct R1CS<F: Field> {
 
 impl<F: Field> R1CS<F> {
     pub fn new(left: Vec<Vec<F>>, right: Vec<Vec<F>>, out: Vec<Vec<F>>) -> Self {
-        let d = left.len();
-        let m = if d == 0 { 0 } else { left[0].len() };
+        let m = left.len();
+        let d = if m == 0 { 0 } else { left[0].len() };
         R1CS {
             left,
             right,
