@@ -186,3 +186,11 @@ The new protocol using the above variable-consistency check is as follows:
 - Validity check
   - \\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\\)
 
+**Vulnerability**
+
+This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \\((g^{\ell _i(s)})^{w _i}\\) is actually calculated by \\(g^{\ell _i(s)}\\) by checking \\(e((g^{\ell _i(s)})^{w _i}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)\\). Here, suppose the prover submits \\((g^{\ell _i(s)})^{w _i} \cdot g^{v}\\) and \\((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}\\) is a constatn value. Then, the polynomial restriction check still passes!
+
+\\[
+e((g^{\ell _i(s)})^{w _i} \cdot g^{v}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)
+\\]
+
