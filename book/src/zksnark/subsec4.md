@@ -131,5 +131,5 @@ Unfortunately, this condition is not equivalent. For example, suppose \\(\ell_i(
 
 Then, for arbitrary \\(w _{r,i}\\) and \\(w _{o,i}\\), the above equation holds if we set \\(w _{\beta, i} = w _{o, i}\\) and \\(w _{\ell, i} = 2 w _{o, i} - w _{r, i}\\).
 
-To surrogate this problem, we have to use different \\(\beta\\) for each term.
+To surrogate this problem, we have to use different \\(\beta\\) for each of \\(\ell\\), \\(r\\) and \\(o\\).
 

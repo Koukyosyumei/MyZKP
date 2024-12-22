@@ -6,7 +6,7 @@
 ██╔████╔██║   ╚████╔╝     ███╔╝   █████╔╝   ██████╔╝ 
 ██║╚██╔╝██║    ╚██╔╝     ███╔╝    ██╔═██╗   ██╔═══╝  
 ██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║      
-╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝     
+╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝   
 ```
 
 **MyZKP** is a Rust implementation of zero-knowledge protocols built entirely from scratch! This project serves as an educational resource for understanding and working with zero-knowledge proofs.
