@@ -180,6 +180,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="bringing-it-all-together"><a class="header" href="#bringing-it-all-together">Bringing It All Together</a></h1>
+<p>We first recap the previous sections. First the relationship between inputs and outputs of any prgram can be represented as a rank-one constraint system (R1CS) as follows:</p>
+<p>\[
+(L \cdot a) \circ (R \cdot a) - O \cdot a = 0<br />
+\]</p>
+<p>, where \(a\) is the concatenation of all inputs, outputs, and intermediate values (witness). Then, the statement, "I know the input values \(x\) that make the program returns the output values \(y\)", can be converted into "I know \(a\), whose outputs part is \(y\), that satisfies the constraint system corresponding to the program".</p>
+<p>Although separately checking each constraint, corresponding to each row in the above R1CS, is not efficient, we can convert those vector-equivalence test into the polynomial-equivalence test.</p>
+<h2 id=""><a class="header" href="#"></a></h2>
 
                     </main>
 
