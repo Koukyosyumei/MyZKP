@@ -141,15 +141,16 @@ The new protocol using the above variable-consistency check is as follows:
 
 - **Interpolated Polynomial:** Construct \\(\\{\ell_i, r_i, o_i\\}_{i\in[d]}\\) from \\(L\\), \\(R\\), and \\(O\\), respectively.
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
-- **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\).
+- **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), *\\(\beta_{\ell}\\), \\(\beta_{r}\\), and \\(\beta_{o}\\)*.
+- **Consistency Polynomial:** *\\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)*
 - **Proof Key:** Provided to the prover
-  - \\(\\{g^{\ell_i(s)},g^{\alpha \ell_i(s)}\\}_{i\in[d]}\\)
-  - \\(\\{g^{r_i(s)},g^{\alpha r_i(s)}\\}_{i\in[d]}\\)
-  - \\(\\{g^{o_i(s)},g^{\alpha o_i(s)}\\}_{i\in[d]}\\)
-  - \\(\\{g^{(s^j)}\\}_{j \in [m]}\\)
+  - \\(\\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\\}_{i\in[d]}\\)
+  - \\(\\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)
+  - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
 - **Verification Key:**
   - \\(g^{t(s)}\\)
   - \\(g^{\alpha_{\ell}}\\), \\(g^{\alpha_{r}}\\), \\(g^{\alpha_{o}}\\)
+  - *\\(g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\\)*
 - After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
 
 **Protocol (Proving)**
@@ -160,24 +161,28 @@ The new protocol using the above variable-consistency check is as follows:
   - \\(r(x) = \sum_{i=1}^{d} w_i r_{i}(x)\\)
   - \\(o(x) = \sum_{i=1}^{d} w_i o_{i}(x)\\)
 - Compute \\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\\)
-- Evaluate each polynomial at \\(s\\).
+- Evaluate each polynomial at \\(s\\):
   - \\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \\)
   - \\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \\)
   - \\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \\)
-- Evaluate each shifted polynomial at \\(s\\).
+- Evaluate each shifted polynomial at \\(s\\):
   - \\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{w_i} \\)
   - \\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{w_i} \\)
   - \\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{w_i} \\)
+- *Evaluate each consistency polynomial at \\(s\\):*
+  - *\\(g^{z(s)} = \prod^{d}_{i=1} g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\)*
 - Calculate \\(g^{h(s)}\\) from \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
-- Proof: \\((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)})\\)
+- Proof: \\((\\) \\(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\\) *\\(g^{z(s)}\\)* \\()\\)
 
 **Protocol (Verification)**
 
-- Parse proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\\)
+- Parse proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\\)
 - Check polynomial restrictions
   - \\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\\)
   - \\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\\)
   - \\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\\)
+- Check variable consistency
+  - *\\(e(g^{\ell}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z}, g)\\)*
 - Validity check
   - \\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\\)
 

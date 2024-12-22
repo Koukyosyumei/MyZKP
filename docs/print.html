@@ -2413,19 +2413,20 @@ e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(
 <ul>
 <li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
 <li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
-<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\).</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), <em>\(\beta_{\ell}\), \(\beta_{r}\), and \(\beta_{o}\)</em>.</li>
+<li><strong>Consistency Polynomial:</strong> <em>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</em></li>
 <li><strong>Proof Key:</strong> Provided to the prover
 <ul>
-<li>\(\{g^{\ell_i(s)},g^{\alpha \ell_i(s)}\}_{i\in[d]}\)</li>
-<li>\(\{g^{r_i(s)},g^{\alpha r_i(s)}\}_{i\in[d]}\)</li>
-<li>\(\{g^{o_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</li>
-<li>\(\{g^{(s^j)}\}_{j \in [m]}\)</li>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
 </ul>
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
 <li>\(g^{t(s)}\)</li>
 <li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li><em>\(g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
 </ul>
 </li>
 <li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
@@ -2441,31 +2442,41 @@ e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(
 </ul>
 </li>
 <li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
-<li>Evaluate each polynomial at \(s\).
+<li>Evaluate each polynomial at \(s\):
 <ul>
 <li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \)</li>
 <li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \)</li>
 <li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \)</li>
 </ul>
 </li>
-<li>Evaluate each shifted polynomial at \(s\).
+<li>Evaluate each shifted polynomial at \(s\):
 <ul>
 <li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{w_i} \)</li>
 <li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{w_i} \)</li>
 <li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{w_i} \)</li>
 </ul>
 </li>
+<li><em>Evaluate each consistency polynomial at \(s\):</em>
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\)</em></li>
+</ul>
+</li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)})\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) <em>\(g^{z(s)}\)</em> \()\)</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
-<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
 <li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
 <li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
 <li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z}, g)\)</em></li>
 </ul>
 </li>
 <li>Validity check
