@@ -16,7 +16,7 @@ impl<'a, F: Field> QAP<'a, F> {
         QAP {
             r1cs: r1cs,
             t: Polynomial::<F>::from_monomials(
-                &(1..=r1cs.d).map(|i| F::from_value(i)).collect::<Vec<F>>(),
+                &(1..=r1cs.m).map(|i| F::from_value(i)).collect::<Vec<F>>(),
             ),
         }
     }
