@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec4.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -184,7 +184,7 @@
 <p>\begin{equation}
 P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}</p>
-<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(d &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_d\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\). Note that the Prover also knows \(T(x)\).</p>
+<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(m &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_m\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\). Note that the Prover also knows \(T(x)\).</p>
 <p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
 <h2 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h2>
 <p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
@@ -462,7 +462,7 @@ pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verif
 }
 <span class="boring">}</span></code></pre></pre>
 <p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
@@ -850,7 +850,7 @@ pub fn non_interactive_zkp_protocol(
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zkstark/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../zksnark/subsec4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -864,13 +864,29 @@ pub fn non_interactive_zkp_protocol(
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zkstark/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../zksnark/subsec4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

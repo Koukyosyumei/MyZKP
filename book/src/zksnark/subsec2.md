@@ -193,6 +193,8 @@ impl<F: Field> R1CS<F> {
 
 Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
 
+**Equivalence of Matrices**
+
 Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \\(Av = Bu\\), where:
 
 \begin{align*}
@@ -229,31 +231,53 @@ The equivalence check can be represented as:
 This matrix-vector equality check is equivalent to the following polynomial equality check:
 
 \begin{equation*}
-3 \cdot L([(1, 2), (2, 3)]) + 1 \cdot L([(1, 5), (2, 1)]) = 2 \cdot L([(1, 4), (2, 2)]) + 2 \cdot L([(1, 1), (2, 3)])
+3 \cdot \lambda([(1, 2), (2, 3)]) + 1 \cdot \lambda([(1, 5), (2, 1)]) = 2 \cdot \lambda([(1, 4), (2, 2)]) + 2 \cdot \lambda([(1, 1), (2, 3)])
 \end{equation*}
 
-where \\(L\\) denotes Lagrange Interpolation. In \\(\mathbb{F}_{11}\\) (field with 11 elements), we have:
+where \\(\lambda\\) denotes Lagrange Interpolation. In \\(\mathbb{F}_{11}\\) (field with 11 elements), we have:
 
 \begin{align*}
-L([(1, 2), (2, 3)]) &= x + 1 \\\\
-L([(1, 5), (2, 1)]) &= 7x + 9 \\\\
-L([(1, 4), (2, 2)]) &= 9x + 6 \\\\
-L([(1, 1), (2, 3)]) &= 2x + 10
+\lambda([(1, 2), (2, 3)]) &= x + 1 \\\\
+\lambda([(1, 5), (2, 1)]) &= 7x + 9 \\\\
+\lambda([(1, 4), (2, 2)]) &= 9x + 6 \\\\
+\lambda([(1, 1), (2, 3)]) &= 2x + 10
 \end{align*}
 
 The Schwartz-Zippel Lemma states that we need only one evaluation at a random point to check the equivalence of polynomials with high probability.
 
-However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\), where \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are the polynomials resulting from the Lagrange interpolation of \\(L \cdot a\\), \\(R \cdot a\\), and \\(O \cdot a\\) respectively. 
+**Back to R1CS**
 
-While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(d-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2d-2\\).
+Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \\(L \cdot a\\), \\(R \cdot a\\), and \\(O \cdot a\\), denoted as \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\), repectively, as follows:
 
-To address this discrepancy, we introduce a degree \\(d\\) polynomial \\(t(x) = \prod_{i=1}^{d} (x - i)\\). We can then rewrite the equation as:
+\begin{align*}
+\ell(x) = \sum^{d}_{i=1} a_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)])
+\end{align*}
+
+\begin{align*}
+r(x) = \sum^{d}_{i=1} a_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)])
+\end{align*}
+
+\begin{align*}
+o(x) = \sum^{d}_{i=1} a_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
+\end{align*}
+
+However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(m-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2m-2\\). Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\). 
+
+To address this discrepancy, we introduce a degree \\(m\\) polynomial \\(t(x) = \prod_{i=1}^{m} (x - i)\\). Given the constituion of the interpolated equations, we have that \\(\forall{x} \in \\{1,\cdots, d\\}\\) \\(\ell(x) \cdot r(x) = o(x)\\). This implies the following:
+
+\begin{equation}
+\forall{x} \in \\{1,\cdots, m\\} \quad \ell(x) \cdot r(x) - o(x) = 0
+\end{equation}
+
+Thus, we can factorize \\(\ell(x) \cdot r(x) - o(x)\\) into the product of \\(t(x)\\) and an appripriate polynomial \\(h(x)\\) such that \\(\ell(x) \cdot r(x) - o(x) = t(x)h(x)\\).
+
+Then, we can then rewrite the equation as:
 
 \begin{equation}
 \ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
 \end{equation}
 
-where \\(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
+This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
 
 **Implementation:**
 

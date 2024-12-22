@@ -6,7 +6,7 @@ Before dealing with all of \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) at once, we
     P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}
 
-Assume \\(P(x)\\) has \\(n\\) roots, \\(a_1, a_2, \ldots, a_n \in \mathbb{F}\\), such that \\(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\\). The Verifier \\(\mathcal{B}\\) knows \\(d < n\\) roots of \\(P(x)\\), namely \\(a_1, a_2, \ldots, a_d\\). Let \\(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\\). Note that the Prover also knows \\(T(x)\\).
+Assume \\(P(x)\\) has \\(n\\) roots, \\(a_1, a_2, \ldots, a_n \in \mathbb{F}\\), such that \\(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\\). The Verifier \\(\mathcal{B}\\) knows \\(m < n\\) roots of \\(P(x)\\), namely \\(a_1, a_2, \ldots, a_m\\). Let \\(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\\). Note that the Prover also knows \\(T(x)\\).
 
 The Prover's objective is to convince the Verifier that \\(\mathcal{A}\\) knows a polynomial \\(H(x) = \frac{P(x)}{T(x)}\\).
 
@@ -305,7 +305,7 @@ pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F
 
 **Vulnerability:**
 
-However, this protocol still has a flaw. Since the Prover can compute \\(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
+However, this protocol still has a flaw. Since the Prover can compute \\(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
 
 ```rust
 pub fn malicious_discrete_log_protocol<F: Field>(
