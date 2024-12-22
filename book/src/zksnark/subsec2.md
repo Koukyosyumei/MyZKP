@@ -250,15 +250,9 @@ The Schwartz-Zippel Lemma states that we need only one evaluation at a random po
 Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \\(L \cdot a\\), \\(R \cdot a\\), and \\(O \cdot a\\), denoted as \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\), repectively, as follows:
 
 \begin{align*}
-\ell(x) = \sum^{d}_{i=1} a_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)])
-\end{align*}
-
-\begin{align*}
-r(x) = \sum^{d}_{i=1} a_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)])
-\end{align*}
-
-\begin{align*}
-o(x) = \sum^{d}_{i=1} a_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
+\ell(x) &= \sum^{d}_{i=1} a_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)]) \\\\
+r(x) &= \sum^{d} _{i=1} a_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)]) \\\\
+o(x) &= \sum^{d} _{i=1} a_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
 \end{align*}
 
 However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(m-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2m-2\\). Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\). 
