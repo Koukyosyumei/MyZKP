@@ -2261,24 +2261,23 @@ pub fn non_interactive_zkp_protocol(
 <p>The simplest protocol based on the previous chapter is as follos:</p>
 <p><strong>Protocol (Setup)</strong></p>
 <ul>
-<li><em><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</em></li>
-<li><em><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</em></li>
-<li><em><strong>Secret Seed:</strong> A trusted party generates the random value \(s\) and \(\alpha\).</em></li>
-<li><em><strong>Proof Key:</strong> Provided to the prover</em>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\) and \(\alpha\).</li>
+<li><strong>Proof Key:</strong> Provided to the prover
 <ul>
-<li><em>\(\{g^{\ell_i(s)},g^{\alpha \ell_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{r_i(s)},g^{\alpha r_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{o_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{(s^j)}\}_{j\in[m]}\)</em></li>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha \ell_i(s)},g^{\alpha r_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
 </ul>
 </li>
-<li><em><strong>Verification Key:</strong></em>
+<li><strong>Verification Key:</strong>
 <ul>
-<li><em>\(g^{t(s)}\)</em></li>
-<li><em>\(g^{\alpha}\)</em></li>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha}\)</li>
 </ul>
 </li>
-<li><em>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</em></li>
+<li>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -2327,27 +2326,109 @@ pub fn non_interactive_zkp_protocol(
 <p><strong>Vulnerability</strong></p>
 <p>One ciriticl problem of the above protocol is that its check may pass even if \(g^{\ell}\) is computed from not \(\{g^{\ell_i(s)}\}_{i \in [d]}\) but either \(\{g^{r_i(s)}\} _{i \in [d]}\) or \(\{g^{o_i(s)}\} _{i \in [d]}\), or their combination. The same phenomenon is also true for \(g^{r}\) and \(g^{o}\). For example, if the prover sends \((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) insteads of \((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\), all of the verification checks still pass, although the proved statement is different from the original one.</p>
 <h2 id="second-protocol-non-interchangibility"><a class="header" href="#second-protocol-non-interchangibility">Second Protocol: Non-Interchangibility</a></h2>
-<p><strong>Protocol (Setup)</strong></p>
 <p>To solve the above interchangeability problem, we should use the different \(\alpha\)-shift for \(\ell\), \(r\), and \(o\).</p>
+<p><strong>Protocol (Setup)</strong></p>
 <ul>
-<li><em><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</em></li>
-<li><em><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</em></li>
-<li><em><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\).</em></li>
-<li><em><strong>Proof Key:</strong> Provided to the prover</em>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), <em>\(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\)</em>.</li>
+<li><strong>Proof Key:</strong> Provided to the prover
 <ul>
-<li><em>\(\{g^{\ell_i(s)},g^{\alpha \ell_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{r_i(s)},g^{\alpha r_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{o_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</em></li>
-<li><em>\(\{g^{(s^j)}\}_{j\in[m]}\)</em></li>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li><em>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
 </ul>
 </li>
-<li><em><strong>Verification Key:</strong></em>
+<li><strong>Verification Key:</strong>
 <ul>
-<li><em>\(g^{t(s)}\)</em></li>
+<li>\(g^{t(s)}\)</li>
 <li><em>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</em></li>
 </ul>
 </li>
-<li><em>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</em></li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the witness vector \(w\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} w_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} w_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} w_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\).
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\).
+<ul>
+<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{w_i} \)</em></li>
+<li><em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{w_i} \)</em></li>
+<li><em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{w_i} \)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)},\) <em>\(g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)},\)</em> \(g^{h(s)})\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</em></li>
+<li><em>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</em></li>
+<li><em>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Vulnerability</strong></p>
+<p>The current protocol still does not force the consistency of each variable. In other words, each variable \(w_i\) can be different values in each \(\ell\), \(r\), and \(o\), since the verification check is done separetely.</p>
+<h2 id="thrid-protocol-variable-consistency"><a class="header" href="#thrid-protocol-variable-consistency">Thrid Protocol: Variable Consistency</a></h2>
+<p>To achive the variable-consistency, we use a kind of checksum. Specifically, we first draw a new random value \(\beta\) and defines a checksum of \(w_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(w _{\ell, i}\), \(w _{r,i}\), \(w _{o,i}\), and \(w _{\beta,i}\) be the \(i\)-th value of the witness vector for \(\ell\), \(r\), \(o\) and the checksum, respectively. Then, if all of them are true, the following equation holds:</p>
+<p>\[
+e(g^{w _{\ell, i} \ell_i(s)} g^{w _{r, i} r_i(s)} g^{w _{o, i} o_i(s)}, g^{\beta}) = e(g^{w _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
+\]</p>
+<p>Unfortunately, this condition is not equivalent. For example, suppose \(\ell_i(x) = r_i(x)\). Then, we have the following:</p>
+<p>\begin{align*}
+&amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} r_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
+\iff &amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} \ell_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
+\end{align*}</p>
+<p>Then, for arbitrary \(w _{r,i}\) and \(w _{o,i}\), the above equation holds if we set \(w _{\beta, i} = w _{o, i}\) and \(w _{\ell, i} = 2 w _{o, i} - w _{r, i}\).</p>
+<p>To surrogate this problem, we have to use different \(\beta\) for each of \(\ell\), \(r\) and \(o\). THen, we need to check the following equation:</p>
+<p>\[
+e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{w _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{w _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)<br />
+\]</p>
+<p>The new protocol using the above variable-consistency check is as follows:</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\).</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{\alpha \ell_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{r_i(s)},g^{\alpha r_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{o_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j \in [m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -2393,20 +2474,6 @@ pub fn non_interactive_zkp_protocol(
 </ul>
 </li>
 </ul>
-<p><strong>Vulnerability</strong></p>
-<p>The current protocol still does not force the consistency of each variable. In other words, each variable \(w_i\) can be different values in each \(\ell\), \(r\), and \(o\), since the verification check is done separetely.</p>
-<h2 id="thrid-protocol-variable-consistency"><a class="header" href="#thrid-protocol-variable-consistency">Thrid Protocol: Variable Consistency</a></h2>
-<p>To achive the variable-consistency, we use a kind of checksum. Specifically, we first draw a new random value \(\beta\) and defines a checksum of \(w_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(w _{\ell, i}\), \(w _{r,i}\), \(w _{o,i}\), and \(w _{\beta,i}\) be the \(i\)-th value of the witness vector for \(\ell\), \(r\), \(o\) and the checksum, respectively. Then, if all of them are true, the following equation holds:</p>
-<p>\[
-e(g^{w _{\ell, i} \ell_i(s)} g^{w _{r, i} r_i(s)} g^{w _{o, i} o_i(s)}, g^{\beta}) = e(g^{w _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
-\]</p>
-<p>Unfortunately, this condition is not equivalent. For example, suppose \(\ell_i(x) = r_i(x)\). Then, we have the following:</p>
-<p>\begin{align*}
-&amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} r_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
-\iff &amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} \ell_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
-\end{align*}</p>
-<p>Then, for arbitrary \(w _{r,i}\) and \(w _{o,i}\), the above equation holds if we set \(w _{\beta, i} = w _{o, i}\) and \(w _{\ell, i} = 2 w _{o, i} - w _{r, i}\).</p>
-<p>To surrogate this problem, we have to use different \(\beta\) for each of \(\ell\), \(r\) and \(o\).</p>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
