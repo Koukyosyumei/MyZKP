@@ -188,9 +188,9 @@ The new protocol using the above variable-consistency check is as follows:
 
 **Vulnerability**
 
-This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \\((g^{\ell _i(s)})^{w _i}\\) is actually calculated by \\(g^{\ell _i(s)}\\) by checking \\(e((g^{\ell _i(s)})^{w _i}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)\\). Here, suppose the prover submits \\((g^{\ell _i(s)})^{w _i} \cdot g^{v}\\) and \\((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}\\) is a constatn value. Then, the polynomial restriction check still passes!
+This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \\((g^{\ell _i(s)})^{w _i}\\) is actually calculated by \\(g^{\ell _i(s)}\\) by checking \\(e((g^{\ell _i(s)})^{w _i}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)\\). Suppose that all the elements of one column of \\(L\\), \\(L _j\\), are \\(1\\). Then, the corresponding interpolated polynomial will be the constatn function: \\(\ell _j(x) = 1\\), allowing the prover to obtain \\(g^{\alpha}\\). Here, suppose the prover submits \\((g^{\ell _i(s)})^{w _i} g^{v}\\) and \\((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i} (g^{\alpha _{\ell}})^{v}\\), where \\(v\\) is a constatn value. Then, the polynomial restriction check still passes!
 
 \\[
-e((g^{\ell _i(s)})^{w _i} \cdot g^{v}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)
+e((g^{\ell _i(s)})^{w _i} g^{v}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i} (g^{\alpha _{\ell}})^{v}, g)
 \\]
 
