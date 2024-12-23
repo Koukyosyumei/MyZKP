@@ -208,29 +208,30 @@
 </li>
 <li>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</li>
 </ul>
+<p>Note that both of proof and verification keys are publicaly available so that anyone can prove and verify the proof generated from the target program.</p>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
 <li>Execute the program and get the witness vector \(w\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} w_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} w_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} w_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
 <li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
 <li>Evaluate each polynomial at \(s\).
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\).
 <ul>
-<li>\(g^{\alpha \ell(s)} = \prod^{d}_{i=1} (g^{\alpha \ell_i(s)})^{w_i} \)</li>
-<li>\(g^{\alpha r(s)} = \prod^{d}_{i=1} (g^{\alpha r_i(s)})^{w_i} \)</li>
-<li>\(g^{\alpha o(s)} = \prod^{d}_{i=1} (g^{\alpha o_i(s)})^{w_i} \)</li>
+<li>\(g^{\alpha \ell(s)} = \prod^{d}_{i=1} (g^{\alpha \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha r(s)} = \prod^{d}_{i=1} (g^{\alpha r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha o(s)} = \prod^{d}_{i=1} (g^{\alpha o_i(s)})^{v_i} \)</li>
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
@@ -281,24 +282,24 @@
 <li>Execute the program and get the witness vector \(w\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} w_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} w_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} w_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
 <li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
 <li>Evaluate each polynomial at \(s\).
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\).
 <ul>
-<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{w_i} \)</em></li>
-<li><em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{w_i} \)</em></li>
-<li><em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{w_i} \)</em></li>
+<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</em></li>
+<li><em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</em></li>
+<li><em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</em></li>
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
@@ -321,21 +322,21 @@
 </li>
 </ul>
 <p><strong>Vulnerability</strong></p>
-<p>The current protocol still does not force the consistency of each variable. In other words, each variable \(w_i\) can be different values in each \(\ell\), \(r\), and \(o\), since the verification check is done separetely.</p>
+<p>The current protocol still does not force the consistency of each variable. In other words, each variable \(v_i\) can be different values in each \(\ell\), \(r\), and \(o\), since the verification check is done separetely.</p>
 <h2 id="thrid-protocol-variable-consistency"><a class="header" href="#thrid-protocol-variable-consistency">Thrid Protocol: Variable Consistency</a></h2>
-<p>To achive the variable-consistency, we use a kind of checksum. Specifically, we first draw a new random value \(\beta\) and defines a checksum of \(w_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(w _{\ell, i}\), \(w _{r,i}\), \(w _{o,i}\), and \(w _{\beta,i}\) be the \(i\)-th value of the witness vector for \(\ell\), \(r\), \(o\) and the checksum, respectively. Then, if all of them are true, the following equation holds:</p>
+<p>To achive the variable-consistency, we use a kind of checksum. Specifically, we first draw a new random value \(\beta\) and defines a checksum of \(v_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(v _{\ell, i}\), \(v _{r,i}\), \(v _{o,i}\), and \(v _{\beta,i}\) be the \(i\)-th value of the witness vector for \(\ell\), \(r\), \(o\) and the checksum, respectively. Then, if all of them are true, the following equation holds:</p>
 <p>\[
-e(g^{w _{\ell, i} \ell_i(s)} g^{w _{r, i} r_i(s)} g^{w _{o, i} o_i(s)}, g^{\beta}) = e(g^{w _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
+e(g^{v _{\ell, i} \ell_i(s)} g^{v _{r, i} r_i(s)} g^{v _{o, i} o_i(s)}, g^{\beta}) = e(g^{v _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
 \]</p>
 <p>Unfortunately, this condition is not equivalent. For example, suppose \(\ell_i(x) = r_i(x)\). Then, we have the following:</p>
 <p>\begin{align*}
-&amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} r_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
-\iff &amp;\beta(w _{\ell, i} \ell_i(s) + w _{r, i} \ell_i(s) + w _{o, i} o_i(s)) = w _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
+&amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} r_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
+\iff &amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} \ell_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
 \end{align*}</p>
-<p>Then, for arbitrary \(w _{r,i}\) and \(w _{o,i}\), the above equation holds if we set \(w _{\beta, i} = w _{o, i}\) and \(w _{\ell, i} = 2 w _{o, i} - w _{r, i}\).</p>
+<p>Then, for arbitrary \(v _{r,i}\) and \(v _{o,i}\), the above equation holds if we set \(v _{\beta, i} = v _{o, i}\) and \(v _{\ell, i} = 2 v _{o, i} - v _{r, i}\).</p>
 <p>To surrogate this problem, we have to use different \(\beta\) for each of \(\ell\), \(r\) and \(o\). THen, we need to check the following equation:</p>
 <p>\[
-e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{w _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{w _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)<br />
+e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{v _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{v _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)<br />
 \]</p>
 <p>The new protocol using the above variable-consistency check is as follows:</p>
 <p><strong>Protocol (Setup)</strong></p>
@@ -362,32 +363,32 @@ e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
-<li>Execute the program and get the witness vector \(w\).</li>
+<li>Execute the program and get the assignment vector \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} w_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} w_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} w_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
 <li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
 <li>Evaluate each polynomial at \(s\):
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{w_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{w_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{w_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\):
 <ul>
-<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{w_i} \)</li>
-<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{w_i} \)</li>
-<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{w_i} \)</li>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
 </ul>
 </li>
 <li><em>Evaluate each consistency polynomial at \(s\):</em>
 <ul>
-<li><em>\(g^{z(s)} = \prod^{d}_{i=1} g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\)</em></li>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
@@ -415,10 +416,174 @@ e(g^{w _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{w _{r, i} r _{i}(
 </li>
 </ul>
 <p><strong>Vulnerability</strong></p>
-<p>This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \((g^{\ell _i(s)})^{w _i}\) is actually calculated by \(g^{\ell _i(s)}\) by checking \(e((g^{\ell _i(s)})^{w _i}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i}, g)\). Suppose that all the elements of one column of \(L\), \(L _j\), are \(1\). Then, the corresponding interpolated polynomial will be the constatn function: \(\ell _j(x) = 1\), allowing the prover to obtain \(g^{\alpha}\). Here, suppose the prover submits \((g^{\ell _i(s)})^{w _i} g^{v}\) and \((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i} (g^{\alpha _{\ell}})^{v}\), where \(v\) is a constatn value. Then, the polynomial restriction check still passes!</p>
+<p>This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \(g^{\ell}\) is actually calculated by \(\{g^{\ell _i(s)}\} _{i \in [d]}\) by checking \(e(g^{\ell}, g^{\alpha _{\ell}}) = e(g^{\ell'}, g)\). However, this process is not sound. Recall that the verification key is publicaly available, and the prover knows both of \(g^{\alpha _{\ell}}\) and \(g^{\beta _{\ell}}\). Here, suppose the prover submits \(g^{\ell} g^{c}\) and \(g^{\ell'} (g^{\alpha _{\ell}})^{c}\) insteads of \(g^{\ell}\) and \(g^{\ell'}\), where \(c\) is a constatn value. Then, the polynomial restriction check still passes:</p>
 <p>\[
-e((g^{\ell _i(s)})^{w _i} g^{v}, g^{\alpha _{\ell}}) = e((g^{\alpha _{\ell} \ell _{i}(s)})^{w_i} (g^{\alpha _{\ell}})^{v}, g)
+e(g^{\ell} g^{c}, g^{\alpha _{\ell}}) = e(g^{\alpha _{\ell} \ell + \alpha _{\ell} c}, g) = e(g^{\ell'}g^{\alpha _{\ell}c}, g) = e(g^{\ell'} (g^{\alpha _{\ell}})^{c}, g)
 \]</p>
+<p>In addition, if the prover submits \(g^{z} (g^{\beta _{\ell}})^{c}\) as the checksum, it also passes the polynomial checksum verification:</p>
+<p>\[
+e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z} (g^{\beta _{\ell}})^{c}, g)
+\]</p>
+<p>Ofcouse, this phenomenon also can occur for \(r\) and \(o\).</p>
+<p>To sum up, the malicious prover can add an arbitray constatn to \(\ell(s)\), alternating the statement to be proved, witout being detected by the verifier. This kind of vulnerability is typically called <strong>Malleability</strong>.</p>
+<h2 id="forth-protocol-non-malleability"><a class="header" href="#forth-protocol-non-malleability">Forth Protocol: Non-Malleability</a></h2>
+<p>One way to surrogate the above malleability is hiding \(g^{\beta _{\ell}}\), \(g^{\beta _{r}}\), and \(g^{\beta _{o}}\) by powering them with a new random value \(\eta\).</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), and <em>\(\eta\)</em>.</li>
+<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li><em>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
+<li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
+<li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell} \eta}) \cdot e(g^{r}, g^{\beta _{r} \eta}) \cdot e(g^{o}, g^{\beta _{o} \eta}) = e(g^{z}, g^{\eta})\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<h2 id="fifth-protocol-pinocchio"><a class="header" href="#fifth-protocol-pinocchio">Fifth Protocol: Pinocchio</a></h2>
+<p>The above protocol introduces four expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
+<li><strong>Randized Generators:</strong> <em>\(g _{\ell} = g^{\rho _{\ell}}\), \(g _{r} = g^{\rho _{r}}\), and \(g _{o} = g^{\rho _{o}}\)</em></li>
+<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li><em>\(\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\}_{i\in[d]}\)</em></li>
+<li><em>\(\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li><em>\(g_{o}^{t(s)}\)</em></li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta _{\ell} \ell _{i}(s)} \cdot g _{r}^{\beta _{r} r _{i}(s)} \cdot g _{o}^{\beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em></li>
+<li><em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em></li>
+<li><em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}) = e(g^{z}, g^{\eta})\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p>This protocol reduces two pairing operations.</p>
 
                     </main>
 

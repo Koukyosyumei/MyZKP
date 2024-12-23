@@ -8,7 +8,7 @@ However, Boolean circuits are often large and inefficient. Even a simple operati
 
 ## Rank-1 Constraint System (R1CS)
 
-There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as \underline{a set of equality constraints, each involving only one multiplication}. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:
+There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as a set of equality constraints, each involving only one multiplication. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:
 
 ### Definition: R1CS
 
@@ -21,9 +21,9 @@ An R1CS structure \\(\mathcal{S}\\) consists of:
 An R1CS instance includes a public input \\(p \in \mathbb{F}^\ell\\), while an R1CS witness is a vector \\(w \in \mathbb{F}^{d - \ell - 1}\\).
 A structure-instance tuple \\((S, p)\\) is satisfied by a witness \\(w\\) if:
 \begin{equation}
-(L \cdot a) \circ (R \cdot a) - O \cdot a = \mathbf{0}
+(L \cdot v) \circ (R \cdot v) - O \cdot v = \mathbf{0}
 \end{equation}
-where \\(a = (1, w, p) \in \mathbb{F}^d\\), \\(\cdot\\) denotes matrix-vector multiplication, and \\(\circ\\) is the Hadamard product.
+where \\(v = (1, w, p) \in \mathbb{F}^d\\), \\(\cdot\\) denotes matrix-vector multiplication, and \\(\circ\\) is the Hadamard product.
 
 The intuitive interpretation of each matrix is as follows:
 
@@ -46,7 +46,7 @@ Let's consider a simple example where we want to prove \\(z = x \cdot y\\), with
 The R1CS constraint for \\(z = x \cdot y\\) is satisfied when:
 
 \begin{align*}
-&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot a) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot a) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot a \\\\
+&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot v) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot v) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot v \\\\
 =&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot \begin{bmatrix}
 1 \\\\ 3690 \\\\ 82 \\\\ 45
 \end{bmatrix}) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot \begin{bmatrix}
@@ -71,18 +71,18 @@ This example demonstrates how R1CS encodes a simple multiplication constraint:
 Let's examine a more complex example: \\(r = a \cdot b \cdot c \cdot d\\). Since R1CS requires that each constraint contain only one multiplication, we need to break this down into multiple constraints:
 
 \begin{align*}
-v_1 &= a \cdot b \\\\
-v_2 &= c \cdot d \\\\
-r &= v_1 \cdot v_2
+z_1 &= a \cdot b \\\\
+z_2 &= c \cdot d \\\\
+r &= z_1 \cdot z_2
 \end{align*}
 
-Note that alternative representations are possible, such as \\(v_1 = ab, v_2 = v_1c, r = v_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, v_1, v_2)\\), so the dimension of the witness vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
+Note that alternative representations are possible, such as \\(z_1 = ab, z_2 = z_1c, r = z_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, z_1, z_2)\\), so the dimension of the witness vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
 To construct the matrices \\(L\\), \\(R\\), and \\(O\\), we can interpret the constraints as linear combinations:
 
 \begin{align*}
-v_1 &= (0 \cdot 1 + 0 \cdot r + 1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot b \\\\
-v_2 &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot d \\\\
-r &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot v_1 + 0 \cdot v_2) \cdot v_2
+z_1 &= (0 \cdot 1 + 0 \cdot r + 1 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot b \\\\
+z_2 &= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot d \\\\
+r &= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot z_1 + 0 \cdot z_2) \cdot z_2
 \end{align*}
 
 Thus, we can construct \\(L\\), \\(R\\), and \\(O\\) as follows:
@@ -109,7 +109,7 @@ O = \begin{bmatrix}
 \end{bmatrix}
 \end{equation*}
 
-Where the columns in each matrix correspond to \\((1, r, a, b, c, d, v_1, v_2)\\).
+Where the columns in each matrix correspond to \\((1, r, a, b, c, d, z_1, z_2)\\).
 
 **Addition with a Constant**
 
@@ -191,7 +191,7 @@ impl<F: Field> R1CS<F> {
 
 ## Quadratic Arithmetic Program (QAP)
 
-Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
+Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot v) \circ (R \cdot v) = O \cdot v\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
 
 **Equivalence of Matrices**
 
@@ -247,12 +247,12 @@ The Schwartz-Zippel Lemma states that we need only one evaluation at a random po
 
 **Back to R1CS**
 
-Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \\(L \cdot a\\), \\(R \cdot a\\), and \\(O \cdot a\\), denoted as \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\), repectively, as follows:
+Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \\(L \cdot v\\), \\(R \cdot v\\), and \\(O \cdot v\\), denoted as \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\), repectively, as follows:
 
 \begin{align*}
-\ell(x) &= \sum^{d}_{i=1} a_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)]) \\\\
-r(x) &= \sum^{d} _{i=1} a_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)]) \\\\
-o(x) &= \sum^{d} _{i=1} a_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
+\ell(x) &= \sum^{d}_{i=1} v_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)]) \\\\
+r(x) &= \sum^{d} _{i=1} v_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)]) \\\\
+o(x) &= \sum^{d} _{i=1} v_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
 \end{align*}
 
 However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(m-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2m-2\\). Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\). 
