@@ -32,7 +32,7 @@
 //! use myzkp::modules::ring::Ring;
 //! use myzkp::modules::field::ModulusValue;
 //! use myzkp::modules::field::FiniteFieldElement;
-//! 
+//!
 //! define_myzkp_modulus_type!(Mod17, "17");
 //! let a = FiniteFieldElement::<Mod17>::from_value(5);
 //! let b = FiniteFieldElement::<Mod17>::from_value(3);
@@ -345,7 +345,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 /// use myzkp::modules::ring::Ring;
 /// use myzkp::modules::field::ModulusValue;
 /// use myzkp::modules::field::FiniteFieldElement;
-/// 
+///
 /// define_myzkp_modulus_type!(Mod17, "17");
 /// ```
 #[macro_export]
