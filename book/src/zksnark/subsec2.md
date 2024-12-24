@@ -31,14 +31,14 @@ The intuitive interpretation of each matrix is as follows:
 - \\(L\\): Encodes the left input of each gate
 - \\(R\\): Encodes the right input of each gate
 - \\(O\\): Encodes the output of each gate
-- The leading 1 in the witness vector allows for constant terms
+- The leading 1 in the assignment vector allows for constant terms
 
 
 **Single Multiplication**
 
 Let's consider a simple example where we want to prove \\(z = x \cdot y\\), with \\(z = 3690\\), \\(x = 82\\), and \\(y = 45\\).
 
-- **Witness vector**: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
+- **Assignment vector**: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
 - **Number of witnesses**: \\(m = 4\\)
 - **Number of constraints**: \\(d = 1\\)
 
@@ -76,7 +76,7 @@ z_2 &= c \cdot d \\\\
 r &= z_1 \cdot z_2
 \end{align*}
 
-Note that alternative representations are possible, such as \\(z_1 = ab, z_2 = z_1c, r = z_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, z_1, z_2)\\), so the dimension of the witness vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
+Note that alternative representations are possible, such as \\(z_1 = ab, z_2 = z_1c, r = z_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, z_1, z_2)\\), so the dimension of the assignment vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
 To construct the matrices \\(L\\), \\(R\\), and \\(O\\), we can interpret the constraints as linear combinations:
 
 \begin{align*}
@@ -113,7 +113,7 @@ Where the columns in each matrix correspond to \\((1, r, a, b, c, d, z_1, z_2)\\
 
 **Addition with a Constant**
 
-Let's examine the case \\(z = x \cdot y + 3\\). We can represent this as \\(-3 + z = x \cdot y\\). For the witness vector \\((1, z, x, y)\\), we have:
+Let's examine the case \\(z = x \cdot y + 3\\). We can represent this as \\(-3 + z = x \cdot y\\). For the assignment vector \\((1, z, x, y)\\), we have:
 
 \begin{align*}
 L &= \begin{bmatrix}

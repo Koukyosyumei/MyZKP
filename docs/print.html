@@ -1337,12 +1337,12 @@ where \(v = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multip
 <li>\(L\): Encodes the left input of each gate</li>
 <li>\(R\): Encodes the right input of each gate</li>
 <li>\(O\): Encodes the output of each gate</li>
-<li>The leading 1 in the witness vector allows for constant terms</li>
+<li>The leading 1 in the assignment vector allows for constant terms</li>
 </ul>
 <p><strong>Single Multiplication</strong></p>
 <p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
 <ul>
-<li><strong>Witness vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li><strong>Assignment vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
 <li><strong>Number of witnesses</strong>: \(m = 4\)</li>
 <li><strong>Number of constraints</strong>: \(d = 1\)</li>
 </ul>
@@ -1373,7 +1373,7 @@ z_1 &amp;= a \cdot b \\
 z_2 &amp;= c \cdot d \\
 r &amp;= z_1 \cdot z_2
 \end{align*}</p>
-<p>Note that alternative representations are possible, such as \(z_1 = ab, z_2 = z_1c, r = z_2d\). In this example, we use 7 variables \((r, a, b, c, d, z_1, z_2)\), so the dimension of the witness vector will be \(m = 8\) (including the constant 1). We have three constraints, so \(n = 3\).
+<p>Note that alternative representations are possible, such as \(z_1 = ab, z_2 = z_1c, r = z_2d\). In this example, we use 7 variables \((r, a, b, c, d, z_1, z_2)\), so the dimension of the assignment vector will be \(m = 8\) (including the constant 1). We have three constraints, so \(n = 3\).
 To construct the matrices \(L\), \(R\), and \(O\), we can interpret the constraints as linear combinations:</p>
 <p>\begin{align*}
 z_1 &amp;= (0 \cdot 1 + 0 \cdot r + 1 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot b \\
@@ -1404,7 +1404,7 @@ O = \begin{bmatrix}
 \end{equation*}</p>
 <p>Where the columns in each matrix correspond to \((1, r, a, b, c, d, z_1, z_2)\).</p>
 <p><strong>Addition with a Constant</strong></p>
-<p>Let's examine the case \(z = x \cdot y + 3\). We can represent this as \(-3 + z = x \cdot y\). For the witness vector \((1, z, x, y)\), we have:</p>
+<p>Let's examine the case \(z = x \cdot y + 3\). We can represent this as \(-3 + z = x \cdot y\). For the assignment vector \((1, z, x, y)\), we have:</p>
 <p>\begin{align*}
 L &amp;= \begin{bmatrix}
 0 &amp; 0 &amp; 1 &amp; 0
