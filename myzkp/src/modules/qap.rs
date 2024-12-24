@@ -5,53 +5,42 @@ use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use crate::modules::r1cs::{dot, R1CS};
 
-#[derive(Debug, Clone)]
-pub struct QAP<'a, F: Field> {
-    pub r1cs: &'a R1CS<F>,
+pub struct QAP<F: Field> {
+    pub m: usize,
+    pub d: usize,
+    pub ell_i_vec: Vec<Polynomial<F>>,
+    pub r_i_vec: Vec<Polynomial<F>>,
+    pub o_i_vec: Vec<Polynomial<F>>,
     pub t: Polynomial<F>,
 }
 
-impl<'a, F: Field> QAP<'a, F> {
-    fn new(r1cs: &'a R1CS<F>) -> Self {
+impl<F: Field> QAP<F> {
+    pub fn from_r1cs(r1cs: &R1CS<F>) -> QAP<F> {
+        let x: Vec<F> = (1..=r1cs.m).map(F::from_value).collect();
+
+        let interpolate = |rows: &[Vec<F>]| {
+            (0..r1cs.d)
+                .map(|i| {
+                    let column: Vec<F> = rows.iter().map(|row| row[i].clone()).collect();
+                    Polynomial::<F>::interpolate(&x, &column)
+                })
+                .collect::<Vec<Polynomial<F>>>()
+        };
+
+        let ell_i_vec = interpolate(&r1cs.left);
+        let r_i_vec = interpolate(&r1cs.right);
+        let o_i_vec = interpolate(&r1cs.out);
+
+        let t = Polynomial::<F>::from_monomials(&x);
+
         QAP {
-            r1cs: r1cs,
-            t: Polynomial::<F>::from_monomials(
-                &(1..=r1cs.m).map(|i| F::from_value(i)).collect::<Vec<F>>(),
-            ),
+            m: r1cs.m,
+            d: r1cs.d,
+            ell_i_vec,
+            r_i_vec,
+            o_i_vec,
+            t,
         }
-    }
-
-    fn generate_polynomials(&self, a: &Vec<F>) -> (Polynomial<F>, Polynomial<F>, Polynomial<F>) {
-        let left_dot_products = self
-            .r1cs
-            .left
-            .iter()
-            .map(|v| dot(&v, &a))
-            .collect::<Vec<F>>();
-        let right_dot_products = self
-            .r1cs
-            .right
-            .iter()
-            .map(|v| dot(&v, &a))
-            .collect::<Vec<F>>();
-        let out_dot_products = self
-            .r1cs
-            .out
-            .iter()
-            .map(|v| dot(&v, &a))
-            .collect::<Vec<F>>();
-
-        let x = (1..=self.r1cs.m)
-            .map(|i| F::from_value(i))
-            .collect::<Vec<F>>();
-        let left_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &left_dot_products);
-        let right_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &right_dot_products);
-        let out_interpolated_polynomial = Polynomial::<F>::interpolate(&x, &out_dot_products);
-        (
-            left_interpolated_polynomial,
-            right_interpolated_polynomial,
-            out_interpolated_polynomial,
-        )
     }
 }
 
@@ -71,14 +60,143 @@ mod tests {
         let left = vec![vec![F::zero(), F::zero(), F::one(), F::zero()]];
         let right = vec![vec![F::zero(), F::zero(), F::zero(), F::one()]];
         let out = vec![vec![F::zero(), F::one(), F::zero(), F::zero()]];
-        let a = vec![
-            F::one(),
-            F::from_value(3690),
-            F::from_value(82),
-            F::from_value(45),
+        let r1cs = R1CS::new(left, right, out);
+        let qap = QAP::from_r1cs(&r1cs);
+
+        let ground_truth_ell_i_vec = vec![
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::one(),
+            Polynomial::<F>::zero(),
+        ];
+        let ground_truth_r_i_vec = vec![
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::one(),
+        ];
+        let ground_truth_o_i_vec = vec![
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::one(),
+            Polynomial::<F>::zero(),
+            Polynomial::<F>::zero(),
+        ];
+        for i in 0..(qap.d) {
+            assert_eq!(qap.ell_i_vec[i], ground_truth_ell_i_vec[i]);
+            assert_eq!(qap.r_i_vec[i], ground_truth_r_i_vec[i]);
+            assert_eq!(qap.o_i_vec[i], ground_truth_o_i_vec[i]);
+        }
+    }
+
+    #[test]
+    fn test_qap_multi_multiplication() {
+        let left = vec![
+            vec![
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+            ],
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+            ],
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+            ],
+        ];
+
+        let right = vec![
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+            ],
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+                F::zero(),
+            ],
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+            ],
+        ];
+
+        let out = vec![
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+                F::zero(),
+            ],
+            vec![
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::one(),
+            ],
+            vec![
+                F::zero(),
+                F::one(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+                F::zero(),
+            ],
         ];
         let r1cs = R1CS::new(left, right, out);
-        let qap = QAP::new(&r1cs);
-        let (_, _, _) = qap.generate_polynomials(&a);
+        let qap = QAP::from_r1cs(&r1cs);
+
+        /*
+        for i in 0..(qap.d) {
+            println!("ell - {}: {}", i, qap.ell_i_vec[i]);
+        }
+
+        assert!(false);
+        */
     }
 }

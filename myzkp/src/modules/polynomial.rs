@@ -161,7 +161,7 @@ impl<F: Field> Polynomial<F> {
             lagrange_polys.push(cur_poly);
         }
 
-        let mut result = Polynomial { coef: vec![] };
+        let mut result = Polynomial::<F>::zero();
         for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
             result = result + lagrange_poly.clone() * y_values[j].clone();
         }
@@ -287,9 +287,7 @@ impl<F: Field> fmt::Display for Polynomial<F> {
 
 impl<F: Field> Zero for Polynomial<F> {
     fn zero() -> Self {
-        Polynomial {
-            coef: vec![F::zero()],
-        }
+        Polynomial { coef: vec![] }
     }
 
     fn is_zero(&self) -> bool {

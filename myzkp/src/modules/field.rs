@@ -193,17 +193,14 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 
 impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
     fn add_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
         FiniteFieldElement::<M>::new(&self.value + &other.value)
     }
 
     fn mul_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
         FiniteFieldElement::<M>::new(&self.value * &other.value)
     }
 
     fn sub_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
         FiniteFieldElement::<M>::new(&self.value - &other.value)
     }
 

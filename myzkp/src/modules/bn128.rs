@@ -146,6 +146,10 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
     let q: G12Point = twist_g2_to_g12(q_g2.clone());
     let m = BN128Modulus::modulus();
 
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return Fq12::zero();
+    }
+
     let mut f = Fq12::one();
     if p != q {
         let out = miller(&q, &p, &ATE_LOOP_COUNT);
