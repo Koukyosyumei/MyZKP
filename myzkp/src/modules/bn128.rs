@@ -19,6 +19,10 @@ define_myzkp_modulus_type!(
 );
 define_myzkp_curve_type!(BN128Curve, "0", "3");
 
+lazy_static! {
+    static ref ATE_LOOP_COUNT: BigInt = BigInt::from_str("29793968203157093288").unwrap();
+}
+
 pub type Fq = FiniteFieldElement<BN128Modulus>;
 pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
@@ -144,9 +148,7 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
 
     let mut f = Fq12::one();
     if p != q {
-        let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
-
-        let out = miller(&q, &p, &ate_loop_count);
+        let out = miller(&q, &p, &ATE_LOOP_COUNT);
         f = out.0;
         let mut r = out.1;
         // Assert: r == multiply(&q, &ate_loop_count)
