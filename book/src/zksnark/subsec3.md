@@ -16,9 +16,9 @@ The simplest approach to prove that \\(\mathcal{A}\\) knows \\(H(x)\\) is as fol
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) sends all possible values in \\(\mathbb{F}\\) to \\(\mathcal{A}\\).*
-- *\\(\mathcal{A}\\) computes and sends all possible outputs of \\(H(x)\\) and \\(P(x)\\).*
-- *\\(\mathcal{B}\\) checks whether \\(H(a)T(a) = P(a)\\) holds for any \\(a\\) in \\(\mathbb{F}\\).*
+- \\(\mathcal{B}\\) sends all possible values in \\(\mathbb{F}\\) to \\(\mathcal{A}\\).
+- \\(\mathcal{A}\\) computes and sends all possible outputs of \\(H(x)\\) and \\(P(x)\\).
+- \\(\mathcal{B}\\) checks whether \\(H(a)T(a) = P(a)\\) holds for any \\(a\\) in \\(\mathbb{F}\\).
 
 This protocol is highly inefficient, requiring \\(\mathcal{O}(|\mathbb{F}|)\\) evaluations and communications.
 
@@ -209,7 +209,7 @@ Similarly, the Prover can evaluate \\(g^h = g^{H(s)}\\). The Verifier can then c
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly draw \\(s\\) from \\(\mathbb{F}\\).*
+- \\(\mathcal{B}\\) randomly draw \\(s\\) from \\(\mathbb{F}\\).
 - *\\(\mathcal{B}\\) computes and sends \\(\\{\alpha, \alpha_2, ..., \alpha_{n}\\}\\), where \\(\alpha_i= g^{(s^{i})}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\) and \\(v = g^{h}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).*
@@ -337,11 +337,11 @@ Based on this assumption, we can design an improved protocol:
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).*
-- *\\(\mathcal{B}\\) computes and sends \\(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\\) and \\(\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
-- *\\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), and \\(w = g^{p'}\\), where \\(g^{p'} = g^{P(sr)}\\).*
+- \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
+- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) *and \\(\\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
+- \\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), *and \\(w = g^{p'}\\), where \\(g^{p'} = g^{P(sr)}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u^{r} = w\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).*
+- \\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).
 
 The prover can compute \\(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\\) using powers of \\(\alpha'\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
 
@@ -441,12 +441,12 @@ To transform the above protocol into a zk-SNARK, we need to ensure that the veri
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).*
-- *\\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) and \\(\\{\alpha\_1', \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^{i})}\\) and \\(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\\).*
+- \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
+- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) and \\(\\{\alpha\_1', \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^{i})}\\) and \\(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\\).
 - *\\(\mathcal{A}\\) randomly selects \\(\delta\\) from field \\(\mathbb{F}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u' = (g^{p})^{\delta}\\), \\(v' = (g^{h})^{\delta}\\), and \\(w' = (g^{p'})^{\delta}\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u'^{r} = w'\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).*
+- \\(\mathcal{B}\\) checks whether \\(u'^{r} = w'\\).
+- \\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).
 
 By introducing the random value \\(\delta\\), the verifier can no longer learn anything about \\(p\\), \\(h\\), or \\(w\\), thus achieving zero knowledge.
 
