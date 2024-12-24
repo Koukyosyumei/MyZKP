@@ -109,6 +109,28 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
 
         Self::new(new_x, new_y)
     }
+
+    pub fn mul_ref<V: Into<BigInt>>(&self, scalar_val: V) -> Self {
+        let scalar: BigInt = scalar_val.into();
+        if scalar.is_zero() {
+            // Return the point at infinity for scalar * 0
+            return EllipticCurvePoint::point_at_infinity();
+        }
+
+        let mut result = EllipticCurvePoint::point_at_infinity();
+        let mut current = self.clone(); // Start with the current point
+        let mut scalar_bits = scalar.clone();
+
+        while scalar_bits > BigInt::zero() {
+            if &scalar_bits & BigInt::one() == BigInt::one() {
+                result = result.add_ref(&current);
+            }
+            current = current.add_ref(&current); // Double the point
+            scalar_bits >>= 1; // Move to the next bit
+        }
+
+        result
+    }
 }
 
 impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
@@ -141,25 +163,7 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<
     type Output = Self;
 
     fn mul(self, scalar_val: V) -> Self {
-        let scalar: BigInt = scalar_val.into();
-        if scalar.is_zero() {
-            // Return the point at infinity for scalar * 0
-            return EllipticCurvePoint::point_at_infinity();
-        }
-
-        let mut result = EllipticCurvePoint::point_at_infinity();
-        let mut current = self.clone(); // Start with the current point
-        let mut scalar_bits = scalar.clone();
-
-        while scalar_bits > BigInt::zero() {
-            if &scalar_bits & BigInt::one() == BigInt::one() {
-                result = result.add_ref(&current);
-            }
-            current = current.add_ref(&current); // Double the point
-            scalar_bits >>= 1; // Move to the next bit
-        }
-
-        result
+        self.mul_ref(scalar_val)
     }
 }
 

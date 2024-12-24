@@ -8,4 +8,5 @@ pub mod r1cs;
 pub mod ring;
 pub mod single_polynomial;
 pub mod utils;
+//pub mod zksnark;
 // pub mod snark;

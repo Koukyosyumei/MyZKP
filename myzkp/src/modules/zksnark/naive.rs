@@ -2,114 +2,125 @@ use num_bigint::{BigInt, RandBigInt, ToBigInt};
 use num_traits::Zero;
 use std::str::FromStr;
 
+use crate::modules::bn128::{optimal_ate_pairing, Fq, G1Point, G2Point};
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
+use crate::modules::ring::Ring;
 
 pub struct ProofKey {
-    alpha: Vec<G1Point>,
-    alpha_prime: Vec<G1Point>,
+    g_ell_i_vec: Vec<G1Point>,
+    g_r_i_vec: Vec<G1Point>,
+    g_o_i_vec: Vec<G1Point>,
+    g_alpha_ell_i_vec: Vec<G1Point>,
+    g_alpha_r_i_vec: Vec<G1Point>,
+    g_alpha_o_i_vec: Vec<G1Point>,
+    g_sj_vec: Vec<G1Point>,
 }
 
 pub struct VerificationKey {
-    g_r: G2Point,
+    g_alpha: G2Point,
     g_t_s: G2Point,
 }
 
 pub struct Proof {
-    u_prime: G1Point,
-    v_prime: G1Point,
-    w_prime: G1Point,
+    g_ell: G1Point,
+    g_r: G1Point,
+    g_o: G1Point,
+    g_ell_prime: G1Point,
+    g_r_prime: G1Point,
+    g_o_prime: G1Point,
+    g_h: G1Point,
 }
 
-pub struct TrustedSetup {
-    proof_key: ProofKey,
-    verification_key: VerificationKey,
+pub struct QAP<F: Field> {
+    pub m: usize,
+    pub d: usize,
+    pub ell_i_vec: Vec<Polynomial<F>>,
+    pub r_i_vec: Vec<Polynomial<F>>,
+    pub o_i_vec: Vec<Polynomial<F>>,
+    pub t: Polynomial<F>,
 }
 
-impl TrustedSetup {
-    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<Fq>, n: usize) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-        let r = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+pub fn setup<F: Field>(
+    g1: &G1Point,
+    g2: &G2Point,
+    qap: &QAP<F>,
+    n: usize,
+) -> (ProofKey, VerificationKey) {
+    let mut rng = rand::thread_rng();
+    let s = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+    let alpha = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
 
-        let mut alpha = Vec::with_capacity(n);
-        let mut alpha_prime = Vec::with_capacity(n);
+    let mut g_ell_i_vec = Vec::with_capacity(qap.d);
+    let mut g_r_i_vec = Vec::with_capacity(qap.d);
+    let mut g_o_i_vec = Vec::with_capacity(qap.d);
+    let mut g_alpha_ell_i_vec = Vec::with_capacity(qap.d);
+    let mut g_alpha_r_i_vec = Vec::with_capacity(qap.d);
+    let mut g_alpha_o_i_vec = Vec::with_capacity(qap.d);
+    let mut g_sj_vec = Vec::with_capacity(n);
 
-        let mut s_power = Fq::one();
-        for _ in 0..1 + n {
-            alpha.push(g1.clone() * s_power.clone().get_value());
-            alpha_prime.push(g1.clone() * (s_power.clone() * r.clone()).get_value());
-            s_power = s_power * s.clone();
-        }
-
-        let g_r = g2.clone() * r.clone().get_value();
-        let g_t_s = g2.clone() * t.eval(&s).get_value();
-
-        TrustedSetup {
-            proof_key: ProofKey { alpha, alpha_prime },
-            verification_key: VerificationKey { g_r, g_t_s },
-        }
-    }
-}
-
-pub struct Prover {
-    pub p: Polynomial<Fq>,
-    pub h: Polynomial<Fq>,
-}
-
-impl Prover {
-    pub fn new(p: Polynomial<Fq>, t: Polynomial<Fq>) -> Self {
-        let h = p.clone() / t;
-        Prover { p, h }
-    }
-
-    pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
-        let mut rng = rand::thread_rng();
-        let delta =
-            Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-
-        let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_p_prime = self.p.eval_with_powers_on_curve(&proof_key.alpha_prime);
-
-        Proof {
-            u_prime: g_p * delta.get_value(),
-            v_prime: g_h * delta.get_value(),
-            w_prime: g_p_prime * delta.get_value(),
-        }
-    }
-}
-
-pub struct Verifier {
-    pub g1: G1Point,
-    pub g2: G2Point,
-}
-
-impl Verifier {
-    pub fn new(g1: G1Point, g2: G2Point) -> Self {
-        Verifier { g1, g2 }
+    for i in 0..1 + qap.d {
+        g_ell_i_vec.push(g1.clone() * qap.ell_i_vec[i].eval(&s).get_value());
+        g_r_i_vec.push(g1.clone() * qap.r_i_vec[i].eval(&s).get_value());
+        g_o_i_vec.push(g1.clone() * qap.o_i_vec[i].eval(&s).get_value());
+        g_alpha_ell_i_vec
+            .push(g1.clone() * (alpha.clone() * qap.ell_i_vec[i].eval(&s).get_value()));
+        g_alpha_r_i_vec.push(g1.clone() * (alpha.clone() * qap.r_i_vec[i].eval(&s).get_value()));
+        g_alpha_o_i_vec.push(g1.clone() * (alpha.clone() * qap.o_i_vec[i].eval(&s).get_value()));
     }
 
-    pub fn verify(&self, proof: &Proof, vk: &VerificationKey) -> bool {
-        // Check e(u', g^r) = e(w', g)
-        let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
-        let pairing2 = optimal_ate_pairing(&proof.w_prime, &self.g2);
-        let check1 = pairing1 == pairing2;
-
-        // Check e(u', g^t) = e(v', g)
-        let pairing3 = optimal_ate_pairing(&proof.u_prime, &self.g2);
-        let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
-        let check2 = pairing3 == pairing4;
-
-        check1 && check2
+    let mut s_power = Fq::one();
+    for _ in 0..1 + n {
+        g_sj_vec.push(g1.clone() * s_power.clone().get_value());
+        s_power = s_power * s.clone();
     }
+
+    let g_alpha = g2.clone() * alpha.clone().get_value();
+    let g_t_s = g2.clone() * t.eval(&s).get_value();
+
+    (
+        ProofKey {
+            g_ell_i_vec,
+            g_r_i_vec,
+            g_o_i_vec,
+            g_alpha_ell_i_vec,
+            g_alpha_r_i_vec,
+            g_alpha_o_i_vec,
+            g_sj_vec,
+        },
+        VerificationKey { g_alpha, g_t_s },
+    )
 }
 
-pub fn non_interactive_zkp_protocol(
-    prover: &Prover,
-    verifier: &Verifier,
-    setup: &TrustedSetup,
-) -> bool {
-    let proof = prover.generate_proof(&setup.proof_key);
-    verifier.verify(&proof, &setup.verification_key)
+pub fn generate_proof<F: Field>(
+    &self,
+    assignment: &Vec<F>,
+    proof_key: &ProofKey,
+    qap: &QAP<F>,
+) -> Proof {
+    let mut g_ell = proof_key.g_ell_i_vec[0] * assignment[0];
+    let mut g_r = proof_key.g_r_i_vec[0] * assignment[0];
+    let mut g_o = proof_key.g_o_i_vec[0] * assignment[0];
+    let mut g_ell_prime = proof_key.g_alpha_ell_i_vec[0] * assignment[0];
+    let mut g_r_prime = proof_key.g_alpha_r_i_vec[0] * assignment[0];
+    let mut g_o_prime = proof_key.g_alpha_o_i_vec[0] * assignment[0];
+
+    for i in 1..1 + qap.d {
+        g_ell = g_ell + proof_key.g_ell_i_vec[i] * assignment[i];
+        g_r = g_r + proof_key.g_r_i_vec[i] * assignment[i];
+        g_o = g_o + proof_key.g_o_i_vec[i] * assignment[i];
+        g_ell_prime = g_ell_prime + proof_key.g_alpha_ell_i_vec[i] * assignment[i];
+        g_r_prime = g_r_prime + proof_key.g_alpha_r_i_vec[i] * assignment[i];
+        g_o_prime = g_o_prime + proof_key.g_alpha_o_i_vec[i] * assignment[i];
+    }
+
+    let mut ell = Polynomial::<F>::zero();
+    let mut r = Polynomial::<F>::zero();
+    let mut o = Polynomial::<F>::zero();
+    for i in 0..1 + qap.d {
+        ell = ell + assignment[i] * qap.ell_i_vec[i];
+        r = r + assignment[i] * qap.r_i_vec[i];
+        o = o + assignment[i] * qap.o_i_vec[i];
+    }
+    let h = (rll * r - o) / qap.t;
 }

@@ -340,15 +340,15 @@ mod tests {
         let np1 = optimal_ate_pairing(&g1.clone(), &-g2.clone());
         assert_eq!(p1.clone() * np1.clone(), Fq12::one());
         assert_eq!(pn1.clone(), np1.clone());
-        let p2 = optimal_ate_pairing(&(g1.clone() * 2), &g2.clone());
+        let p2 = optimal_ate_pairing(&(g1.mul_ref(2)), &g2.clone());
         assert_eq!(p1.clone() * p1.clone(), p2);
         assert!(p1 != p2);
         assert!(p1 != np1);
         assert!(p2 != np1);
-        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.clone() * 2));
+        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.mul_ref(2)));
         assert_eq!(p1.clone() * p1.clone(), po2);
-        let p3 = optimal_ate_pairing(&(g1.clone() * 37), &(g2.clone() * 27));
-        let po3 = optimal_ate_pairing(&(g1.clone() * 999), &(g2.clone()));
+        let p3 = optimal_ate_pairing(&(g1.mul_ref(37)), &(g2.mul_ref(27)));
+        let po3 = optimal_ate_pairing(&(g1 * 999), &g2);
         assert_eq!(p3, po3);
     }
 }
