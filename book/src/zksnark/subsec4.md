@@ -1,18 +1,18 @@
 # Bringing It All Together
 
-We first recap the previous sections. First the relationship between inputs and outputs of any prgram can be represented as a rank-one constraint system (R1CS) as follows:
+Let's recap the previous sections. First, the relationship between the inputs and outputs of any program can be expressed as a rank-one constraint system (R1CS) as follows:
 
 \\[
-  (L \cdot a) \circ (R \cdot a) - O \cdot a = 0  
+  (L \cdot v) \circ (R \cdot v) - O \cdot v = 0  
 \\]
 
-, where \\(a\\) is the concatenation of all inputs, outputs, and intermediate values (witness). Then, the statement, "I know the input values \\(x\\) that make the program returns the output values \\(y\\)", can be converted into "I know \\(a\\), whose outputs part is \\(y\\), that satisfies the constraint system corresponding to the program". 
+, where \\(v\\) is the concatenation of all inputs, outputs, and intermediate values. This allows us to transform the statement, "I know the input values \\(x\\) that make the program returns the output values \\(y\\)", into "I know \\(v\\), whose outputs components are \\(y\\), that satisfies the constraint system corresponding to the program". 
 
-Although separately checking each constraint, corresponding to each row in the above R1CS, is not efficient, we can convert those vector-equivalence test into the polynomial-equivalence test.
+Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test.
 
 ## First Protocol Idea
 
-The simplest protocol based on the previous chapter is as follos:
+The simplest protocol, based on the previous chapter, is as follows:
 
 **Protocol (Setup)**
 
@@ -28,11 +28,11 @@ The simplest protocol based on the previous chapter is as follos:
   - \\(g^{\alpha}\\)
 - After distribution, the original \\(s\\) and \\(\alpha\\) values are securely destroyed.
 
-Note that both of proof and verification keys are publicaly available so that anyone can prove and verify the proof generated from the target program.
+Both the proof key and the verification key are publicly available, enabling anyone to generate and verify proofs based on the target program.
 
 **Protocol (Proving)**
 
-- Execute the program and get the witness vector \\(w\\).
+- Run the program to obtain the assignment vector \\(v\\).
 - Compute the linear-combinations of polynomials
   - \\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\\)
   - \\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\\)
@@ -42,48 +42,50 @@ Note that both of proof and verification keys are publicaly available so that an
   - \\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \\)
   - \\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \\)
   - \\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \\)
-- Evaluate each shifted polynomial at \\(s\\).
+- Evaluate the shifted polynomials at \\(s\\).
   - \\(g^{\alpha \ell(s)} = \prod^{d}_{i=1} (g^{\alpha \ell_i(s)})^{v_i} \\)
   - \\(g^{\alpha r(s)} = \prod^{d}_{i=1} (g^{\alpha r_i(s)})^{v_i} \\)
   - \\(g^{\alpha o(s)} = \prod^{d}_{i=1} (g^{\alpha o_i(s)})^{v_i} \\)
-- Calculate \\(g^{h(s)}\\) from \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
+- Compute \\(g^{h(s)}\\) from \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
 - Proof: \\((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\\)
 
 **Protocol (Verification)**
 
-- Parse proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\\)
-- Check polynomial restrictions
+- Parse the proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\\)
+- Check the polynomial restrictions
   - \\(e(g^{\ell}, g^{\alpha}) = e(g^{\ell'}, g)\\)
   - \\(e(g^{r}, g^{\alpha}) = e(g^{r'}, g)\\)
   - \\(e(g^{o}, g^{\alpha}) = e(g^{o'}, g)\\)
-- Validity check
+- Verify validity of the proof
   - \\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\\)
 
 **Vulnerability**
 
-One ciriticl problem of the above protocol is that its check may pass even if \\(g^{\ell}\\) is computed from not \\(\\{g^{\ell_i(s)}\\}_{i \in [d]}\\) but either \\(\\{g^{r_i(s)}\\} _{i \in [d]}\\) or \\(\\{g^{o_i(s)}\\} _{i \in [d]}\\), or their combination. The same phenomenon is also true for \\(g^{r}\\) and \\(g^{o}\\). For example, if the prover sends \\((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\\) insteads of \\((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\\), all of the verification checks still pass, although the proved statement is different from the original one.
+A critical issue with this protocol is that the checks may pass even if \\(g^{\ell}\\) is computed not from \\(\\{g^{\ell_i(s)}\\}_{i \in [d]}\\) but from \\(\\{g^{r_i(s)}\\} _{i \in [d]}\\), \\(\\{g^{o_i(s)}\\} _{i \in [d]}\\), or their combinations. The same issue applies to \\(g^{r}\\) and \\(g^{o}\\). 
+
+For example, if the prover sends \\((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.
 
 ## Second Protocol: Non-Interchangibility
 
-To solve the above interchangeability problem, we should use the different \\(\alpha\\)-shift for \\(\ell\\), \\(r\\), and \\(o\\).
+To address the interchangeability issue, the next protocol uses distinct the different \\(\alpha\\)-shift for \\(\ell\\), \\(r\\), and \\(o\\).
 
 **Protocol (Setup)**
 
 - **Interpolated Polynomial:** Construct \\(\\{\ell_i, r_i, o_i\\}_{i\in[d]}\\) from \\(L\\), \\(R\\), and \\(O\\), respectively.
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
 - **Secret Seed:** A trusted party generates the random value \\(s\\), *\\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\)*.
-- **Proof Key:** Provided to the prover
+- **Proof Key (for the prover):**
   - \\(\\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\\}_{i\in[d]}\\)
   - *\\(\\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)*
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
-- **Verification Key:**
+- **Verification Key (public):**
   - \\(g^{t(s)}\\)
   - *\\(g^{\alpha_{\ell}}\\), \\(g^{\alpha_{r}}\\), \\(g^{\alpha_{o}}\\)*
 - After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
 
 **Protocol (Proving)**
 
-- Execute the program and get the witness vector \\(w\\).
+- Execute the program and get the assignment \\(v\\).
 - Compute the linear-combinations of polynomials
   - \\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\\)
   - \\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\\)
@@ -112,26 +114,26 @@ To solve the above interchangeability problem, we should use the different \\(\a
 
 **Vulnerability**
 
-The current protocol still does not force the consistency of each variable. In other words, each variable \\(v_i\\) can be different values in each \\(\ell\\), \\(r\\), and \\(o\\), since the verification check is done separetely.
+This protocol resolves interchangeability but does not enforce consistency acros \\(\ell\\), \\(r\\), and \\(o\\). Variables \\(v_i\\) can still take different values in each polynoimal because verification checks are performed separately.
 
 ## Thrid Protocol: Variable Consistency
 
-To achive the variable-consistency, we use a kind of checksum. Specifically, we first draw a new random value \\(\beta\\) and defines a checksum of \\(v_i\\) as \\(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\\). Let \\(v _{\ell, i}\\), \\(v _{r,i}\\), \\(v _{o,i}\\), and \\(v _{\beta,i}\\) be the \\(i\\)-th value of the witness vector for \\(\ell\\), \\(r\\), \\(o\\) and the checksum, respectively. Then, if all of them are true, the following equation holds:
+To achive the variable consistency, we employ a checksum mechanism. Specifically, we first draw a new random value \\(\beta\\) and define the checksum of \\(v_i\\) as \\(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\\). Let \\(v _{\ell, i}\\), \\(v _{r,i}\\), \\(v _{o,i}\\), and \\(v _{\beta,i}\\) denote the \\(i\\)-th value of the assignment vectors for \\(\ell\\), \\(r\\), \\(o\\) and the checksum, respectively. If all of them are the same, the following equation holds:
 
 \\[
 e(g^{v _{\ell, i} \ell_i(s)} g^{v _{r, i} r_i(s)} g^{v _{o, i} o_i(s)}, g^{\beta}) = e(g^{v _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
 \\]
 
-Unfortunately, this condition is not equivalent. For example, suppose \\(\ell_i(x) = r_i(x)\\). Then, we have the following:
+Unfortunately, this condition is not strictly equivalent. For example, consider the case where \\(\ell_i(x) = r_i(x)\\). In this scenario, we have:
 
 \begin{align*}
   &\beta(v _{\ell, i} \ell_i(s) + v _{r, i} r_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\\\
   \iff &\beta(v _{\ell, i} \ell_i(s) + v _{r, i} \ell_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
 \end{align*}
 
-Then, for arbitrary \\(v _{r,i}\\) and \\(v _{o,i}\\), the above equation holds if we set \\(v _{\beta, i} = v _{o, i}\\) and \\(v _{\ell, i} = 2 v _{o, i} - v _{r, i}\\).
+This equation holds for arbitrary \\(v _{r,i}\\) and \\(v _{o,i}\\) if we set \\(v _{\beta, i} = v _{o, i}\\) and \\(v _{\ell, i} = 2 v _{o, i} - v _{r, i}\\).
 
-To surrogate this problem, we have to use different \\(\beta\\) for each of \\(\ell\\), \\(r\\) and \\(o\\). THen, we need to check the following equation:
+To address this issue, we use distinct different \\(\beta\\) values for \\(\ell\\), \\(r\\) and \\(o\\). The consistency check then verifies the following equation:
 
 \\[
 e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{v _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{v _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)   
@@ -190,7 +192,9 @@ The new protocol using the above variable-consistency check is as follows:
 
 **Vulnerability**
 
-This protocol still has one critical flow within the polynomial restriction check. Recall that the verifier validates whether the submitted \\(g^{\ell}\\) is actually calculated by \\(\\{g^{\ell _i(s)}\\} _{i \in [d]}\\) by checking \\(e(g^{\ell}, g^{\alpha _{\ell}}) = e(g^{\ell'}, g)\\). However, this process is not sound. Recall that the verification key is publicaly available, and the prover knows both of \\(g^{\alpha _{\ell}}\\) and \\(g^{\beta _{\ell}}\\). Here, suppose the prover submits \\(g^{\ell} g^{c}\\) and \\(g^{\ell'} (g^{\alpha _{\ell}})^{c}\\) insteads of \\(g^{\ell}\\) and \\(g^{\ell'}\\), where \\(c\\) is a constatn value. Then, the polynomial restriction check still passes:
+Despite these checks, the protocol is vulnerable to **malleability**. Specifically, a malicious prover can exploit the polynomial restriction check to introduce arbitrary constants, altering the proof witout detection.
+
+Recall that the verifier validates whether the submitted \\(g^{\ell}\\) is actually calculated by \\(\\{g^{\ell _i(s)}\\} _{i \in [d]}\\) by checking \\(e(g^{\ell}, g^{\alpha _{\ell}}) = e(g^{\ell'}, g)\\). However, this process is not sound. Recall that the verification key is publicaly available, and the prover knows both of \\(g^{\alpha _{\ell}}\\) and \\(g^{\beta _{\ell}}\\). Here, suppose the prover submits \\(g^{\ell} g^{c}\\) and \\(g^{\ell'} (g^{\alpha _{\ell}})^{c}\\) insteads of \\(g^{\ell}\\) and \\(g^{\ell'}\\), where \\(c\\) is a constatn value. Then, the polynomial restriction check still passes:
 
 \\[
 e(g^{\ell} g^{c}, g^{\alpha _{\ell}}) = e(g^{\alpha _{\ell} \ell + \alpha _{\ell} c}, g) = e(g^{\ell'}g^{\alpha _{\ell}c}, g) = e(g^{\ell'} (g^{\alpha _{\ell}})^{c}, g)
@@ -202,9 +206,7 @@ In addition, if the prover submits \\(g^{z} (g^{\beta _{\ell}})^{c}\\) as the ch
 e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z} (g^{\beta _{\ell}})^{c}, g)
 \\]
 
-Ofcouse, this phenomenon also can occur for \\(r\\) and \\(o\\).
-
-To sum up, the malicious prover can add an arbitray constatn to \\(\ell(s)\\), alternating the statement to be proved, witout being detected by the verifier. This kind of vulnerability is typically called **Malleability**.
+This phenomenon also can occur for \\(r\\) and \\(o\\).
 
 ## Forth Protocol: Non-Malleability
 
