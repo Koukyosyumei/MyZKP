@@ -214,12 +214,12 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
             exponent = -exponent;
         }
 
-        let mut result = FiniteFieldElement::one();
+        let mut result = Self::one();
         while exponent.is_positive() && !exponent.is_zero() {
-            if &exponent % 2 != BigInt::zero() {
+            if (&exponent & BigInt::one()) == BigInt::one() {
                 result = result * &base;
             }
-            exponent /= 2;
+            exponent >>= 1;
             base = base.mul_ref(&base);
         }
         result

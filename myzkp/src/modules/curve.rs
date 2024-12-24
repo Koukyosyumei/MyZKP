@@ -188,7 +188,7 @@ pub fn get_lambda<F: Field, E: EllipticCurve>(
     r: &EllipticCurvePoint<F, E>,
 ) -> F {
     if p.is_point_at_infinity() || q.is_point_at_infinity() || r.is_point_at_infinity() {
-        return F::zero();
+        return F::one();
     }
 
     let p_x = p.x.as_ref().unwrap();
@@ -216,7 +216,7 @@ pub fn miller<F: Field, E: EllipticCurve>(
     m: &BigInt,
 ) -> (F, EllipticCurvePoint<F, E>) {
     if p.is_point_at_infinity() || q.is_point_at_infinity() {
-        return (F::zero(), EllipticCurvePoint::point_at_infinity());
+        return (F::one(), EllipticCurvePoint::point_at_infinity());
     }
 
     if p == q {
@@ -245,7 +245,7 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     if p.is_point_at_infinity() || q.is_point_at_infinity() {
-        return F::zero();
+        return F::one();
     }
 
     let s_value = s.unwrap();
@@ -265,7 +265,7 @@ pub fn general_tate_pairing<F: Field, E: EllipticCurve>(
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
     if p.is_point_at_infinity() || q.is_point_at_infinity() {
-        return F::zero();
+        return F::one();
     }
 
     let s_value = s.unwrap();
@@ -283,7 +283,7 @@ pub fn tate_pairing<F: Field, E: EllipticCurve>(
     modulus: &BigInt,
 ) -> F {
     if p.is_point_at_infinity() || q.is_point_at_infinity() {
-        return F::zero();
+        return F::one();
     }
 
     let (fp_q, _) = miller(p, q, ell);

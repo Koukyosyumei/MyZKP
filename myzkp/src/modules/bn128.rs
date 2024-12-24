@@ -147,7 +147,7 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
     let m = BN128Modulus::modulus();
 
     if p.is_point_at_infinity() || q.is_point_at_infinity() {
-        return Fq12::zero();
+        return Fq12::one();
     }
 
     let mut f = Fq12::one();

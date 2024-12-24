@@ -120,7 +120,13 @@ pub fn prove(
         r = r + qap.r_i_vec[i].clone() * assignment[i].clone();
         o = o + qap.o_i_vec[i].clone() * assignment[i].clone();
     }
+    println!("ell is {}", ell);
+    println!("r is {}", r);
+    println!("o is {}", o);
+    println!("ell * r - o is {}", ell.clone() * r.clone() - o.clone());
+    println!("t is {}", qap.t);
     let h = (ell * r - o) / qap.t.clone();
+    println!("h is {}", h);
     let g1_h = h.eval_with_powers_on_curve(&proof_key.g1_sj_vec);
 
     Proof {
@@ -166,6 +172,15 @@ pub fn verify(
     let pairing7 = optimal_ate_pairing(&proof.g1_ell, &proof.g2_r);
     let pairing8 = optimal_ate_pairing(&proof.g1_h, &verification_key.g2_t_s);
     let pairing9 = optimal_ate_pairing(&proof.g1_o, &g2);
+    println!(
+        "aaaaaaaa {} {}",
+        proof.g1_h.is_point_at_infinity(),
+        verification_key.g2_t_s.is_point_at_infinity()
+    );
+    println!("pairing7: {:?}", pairing7);
+    println!("pairing8: {:?}", pairing8);
+    println!("pairing9: {:?}", pairing9);
+    println!("pairing?: {:?}", pairing8.clone() * pairing9.clone());
     pairing7 == pairing8 * pairing9
 }
 
@@ -278,17 +293,6 @@ mod tests {
             ],
         ];
 
-        /*
-        let v = vec![
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-            Fq::one(),
-        ];*/
         let v = vec![
             Fq::one(),
             Fq::from_value(210),
