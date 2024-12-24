@@ -1716,7 +1716,22 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Prover computes and sends h and p
+    let (h, p) = prover.compute_values(&amp;s);
+
+    // Step 3: Verifier checks whether p = t * h
+    verifier.verify(&amp;s, &amp;h, &amp;p)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -1734,22 +1749,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1: Verifier generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Prover computes and sends h and p
-    let (h, p) = prover.compute_values(&amp;s);
-
-    // Step 3: Verifier checks whether p = t * h
-    verifier.verify(&amp;s, &amp;h, &amp;p)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
+pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
@@ -1838,7 +1838,23 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = prover.p.degree();
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Prover computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&amp;alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t
+    verifier.verify(&amp;u, &amp;v)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -1858,23 +1874,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1 &amp; 2: Verifier generates a challenge
-    let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&amp;alpha_powers);
-
-    // Step 4: Verifier checks whether u = v^t
-    verifier.verify(&amp;u, &amp;v)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
+pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
