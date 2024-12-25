@@ -8,7 +8,7 @@ use paste::paste;
 
 use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
 use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
-use crate::modules::field::{FiniteFieldElement, ModulusValue};
+use crate::modules::field::{FiniteFieldElement, ModEIP197, ModulusValue};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};
@@ -24,6 +24,7 @@ lazy_static! {
 }
 
 pub type Fq = FiniteFieldElement<BN128Modulus>;
+pub type FqOrder = FiniteFieldElement<ModEIP197>;
 pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field

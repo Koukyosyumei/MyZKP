@@ -140,10 +140,10 @@ impl<F: Field> Polynomial<F> {
     }
 
     /// Evaluates the polynomial at given elliptic curve points.
-    pub fn eval_with_powers_on_curve<E: EllipticCurve>(
+    pub fn eval_with_powers_on_curve<P: Field, E: EllipticCurve>(
         &self,
-        powers: &[EllipticCurvePoint<F, E>],
-    ) -> EllipticCurvePoint<F, E> {
+        powers: &[EllipticCurvePoint<P, E>],
+    ) -> EllipticCurvePoint<P, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
             result = result + powers[i].mul_ref(coef.get_value());
