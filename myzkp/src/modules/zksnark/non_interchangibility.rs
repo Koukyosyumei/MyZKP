@@ -40,18 +40,10 @@ pub struct Proof {
 
 pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
     let mut rng = rand::thread_rng();
-    let s = FqOrder::from_value(
-        rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)) * 2 + 1,
-    );
-    let alpha_ell = FqOrder::from_value(
-        rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)) * 2 + 1,
-    );
-    let alpha_r = FqOrder::from_value(
-        rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)) * 2 + 1,
-    );
-    let alpha_o = FqOrder::from_value(
-        rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)) * 2 + 1,
-    );
+    let s = FqOrder::random_element(&[]);
+    let alpha_ell = FqOrder::random_element(&[]);
+    let alpha_r = FqOrder::random_element(&[]);
+    let alpha_o = FqOrder::random_element(&[]);
 
     let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
     let mut g1_r_i_vec = Vec::with_capacity(qap.d);
@@ -63,14 +55,30 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
     let mut g1_sj_vec = Vec::with_capacity(qap.m);
 
     for i in 0..qap.d {
-        g1_ell_i_vec.push(g1.mul_ref(qap.ell_i_vec[i].eval(&s).get_value()));
-        g1_r_i_vec.push(g1.mul_ref(qap.r_i_vec[i].eval(&s).get_value()));
-        g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).get_value()));
-        g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).get_value()));
-        g1_alpha_ell_i_vec
-            .push(g1.clone() * (alpha_ell.clone() * qap.ell_i_vec[i].eval(&s)).get_value());
-        g1_alpha_r_i_vec.push(g1.mul_ref((alpha_r.clone() * qap.r_i_vec[i].eval(&s)).get_value()));
-        g1_alpha_o_i_vec.push(g1.mul_ref((alpha_o.clone() * qap.o_i_vec[i].eval(&s)).get_value()));
+        g1_ell_i_vec.push(g1.mul_ref(qap.ell_i_vec[i].eval(&s).sanitize().get_value()));
+        g1_r_i_vec.push(g1.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
+        g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
+        g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).sanitize().get_value()));
+        g1_alpha_ell_i_vec.push(
+            g1.clone()
+                * (alpha_ell.clone() * qap.ell_i_vec[i].eval(&s))
+                    .sanitize()
+                    .get_value(),
+        );
+        g1_alpha_r_i_vec.push(
+            g1.mul_ref(
+                (alpha_r.clone() * qap.r_i_vec[i].eval(&s))
+                    .sanitize()
+                    .get_value(),
+            ),
+        );
+        g1_alpha_o_i_vec.push(
+            g1.mul_ref(
+                (alpha_o.clone() * qap.o_i_vec[i].eval(&s))
+                    .sanitize()
+                    .get_value(),
+            ),
+        );
     }
 
     let mut s_power = FqOrder::one();
@@ -82,7 +90,7 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
     let g2_alpha_ell = g2.mul_ref(alpha_ell.clone().get_value());
     let g2_alpha_r = g2.mul_ref(alpha_r.clone().get_value());
     let g2_alpha_o = g2.mul_ref(alpha_o.clone().get_value());
-    let g2_t_s = g2.mul_ref(qap.t.eval(&s).get_value());
+    let g2_t_s = g2.mul_ref(qap.t.eval(&s).sanitize().get_value());
 
     (
         ProofKey {
