@@ -146,21 +146,18 @@ pub fn verify(
 ) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
-    println!("1111");
     if pairing1 != pairing2 {
         return false;
     }
 
     let pairing3 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_alpha);
     let pairing4 = optimal_ate_pairing(&proof.g1_r_prime, &g2);
-    println!("2222");
     if pairing3 != pairing4 {
         return false;
     }
 
     let pairing5 = optimal_ate_pairing(&proof.g1_o, &verification_key.g2_alpha);
     let pairing6 = optimal_ate_pairing(&proof.g1_o_prime, &g2);
-    println!("3333");
     if pairing5 != pairing6 {
         return false;
     }
@@ -168,8 +165,18 @@ pub fn verify(
     let pairing7 = optimal_ate_pairing(&proof.g1_ell, &proof.g2_r);
     let pairing8 = optimal_ate_pairing(&proof.g1_h, &verification_key.g2_t_s);
     let pairing9 = optimal_ate_pairing(&proof.g1_o, &g2);
-    println!("4444");
     pairing7 == pairing8 * pairing9
+}
+
+pub fn modify_qap<F: Field>(qap: &QAP<F>) -> QAP<F> {
+    QAP {
+        m: qap.m,
+        d: qap.d,
+        ell_i_vec: qap.r_i_vec.clone(),
+        r_i_vec: qap.ell_i_vec.clone(),
+        o_i_vec: qap.o_i_vec.clone(),
+        t: qap.t.clone(),
+    }
 }
 
 #[cfg(test)]
@@ -315,5 +322,9 @@ mod tests {
 
         let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &verification_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key, &qap));
+
+        let m_qap = modify_qap(&qap);
+        let bogus_proof = prove(&g1, &g2, &v, &proof_key, &verification_key, &m_qap);
+        assert!(verify(&g1, &g2, &bogus_proof, &verification_key, &qap));
     }
 }
