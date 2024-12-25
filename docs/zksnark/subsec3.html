@@ -490,13 +490,13 @@ pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
 <p>Based on this assumption, we can design an improved protocol:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
+<li>\(\mathcal{B}\) randomly selects \(s\) and <em>\(r\)</em> from field \(\mathbb{F}\).</li>
 <li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) <em>and \(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
-<li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
+<li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{rP(s)}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
 <li>\(\mathcal{B}\) checks whether \(u = v^{t}\).</li>
 </ul>
-<p>The prover can compute \(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
+<p>The prover can compute \(g^{p'} = g^{rP(s)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
 <p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
