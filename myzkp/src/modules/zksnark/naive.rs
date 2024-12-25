@@ -54,26 +54,12 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
         g1_r_i_vec.push(g1.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
         g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
         g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).sanitize().get_value()));
-        g1_alpha_ell_i_vec.push(
-            g1.clone()
-                * (alpha.clone() * qap.ell_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
-        );
-        g1_alpha_r_i_vec.push(
-            g1.mul_ref(
-                (alpha.clone() * qap.r_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
-            ),
-        );
-        g1_alpha_o_i_vec.push(
-            g1.mul_ref(
-                (alpha.clone() * qap.o_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
-            ),
-        );
+        g1_alpha_ell_i_vec
+            .push(g1.mul_ref((alpha.mul_ref(&qap.ell_i_vec[i].eval(&s).sanitize())).get_value()));
+        g1_alpha_r_i_vec
+            .push(g1.mul_ref((alpha.mul_ref(&qap.r_i_vec[i].eval(&s).sanitize())).get_value()));
+        g1_alpha_o_i_vec
+            .push(g1.mul_ref((alpha.mul_ref(&qap.o_i_vec[i].eval(&s).sanitize())).get_value()));
     }
 
     let mut s_power = FqOrder::one();
@@ -82,7 +68,7 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
         s_power = s_power * s.clone();
     }
 
-    let g2_alpha = g2.mul_ref(alpha.clone().get_value());
+    let g2_alpha = g2.mul_ref(alpha.get_value());
     let g2_t_s = g2.mul_ref(qap.t.eval(&s).sanitize().get_value());
 
     (
@@ -105,7 +91,6 @@ pub fn prove(
     g2: &G2Point,
     assignment: &Vec<FqOrder>,
     proof_key: &ProofKey,
-    verification_key: &VerificationKey,
     qap: &QAP<FqOrder>,
 ) -> Proof {
     let mut g1_ell = G1Point::point_at_infinity();
@@ -331,14 +316,14 @@ mod tests {
 
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
-        let proof = prove(&g1, &g2, &v, &proof_key, &verification_key, &qap);
+        let proof = prove(&g1, &g2, &v, &proof_key, &qap);
         assert!(verify(&g1, &g2, &proof, &verification_key, &qap));
 
-        let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &verification_key, &qap);
+        let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key, &qap));
 
         let m_qap = modify_qap(&qap);
-        let bogus_proof = prove(&g1, &g2, &v, &proof_key, &verification_key, &m_qap);
+        let bogus_proof = prove(&g1, &g2, &v, &proof_key, &m_qap);
         assert!(verify(&g1, &g2, &bogus_proof, &verification_key, &qap));
     }
 }
