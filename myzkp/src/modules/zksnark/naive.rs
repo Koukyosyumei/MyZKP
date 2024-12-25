@@ -140,7 +140,6 @@ pub fn verify(
     g2: &G2Point,
     proof: &Proof,
     verification_key: &VerificationKey,
-    qap: &QAP<FqOrder>,
 ) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
@@ -317,13 +316,13 @@ mod tests {
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
         let proof = prove(&g1, &g2, &v, &proof_key, &qap);
-        assert!(verify(&g1, &g2, &proof, &verification_key, &qap));
+        assert!(verify(&g1, &g2, &proof, &verification_key));
 
         let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &proof_prime, &verification_key, &qap));
+        assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
 
         let m_qap = modify_qap(&qap);
         let bogus_proof = prove(&g1, &g2, &v, &proof_key, &m_qap);
-        assert!(verify(&g1, &g2, &bogus_proof, &verification_key, &qap));
+        assert!(verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }

@@ -3,7 +3,7 @@ use num_traits::Zero;
 
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
-use crate::modules::r1cs::{dot, R1CS};
+use crate::modules::r1cs::R1CS;
 
 pub struct QAP<F: Field> {
     pub m: usize,
