@@ -51,24 +51,24 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<Fq>) -> (ProofKey, Verificati
     let mut g1_sj_vec = Vec::with_capacity(qap.m);
 
     for i in 0..qap.d {
-        g1_ell_i_vec.push(g1.clone() * qap.ell_i_vec[i].eval(&s).get_value());
-        g1_r_i_vec.push(g1.clone() * qap.r_i_vec[i].eval(&s).get_value());
-        g2_r_i_vec.push(g2.clone() * qap.r_i_vec[i].eval(&s).get_value());
-        g1_o_i_vec.push(g1.clone() * qap.o_i_vec[i].eval(&s).get_value());
+        g1_ell_i_vec.push(g1.mul_ref(qap.ell_i_vec[i].eval(&s).get_value()));
+        g1_r_i_vec.push(g1.mul_ref(qap.r_i_vec[i].eval(&s).get_value()));
+        g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).get_value()));
+        g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).get_value()));
         g1_alpha_ell_i_vec
             .push(g1.clone() * (alpha.clone() * qap.ell_i_vec[i].eval(&s)).get_value());
-        g1_alpha_r_i_vec.push(g1.clone() * (alpha.clone() * qap.r_i_vec[i].eval(&s)).get_value());
-        g1_alpha_o_i_vec.push(g1.clone() * (alpha.clone() * qap.o_i_vec[i].eval(&s)).get_value());
+        g1_alpha_r_i_vec.push(g1.mul_ref((alpha.clone() * qap.r_i_vec[i].eval(&s)).get_value()));
+        g1_alpha_o_i_vec.push(g1.mul_ref((alpha.clone() * qap.o_i_vec[i].eval(&s)).get_value()));
     }
 
     let mut s_power = Fq::one();
     for _ in 0..1 + qap.m {
-        g1_sj_vec.push(g1.clone() * s_power.clone().get_value());
+        g1_sj_vec.push(g1.mul_ref(s_power.clone().get_value()));
         s_power = s_power * s.clone();
     }
 
-    let g2_alpha = g2.clone() * alpha.clone().get_value();
-    let g2_t_s = g2.clone() * qap.t.eval(&s).get_value();
+    let g2_alpha = g2.mul_ref(alpha.clone().get_value());
+    let g2_t_s = g2.mul_ref(qap.t.eval(&s).get_value());
 
     (
         ProofKey {
