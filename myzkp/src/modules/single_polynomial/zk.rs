@@ -25,7 +25,6 @@ impl<F: Field> Prover<F> {
     }
 
     pub fn compute_values(&self, alpha_powers: &[F], alpha_prime_powers: &[F]) -> (F, F, F) {
-        let mut rng = rand::thread_rng();
         let delta = F::random_element(&[]);
 
         let g_p = self.p.eval_with_powers(alpha_powers);
@@ -42,7 +41,6 @@ impl<F: Field> Prover<F> {
 
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let mut rng = rand::thread_rng();
         let s = F::random_element(&[]);
         let r = F::random_element(&[]);
         let g = F::from_value(generator);
