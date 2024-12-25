@@ -3,7 +3,7 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, Fq2, G1Point, G2Point};
+use crate::modules::bn128::{optimal_ate_pairing, Fq, Fq2, FqOrder, G1Point, G2Point};
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use crate::modules::qap::QAP;
@@ -36,10 +36,10 @@ pub struct Proof {
     g1_h: G1Point,
 }
 
-pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<Fq>) -> (ProofKey, VerificationKey) {
+pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
     let mut rng = rand::thread_rng();
-    let s = Fq::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-    let alpha = Fq::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+    let s = FqOrder::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+    let alpha = FqOrder::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
 
     let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
     let mut g1_r_i_vec = Vec::with_capacity(qap.d);
@@ -61,7 +61,7 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<Fq>) -> (ProofKey, Verificati
         g1_alpha_o_i_vec.push(g1.mul_ref((alpha.clone() * qap.o_i_vec[i].eval(&s)).get_value()));
     }
 
-    let mut s_power = Fq::one();
+    let mut s_power = FqOrder::one();
     for _ in 0..1 + qap.m {
         g1_sj_vec.push(g1.mul_ref(s_power.clone().get_value()));
         s_power = s_power * s.clone();
@@ -88,10 +88,10 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<Fq>) -> (ProofKey, Verificati
 pub fn prove(
     g1: &G1Point,
     g2: &G2Point,
-    assignment: &Vec<Fq>,
+    assignment: &Vec<FqOrder>,
     proof_key: &ProofKey,
     verification_key: &VerificationKey,
-    qap: &QAP<Fq>,
+    qap: &QAP<FqOrder>,
 ) -> Proof {
     let mut g1_ell = G1Point::point_at_infinity();
     let mut g1_r = G1Point::point_at_infinity();
@@ -112,9 +112,9 @@ pub fn prove(
         g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].clone() * assignment[i].get_value();
     }
 
-    let mut ell = Polynomial::<Fq>::zero();
-    let mut r = Polynomial::<Fq>::zero();
-    let mut o = Polynomial::<Fq>::zero();
+    let mut ell = Polynomial::<FqOrder>::zero();
+    let mut r = Polynomial::<FqOrder>::zero();
+    let mut o = Polynomial::<FqOrder>::zero();
     for i in 0..qap.d {
         ell = ell + qap.ell_i_vec[i].clone() * assignment[i].clone();
         r = r + qap.r_i_vec[i].clone() * assignment[i].clone();
@@ -140,7 +140,7 @@ pub fn verify(
     g2: &G2Point,
     proof: &Proof,
     verification_key: &VerificationKey,
-    qap: &QAP<Fq>,
+    qap: &QAP<FqOrder>,
 ) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
@@ -178,122 +178,122 @@ mod tests {
     fn test_zksnark_naive_single_multiplication() {
         let left = vec![
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
             ],
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
             ],
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
             ],
         ];
 
         let right = vec![
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
             ],
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
             ],
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
             ],
         ];
 
         let out = vec![
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
             ],
             vec![
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
             ],
             vec![
-                Fq::zero(),
-                Fq::one(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
-                Fq::zero(),
+                FqOrder::zero(),
+                FqOrder::one(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
+                FqOrder::zero(),
             ],
         ];
 
         let v = vec![
-            Fq::one(),
-            Fq::from_value(210),
-            Fq::from_value(2),
-            Fq::from_value(3),
-            Fq::from_value(5),
-            Fq::from_value(7),
-            Fq::from_value(6),
-            Fq::from_value(35),
+            FqOrder::one(),
+            FqOrder::from_value(210),
+            FqOrder::from_value(2),
+            FqOrder::from_value(3),
+            FqOrder::from_value(5),
+            FqOrder::from_value(7),
+            FqOrder::from_value(6),
+            FqOrder::from_value(35),
         ];
         let v_prime = vec![
-            Fq::one(),
-            Fq::from_value(211),
-            Fq::from_value(2),
-            Fq::from_value(3),
-            Fq::from_value(5),
-            Fq::from_value(7),
-            Fq::from_value(6),
-            Fq::from_value(35),
+            FqOrder::one(),
+            FqOrder::from_value(211),
+            FqOrder::from_value(2),
+            FqOrder::from_value(3),
+            FqOrder::from_value(5),
+            FqOrder::from_value(7),
+            FqOrder::from_value(6),
+            FqOrder::from_value(35),
         ];
 
         let g1 = BN128::generator_g1();
