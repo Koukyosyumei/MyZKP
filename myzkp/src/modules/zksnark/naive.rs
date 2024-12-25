@@ -39,9 +39,9 @@ pub struct Proof {
 pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
     let mut rng = rand::thread_rng();
     let s =
-        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u64::MAX)));
+        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)));
     let alpha =
-        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u64::MAX)));
+        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u128::MAX)));
 
     let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
     let mut g1_r_i_vec = Vec::with_capacity(qap.d);
@@ -146,18 +146,21 @@ pub fn verify(
 ) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
+    println!("1111");
     if pairing1 != pairing2 {
         return false;
     }
 
     let pairing3 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_alpha);
     let pairing4 = optimal_ate_pairing(&proof.g1_r_prime, &g2);
+    println!("2222");
     if pairing3 != pairing4 {
         return false;
     }
 
     let pairing5 = optimal_ate_pairing(&proof.g1_o, &verification_key.g2_alpha);
     let pairing6 = optimal_ate_pairing(&proof.g1_o_prime, &g2);
+    println!("3333");
     if pairing5 != pairing6 {
         return false;
     }
@@ -165,6 +168,7 @@ pub fn verify(
     let pairing7 = optimal_ate_pairing(&proof.g1_ell, &proof.g2_r);
     let pairing8 = optimal_ate_pairing(&proof.g1_h, &verification_key.g2_t_s);
     let pairing9 = optimal_ate_pairing(&proof.g1_o, &g2);
+    println!("4444");
     pairing7 == pairing8 * pairing9
 }
 
