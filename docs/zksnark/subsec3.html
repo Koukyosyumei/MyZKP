@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec4.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -184,15 +184,15 @@
 <p>\begin{equation}
 P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}</p>
-<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(d &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_d\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\). Note that the Prover also knows \(T(x)\).</p>
+<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(m &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_m\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\). Note that the Prover also knows \(T(x)\).</p>
 <p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
 <h2 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h2>
 <p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</em></li>
+<li>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</li>
+<li>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</li>
+<li>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</li>
 </ul>
 <p>This protocol is highly inefficient, requiring \(\mathcal{O}(|\mathbb{F}|)\) evaluations and communications.</p>
 <p><strong>Implementation:</strong></p>
@@ -307,7 +307,22 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Prover computes and sends h and p
+    let (h, p) = prover.compute_values(&amp;s);
+
+    // Step 3: Verifier checks whether p = t * h
+    verifier.verify(&amp;s, &amp;h, &amp;p)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -325,22 +340,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1: Verifier generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Prover computes and sends h and p
-    let (h, p) = prover.compute_values(&amp;s);
-
-    // Step 3: Verifier checks whether p = t * h
-    verifier.verify(&amp;s, &amp;h, &amp;p)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
+pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
@@ -368,7 +368,7 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</em></li>
+<li>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</li>
 <li><em>\(\mathcal{B}\) computes and sends \(\{\alpha, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_i= g^{(s^{i})}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\) and \(v = g^{h}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
@@ -429,7 +429,23 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = prover.p.degree();
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Prover computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&amp;alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t
+    verifier.verify(&amp;u, &amp;v)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -449,23 +465,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1 &amp; 2: Verifier generates a challenge
-    let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&amp;alpha_powers);
-
-    // Step 4: Verifier checks whether u = v^t
-    verifier.verify(&amp;u, &amp;v)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
+pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
@@ -490,11 +490,11 @@ pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verif
 <p>Based on this assumption, we can design an improved protocol:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{B}\) computes and sends \({\alpha_1, \alpha_2, ..., \alpha_{n}}\) and \({\alpha'_1, \alpha'_2, ..., \alpha'_{n}}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
+<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
+<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) <em>and \(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
+<li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
+<li>\(\mathcal{B}\) checks whether \(u = v^{t}\).</li>
 </ul>
 <p>The prover can compute \(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
 <p><strong>Implementation:</strong></p>
@@ -590,12 +590,12 @@ pub fn knowledge_of_exponent_protocol&lt;F: Field&gt;(
 <p>To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \(P(x)\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \(\delta\):</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</em></li>
+<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
+<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</li>
 <li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u' = (g^{p})^{\delta}\), \(v' = (g^{h})^{\delta}\), and \(w' = (g^{p'})^{\delta}\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
+<li>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</li>
+<li>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</li>
 </ul>
 <p>By introducing the random value \(\delta\), the verifier can no longer learn anything about \(p\), \(h\), or \(w\), thus achieving zero knowledge.</p>
 <p><strong>Implementation:</strong></p>
@@ -850,7 +850,7 @@ pub fn non_interactive_zkp_protocol(
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zkstark/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../zksnark/subsec4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -864,13 +864,29 @@ pub fn non_interactive_zkp_protocol(
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zkstark/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../zksnark/subsec4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

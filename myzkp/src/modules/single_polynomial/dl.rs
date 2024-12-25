@@ -33,10 +33,7 @@ impl<F: Field> Prover<F> {
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
         let mut rng = rand::thread_rng();
-        let s = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = F::random_element(&[]);
         let g = F::from_value(generator);
         Verifier { t, s, g }
     }
@@ -46,14 +43,14 @@ impl<F: Field> Verifier<F> {
         for i in 0..(max_degree + 1) {
             alpha_powers.push(
                 self.g
-                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
         }
         alpha_powers
     }
 
     pub fn verify(&self, u: &F, v: &F) -> bool {
-        let t_s = self.t.eval(&self.s);
+        let t_s = self.t.eval_m1(&self.s);
         u == &v.pow(t_s.get_value())
     }
 }

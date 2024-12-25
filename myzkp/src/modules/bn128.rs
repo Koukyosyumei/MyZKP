@@ -19,6 +19,10 @@ define_myzkp_modulus_type!(
 );
 define_myzkp_curve_type!(BN128Curve, "0", "3");
 
+lazy_static! {
+    static ref ATE_LOOP_COUNT: BigInt = BigInt::from_str("29793968203157093288").unwrap();
+}
+
 pub type Fq = FiniteFieldElement<BN128Modulus>;
 pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
@@ -142,11 +146,13 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
     let q: G12Point = twist_g2_to_g12(q_g2.clone());
     let m = BN128Modulus::modulus();
 
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return Fq12::one();
+    }
+
     let mut f = Fq12::one();
     if p != q {
-        let ate_loop_count = BigInt::from_str("29793968203157093288").unwrap();
-
-        let out = miller(&q, &p, &ate_loop_count);
+        let out = miller(&q, &p, &ATE_LOOP_COUNT);
         f = out.0;
         let mut r = out.1;
         // Assert: r == multiply(&q, &ate_loop_count)
@@ -338,15 +344,15 @@ mod tests {
         let np1 = optimal_ate_pairing(&g1.clone(), &-g2.clone());
         assert_eq!(p1.clone() * np1.clone(), Fq12::one());
         assert_eq!(pn1.clone(), np1.clone());
-        let p2 = optimal_ate_pairing(&(g1.clone() * 2), &g2.clone());
+        let p2 = optimal_ate_pairing(&(g1.mul_ref(2)), &g2.clone());
         assert_eq!(p1.clone() * p1.clone(), p2);
         assert!(p1 != p2);
         assert!(p1 != np1);
         assert!(p2 != np1);
-        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.clone() * 2));
+        let po2 = optimal_ate_pairing(&g1.clone(), &(g2.mul_ref(2)));
         assert_eq!(p1.clone() * p1.clone(), po2);
-        let p3 = optimal_ate_pairing(&(g1.clone() * 37), &(g2.clone() * 27));
-        let po3 = optimal_ate_pairing(&(g1.clone() * 999), &(g2.clone()));
+        let p3 = optimal_ate_pairing(&(g1.mul_ref(37)), &(g2.mul_ref(27)));
+        let po3 = optimal_ate_pairing(&(g1 * 999), &g2);
         assert_eq!(p3, po3);
     }
 }

@@ -109,6 +109,28 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
 
         Self::new(new_x, new_y)
     }
+
+    pub fn mul_ref<V: Into<BigInt>>(&self, scalar_val: V) -> Self {
+        let scalar: BigInt = scalar_val.into();
+        if scalar.is_zero() {
+            // Return the point at infinity for scalar * 0
+            return EllipticCurvePoint::point_at_infinity();
+        }
+
+        let mut result = EllipticCurvePoint::point_at_infinity();
+        let mut current = self.clone(); // Start with the current point
+        let mut scalar_bits = scalar.clone();
+
+        while scalar_bits > BigInt::zero() {
+            if &scalar_bits & BigInt::one() == BigInt::one() {
+                result = result.add_ref(&current);
+            }
+            current = current.add_ref(&current); // Double the point
+            scalar_bits >>= 1; // Move to the next bit
+        }
+
+        result
+    }
 }
 
 impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
@@ -141,25 +163,7 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<
     type Output = Self;
 
     fn mul(self, scalar_val: V) -> Self {
-        let scalar: BigInt = scalar_val.into();
-        if scalar.is_zero() {
-            // Return the point at infinity for scalar * 0
-            return EllipticCurvePoint::point_at_infinity();
-        }
-
-        let mut result = EllipticCurvePoint::point_at_infinity();
-        let mut current = self.clone(); // Start with the current point
-        let mut scalar_bits = scalar.clone();
-
-        while scalar_bits > BigInt::zero() {
-            if &scalar_bits & BigInt::one() == BigInt::one() {
-                result = result.add_ref(&current);
-            }
-            current = current.add_ref(&current); // Double the point
-            scalar_bits >>= 1; // Move to the next bit
-        }
-
-        result
+        self.mul_ref(scalar_val)
     }
 }
 
@@ -183,6 +187,10 @@ pub fn get_lambda<F: Field, E: EllipticCurve>(
     q: &EllipticCurvePoint<F, E>,
     r: &EllipticCurvePoint<F, E>,
 ) -> F {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() || r.is_point_at_infinity() {
+        return F::one();
+    }
+
     let p_x = p.x.as_ref().unwrap();
     let p_y = p.y.as_ref().unwrap();
     let q_x = q.x.as_ref().unwrap();
@@ -207,6 +215,10 @@ pub fn miller<F: Field, E: EllipticCurve>(
     q: &EllipticCurvePoint<F, E>,
     m: &BigInt,
 ) -> (F, EllipticCurvePoint<F, E>) {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return (F::one(), EllipticCurvePoint::point_at_infinity());
+    }
+
     if p == q {
         return (F::one(), p.clone());
     }
@@ -232,6 +244,10 @@ pub fn weil_pairing<F: Field, E: EllipticCurve>(
     m: &BigInt,
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return F::one();
+    }
+
     let s_value = s.unwrap();
     let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), m);
     let (fp_s, _) = miller(&p, &s_value, m);
@@ -248,6 +264,10 @@ pub fn general_tate_pairing<F: Field, E: EllipticCurve>(
     modulus: &BigInt,
     s: Option<&EllipticCurvePoint<F, E>>,
 ) -> F {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return F::one();
+    }
+
     let s_value = s.unwrap();
     let (fp_qs, _) = miller(&p, &q.add_ref(&s_value), ell);
     let (fp_s, _) = miller(&p, &s_value, ell);
@@ -262,6 +282,10 @@ pub fn tate_pairing<F: Field, E: EllipticCurve>(
     ell: &BigInt,
     modulus: &BigInt,
 ) -> F {
+    if p.is_point_at_infinity() || q.is_point_at_infinity() {
+        return F::one();
+    }
+
     let (fp_q, _) = miller(p, q, ell);
 
     return fp_q.pow((modulus - BigInt::one()) / ell);

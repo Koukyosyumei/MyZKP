@@ -26,10 +26,7 @@ impl<F: Field> Prover<F> {
 
     pub fn compute_values(&self, alpha_powers: &[F], alpha_prime_powers: &[F]) -> (F, F, F) {
         let mut rng = rand::thread_rng();
-        let delta = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let delta = F::random_element(&[]);
 
         let g_p = self.p.eval_with_powers(alpha_powers);
         let g_h = self.h.eval_with_powers(alpha_powers);
@@ -46,14 +43,8 @@ impl<F: Field> Prover<F> {
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
         let mut rng = rand::thread_rng();
-        let s = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
-        let r = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = F::random_element(&[]);
+        let r = F::random_element(&[]);
         let g = F::from_value(generator);
         Verifier { t, s, r, g }
     }
@@ -65,7 +56,7 @@ impl<F: Field> Verifier<F> {
         for i in 0..(max_degree + 1) {
             alpha_powers.push(
                 self.g
-                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
             alpha_prime_powers.push(alpha_powers.last().unwrap().pow(self.r.get_value()));
         }
@@ -74,7 +65,7 @@ impl<F: Field> Verifier<F> {
     }
 
     pub fn verify(&self, u_prime: &F, v_prime: &F, w_prime: &F) -> bool {
-        let t_s = self.t.eval(&self.s);
+        let t_s = self.t.eval_m1(&self.s);
         let u_prime_r = u_prime.pow(self.r.clone().get_value());
 
         // Check 1: u'^r = w'

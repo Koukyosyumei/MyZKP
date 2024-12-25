@@ -79,24 +79,24 @@ impl<F: Field> Polynomial<F> {
     }
 
     /// Removes trailing zeroes from a polynomial's coefficients.
-    fn trim_trailing_zeros(coef: Vec<F>) -> Vec<F> {
-        let mut trimmed = coef;
-        while trimmed.last() == Some(&F::zero()) {
-            trimmed.pop();
-        }
-        trimmed
+    fn trim_trailing_zeros(coef: &[F]) -> Vec<F> {
+        let end = coef
+            .iter()
+            .rposition(|x| x != &F::zero())
+            .map_or(0, |pos| pos + 1);
+        coef[..end].to_vec()
     }
 
     /// Reduces the polynomial by trimming trailing zeros.
     pub fn reduce(&self) -> Self {
         Polynomial {
-            coef: Self::trim_trailing_zeros(self.coef.clone()),
+            coef: Self::trim_trailing_zeros(&self.coef),
         }
     }
 
     /// Returns the degree of the polynomial.
     pub fn degree(&self) -> isize {
-        let trimmed = Self::trim_trailing_zeros(self.coef.clone());
+        let trimmed = Self::trim_trailing_zeros(&self.coef);
         if trimmed.is_empty() {
             -1
         } else {
@@ -122,6 +122,14 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    pub fn eval_m1(&self, point: &F) -> F {
+        let mut result = F::zero();
+        for coef in self.coef.iter().rev() {
+            result = result.mul_m1_ref(&point).add_m1_ref(coef);
+        }
+        result
+    }
+
     /// Evaluates the polynomial using precomputed powers.
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
@@ -138,7 +146,7 @@ impl<F: Field> Polynomial<F> {
     ) -> EllipticCurvePoint<F, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result + powers[i].clone() * coef.get_value();
+            result = result + powers[i].mul_ref(coef.get_value());
         }
         result
     }
@@ -161,7 +169,7 @@ impl<F: Field> Polynomial<F> {
             lagrange_polys.push(cur_poly);
         }
 
-        let mut result = Polynomial { coef: vec![] };
+        let mut result = Polynomial::<F>::zero();
         for (j, lagrange_poly) in lagrange_polys.iter().enumerate() {
             result = result + lagrange_poly.clone() * y_values[j].clone();
         }
@@ -193,7 +201,7 @@ impl<F: Field> Polynomial<F> {
             result.push(a.add_ref(b));
         }
         Polynomial {
-            coef: Self::trim_trailing_zeros(result),
+            coef: Self::trim_trailing_zeros(&result),
         }
     }
 
@@ -209,7 +217,7 @@ impl<F: Field> Polynomial<F> {
             }
         }
         Polynomial {
-            coef: Polynomial::<F>::trim_trailing_zeros(result),
+            coef: Polynomial::<F>::trim_trailing_zeros(&result),
         }
     }
 
@@ -218,8 +226,8 @@ impl<F: Field> Polynomial<F> {
             return (Polynomial::zero(), self.clone());
         }
 
-        let mut remainder_coeffs = Self::trim_trailing_zeros(self.coef.clone());
-        let divisor_coeffs = Self::trim_trailing_zeros(other.coef.clone());
+        let mut remainder_coeffs = Self::trim_trailing_zeros(&self.coef);
+        let divisor_coeffs = Self::trim_trailing_zeros(&other.coef);
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
@@ -233,12 +241,12 @@ impl<F: Field> Polynomial<F> {
                 remainder_coeffs[deg_diff + i] = remainder_coeffs[deg_diff + i]
                     .sub_ref(&(lead_term.mul_ref(&divisor_coeffs[i])));
             }
-            remainder_coeffs = Self::trim_trailing_zeros(remainder_coeffs);
+            remainder_coeffs = Self::trim_trailing_zeros(&remainder_coeffs);
         }
 
         (
             Polynomial {
-                coef: Self::trim_trailing_zeros(quotient),
+                coef: Self::trim_trailing_zeros(&quotient),
             },
             Polynomial {
                 coef: remainder_coeffs,
@@ -287,9 +295,7 @@ impl<F: Field> fmt::Display for Polynomial<F> {
 
 impl<F: Field> Zero for Polynomial<F> {
     fn zero() -> Self {
-        Polynomial {
-            coef: vec![F::zero()],
-        }
+        Polynomial { coef: vec![] }
     }
 
     fn is_zero(&self) -> bool {

@@ -39,13 +39,13 @@ impl TrustedSetup {
 
         let mut s_power = Fq::one();
         for _ in 0..1 + n {
-            alpha.push(g1.clone() * s_power.clone().get_value());
-            alpha_prime.push(g1.clone() * (s_power.clone() * r.clone()).get_value());
+            alpha.push(g1.mul_ref(s_power.clone().get_value()));
+            alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
             s_power = s_power * s.clone();
         }
 
-        let g_r = g2.clone() * r.clone().get_value();
-        let g_t_s = g2.clone() * t.eval(&s).get_value();
+        let g_r = g2.mul_ref(r.clone().get_value());
+        let g_t_s = g2.mul_ref(t.eval(&s).get_value());
 
         TrustedSetup {
             proof_key: ProofKey { alpha, alpha_prime },

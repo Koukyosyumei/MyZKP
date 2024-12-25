@@ -59,21 +59,21 @@ mod tests {
         let left = vec![vec![F::zero(), F::zero(), F::one(), F::zero()]];
         let right = vec![vec![F::zero(), F::zero(), F::zero(), F::one()]];
         let out = vec![vec![F::zero(), F::one(), F::zero(), F::zero()]];
-        let a = vec![
+        let v = vec![
             F::one(),
             F::from_value(3690),
             F::from_value(82),
             F::from_value(45),
         ];
-        let a_prime = vec![
+        let v_prime = vec![
             F::one(),
             F::from_value(3690),
             F::from_value(82),
             F::from_value(46),
         ];
         let r1cs = R1CS::new(left, right, out);
-        assert!(r1cs.is_satisfied(&a));
-        assert!(!r1cs.is_satisfied(&a_prime));
+        assert!(r1cs.is_satisfied(&v));
+        assert!(!r1cs.is_satisfied(&v_prime));
     }
 
     #[test]
@@ -83,21 +83,21 @@ mod tests {
         let left = vec![vec![F::zero(), F::zero(), F::one(), F::zero()]];
         let right = vec![vec![F::zero(), F::zero(), F::zero(), F::one()]];
         let out = vec![vec![F::from_value(-3_i32), F::one(), F::zero(), F::zero()]];
-        let a = vec![
+        let v = vec![
             F::one(),
             F::from_value(9),
             F::from_value(2),
             F::from_value(3),
         ];
-        let a_prime = vec![
+        let v_prime = vec![
             F::one(),
             F::from_value(9),
             F::from_value(2),
             F::from_value(4),
         ];
         let r1cs = R1CS::new(left, right, out);
-        assert!(r1cs.is_satisfied(&a));
-        assert!(!r1cs.is_satisfied(&a_prime));
+        assert!(r1cs.is_satisfied(&v));
+        assert!(!r1cs.is_satisfied(&v_prime));
     }
 
     #[test]
@@ -107,21 +107,21 @@ mod tests {
         let left = vec![vec![F::zero(), F::zero(), F::from_value(3_u32), F::zero()]];
         let right = vec![vec![F::zero(), F::zero(), F::one(), F::zero()]];
         let out = vec![vec![F::zero(), F::one(), F::zero(), F::from_value(-1_i32)]];
-        let a = vec![
+        let v = vec![
             F::one(),
             F::from_value(17),
             F::from_value(2),
             F::from_value(5),
         ];
-        let a_prime = vec![
+        let v_prime = vec![
             F::one(),
             F::from_value(17),
             F::from_value(2),
             F::from_value(7),
         ];
         let r1cs = R1CS::new(left, right, out);
-        assert!(r1cs.is_satisfied(&a));
-        assert!(!r1cs.is_satisfied(&a_prime));
+        assert!(r1cs.is_satisfied(&v));
+        assert!(!r1cs.is_satisfied(&v_prime));
     }
 
     #[test]
@@ -229,7 +229,7 @@ mod tests {
             ],
         ];
 
-        let a = vec![
+        let v = vec![
             F::one(),
             F::from_value(210),
             F::from_value(2),
@@ -239,7 +239,7 @@ mod tests {
             F::from_value(6),
             F::from_value(35),
         ];
-        let a_prime = vec![
+        let v_prime = vec![
             F::one(),
             F::from_value(211),
             F::from_value(2),
@@ -250,7 +250,7 @@ mod tests {
             F::from_value(35),
         ];
         let r1cs = R1CS::new(left, right, out);
-        assert!(r1cs.is_satisfied(&a));
-        assert!(!r1cs.is_satisfied(&a_prime));
+        assert!(r1cs.is_satisfied(&v));
+        assert!(!r1cs.is_satisfied(&v_prime));
     }
 }

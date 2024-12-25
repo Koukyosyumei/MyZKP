@@ -12,5 +12,6 @@
 - [Basics of zk-SNARKs](./zksnark/README.md)
   - [Arithmetization](./zksnark/subsec2.md)
   - [Proving Single Polynomial](./zksnark/subsec3.md)
+  - [Bringing It All Together](./zksnark/subsec4.md)
 - [Basics of zk-STARKS](./zkstark/README.md)
 - [Basics of zkVM](./zkvm/README.md)

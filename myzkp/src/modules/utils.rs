@@ -1,5 +1,7 @@
-use num_traits::{One, Zero};
-use std::ops::{Div, Mul, Rem, Sub};
+use std::ops::{Add, BitAnd, Div, Mul, Rem, Shl, ShrAssign, Sub};
+
+use num_bigint::BigInt;
+use num_traits::{One, Signed, Zero};
 
 /// Computes the greatest common divisor (GCD) of two numbers `a` and `b`
 /// using the Extended Euclidean Algorithm, along with the coefficients
@@ -50,7 +52,7 @@ use std::ops::{Div, Mul, Rem, Sub};
 /// ```
 pub fn extended_euclidean<F>(a: F, b: F) -> (F, F, F)
 where
-    F: Clone + PartialEq + Sub<Output = F> + Div<Output = F> + Rem<Output = F> + Zero + One,
+    F: Clone + PartialEq + Zero + One,
     for<'a> &'a F: Sub<&'a F, Output = F>
         + Div<&'a F, Output = F>
         + Rem<&'a F, Output = F>
@@ -68,13 +70,69 @@ where
         let r = &r0 % &r1;
         r0 = r1;
         r1 = r;
-        let new_s = s0 - &q * &s1;
+        let new_s = &s0 - &(&q * &s1);
         s0 = s1;
         s1 = new_s;
-        let new_t = t0.clone() - &q * &t1;
+        let new_t = &t0 - &(&q * &t1);
         t0 = t1;
         t1 = new_t;
     }
 
     (r0, s0, t0)
+}
+
+pub fn mod_inverse<F>(a: &F, modulus: &F) -> F
+where
+    F: Clone + PartialEq + Zero + One + Signed,
+    for<'a> &'a F: Add<&'a F, Output = F>
+        + Sub<&'a F, Output = F>
+        + Div<&'a F, Output = F>
+        + Rem<&'a F, Output = F>
+        + Mul<&'a F, Output = F>,
+{
+    let mut r = modulus.clone();
+    let mut new_r = a.clone();
+
+    if new_r.is_negative() {
+        new_r = &new_r + modulus;
+    }
+
+    let (_, _, mut t) = extended_euclidean(r, new_r);
+    t = &t % modulus;
+    if t.is_negative() {
+        t = &t + modulus;
+    }
+
+    t
+}
+
+pub fn mod_pow<F>(x: &F, y: &F, modulus: &F) -> F
+where
+    F: Clone + PartialEq + Zero + One + Signed + Shl<u32, Output = F> + ShrAssign<i32>,
+    for<'a> &'a F: Add<&'a F, Output = F>
+        + Sub<&'a F, Output = F>
+        + Div<&'a F, Output = F>
+        + Rem<&'a F, Output = F>
+        + Mul<&'a F, Output = F>
+        + BitAnd<&'a F, Output = F>,
+{
+    let mut base = x.clone();
+    let mut exponent = y.clone();
+
+    if exponent.is_negative() {
+        base = mod_inverse(&base, modulus);
+        exponent = -exponent;
+    }
+    let one = F::one();
+
+    base = &base % modulus;
+    let mut result = F::one();
+    while exponent.is_positive() && !exponent.is_zero() {
+        if (&exponent & &one) == one {
+            result = &(&result * &base) % modulus;
+        }
+        exponent >>= 1;
+        base = &(&base * &base) % modulus;
+    }
+    result
 }

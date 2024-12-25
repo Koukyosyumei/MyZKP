@@ -8,7 +8,7 @@ However, Boolean circuits are often large and inefficient. Even a simple operati
 
 ## Rank-1 Constraint System (R1CS)
 
-There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as \underline{a set of equality constraints, each involving only one multiplication}. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:
+There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as a set of equality constraints, each involving only one multiplication. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:
 
 ### Definition: R1CS
 
@@ -21,9 +21,9 @@ An R1CS structure \\(\mathcal{S}\\) consists of:
 An R1CS instance includes a public input \\(p \in \mathbb{F}^\ell\\), while an R1CS witness is a vector \\(w \in \mathbb{F}^{d - \ell - 1}\\).
 A structure-instance tuple \\((S, p)\\) is satisfied by a witness \\(w\\) if:
 \begin{equation}
-(L \cdot a) \circ (R \cdot a) - O \cdot a = \mathbf{0}
+(L \cdot v) \circ (R \cdot v) - O \cdot v = \mathbf{0}
 \end{equation}
-where \\(a = (1, w, p) \in \mathbb{F}^d\\), \\(\cdot\\) denotes matrix-vector multiplication, and \\(\circ\\) is the Hadamard product.
+where \\(v = (1, w, p) \in \mathbb{F}^d\\), \\(\cdot\\) denotes matrix-vector multiplication, and \\(\circ\\) is the Hadamard product.
 
 The intuitive interpretation of each matrix is as follows:
 
@@ -31,14 +31,14 @@ The intuitive interpretation of each matrix is as follows:
 - \\(L\\): Encodes the left input of each gate
 - \\(R\\): Encodes the right input of each gate
 - \\(O\\): Encodes the output of each gate
-- The leading 1 in the witness vector allows for constant terms
+- The leading 1 in the assignment vector allows for constant terms
 
 
 **Single Multiplication**
 
 Let's consider a simple example where we want to prove \\(z = x \cdot y\\), with \\(z = 3690\\), \\(x = 82\\), and \\(y = 45\\).
 
-- **Witness vector**: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
+- **Assignment vector**: \\((1, z, x, y) = (1, 3690, 82, 45)\\)
 - **Number of witnesses**: \\(m = 4\\)
 - **Number of constraints**: \\(d = 1\\)
 
@@ -46,7 +46,7 @@ Let's consider a simple example where we want to prove \\(z = x \cdot y\\), with
 The R1CS constraint for \\(z = x \cdot y\\) is satisfied when:
 
 \begin{align*}
-&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot a) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot a) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot a \\\\
+&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot v) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot v) - \begin{bmatrix} 0 & 1 & 0 & 0 \end{bmatrix} \cdot v \\\\
 =&(\begin{bmatrix} 0 & 0 & 1 & 0 \end{bmatrix} \cdot \begin{bmatrix}
 1 \\\\ 3690 \\\\ 82 \\\\ 45
 \end{bmatrix}) \circ (\begin{bmatrix} 0 & 0 & 0 & 1 \end{bmatrix} \cdot \begin{bmatrix}
@@ -71,18 +71,18 @@ This example demonstrates how R1CS encodes a simple multiplication constraint:
 Let's examine a more complex example: \\(r = a \cdot b \cdot c \cdot d\\). Since R1CS requires that each constraint contain only one multiplication, we need to break this down into multiple constraints:
 
 \begin{align*}
-v_1 &= a \cdot b \\\\
-v_2 &= c \cdot d \\\\
-r &= v_1 \cdot v_2
+z_1 &= a \cdot b \\\\
+z_2 &= c \cdot d \\\\
+r &= z_1 \cdot z_2
 \end{align*}
 
-Note that alternative representations are possible, such as \\(v_1 = ab, v_2 = v_1c, r = v_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, v_1, v_2)\\), so the dimension of the witness vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
+Note that alternative representations are possible, such as \\(z_1 = ab, z_2 = z_1c, r = z_2d\\). In this example, we use 7 variables \\((r, a, b, c, d, z_1, z_2)\\), so the dimension of the assignment vector will be \\(m = 8\\) (including the constant 1). We have three constraints, so \\(n = 3\\).
 To construct the matrices \\(L\\), \\(R\\), and \\(O\\), we can interpret the constraints as linear combinations:
 
 \begin{align*}
-v_1 &= (0 \cdot 1 + 0 \cdot r + 1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot b \\\\
-v_2 &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot d \\\\
-r &= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot v_1 + 0 \cdot v_2) \cdot v_2
+z_1 &= (0 \cdot 1 + 0 \cdot r + 1 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot b \\\\
+z_2 &= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot d \\\\
+r &= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot z_1 + 0 \cdot z_2) \cdot z_2
 \end{align*}
 
 Thus, we can construct \\(L\\), \\(R\\), and \\(O\\) as follows:
@@ -109,11 +109,11 @@ O = \begin{bmatrix}
 \end{bmatrix}
 \end{equation*}
 
-Where the columns in each matrix correspond to \\((1, r, a, b, c, d, v_1, v_2)\\).
+Where the columns in each matrix correspond to \\((1, r, a, b, c, d, z_1, z_2)\\).
 
 **Addition with a Constant**
 
-Let's examine the case \\(z = x \cdot y + 3\\). We can represent this as \\(-3 + z = x \cdot y\\). For the witness vector \\((1, z, x, y)\\), we have:
+Let's examine the case \\(z = x \cdot y + 3\\). We can represent this as \\(-3 + z = x \cdot y\\). For the assignment vector \\((1, z, x, y)\\), we have:
 
 \begin{align*}
 L &= \begin{bmatrix}
@@ -191,7 +191,9 @@ impl<F: Field> R1CS<F> {
 
 ## Quadratic Arithmetic Program (QAP)
 
-Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot a) \circ (R \cdot a) = O \cdot a\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
+Recall that the prover aims to demonstrate knowledge of a witness \\(w\\) without revealing it. This is equivalent to knowing a vector \\(a\\) that satisfies \\((L \cdot v) \circ (R \cdot v) = O \cdot v\\), where \\(\circ\\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \\(\Omega(d)\\) operations, where \\(d\\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \\(\Omega(1)\\) evaluations.
+
+**Equivalence of Matrices**
 
 Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \\(Av = Bu\\), where:
 
@@ -229,31 +231,47 @@ The equivalence check can be represented as:
 This matrix-vector equality check is equivalent to the following polynomial equality check:
 
 \begin{equation*}
-3 \cdot L([(1, 2), (2, 3)]) + 1 \cdot L([(1, 5), (2, 1)]) = 2 \cdot L([(1, 4), (2, 2)]) + 2 \cdot L([(1, 1), (2, 3)])
+3 \cdot \lambda([(1, 2), (2, 3)]) + 1 \cdot \lambda([(1, 5), (2, 1)]) = 2 \cdot \lambda([(1, 4), (2, 2)]) + 2 \cdot \lambda([(1, 1), (2, 3)])
 \end{equation*}
 
-where \\(L\\) denotes Lagrange Interpolation. In \\(\mathbb{F}_{11}\\) (field with 11 elements), we have:
+where \\(\lambda\\) denotes Lagrange Interpolation. In \\(\mathbb{F}_{11}\\) (field with 11 elements), we have:
 
 \begin{align*}
-L([(1, 2), (2, 3)]) &= x + 1 \\\\
-L([(1, 5), (2, 1)]) &= 7x + 9 \\\\
-L([(1, 4), (2, 2)]) &= 9x + 6 \\\\
-L([(1, 1), (2, 3)]) &= 2x + 10
+\lambda([(1, 2), (2, 3)]) &= x + 1 \\\\
+\lambda([(1, 5), (2, 1)]) &= 7x + 9 \\\\
+\lambda([(1, 4), (2, 2)]) &= 9x + 6 \\\\
+\lambda([(1, 1), (2, 3)]) &= 2x + 10
 \end{align*}
 
 The Schwartz-Zippel Lemma states that we need only one evaluation at a random point to check the equivalence of polynomials with high probability.
 
-However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\), where \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are the polynomials resulting from the Lagrange interpolation of \\(L \cdot a\\), \\(R \cdot a\\), and \\(O \cdot a\\) respectively. 
+**Back to R1CS**
 
-While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(d-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2d-2\\).
+Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \\(L \cdot v\\), \\(R \cdot v\\), and \\(O \cdot v\\), denoted as \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\), repectively, as follows:
 
-To address this discrepancy, we introduce a degree \\(d\\) polynomial \\(t(x) = \prod_{i=1}^{d} (x - i)\\). We can then rewrite the equation as:
+\begin{align*}
+\ell(x) &= \sum^{d}_{i=1} v_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)]) \\\\
+r(x) &= \sum^{d} _{i=1} v_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)]) \\\\
+o(x) &= \sum^{d} _{i=1} v_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
+\end{align*}
+
+However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. While \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) are of degree at most \\(m-1\\), \\(\ell(x) \cdot r(x)\\) is of degree at most \\(2m-2\\). Thus, we don't have \\(\ell(x) \cdot r(x) = o(x)\\). 
+
+To address this discrepancy, we introduce a degree \\(m\\) polynomial \\(t(x) = \prod_{i=1}^{m} (x - i)\\). Given the constituion of the interpolated equations, we have that \\(\forall{x} \in \\{1,\cdots, d\\}\\) \\(\ell(x) \cdot r(x) = o(x)\\). This implies the following:
+
+\begin{equation}
+\forall{x} \in \\{1,\cdots, m\\} \quad \ell(x) \cdot r(x) - o(x) = 0
+\end{equation}
+
+Thus, we can factorize \\(\ell(x) \cdot r(x) - o(x)\\) into the product of \\(t(x)\\) and an appripriate polynomial \\(h(x)\\) such that \\(\ell(x) \cdot r(x) - o(x) = t(x)h(x)\\).
+
+Then, we can then rewrite the equation as:
 
 \begin{equation}
 \ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
 \end{equation}
 
-where \\(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
+This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.
 
 **Implementation:**
 

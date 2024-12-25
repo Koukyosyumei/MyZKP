@@ -32,7 +32,7 @@
 //! use myzkp::modules::ring::Ring;
 //! use myzkp::modules::field::ModulusValue;
 //! use myzkp::modules::field::FiniteFieldElement;
-//! 
+//!
 //! define_myzkp_modulus_type!(Mod17, "17");
 //! let a = FiniteFieldElement::<Mod17>::from_value(5);
 //! let b = FiniteFieldElement::<Mod17>::from_value(3);
@@ -58,7 +58,7 @@ use num_traits::{One, Signed, Zero};
 use paste::paste;
 
 use crate::modules::ring::Ring;
-use crate::modules::utils::extended_euclidean;
+use crate::modules::utils::{extended_euclidean, mod_pow};
 
 /// Trait representing a field in abstract algebra.
 ///
@@ -68,6 +68,11 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
     fn div_ref(&self, other: &Self) -> Self;
+
+    fn add_m1_ref(&self, rhs: &Self) -> Self;
+    fn sub_m1_ref(&self, rhs: &Self) -> Self;
+    fn mul_m1_ref(&self, rhs: &Self) -> Self;
+    fn pow_m1<M: Into<BigInt>>(&self, n: M) -> Self;
 }
 
 /// Represents an element in a finite field.
@@ -156,6 +161,43 @@ impl<M: ModulusValue> Hash for FiniteFieldElement<M> {
     }
 }
 
+impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
+    fn add_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new(&self.value + &other.value)
+    }
+
+    fn mul_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new(&self.value * &other.value)
+    }
+
+    fn sub_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new(&self.value - &other.value)
+    }
+
+    fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
+        FiniteFieldElement::<M>::new(mod_pow(&self.value, &n.into(), &M::modulus()))
+    }
+
+    fn from_value<V: Into<BigInt>>(value: V) -> Self {
+        FiniteFieldElement::<M>::new(value.into())
+    }
+
+    fn get_value(&self) -> BigInt {
+        self.value.clone()
+    }
+
+    // Random element excluding a set of elements.
+    fn random_element(exclude_elements: &[FiniteFieldElement<M>]) -> Self {
+        let modulus = M::modulus();
+        let mut rng = rand::thread_rng();
+        let mut fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
+        while exclude_elements.contains(&fe) {
+            fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
+        }
+        fe
+    }
+}
+
 impl<M: ModulusValue> Field for FiniteFieldElement<M> {
     fn inverse(&self) -> Self {
         let modulus = M::modulus();
@@ -189,62 +231,21 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
     fn div_ref(&self, other: &Self) -> Self {
         self.mul_ref(&other.inverse())
     }
-}
 
-impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
-    fn add_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value + &other.value) % modulus)
+    fn add_m1_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new((&self.value + &other.value) % (M::modulus() - 1))
     }
 
-    fn mul_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value * &other.value) % modulus)
+    fn mul_m1_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new((&self.value * &other.value) % (M::modulus() - 1))
     }
 
-    fn sub_ref(&self, other: &Self) -> Self {
-        let modulus = M::modulus();
-        FiniteFieldElement::<M>::new((&self.value - &other.value) % modulus)
+    fn sub_m1_ref(&self, other: &Self) -> Self {
+        FiniteFieldElement::<M>::new((&self.value - &other.value) % (M::modulus() - 1))
     }
 
-    fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
-        let mut exponent: BigInt = n.into();
-        let mut base = self.clone();
-
-        if exponent.is_negative() {
-            // x^{-n} = (x^{-1})^{n}
-            base = base.inverse();
-            exponent = -exponent;
-        }
-
-        let mut result = FiniteFieldElement::one();
-        while exponent.is_positive() && !exponent.is_zero() {
-            if &exponent % 2 != BigInt::zero() {
-                result = result * &base;
-            }
-            exponent /= 2;
-            base = base.mul_ref(&base);
-        }
-        result
-    }
-
-    fn from_value<V: Into<BigInt>>(value: V) -> Self {
-        FiniteFieldElement::<M>::new(value.into())
-    }
-
-    fn get_value(&self) -> BigInt {
-        self.value.clone()
-    }
-
-    // Random element excluding a set of elements.
-    fn random_element(exclude_elements: &[FiniteFieldElement<M>]) -> Self {
-        let modulus = M::modulus();
-        let mut rng = rand::thread_rng();
-        let mut fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
-        while exclude_elements.contains(&fe) {
-            fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
-        }
-        fe
+    fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
+        FiniteFieldElement::<M>::new(mod_pow(&self.value, &n.into(), &(M::modulus() - 1)))
     }
 }
 
@@ -345,7 +346,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 /// use myzkp::modules::ring::Ring;
 /// use myzkp::modules::field::ModulusValue;
 /// use myzkp::modules::field::FiniteFieldElement;
-/// 
+///
 /// define_myzkp_modulus_type!(Mod17, "17");
 /// ```
 #[macro_export]

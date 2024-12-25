@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="zksnark/subsec4.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -181,12 +181,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="-myzkp-building-zero-knowledge-proof-from-scratch-in-rust"><a class="header" href="#-myzkp-building-zero-knowledge-proof-from-scratch-in-rust">🚀 MyZKP: Building Zero Knowledge Proof from Scratch in Rust</a></h1>
-<pre><code>███╗   ███╗  ██╗   ██╗  ███████╗  ██╗  ██╗  ██████╗  
-████╗ ████║  ╚██╗ ██╔╝  ╚══███╔╝  ██║ ██╔╝  ██╔══██╗ 
+<pre><code>███╗   ███╗  ██╗   ██╗  ███████╗  ██╗  ██╗  ██████╗   🦀
+████╗ ████║  ╚██╗ ██╔╝  ╚══███╔╝  ██║ ██╔╝  ██╔══██╗ 🦀
 ██╔████╔██║   ╚████╔╝     ███╔╝   █████╔╝   ██████╔╝ 
-██║╚██╔╝██║    ╚██╔╝     ███╔╝    ██╔═██╗   ██╔═══╝  
-██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║      
-╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝     
+██║╚██╔╝██║    ╚██╔╝     ███╔╝    ██╔═██╗   ██╔═══╝    🦀
+██║ ╚═╝ ██║     ██║     ███████╗  ██║  ██╗  ██║    🦀    
+╚═╝     ╚═╝     ╚═╝     ╚══════╝  ╚═╝  ╚═╝  ╚═╝      🦀
 </code></pre>
 <p><strong>MyZKP</strong> is a Rust implementation of zero-knowledge protocols built entirely from scratch! This project serves as an educational resource for understanding and working with zero-knowledge proofs.</p>
 <blockquote>
@@ -1319,7 +1319,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <p>To make the protocol flexible, we need to encode this knowledge in a specific format, and one common approach is using Boolean circuits. It's well-known that problems in P (those solvable in polynomial time) and NP (those where the solution can be verified in polynomial time) can be represented as Boolean circuits. This means adopting Boolean circuits allows us to handle both P and NP problems.</p>
 <p>However, Boolean circuits are often large and inefficient. Even a simple operation, like adding two 256-bit integers, can require hundreds of Boolean operators. In contrast, arithmetic circuits—essentially systems of equations involving addition, multiplication, and equality—offer a much more compact representation. Additionally, any Boolean circuit can be converted into an arithmetic circuit. For instance, the Boolean expression \(z = x \land y\) can be represented as \(x(x-1) = 0\), \(y(y-1) = 0\), and \(z = xy\) in an arithmetic circuit. Furthermore, as we'll see in this section, converting arithmetic circuits into polynomial constraints allows for much faster evaluation.</p>
 <h2 id="rank-1-constraint-system-r1cs"><a class="header" href="#rank-1-constraint-system-r1cs">Rank-1 Constraint System (R1CS)</a></h2>
-<p>There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as \underline{a set of equality constraints, each involving only one multiplication}. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:</p>
+<p>There are many formats to represent arithmetic circuits, and one of the most popular ones is R1CS (Rank-1 Constraint System), which represents arithmetic circuits as a set of equality constraints, each involving only one multiplication. In an arithmetic circuit, we call the concrete values assigned to the variables within the constraints witness. We first provide the formal definition of R1CS as follows:</p>
 <h3 id="definition-r1cs"><a class="header" href="#definition-r1cs">Definition: R1CS</a></h3>
 <p>An R1CS structure \(\mathcal{S}\) consists of:</p>
 <ul>
@@ -1329,26 +1329,26 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <p>An R1CS instance includes a public input \(p \in \mathbb{F}^\ell\), while an R1CS witness is a vector \(w \in \mathbb{F}^{d - \ell - 1}\).
 A structure-instance tuple \((S, p)\) is satisfied by a witness \(w\) if:
 \begin{equation}
-(L \cdot a) \circ (R \cdot a) - O \cdot a = \mathbf{0}
+(L \cdot v) \circ (R \cdot v) - O \cdot v = \mathbf{0}
 \end{equation}
-where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multiplication, and \(\circ\) is the Hadamard product.</p>
+where \(v = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multiplication, and \(\circ\) is the Hadamard product.</p>
 <p>The intuitive interpretation of each matrix is as follows:</p>
 <ul>
 <li>\(L\): Encodes the left input of each gate</li>
 <li>\(R\): Encodes the right input of each gate</li>
 <li>\(O\): Encodes the output of each gate</li>
-<li>The leading 1 in the witness vector allows for constant terms</li>
+<li>The leading 1 in the assignment vector allows for constant terms</li>
 </ul>
 <p><strong>Single Multiplication</strong></p>
 <p>Let's consider a simple example where we want to prove \(z = x \cdot y\), with \(z = 3690\), \(x = 82\), and \(y = 45\).</p>
 <ul>
-<li><strong>Witness vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
+<li><strong>Assignment vector</strong>: \((1, z, x, y) = (1, 3690, 82, 45)\)</li>
 <li><strong>Number of witnesses</strong>: \(m = 4\)</li>
 <li><strong>Number of constraints</strong>: \(d = 1\)</li>
 </ul>
 <p>The R1CS constraint for \(z = x \cdot y\) is satisfied when:</p>
 <p>\begin{align*}
-&amp;(\begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \cdot a) \circ (\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \cdot a) - \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 \end{bmatrix} \cdot a \\
+&amp;(\begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \cdot v) \circ (\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \cdot v) - \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 \end{bmatrix} \cdot v \\
 =&amp;(\begin{bmatrix} 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \cdot \begin{bmatrix}
 1 \\ 3690 \\ 82 \\ 45
 \end{bmatrix}) \circ (\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \cdot \begin{bmatrix}
@@ -1369,16 +1369,16 @@ where \(a = (1, w, p) \in \mathbb{F}^d\), \(\cdot\) denotes matrix-vector multip
 <p><strong>Multiple Constraints</strong></p>
 <p>Let's examine a more complex example: \(r = a \cdot b \cdot c \cdot d\). Since R1CS requires that each constraint contain only one multiplication, we need to break this down into multiple constraints:</p>
 <p>\begin{align*}
-v_1 &amp;= a \cdot b \\
-v_2 &amp;= c \cdot d \\
-r &amp;= v_1 \cdot v_2
+z_1 &amp;= a \cdot b \\
+z_2 &amp;= c \cdot d \\
+r &amp;= z_1 \cdot z_2
 \end{align*}</p>
-<p>Note that alternative representations are possible, such as \(v_1 = ab, v_2 = v_1c, r = v_2d\). In this example, we use 7 variables \((r, a, b, c, d, v_1, v_2)\), so the dimension of the witness vector will be \(m = 8\) (including the constant 1). We have three constraints, so \(n = 3\).
+<p>Note that alternative representations are possible, such as \(z_1 = ab, z_2 = z_1c, r = z_2d\). In this example, we use 7 variables \((r, a, b, c, d, z_1, z_2)\), so the dimension of the assignment vector will be \(m = 8\) (including the constant 1). We have three constraints, so \(n = 3\).
 To construct the matrices \(L\), \(R\), and \(O\), we can interpret the constraints as linear combinations:</p>
 <p>\begin{align*}
-v_1 &amp;= (0 \cdot 1 + 0 \cdot r + 1 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot b \\
-v_2 &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot v_1 + 0 \cdot v_2) \cdot d \\
-r &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot a + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot v_1 + 0 \cdot v_2) \cdot v_2
+z_1 &amp;= (0 \cdot 1 + 0 \cdot r + 1 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot b \\
+z_2 &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 1 \cdot c + 0 \cdot d + 0 \cdot z_1 + 0 \cdot z_2) \cdot d \\
+r &amp;= (0 \cdot 1 + 0 \cdot r + 0 \cdot v + 0 \cdot b + 0 \cdot c + 0 \cdot d + 1 \cdot z_1 + 0 \cdot z_2) \cdot z_2
 \end{align*}</p>
 <p>Thus, we can construct \(L\), \(R\), and \(O\) as follows:</p>
 <p>\begin{equation*}
@@ -1402,9 +1402,9 @@ O = \begin{bmatrix}
 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0
 \end{bmatrix}
 \end{equation*}</p>
-<p>Where the columns in each matrix correspond to \((1, r, a, b, c, d, v_1, v_2)\).</p>
+<p>Where the columns in each matrix correspond to \((1, r, a, b, c, d, z_1, z_2)\).</p>
 <p><strong>Addition with a Constant</strong></p>
-<p>Let's examine the case \(z = x \cdot y + 3\). We can represent this as \(-3 + z = x \cdot y\). For the witness vector \((1, z, x, y)\), we have:</p>
+<p>Let's examine the case \(z = x \cdot y + 3\). We can represent this as \(-3 + z = x \cdot y\). For the assignment vector \((1, z, x, y)\), we have:</p>
 <p>\begin{align*}
 L &amp;= \begin{bmatrix}
 0 &amp; 0 &amp; 1 &amp; 0
@@ -1474,7 +1474,8 @@ impl&lt;F: Field&gt; R1CS&lt;F&gt; {
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="quadratic-arithmetic-program-qap"><a class="header" href="#quadratic-arithmetic-program-qap">Quadratic Arithmetic Program (QAP)</a></h2>
-<p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot a) \circ (R \cdot a) = O \cdot a\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
+<p>Recall that the prover aims to demonstrate knowledge of a witness \(w\) without revealing it. This is equivalent to knowing a vector \(a\) that satisfies \((L \cdot v) \circ (R \cdot v) = O \cdot v\), where \(\circ\) denotes the Hadamard (element-wise) product. However, evaluating this equivalence directly requires \(\Omega(d)\) operations, where \(d\) is the number of rows. To improve efficiency, we can convert this matrix comparison to a polynomial comparison, leveraging the Schwartz-Zippel Lemma, which allows us to check polynomial equality with \(\Omega(1)\) evaluations.</p>
+<p><strong>Equivalence of Matrices</strong></p>
 <p>Let's consider a simpler example to illustrate this concept. Suppose we want to test the equivalence \(Av = Bu\), where:</p>
 <p>\begin{align*}
 A = \begin{bmatrix}
@@ -1506,23 +1507,34 @@ u = \begin{bmatrix}
 \end{equation*}</p>
 <p>This matrix-vector equality check is equivalent to the following polynomial equality check:</p>
 <p>\begin{equation*}
-3 \cdot L([(1, 2), (2, 3)]) + 1 \cdot L([(1, 5), (2, 1)]) = 2 \cdot L([(1, 4), (2, 2)]) + 2 \cdot L([(1, 1), (2, 3)])
+3 \cdot \lambda([(1, 2), (2, 3)]) + 1 \cdot \lambda([(1, 5), (2, 1)]) = 2 \cdot \lambda([(1, 4), (2, 2)]) + 2 \cdot \lambda([(1, 1), (2, 3)])
 \end{equation*}</p>
-<p>where \(L\) denotes Lagrange Interpolation. In \(\mathbb{F}_{11}\) (field with 11 elements), we have:</p>
+<p>where \(\lambda\) denotes Lagrange Interpolation. In \(\mathbb{F}_{11}\) (field with 11 elements), we have:</p>
 <p>\begin{align*}
-L([(1, 2), (2, 3)]) &amp;= x + 1 \\
-L([(1, 5), (2, 1)]) &amp;= 7x + 9 \\
-L([(1, 4), (2, 2)]) &amp;= 9x + 6 \\
-L([(1, 1), (2, 3)]) &amp;= 2x + 10
+\lambda([(1, 2), (2, 3)]) &amp;= x + 1 \\
+\lambda([(1, 5), (2, 1)]) &amp;= 7x + 9 \\
+\lambda([(1, 4), (2, 2)]) &amp;= 9x + 6 \\
+\lambda([(1, 1), (2, 3)]) &amp;= 2x + 10
 \end{align*}</p>
 <p>The Schwartz-Zippel Lemma states that we need only one evaluation at a random point to check the equivalence of polynomials with high probability.</p>
-<p>However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. Thus, we don't have \(\ell(x) \cdot r(x) = o(x)\), where \(\ell(x)\), \(r(x)\), and \(o(x)\) are the polynomials resulting from the Lagrange interpolation of \(L \cdot a\), \(R \cdot a\), and \(O \cdot a\) respectively.</p>
-<p>While \(\ell(x)\), \(r(x)\), and \(o(x)\) are of degree at most \(d-1\), \(\ell(x) \cdot r(x)\) is of degree at most \(2d-2\).</p>
-<p>To address this discrepancy, we introduce a degree \(d\) polynomial \(t(x) = \prod_{i=1}^{d} (x - i)\). We can then rewrite the equation as:</p>
+<p><strong>Back to R1CS</strong></p>
+<p>Let's thinks about how we can leverage the above method for the verification of R1CS. First, we can construct the interpolated polynomials for \(L \cdot v\), \(R \cdot v\), and \(O \cdot v\), denoted as \(\ell(x)\), \(r(x)\), and \(o(x)\), repectively, as follows:</p>
+<p>\begin{align*}
+\ell(x) &amp;= \sum^{d}_{i=1} v_i \ell_i(x) \quad \hbox{,where } \ell_i(x) := \lambda([(1, L_i,_1), (2, L_i,_2), \cdots,(m, L_i,_m)]) \\
+r(x) &amp;= \sum^{d} _{i=1} v_i r_i(x) \quad \hbox{,where } r_i(x) := \lambda([(1, R_i,_1), (2, R_i,_2), \cdots,(m, R_i,_m)]) \\
+o(x) &amp;= \sum^{d} _{i=1} v_i o_i(x) \quad \hbox{,where } o_i(x) := \lambda([(1, O_i,_1), (2, O_i,_2), \cdots,(m, O_i,_m)])
+\end{align*}</p>
+<p>However, the homomorphic property for multiplication doesn't hold for Lagrange Interpolation. While \(\ell(x)\), \(r(x)\), and \(o(x)\) are of degree at most \(m-1\), \(\ell(x) \cdot r(x)\) is of degree at most \(2m-2\). Thus, we don't have \(\ell(x) \cdot r(x) = o(x)\).</p>
+<p>To address this discrepancy, we introduce a degree \(m\) polynomial \(t(x) = \prod_{i=1}^{m} (x - i)\). Given the constituion of the interpolated equations, we have that \(\forall{x} \in \{1,\cdots, d\}\) \(\ell(x) \cdot r(x) = o(x)\). This implies the following:</p>
+<p>\begin{equation}
+\forall{x} \in \{1,\cdots, m\} \quad \ell(x) \cdot r(x) - o(x) = 0
+\end{equation}</p>
+<p>Thus, we can factorize \(\ell(x) \cdot r(x) - o(x)\) into the product of \(t(x)\) and an appripriate polynomial \(h(x)\) such that \(\ell(x) \cdot r(x) - o(x) = t(x)h(x)\).</p>
+<p>Then, we can then rewrite the equation as:</p>
 <p>\begin{equation}
 \ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
 \end{equation}</p>
-<p>where \(h(x) = \frac{\ell(x) \cdot r(x) - o(x)}{t(x)}\). This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.</p>
+<p>This formulation allows us to maintain the desired polynomial relationships while accounting for the degree differences.</p>
 <p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1581,15 +1593,15 @@ impl&lt;'a, F: Field&gt; QAP&lt;'a, F&gt; {
 <p>\begin{equation}
 P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}</p>
-<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(d &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_d\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\). Note that the Prover also knows \(T(x)\).</p>
+<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(m &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_m\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\). Note that the Prover also knows \(T(x)\).</p>
 <p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
 <h2 id="naive-approach"><a class="header" href="#naive-approach">Naive Approach</a></h2>
 <p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</em></li>
+<li>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</li>
+<li>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</li>
+<li>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</li>
 </ul>
 <p>This protocol is highly inefficient, requiring \(\mathcal{O}(|\mathbb{F}|)\) evaluations and communications.</p>
 <p><strong>Implementation:</strong></p>
@@ -1704,7 +1716,22 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Prover computes and sends h and p
+    let (h, p) = prover.compute_values(&amp;s);
+
+    // Step 3: Verifier checks whether p = t * h
+    verifier.verify(&amp;s, &amp;h, &amp;p)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -1722,22 +1749,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1: Verifier generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Prover computes and sends h and p
-    let (h, p) = prover.compute_values(&amp;s);
-
-    // Step 3: Verifier checks whether p = t * h
-    verifier.verify(&amp;s, &amp;h, &amp;p)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
+pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
@@ -1765,7 +1777,7 @@ g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n
 <p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</em></li>
+<li>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</li>
 <li><em>\(\mathcal{B}\) computes and sends \(\{\alpha, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_i= g^{(s^{i})}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\) and \(v = g^{h}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
@@ -1826,7 +1838,23 @@ impl&lt;F: Field&gt; Verifier&lt;F&gt; {
     }
 }
 
-// Simulating a malicious prover
+pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
+    // Step 1 &amp; 2: Verifier generates a challenge
+    let max_degree = prover.p.degree();
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Prover computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&amp;alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t
+    verifier.verify(&amp;u, &amp;v)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability:</strong></p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Simulating a malicious prover
 pub struct MaliciousProver&lt;F: Field&gt; {
     t: Polynomial&lt;F&gt;,
 }
@@ -1846,23 +1874,7 @@ impl&lt;F: Field&gt; MaliciousProver&lt;F&gt; {
     }
 }
 
-pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;Verifier&lt;F&gt;) -&gt; bool {
-    // Step 1 &amp; 2: Verifier generates a challenge
-    let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&amp;alpha_powers);
-
-    // Step 4: Verifier checks whether u = v^t
-    verifier.verify(&amp;u, &amp;v)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
+pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
     prover: &amp;MaliciousProver&lt;F&gt;,
     verifier: &amp;Verifier&lt;F&gt;,
 ) -&gt; bool {
@@ -1887,11 +1899,11 @@ pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verif
 <p>Based on this assumption, we can design an improved protocol:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{B}\) computes and sends \({\alpha_1, \alpha_2, ..., \alpha_{n}}\) and \({\alpha'_1, \alpha'_2, ..., \alpha'_{n}}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
+<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
+<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) <em>and \(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
+<li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{P(sr)}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
+<li>\(\mathcal{B}\) checks whether \(u = v^{t}\).</li>
 </ul>
 <p>The prover can compute \(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
 <p><strong>Implementation:</strong></p>
@@ -1987,12 +1999,12 @@ pub fn knowledge_of_exponent_protocol&lt;F: Field&gt;(
 <p>To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \(P(x)\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \(\delta\):</p>
 <p><strong>Protocol:</strong></p>
 <ul>
-<li><em>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</em></li>
+<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
+<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</li>
 <li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u' = (g^{p})^{\delta}\), \(v' = (g^{h})^{\delta}\), and \(w' = (g^{p'})^{\delta}\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</em></li>
+<li>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</li>
+<li>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</li>
 </ul>
 <p>By introducing the random value \(\delta\), the verifier can no longer learn anything about \(p\), \(h\), or \(w\), thus achieving zero knowledge.</p>
 <p><strong>Implementation:</strong></p>
@@ -2238,6 +2250,412 @@ pub fn non_interactive_zkp_protocol(
     verifier.verify(&amp;proof, &amp;setup.verification_key)
 }
 <span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bringing-it-all-together"><a class="header" href="#bringing-it-all-together">Bringing It All Together</a></h1>
+<p>Let's recap the previous sections. First, the relationship between the inputs and outputs of any program can be expressed as a rank-one constraint system (R1CS) as follows:</p>
+<p>\[
+(L \cdot v) \circ (R \cdot v) - O \cdot v = 0<br />
+\]</p>
+<p>, where \(v\) is the concatenation of all inputs, outputs, and intermediate values. This allows us to transform the statement, "I know the input values \(x\) that make the program returns the output values \(y\)", into "I know \(v\), whose outputs components are \(y\), that satisfies the constraint system corresponding to the program".</p>
+<p>Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test.</p>
+<h2 id="first-protocol-idea"><a class="header" href="#first-protocol-idea">First Protocol Idea</a></h2>
+<p>The simplest protocol, based on the previous chapter, is as follows:</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\) and \(\alpha\).</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha \ell_i(s)},g^{\alpha r_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha}\)</li>
+</ul>
+</li>
+<li>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</li>
+</ul>
+<p>Both the proof key and the verification key are publicly available, enabling anyone to generate and verify proofs based on the target program.</p>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Run the program to obtain the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\).
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate the shifted polynomials at \(s\).
+<ul>
+<li>\(g^{\alpha \ell(s)} = \prod^{d}_{i=1} (g^{\alpha \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha r(s)} = \prod^{d}_{i=1} (g^{\alpha r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha o(s)} = \prod^{d}_{i=1} (g^{\alpha o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Compute \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse the proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Check the polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha}) = e(g^{\ell'}, g)\)</li>
+<li>\(e(g^{r}, g^{\alpha}) = e(g^{r'}, g)\)</li>
+<li>\(e(g^{o}, g^{\alpha}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Verify validity of the proof
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Vulnerability</strong></p>
+<p>A critical issue with this protocol is that the checks may pass even if \(g^{\ell}\) is computed not from \(\{g^{\ell_i(s)}\}_{i \in [d]}\) but from \(\{g^{r_i(s)}\} _{i \in [d]}\), \(\{g^{o_i(s)}\} _{i \in [d]}\), or their combinations. The same issue applies to \(g^{r}\) and \(g^{o}\).</p>
+<p>For example, if the prover sends \((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.</p>
+<h2 id="second-protocol-non-interchangibility"><a class="header" href="#second-protocol-non-interchangibility">Second Protocol: Non-Interchangibility</a></h2>
+<p>To address the interchangeability issue, the next protocol uses distinct the different \(\alpha\)-shift for \(\ell\), \(r\), and \(o\).</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), <em>\(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\)</em>.</li>
+<li><strong>Proof Key (for the prover):</strong>
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li><em>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key (public):</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li><em>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\).
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\).
+<ul>
+<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</em></li>
+<li><em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</em></li>
+<li><em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)},\) <em>\(g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)},\)</em> \(g^{h(s)})\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</em></li>
+<li><em>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</em></li>
+<li><em>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Vulnerability</strong></p>
+<p>This protocol resolves interchangeability but does not enforce consistency acros \(\ell\), \(r\), and \(o\). Variables \(v_i\) can still take different values in each polynoimal because verification checks are performed separately.</p>
+<h2 id="thrid-protocol-variable-consistency"><a class="header" href="#thrid-protocol-variable-consistency">Thrid Protocol: Variable Consistency</a></h2>
+<p>To achive the variable consistency, we employ a checksum mechanism. Specifically, we first draw a new random value \(\beta\) and define the checksum of \(v_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(v _{\ell, i}\), \(v _{r,i}\), \(v _{o,i}\), and \(v _{\beta,i}\) denote the \(i\)-th value of the assignment vectors for \(\ell\), \(r\), \(o\) and the checksum, respectively. If all of them are the same, the following equation holds:</p>
+<p>\[
+e(g^{v _{\ell, i} \ell_i(s)} g^{v _{r, i} r_i(s)} g^{v _{o, i} o_i(s)}, g^{\beta}) = e(g^{v _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
+\]</p>
+<p>Unfortunately, this condition is not strictly equivalent. For example, consider the case where \(\ell_i(x) = r_i(x)\). In this scenario, we have:</p>
+<p>\begin{align*}
+&amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} r_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
+\iff &amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} \ell_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
+\end{align*}</p>
+<p>This equation holds for arbitrary \(v _{r,i}\) and \(v _{o,i}\) if we set \(v _{\beta, i} = v _{o, i}\) and \(v _{\ell, i} = 2 v _{o, i} - v _{r, i}\).</p>
+<p>To address this issue, we use distinct different \(\beta\) values for \(\ell\), \(r\) and \(o\). The consistency check then verifies the following equation:</p>
+<p>\[
+e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{v _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{v _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)<br />
+\]</p>
+<p>The new protocol using the above variable-consistency check is as follows:</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), <em>\(\beta_{\ell}\), \(\beta_{r}\), and \(\beta_{o}\)</em>.</li>
+<li><strong>Consistency Polynomial:</strong> <em>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</em></li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li><em>\(g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li><em>Evaluate each consistency polynomial at \(s\):</em>
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) <em>\(g^{z(s)}\)</em> \()\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
+<li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
+<li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z}, g)\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Vulnerability</strong></p>
+<p>Despite these checks, the protocol is vulnerable to <strong>malleability</strong>. Specifically, a malicious prover can exploit the polynomial restriction check to introduce arbitrary constants, altering the proof witout detection.</p>
+<p>Recall that the verifier validates whether the submitted \(g^{\ell}\) is actually calculated by \(\{g^{\ell _i(s)}\} _{i \in [d]}\) by checking \(e(g^{\ell}, g^{\alpha _{\ell}}) = e(g^{\ell'}, g)\). However, this process is not sound. Recall that the verification key is publicaly available, and the prover knows both of \(g^{\alpha _{\ell}}\) and \(g^{\beta _{\ell}}\). Here, suppose the prover submits \(g^{\ell} g^{c}\) and \(g^{\ell'} (g^{\alpha _{\ell}})^{c}\) insteads of \(g^{\ell}\) and \(g^{\ell'}\), where \(c\) is a constatn value. Then, the polynomial restriction check still passes:</p>
+<p>\[
+e(g^{\ell} g^{c}, g^{\alpha _{\ell}}) = e(g^{\alpha _{\ell} \ell + \alpha _{\ell} c}, g) = e(g^{\ell'}g^{\alpha _{\ell}c}, g) = e(g^{\ell'} (g^{\alpha _{\ell}})^{c}, g)
+\]</p>
+<p>In addition, if the prover submits \(g^{z} (g^{\beta _{\ell}})^{c}\) as the checksum, it also passes the polynomial checksum verification:</p>
+<p>\[
+e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z} (g^{\beta _{\ell}})^{c}, g)
+\]</p>
+<p>This phenomenon also can occur for \(r\) and \(o\).</p>
+<h2 id="forth-protocol-non-malleability"><a class="header" href="#forth-protocol-non-malleability">Forth Protocol: Non-Malleability</a></h2>
+<p>One way to surrogate the above malleability is hiding \(g^{\beta _{\ell}}\), \(g^{\beta _{r}}\), and \(g^{\beta _{o}}\) by powering them with a new random value \(\eta\).</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), and <em>\(\eta\)</em>.</li>
+<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}\)</li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li><em>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
+<li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
+<li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell} \eta}) \cdot e(g^{r}, g^{\beta _{r} \eta}) \cdot e(g^{o}, g^{\beta _{o} \eta}) = e(g^{z}, g^{\eta})\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<h2 id="fifth-protocol-pinocchio"><a class="header" href="#fifth-protocol-pinocchio">Fifth Protocol: Pinocchio</a></h2>
+<p>The above protocol introduces four expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
+<li><strong>Randized Generators:</strong> <em>\(g _{\ell} = g^{\rho _{\ell}}\), \(g _{r} = g^{\rho _{r}}\), and \(g _{o} = g^{\rho _{o}}\)</em></li>
+<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li><em>\(\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\}_{i\in[d]}\)</em></li>
+<li><em>\(\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li><em>\(g_{o}^{t(s)}\)</em></li>
+<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
+<li>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</li>
+</ul>
+</li>
+<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
+<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
+<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
+<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
+<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta _{\ell} \ell _{i}(s)} \cdot g _{r}^{\beta _{r} r _{i}(s)} \cdot g _{o}^{\beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em></li>
+<li><em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em></li>
+<li><em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}) = e(g^{z}, g^{\eta})\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p>This protocol reduces two pairing operations.</p>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
@@ -2256,6 +2674,22 @@ pub fn non_interactive_zkp_protocol(
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

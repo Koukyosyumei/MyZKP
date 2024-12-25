@@ -6,7 +6,7 @@ Before dealing with all of \\(\ell(x)\\), \\(r(x)\\), and \\(o(x)\\) at once, we
     P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
 \end{equation}
 
-Assume \\(P(x)\\) has \\(n\\) roots, \\(a_1, a_2, \ldots, a_n \in \mathbb{F}\\), such that \\(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\\). The Verifier \\(\mathcal{B}\\) knows \\(d < n\\) roots of \\(P(x)\\), namely \\(a_1, a_2, \ldots, a_d\\). Let \\(T(x) = (x - a_1)(x - a_2)\cdots(x - a_d)\\). Note that the Prover also knows \\(T(x)\\).
+Assume \\(P(x)\\) has \\(n\\) roots, \\(a_1, a_2, \ldots, a_n \in \mathbb{F}\\), such that \\(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\\). The Verifier \\(\mathcal{B}\\) knows \\(m < n\\) roots of \\(P(x)\\), namely \\(a_1, a_2, \ldots, a_m\\). Let \\(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\\). Note that the Prover also knows \\(T(x)\\).
 
 The Prover's objective is to convince the Verifier that \\(\mathcal{A}\\) knows a polynomial \\(H(x) = \frac{P(x)}{T(x)}\\).
 
@@ -16,9 +16,9 @@ The simplest approach to prove that \\(\mathcal{A}\\) knows \\(H(x)\\) is as fol
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) sends all possible values in \\(\mathbb{F}\\) to \\(\mathcal{A}\\).*
-- *\\(\mathcal{A}\\) computes and sends all possible outputs of \\(H(x)\\) and \\(P(x)\\).*
-- *\\(\mathcal{B}\\) checks whether \\(H(a)T(a) = P(a)\\) holds for any \\(a\\) in \\(\mathbb{F}\\).*
+- \\(\mathcal{B}\\) sends all possible values in \\(\mathbb{F}\\) to \\(\mathcal{A}\\).
+- \\(\mathcal{A}\\) computes and sends all possible outputs of \\(H(x)\\) and \\(P(x)\\).
+- \\(\mathcal{B}\\) checks whether \\(H(a)T(a) = P(a)\\) holds for any \\(a\\) in \\(\mathbb{F}\\).
 
 This protocol is highly inefficient, requiring \\(\mathcal{O}(|\mathbb{F}|)\\) evaluations and communications.
 
@@ -138,6 +138,23 @@ impl<F: Field> Verifier<F> {
     }
 }
 
+pub fn schwartz_zippel_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
+    // Step 1: Verifier generates a random challenge
+    let s = verifier.generate_challenge();
+
+    // Step 2: Prover computes and sends h and p
+    let (h, p) = prover.compute_values(&s);
+
+    // Step 3: Verifier checks whether p = t * h
+    verifier.verify(&s, &h, &p)
+}
+```
+
+**Vulnerability:**
+
+However, it is vulnerable to a malicious prover who could send an arbitrary value \\(h'\\) and the corresponding \\(p'\\) such that \\(p' = h't\\).
+
+```rust
 // Simulating a malicious prover
 pub struct MaliciousProver<F: Field> {
     t: Polynomial<F>,
@@ -156,23 +173,6 @@ impl<F: Field> MaliciousProver<F> {
     }
 }
 
-pub fn schwartz_zippel_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1: Verifier generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Prover computes and sends h and p
-    let (h, p) = prover.compute_values(&s);
-
-    // Step 3: Verifier checks whether p = t * h
-    verifier.verify(&s, &h, &p)
-}
-```
-
-**Vulnerability:**
-
-However, it is vulnerable to a malicious prover who could send an arbitrary value \\(h'\\) and the corresponding \\(p'\\) such that \\(p' = h't\\).
-
-```rust
 pub fn malicious_schwartz_zippel_protocol<F: Field>(
     prover: &MaliciousProver<F>,
     verifier: &Verifier<F>,
@@ -209,7 +209,7 @@ Similarly, the Prover can evaluate \\(g^h = g^{H(s)}\\). The Verifier can then c
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly draw \\(s\\) from \\(\mathbb{F}\\).*
+- \\(\mathcal{B}\\) randomly draw \\(s\\) from \\(\mathbb{F}\\).
 - *\\(\mathcal{B}\\) computes and sends \\(\\{\alpha, \alpha_2, ..., \alpha_{n}\\}\\), where \\(\alpha_i= g^{(s^{i})}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\) and \\(v = g^{h}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).*
@@ -270,6 +270,24 @@ impl<F: Field> Verifier<F> {
     }
 }
 
+pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
+    // Step 1 & 2: Verifier generates a challenge
+    let max_degree = prover.p.degree();
+    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+
+    // Step 3: Prover computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&alpha_powers);
+
+    // Step 4: Verifier checks whether u = v^t
+    verifier.verify(&u, &v)
+}
+```
+
+**Vulnerability:**
+
+However, this protocol still has a flaw. Since the Prover can compute \\(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
+
+```rust
 // Simulating a malicious prover
 pub struct MaliciousProver<F: Field> {
     t: Polynomial<F>,
@@ -290,24 +308,6 @@ impl<F: Field> MaliciousProver<F> {
     }
 }
 
-pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
-    let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&alpha_powers);
-
-    // Step 4: Verifier checks whether u = v^t
-    verifier.verify(&u, &v)
-}
-```
-
-**Vulnerability:**
-
-However, this protocol still has a flaw. Since the Prover can compute \\(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_d)^{c_d}\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
-
-```rust
 pub fn malicious_discrete_log_protocol<F: Field>(
     prover: &MaliciousProver<F>,
     verifier: &Verifier<F>,
@@ -337,11 +337,11 @@ Based on this assumption, we can design an improved protocol:
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).*
-- *\\(\mathcal{B}\\) computes and sends \\(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\\) and \\(\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
-- *\\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), and \\(w = g^{p'}\\), where \\(g^{p'} = g^{P(sr)}\\).*
+- \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
+- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) *and \\(\\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
+- \\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), *and \\(w = g^{p'}\\), where \\(g^{p'} = g^{P(sr)}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u^{r} = w\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).*
+- \\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).
 
 The prover can compute \\(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\\) using powers of \\(\alpha'\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
 
@@ -441,12 +441,12 @@ To transform the above protocol into a zk-SNARK, we need to ensure that the veri
 
 **Protocol:**
 
-- *\\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).*
-- *\\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) and \\(\\{\alpha\_1', \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^{i})}\\) and \\(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\\).*
+- \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
+- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) and \\(\\{\alpha\_1', \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^{i})}\\) and \\(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\\).
 - *\\(\mathcal{A}\\) randomly selects \\(\delta\\) from field \\(\mathbb{F}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u' = (g^{p})^{\delta}\\), \\(v' = (g^{h})^{\delta}\\), and \\(w' = (g^{p'})^{\delta}\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u'^{r} = w'\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).*
+- \\(\mathcal{B}\\) checks whether \\(u'^{r} = w'\\).
+- \\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).
 
 By introducing the random value \\(\delta\\), the verifier can no longer learn anything about \\(p\\), \\(h\\), or \\(w\\), thus achieving zero knowledge.
 
