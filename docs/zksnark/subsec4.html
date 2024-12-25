@@ -343,12 +343,12 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 <li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
 <li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
 <li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), <em>\(\beta_{\ell}\), \(\beta_{r}\), and \(\beta_{o}\)</em>.</li>
-<li><strong>Consistency Polynomial:</strong> <em>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</em></li>
 <li><strong>Proof Key:</strong> Provided to the prover
 <ul>
 <li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
 <li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
 <li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><em>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</em></li>
 </ul>
 </li>
 <li><strong>Verification Key:</strong>
@@ -430,12 +430,12 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 <li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
 <li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
 <li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), and <em>\(\eta\)</em>.</li>
-<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
 <li><strong>Proof Key:</strong> Provided to the prover
 <ul>
 <li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
 <li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
 <li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
 </ul>
 </li>
 <li><strong>Verification Key:</strong>
@@ -507,12 +507,12 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 <li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
 <li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
 <li><strong>Randized Generators:</strong> <em>\(g _{\ell} = g^{\rho _{\ell}}\), \(g _{r} = g^{\rho _{r}}\), and \(g _{o} = g^{\rho _{o}}\)</em></li>
-<li><strong>Consistency Polynomial:</strong> \(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
 <li><strong>Proof Key:</strong> Provided to the prover
 <ul>
 <li><em>\(\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\}_{i\in[d]}\)</em></li>
 <li><em>\(\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
 <li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
 </ul>
 </li>
 <li><strong>Verification Key:</strong>

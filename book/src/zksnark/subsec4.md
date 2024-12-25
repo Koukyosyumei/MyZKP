@@ -132,11 +132,11 @@ The new protocol using the above variable-consistency check is as follows:
 - **Interpolated Polynomial:** Construct \\(\\{\ell_i, r_i, o_i\\}_{i\in[d]}\\) from \\(L\\), \\(R\\), and \\(O\\), respectively.
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
 - **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), *\\(\beta_{\ell}\\), \\(\beta_{r}\\), and \\(\beta_{o}\\)*.
-- **Consistency Polynomial:** *\\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)*
 - **Proof Key:** Provided to the prover
   - \\(\\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\\}_{i\in[d]}\\)
   - \\(\\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
+  - *\\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)*
 - **Verification Key:**
   - \\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\\) *\\(, g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\\)*
 - After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
@@ -196,11 +196,11 @@ One way to surrogate the above malleability is hiding \\(g^{\beta _{\ell}}\\), \
 - **Interpolated Polynomial:** Construct \\(\\{\ell_i, r_i, o_i\\}_{i\in[d]}\\) from \\(L\\), \\(R\\), and \\(O\\), respectively.
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
 - **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), \\(\beta_{\ell}\\), \\(\beta_{r}\\), \\(\beta_{o}\\), and *\\(\eta\\)*.
-- **Consistency Polynomial:** \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
 - **Proof Key:** Provided to the prover
   - \\(\\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\\}_{i\in[d]}\\)
   - \\(\\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
+  - \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
 - **Verification Key:**
   - \\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\\) *\\(, g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\\)*
 - After distribution, the original \\(s,\alpha_{\ell},\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
@@ -242,11 +242,11 @@ The above protocol introduces four expensive pairing operations. To make it fast
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
 - **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), \\(\beta_{\ell}\\), \\(\beta_{r}\\), \\(\beta_{o}\\), \\(\eta\\), *\\(\rho _{\ell}\\), and \\(\rho _{r}\\), and set \\(\rho _{o} = \rho _{\ell} \rho _{r}\\)*.
 - **Randized Generators:** *\\(g _{\ell} = g^{\rho _{\ell}}\\), \\(g _{r} = g^{\rho _{r}}\\), and \\(g _{o} = g^{\rho _{o}}\\)*
-- **Consistency Polynomial:** \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
 - **Proof Key:** Provided to the prover
   - *\\(\\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\\}_{i\in[d]}\\)*
   - *\\(\\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)*
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
+  - \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
 - **Verification Key:**
   - *\\(g _{o}^{t(s)}\\)* \\(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}, g^{\beta _{\ell} \eta}, g^{\beta _{r} \eta}, g^{\beta _{o} \eta}\\)
 - After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
