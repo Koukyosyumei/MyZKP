@@ -2273,8 +2273,7 @@ pub fn non_interactive_zkp_protocol(
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
-<li>\(g^{t(s)}\)</li>
-<li>\(g^{\alpha}\)</li>
+<li>\(g^{t(s)}, g^{\alpha}\)</li>
 </ul>
 </li>
 <li>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</li>
@@ -2285,37 +2284,37 @@ pub fn non_interactive_zkp_protocol(
 <li>Run the program to obtain the assignment vector \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
-<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
 <li>Evaluate each polynomial at \(s\).
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate the shifted polynomials at \(s\).
 <ul>
-<li>\(g^{\alpha \ell(s)} = \prod^{d}_{i=1} (g^{\alpha \ell_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha r(s)} = \prod^{d}_{i=1} (g^{\alpha r_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha o(s)} = \prod^{d}_{i=1} (g^{\alpha o_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha \ell(s)} = \prod^{d} _{i=1} (g^{\alpha \ell _i(s)})^{v _i} ,\quad g^{\alpha r(s)} = \prod^{d} _{i=1} (g^{\alpha r _i(s)})^{v _i} ,\quad g^{\alpha o(s)} = \prod^{d} _{i=1} (g^{\alpha o_i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Compute \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\)</li>
+</ul>
+</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
 <li>Parse the proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
 <li>Check the polynomial restrictions
 <ul>
-<li>\(e(g^{\ell}, g^{\alpha}) = e(g^{\ell'}, g)\)</li>
-<li>\(e(g^{r}, g^{\alpha}) = e(g^{r'}, g)\)</li>
-<li>\(e(g^{o}, g^{\alpha}) = e(g^{o'}, g)\)</li>
+<li>\(e(g^{\ell}, g^{\alpha}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha}) = e(g^{o'}, g)\)</li>
 </ul>
 </li>
 <li>Verify validity of the proof
@@ -2343,8 +2342,7 @@ pub fn non_interactive_zkp_protocol(
 </li>
 <li><strong>Verification Key (public):</strong>
 <ul>
-<li>\(g^{t(s)}\)</li>
-<li><em>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</em></li>
+<li>\(g^{t(s)}\) <em>\(, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\)</em></li>
 </ul>
 </li>
 <li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
@@ -2354,37 +2352,37 @@ pub fn non_interactive_zkp_protocol(
 <li>Execute the program and get the assignment \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
-<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
 <li>Evaluate each polynomial at \(s\).
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\).
 <ul>
-<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</em></li>
-<li><em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</em></li>
-<li><em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</em></li>
+<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</em>, <em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</em>, <em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</em></li>
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((g^{\ell(s)}, g^{r(s)}, g^{o(s)},\) <em>\(g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)},\)</em> \(g^{h(s)})\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((g^{\ell(s)}, g^{r(s)}, g^{o(s)},\) <em>\(g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)},\)</em> \(g^{h(s)})\)</li>
+</ul>
+</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
 <li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
 <li>Check polynomial restrictions
 <ul>
-<li><em>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</em></li>
-<li><em>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</em></li>
-<li><em>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</em></li>
+<li><em>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</em>, \(\quad \) <em>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</em>, \(\quad \) <em>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</em></li>
 </ul>
 </li>
 <li>Validity check
@@ -2426,9 +2424,7 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
-<li>\(g^{t(s)}\)</li>
-<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
-<li><em>\(g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
+<li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(, g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
 </ul>
 </li>
 <li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
@@ -2438,24 +2434,22 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 <li>Execute the program and get the assignment vector \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
-<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
 <li>Evaluate each polynomial at \(s\):
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\):
 <ul>
-<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li><em>Evaluate each consistency polynomial at \(s\):</em>
@@ -2464,16 +2458,18 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) <em>\(g^{z(s)}\)</em> \()\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) <em>\(g^{z(s)}\)</em> \()\)</li>
+</ul>
+</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
 <li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
-<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
-<li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
-<li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+<li>\(\quad e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
 </ul>
 </li>
 <li>Check variable consistency
@@ -2515,36 +2511,32 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
-<li>\(g^{t(s)}\)</li>
-<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
-<li><em>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
+<li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(, g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
 </ul>
 </li>
-<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+<li>After distribution, the original \(s,\alpha_{\ell},\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
 <li>Execute the program and get the assignment vector \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
-<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
 <li>Evaluate each polynomial at \(s\):
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\):
 <ul>
-<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each consistency polynomial at \(s\):
@@ -2553,16 +2545,18 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
 <li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
-<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</li>
-<li>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</li>
-<li>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
 </ul>
 </li>
 <li>Check variable consistency
@@ -2594,9 +2588,7 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
-<li><em>\(g_{o}^{t(s)}\)</em></li>
-<li>\(g^{\alpha_{\ell}}\), \(g^{\alpha_{r}}\), \(g^{\alpha_{o}}\)</li>
-<li>\(g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</li>
+<li><em>\(g _{o}^{t(s)}\)</em> \(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}, g^{\beta _{\ell} \eta}, g^{\beta _{r} \eta}, g^{\beta _{o} \eta}\)</li>
 </ul>
 </li>
 <li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
@@ -2606,24 +2598,22 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 <li>Execute the program and get the assignment vector \(v\).</li>
 <li>Compute the linear-combinations of polynomials
 <ul>
-<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x)\)</li>
-<li>\(r(x) = \sum_{i=1}^{d} v_i r_{i}(x)\)</li>
-<li>\(o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
 </ul>
 </li>
-<li>Compute \(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
 <li>Evaluate each polynomial at \(s\):
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v_i} \)</li>
-<li>\(g^{r(s)} = \prod^{d}_{i=1} (g^{r_i(s)})^{v_i} \)</li>
-<li>\(g^{o(s)} = \prod^{d}_{i=1} (g^{o_i(s)})^{v_i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\):
 <ul>
-<li>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</li>
-<li>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</li>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each consistency polynomial at \(s\):
@@ -2632,16 +2622,18 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>Proof: \((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+</li>
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
 <li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
-<li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em></li>
-<li><em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em></li>
-<li><em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
+<li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em>, <em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em>, <em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
 </ul>
 </li>
 <li>Check variable consistency
@@ -2674,6 +2666,22 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 
