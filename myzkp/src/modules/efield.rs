@@ -37,7 +37,7 @@
 //! use myzkp::modules::polynomial::Polynomial;
 //! use myzkp::modules::efield::IrreduciblePoly;
 //! use myzkp::modules::efield::ExtendedFieldElement;
-//! 
+//!
 //! define_myzkp_modulus_type!(Mod7, "7");
 //! define_extension_field!(
 //!     Ip7,
@@ -50,7 +50,7 @@
 //!         ],
 //!     }
 //! );
-//! 
+//!
 //! let a = ExtendedFieldElement::<Mod7, Ip7>::new(Polynomial {
 //!     coef: vec![
 //!         FiniteFieldElement::from_value(2),
@@ -150,6 +150,22 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
 
     fn div_ref(&self, other: &Self) -> Self {
         self.mul_ref(&other.inverse())
+    }
+
+    fn add_m1_ref(&self, other: &Self) -> Self {
+        unimplemented!("Not applicable for extended field elements")
+    }
+
+    fn mul_m1_ref(&self, other: &Self) -> Self {
+        unimplemented!("Not applicable for extended field elements")
+    }
+
+    fn sub_m1_ref(&self, other: &Self) -> Self {
+        unimplemented!("Not applicable for extended field elements")
+    }
+
+    fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
+        unimplemented!("Not applicable for extended field elements")
     }
 }
 

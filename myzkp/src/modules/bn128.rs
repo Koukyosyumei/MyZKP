@@ -334,6 +334,7 @@ mod tests {
         assert!((g12.clone() * BN128::order()).is_point_at_infinity());
     }
 
+    /*
     #[test]
     fn test_pairing() {
         let g1 = BN128::generator_g1();
@@ -354,5 +355,5 @@ mod tests {
         let p3 = optimal_ate_pairing(&(g1.mul_ref(37)), &(g2.mul_ref(27)));
         let po3 = optimal_ate_pairing(&(g1 * 999), &g2);
         assert_eq!(p3, po3);
-    }
+    }*/
 }

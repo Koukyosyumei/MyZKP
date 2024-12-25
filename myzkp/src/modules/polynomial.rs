@@ -122,6 +122,14 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    pub fn eval_m1(&self, point: &F) -> F {
+        let mut result = F::zero();
+        for coef in self.coef.iter().rev() {
+            result = result.mul_m1_ref(&point).add_m1_ref(coef);
+        }
+        result
+    }
+
     /// Evaluates the polynomial using precomputed powers.
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
