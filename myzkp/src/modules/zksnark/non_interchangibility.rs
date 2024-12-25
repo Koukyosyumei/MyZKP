@@ -60,25 +60,12 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
         g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
         g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).sanitize().get_value()));
         g1_alpha_ell_i_vec.push(
-            g1.clone()
-                * (alpha_ell.clone() * qap.ell_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
+            g1.mul_ref((alpha_ell.mul_ref(qap.ell_i_vec[i].eval(&s).sanitize())).get_value()),
         );
-        g1_alpha_r_i_vec.push(
-            g1.mul_ref(
-                (alpha_r.clone() * qap.r_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
-            ),
-        );
-        g1_alpha_o_i_vec.push(
-            g1.mul_ref(
-                (alpha_o.clone() * qap.o_i_vec[i].eval(&s))
-                    .sanitize()
-                    .get_value(),
-            ),
-        );
+        g1_alpha_r_i_vec
+            .push(g1.mul_ref((alpha_r.mul_ref(qap.r_i_vec[i].eval(&s).sanitize())).get_value()));
+        g1_alpha_o_i_vec
+            .push(g1.mul_ref((alpha_o.mul_ref(qap.o_i_vec[i].eval(&s).sanitize())).get_value()));
     }
 
     let mut s_power = FqOrder::one();
@@ -87,9 +74,9 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
         s_power = s_power * s.clone();
     }
 
-    let g2_alpha_ell = g2.mul_ref(alpha_ell.clone().get_value());
-    let g2_alpha_r = g2.mul_ref(alpha_r.clone().get_value());
-    let g2_alpha_o = g2.mul_ref(alpha_o.clone().get_value());
+    let g2_alpha_ell = g2.mul_ref(alpha_ell.get_value());
+    let g2_alpha_r = g2.mul_ref(alpha_r.get_value());
+    let g2_alpha_o = g2.mul_ref(alpha_o.get_value());
     let g2_t_s = g2.mul_ref(qap.t.eval(&s).sanitize().get_value());
 
     (
@@ -129,25 +116,25 @@ pub fn prove(
     let mut g1_o_prime = G1Point::point_at_infinity();
 
     for i in 0..qap.d {
-        g1_ell = g1_ell + proof_key.g1_ell_i_vec[i].clone() * assignment[i].get_value();
-        g1_r = g1_r + proof_key.g1_r_i_vec[i].clone() * assignment[i].get_value();
-        g2_r = g2_r + proof_key.g2_r_i_vec[i].clone() * assignment[i].get_value();
-        g1_o = g1_o + proof_key.g1_o_i_vec[i].clone() * assignment[i].get_value();
+        g1_ell = g1_ell + proof_key.g1_ell_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_r = g1_r + proof_key.g1_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g2_r = g2_r + proof_key.g2_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_o = g1_o + proof_key.g1_o_i_vec[i].mul_ref(assignment[i].get_value());
         g1_ell_prime =
-            g1_ell_prime + proof_key.g1_alpha_ell_i_vec[i].clone() * assignment[i].get_value();
-        g1_r_prime = g1_r_prime + proof_key.g1_alpha_r_i_vec[i].clone() * assignment[i].get_value();
-        g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].clone() * assignment[i].get_value();
+            g1_ell_prime + proof_key.g1_alpha_ell_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_r_prime = g1_r_prime + proof_key.g1_alpha_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].mul_ref(assignment[i].get_value());
     }
 
     let mut ell = Polynomial::<FqOrder>::zero();
     let mut r = Polynomial::<FqOrder>::zero();
     let mut o = Polynomial::<FqOrder>::zero();
     for i in 0..qap.d {
-        ell = ell + qap.ell_i_vec[i].clone() * assignment[i].clone();
-        r = r + qap.r_i_vec[i].clone() * assignment[i].clone();
-        o = o + qap.o_i_vec[i].clone() * assignment[i].clone();
+        ell = ell + qap.ell_i_vec[i].mul_ref(assignment[i]);
+        r = r + qap.r_i_vec[i].mul_ref(assignment[i]);
+        o = o + qap.o_i_vec[i].mul_ref(assignment[i]);
     }
-    let h = (ell * r - o) / qap.t.clone();
+    let h = (ell * r - o) / qap.t;
     let g1_h = h.eval_with_powers_on_curve(&proof_key.g1_sj_vec);
 
     Proof {
