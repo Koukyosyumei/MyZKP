@@ -581,7 +581,7 @@ Since \\(r\\) is not shared and already destroyed, the verifier \\(\mathcal{B}\\
 - *\\(\mathcal{B}\\) receives the verification key.*
 - *\\(\mathcal{B}\\) receives the proof \\(\pi\\).*
 - *\\(\mathcal{B}\\) checks whether \\(e(u', g^{r}) = e(w', g)\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).*
+- *\\(\mathcal{B}\\) checks whether \\(e(u', g) = e (v', g^{T(s)})\\).*
 
 **Implementation:**
 
