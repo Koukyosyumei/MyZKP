@@ -38,8 +38,10 @@ pub struct Proof {
 
 pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
     let mut rng = rand::thread_rng();
-    let s = FqOrder::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-    let alpha = FqOrder::from_value(BigInt::from(3_u32)); //Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+    let s =
+        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u64::MAX)));
+    let alpha =
+        FqOrder::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u64::MAX)));
 
     let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
     let mut g1_r_i_vec = Vec::with_capacity(qap.d);
