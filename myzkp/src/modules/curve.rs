@@ -121,8 +121,8 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
         let mut current = self.clone(); // Start with the current point
         let mut scalar_bits = scalar.clone();
 
-        while scalar_bits > BigInt::zero() {
-            if &scalar_bits & BigInt::one() == BigInt::one() {
+        while !scalar_bits.is_zero() {
+            if scalar_bits.bit(0) {
                 result = result.add_ref(&current);
             }
             current = current.add_ref(&current); // Double the point
