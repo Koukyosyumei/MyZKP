@@ -102,14 +102,14 @@ pub fn prove(
     let mut g1_o_prime = G1Point::point_at_infinity();
 
     for i in 0..qap.d {
-        g1_ell = g1_ell + proof_key.g1_ell_i_vec[i].clone() * assignment[i].get_value();
-        g1_r = g1_r + proof_key.g1_r_i_vec[i].clone() * assignment[i].get_value();
-        g2_r = g2_r + proof_key.g2_r_i_vec[i].clone() * assignment[i].get_value();
-        g1_o = g1_o + proof_key.g1_o_i_vec[i].clone() * assignment[i].get_value();
+        g1_ell = g1_ell + proof_key.g1_ell_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_r = g1_r + proof_key.g1_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g2_r = g2_r + proof_key.g2_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_o = g1_o + proof_key.g1_o_i_vec[i].mul_ref(assignment[i].get_value());
         g1_ell_prime =
-            g1_ell_prime + proof_key.g1_alpha_ell_i_vec[i].clone() * assignment[i].get_value();
-        g1_r_prime = g1_r_prime + proof_key.g1_alpha_r_i_vec[i].clone() * assignment[i].get_value();
-        g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].clone() * assignment[i].get_value();
+            g1_ell_prime + proof_key.g1_alpha_ell_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_r_prime = g1_r_prime + proof_key.g1_alpha_r_i_vec[i].mul_ref(assignment[i].get_value());
+        g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].mul_ref(assignment[i].get_value());
     }
 
     let mut ell = Polynomial::<FqOrder>::zero();
