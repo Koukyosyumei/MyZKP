@@ -1,6 +1,3 @@
-use num_traits::One;
-use num_traits::Zero;
-
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::arithmetization::r1cs::R1CS;
@@ -47,6 +44,9 @@ impl<F: Field> QAP<F> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use num_traits::One;
+    use num_traits::Zero;
 
     use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::algebra::ring::Ring;

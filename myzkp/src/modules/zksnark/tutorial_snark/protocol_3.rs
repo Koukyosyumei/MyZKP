@@ -1,7 +1,5 @@
-use num_bigint::{BigInt, RandBigInt, ToBigInt};
-use num_traits::One;
-use num_traits::Zero;
-use std::str::FromStr;
+use num_bigint::{BigInt, ToBigInt};
+use num_traits::{One, Zero};
 
 use crate::modules::algebra::curve::bn128::{
     optimal_ate_pairing, Fq, Fq2, FqOrder, G1Point, G2Point,
