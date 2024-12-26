@@ -95,22 +95,26 @@ pub fn verify(
     if pairing1 != pairing2 {
         return false;
     }
+    println!("11111111111111");
 
     let pairing3 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_alpha_r);
     let pairing4 = optimal_ate_pairing(&proof.g1_r_prime, &g2);
     if pairing3 != pairing4 {
         return false;
     }
+    println!("222222222222222");
 
     let pairing5 = optimal_ate_pairing(&proof.g1_o, &verification_key.g2_alpha_o);
     let pairing6 = optimal_ate_pairing(&proof.g1_o_prime, &g2);
     if pairing5 != pairing6 {
         return false;
     }
+    println!("333333333333333");
 
     let pairing7 = optimal_ate_pairing(&proof.g1_ell, &proof.g2_r);
     let pairing8 = optimal_ate_pairing(&proof.g1_h, &verification_key.g2_t_s);
     let pairing9 = optimal_ate_pairing(&proof.g1_o, &g2);
+    println!("4444444444444444");
 
     pairing7 == pairing8 * pairing9
 }
@@ -120,6 +124,30 @@ pub fn interchange_attack(proof: &Proof) -> Proof {
     new_proof.g1_r = proof.g1_ell.clone();
     new_proof.g1_r_prime = proof.g1_ell_prime.clone();
     new_proof
+}
+
+pub fn inconsistent_variable_attack(
+    assignment_ell: &Vec<FqOrder>,
+    assignment_r: &Vec<FqOrder>,
+    assignment_o: &Vec<FqOrder>,
+    proof_key: &ProofKey,
+    qap: &QAP<FqOrder>,
+) -> Proof {
+    let ell = accumulate_polynomials(&qap.ell_i_vec, assignment_ell);
+    let r = accumulate_polynomials(&qap.r_i_vec, assignment_r);
+    let o = accumulate_polynomials(&qap.o_i_vec, assignment_o);
+    let h = (ell * r - o) / qap.t.clone();
+
+    Proof {
+        g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment_ell),
+        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment_r),
+        g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment_r),
+        g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment_o),
+        g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment_ell),
+        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
+        g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
+        g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
+    }
 }
 
 #[cfg(test)]
@@ -266,7 +294,43 @@ mod tests {
         let proof_prime = prove(&v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
 
-        let bogus_proof = interchange_attack(&proof);
-        assert!(!verify(&g1, &g2, &bogus_proof, &verification_key));
+        let bogus_proof_1 = interchange_attack(&proof);
+        assert!(!verify(&g1, &g2, &bogus_proof_1, &verification_key));
+
+        let v_ell = vec![
+            FqOrder::one(),
+            FqOrder::from_value(210),
+            FqOrder::from_value(2),
+            FqOrder::from_value(3),
+            FqOrder::from_value(5),
+            FqOrder::from_value(7),
+            FqOrder::from_value(6),
+            FqOrder::from_value(35),
+        ];
+
+        let v_r = vec![
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+        ];
+
+        let v_o = vec![
+            FqOrder::one(),
+            FqOrder::from_value(6),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::from_value(2),
+            FqOrder::from_value(5),
+        ];
+
+        let bogus_proof_2 = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
+        assert!(verify(&g1, &g2, &bogus_proof_2, &verification_key));
     }
 }
