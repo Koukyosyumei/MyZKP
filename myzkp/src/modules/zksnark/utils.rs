@@ -3,11 +3,11 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
-use crate::modules::qap::QAP;
-use crate::modules::ring::Ring;
+use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
+use crate::modules::arithmetization::qap::QAP;
 
 pub fn generate_challenge_vec<F1: Field, F2: Field, E: EllipticCurve>(
     point: &EllipticCurvePoint<F1, E>,

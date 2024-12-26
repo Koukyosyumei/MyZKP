@@ -30,10 +30,10 @@
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
 //! use myzkp::define_myzkp_modulus_type;
-//! use myzkp::modules::ring::Ring;
-//! use myzkp::modules::field::ModulusValue;
-//! use myzkp::modules::field::FiniteFieldElement;
-//! use myzkp::modules::polynomial::Polynomial;
+//! use myzkp::modules::algebra::ring::Ring;
+//! use myzkp::modules::algebra::field::ModulusValue;
+//! use myzkp::modules::algebra::field::FiniteFieldElement;
+//! use myzkp::modules::algebra::polynomial::Polynomial;
 //!
 //! // Example finite field type
 //! define_myzkp_modulus_type!(Mod7, "7");
@@ -60,8 +60,8 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 use num_traits::{One, Zero};
 
-use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
-use crate::modules::field::Field;
+use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
+use crate::modules::algebra::field::Field;
 
 /// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq)]
@@ -416,8 +416,8 @@ impl<'a, 'b, F: Field> Rem<&'b Polynomial<F>> for &'a Polynomial<F> {
 mod tests {
     use super::*;
 
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::ring::Ring;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::algebra::ring::Ring;
 
     #[test]
     fn test_polynomial_addition() {

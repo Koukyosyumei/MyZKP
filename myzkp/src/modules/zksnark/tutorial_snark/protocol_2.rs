@@ -3,12 +3,15 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, Fq2, FqOrder, G1Point, G2Point};
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
-use crate::modules::qap::QAP;
-use crate::modules::ring::Ring;
-use crate::modules::snark::utils::{
+use crate::modules::algebra::curve::bn128::{
+    optimal_ate_pairing, Fq, Fq2, FqOrder, G1Point, G2Point,
+};
+use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
+use crate::modules::arithmetization::qap::QAP;
+use crate::modules::zksnark::utils::{
     accumulate_curve_points, accumulate_polynomials, generate_alpha_challenge_vec,
     generate_challenge_vec, generate_s_powers, get_h,
 };
@@ -150,9 +153,9 @@ pub fn inconsistent_variable_attack(
 mod tests {
     use super::*;
 
-    use crate::modules::bn128::BN128;
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::r1cs::R1CS;
+    use crate::modules::algebra::curve::bn128::BN128;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::arithmetization::r1cs::R1CS;
 
     #[test]
     fn test_snark_ni_single_multiplication() {

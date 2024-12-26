@@ -36,7 +36,7 @@ use num_traits::{One, Signed, Zero};
 /// ```
 /// use num_bigint::BigInt;
 /// use num_traits::{One, Zero};
-/// use myzkp::modules::utils::extended_euclidean;
+/// use myzkp::modules::algebra::utils::extended_euclidean;
 ///
 /// fn main() {
 ///     let a = BigInt::from(56);

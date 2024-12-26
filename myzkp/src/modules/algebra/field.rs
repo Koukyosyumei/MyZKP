@@ -29,9 +29,9 @@
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
 //! use myzkp::define_myzkp_modulus_type;
-//! use myzkp::modules::ring::Ring;
-//! use myzkp::modules::field::ModulusValue;
-//! use myzkp::modules::field::FiniteFieldElement;
+//! use myzkp::modules::algebra::ring::Ring;
+//! use myzkp::modules::algebra::field::ModulusValue;
+//! use myzkp::modules::algebra::field::FiniteFieldElement;
 //!
 //! define_myzkp_modulus_type!(Mod17, "17");
 //! let a = FiniteFieldElement::<Mod17>::from_value(5);
@@ -57,8 +57,8 @@ use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
 use paste::paste;
 
-use crate::modules::ring::Ring;
-use crate::modules::utils::{extended_euclidean, mod_pow};
+use crate::modules::algebra::ring::Ring;
+use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
 
 /// Trait representing a field in abstract algebra.
 ///
@@ -344,9 +344,9 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 /// use num_bigint::BigInt;
 /// use lazy_static::lazy_static;
 /// use myzkp::define_myzkp_modulus_type;
-/// use myzkp::modules::ring::Ring;
-/// use myzkp::modules::field::ModulusValue;
-/// use myzkp::modules::field::FiniteFieldElement;
+/// use myzkp::modules::algebra::ring::Ring;
+/// use myzkp::modules::algebra::field::ModulusValue;
+/// use myzkp::modules::algebra::field::FiniteFieldElement;
 ///
 /// define_myzkp_modulus_type!(Mod17, "17");
 /// ```
@@ -378,7 +378,7 @@ define_myzkp_modulus_type!(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::ring::Ring;
+
     use num_bigint::ToBigInt;
 
     define_myzkp_modulus_type!(Mod7, "7");

@@ -3,9 +3,9 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, FqOrder, G1Point, G2Point};
-use crate::modules::polynomial::Polynomial;
-use crate::modules::ring::Ring;
+use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, Fq, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 
 pub struct ProofKey {
     alpha: Vec<G1Point>,
@@ -83,7 +83,8 @@ pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::bn128::BN128;
+
+    use crate::modules::algebra::curve::bn128::BN128;
 
     #[test]
     fn test_non_interactive_zkp() {
