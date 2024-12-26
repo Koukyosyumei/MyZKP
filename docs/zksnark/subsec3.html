@@ -356,20 +356,20 @@ pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
 
 <span class="boring">}</span></code></pre></pre>
 <h2 id="-discrete-logarithm-assumption"><a class="header" href="#-discrete-logarithm-assumption">\(+\) Discrete Logarithm Assumption</a></h2>
-<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\alpha\), where \(\alpha = g^s \bmod p\). Thus, it's safe for the Verifier to send \(\alpha\), as the Prover cannot easily derive \(s\) from it.</p>
+<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\gamma\), where \(\gamma = g^s \bmod p\). Thus, it's safe for the Verifier to send \(\gamma\), as the Prover cannot easily derive \(s\) from it.</p>
 <p>An interesting property of polynomial exponentiation is:</p>
 <p>\begin{align}
 g^{P(x)} &amp;= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
 \end{align}</p>
-<p>Instead of sending \(s\), the Verifier can send \(g\) and \(\alpha_{i} = g^{(s^i)}\) for \(i = 1, \cdots n\). BE CAREFUL THAT <strong>\(g^{(s^i)} \neq (g^s)^i\)</strong>. The Prover can still evaluate \(g^p = g^{P(s)}\) using these powers of \(g\):</p>
+<p>Instead of sending \(s\), the Verifier can send \(g\) and \(\gamma_{i} = g^{(s^i)}\) for \(i = 1, \cdots n\). BE CAREFUL THAT <strong>\(g^{(s^i)} \neq (g^s)^i\)</strong>. The Prover can still evaluate \(g^p = g^{P(s)}\) using these powers of \(g\):</p>
 <p>\begin{equation}
-g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
+g^{p} = g^{P(s)} = g^{c_0} \gamma_{1}^{c_1} \gamma_{2}^{c_2} \cdots \gamma_{n}^{c_n}
 \end{equation}</p>
 <p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
 <p><strong>Protocol:</strong></p>
 <ul>
 <li>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</li>
-<li><em>\(\mathcal{B}\) computes and sends \(\{\alpha, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_i= g^{(s^{i})}\).</em></li>
+<li><em>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_i= g^{(s^{i})}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\) and \(v = g^{h}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
 </ul>
@@ -442,7 +442,7 @@ pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verif
 }
 <span class="boring">}</span></code></pre></pre>
 <p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
+<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t\) from \(\gamma _1, \cdots \gamma _m\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Simulating a malicious prover
@@ -481,22 +481,22 @@ pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="-knowledge-of-exponent-assumption"><a class="header" href="#-knowledge-of-exponent-assumption">\(+\) Knowledge of Exponent Assumption</a></h2>
-<p>To address the vulnerability where the verifier \(\mathcal{B}\) cannot distinguish if \(v (= g^h)\) from the prover is a power of \(\alpha_i = g^{(s^i)}\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:</p>
+<p>To address the vulnerability where the verifier \(\mathcal{B}\) cannot distinguish if \(v (= g^h)\) from the prover is a power of \(\gamma_i = g^{(s^i)}\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:</p>
 <ul>
-<li>\(\mathcal{B}\) sends both \(\alpha_i\) and \(\alpha'_i = \alpha_i^r\) for a new random value \(r\).</li>
-<li>The prover returns \(a = (\alpha_i)^{c_i}\) and \(a' = (\alpha'_i)^{c_i}\) for \(i = 1, ..., n\).</li>
-<li>\(\mathcal{B}\) can conclude that \(a\) is a power of \(\alpha_i\) if \(a^r = a'\).</li>
+<li>\(\mathcal{B}\) sends both \(\gamma_i\) and \(\gamma'_i = \gamma_i^r\) for a new random value \(r\).</li>
+<li>The prover returns \(a = (\gamma_i)^{c_i}\) and \(a' = (\gamma'_i)^{c_i}\) for \(i = 1, ..., n\).</li>
+<li>\(\mathcal{B}\) can conclude that \(a\) is a power of \(\gamma_i\) if \(a^r = a'\).</li>
 </ul>
 <p>Based on this assumption, we can design an improved protocol:</p>
 <p><strong>Protocol:</strong></p>
 <ul>
 <li>\(\mathcal{B}\) randomly selects \(s\) and <em>\(r\)</em> from field \(\mathbb{F}\).</li>
-<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) <em>and \(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^i)}\) and \(\alpha' = \alpha_{r} = g^{(s^{i})r}\).</em></li>
+<li>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\) <em>and \(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i = g^{(s^i)}\) and \(\gamma' = \gamma_{r} = g^{(s^{i})r}\).</em></li>
 <li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{rP(s)}\).</em></li>
 <li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
 <li>\(\mathcal{B}\) checks whether \(u = v^{t}\).</li>
 </ul>
-<p>The prover can compute \(g^{p'} = g^{rP(s)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\) using powers of \(\alpha'\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
+<p>The prover can compute \(g^{p'} = g^{rP(s)} = g^{c_0} (\gamma_{1})'^{c_1} (\gamma'_{2})^{c_2} \cdots (\gamma_{n}')^{c_n}\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
 <p><strong>Implementation:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -591,7 +591,7 @@ pub fn knowledge_of_exponent_protocol&lt;F: Field&gt;(
 <p><strong>Protocol:</strong></p>
 <ul>
 <li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
-<li>\(\mathcal{B}\) computes and sends \(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\) and \(\{\alpha_1', \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i = g^{(s^{i})}\) and \(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\).</li>
+<li>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\) and \(\{\gamma_1', \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i = g^{(s^{i})}\) and \(\gamma_i' = \gamma_i^{r} = g^{(s^{i})r}\).</li>
 <li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
 <li><em>\(\mathcal{A}\) computes and sends \(u' = (g^{p})^{\delta}\), \(v' = (g^{h})^{\delta}\), and \(w' = (g^{p'})^{\delta}\).</em></li>
 <li>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</li>
@@ -702,8 +702,8 @@ pub fn zk_protocol&lt;F: Field&gt;(prover: &amp;Prover&lt;F&gt;, verifier: &amp;
 <li><em><strong>Secret Seed:</strong> A trusted third party generates the random values \(s\) and \(r\)</em></li>
 <li><em><strong>Proof Key:</strong> Provided to the prover</em>
 <ul>
-<li><em>\(\{\alpha_1, \alpha_2, ..., \alpha_{n}\}\), where \(\alpha_{i} = g^{(s^i)}\)</em></li>
-<li><em>\(\{\alpha'_1, \alpha'_2, ..., \alpha'_{n}\}\), where \(\alpha_i' = g^{(s^{i})r}\)</em></li>
+<li><em>\(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_{i} = g^{(s^i)}\)</em></li>
+<li><em>\(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i' = g^{(s^{i})r}\)</em></li>
 </ul>
 </li>
 <li><em><strong>Verification Key:</strong> Distributed to verifiers</em>
@@ -871,6 +871,22 @@ pub fn non_interactive_zkp_protocol(
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

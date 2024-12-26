@@ -191,7 +191,7 @@ pub fn malicious_schwartz_zippel_protocol<F: Field>(
 
 ## \\(+\\) Discrete Logarithm Assumption
 
-To address this vulnerability, the Verifier must hide the randomly chosen input \\(s\\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \\(s\\) from \\(\alpha\\), where \\(\alpha = g^s \bmod p\\). Thus, it's safe for the Verifier to send \\(\alpha\\), as the Prover cannot easily derive \\(s\\) from it.
+To address this vulnerability, the Verifier must hide the randomly chosen input \\(s\\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \\(s\\) from \\(\gamma\\), where \\(\gamma = g^s \bmod p\\). Thus, it's safe for the Verifier to send \\(\gamma\\), as the Prover cannot easily derive \\(s\\) from it.
 
 An interesting property of polynomial exponentiation is:
 
@@ -199,10 +199,10 @@ An interesting property of polynomial exponentiation is:
     g^{P(x)} &= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
 \end{align}
 
-Instead of sending \\(s\\), the Verifier can send \\(g\\) and \\(\alpha_{i} = g^{(s^i)}\\) for \\(i = 1, \cdots n\\). BE CAREFUL THAT **\\(g^{(s^i)} \neq (g^s)^i\\)**. The Prover can still evaluate \\(g^p = g^{P(s)}\\) using these powers of \\(g\\):
+Instead of sending \\(s\\), the Verifier can send \\(g\\) and \\(\gamma_{i} = g^{(s^i)}\\) for \\(i = 1, \cdots n\\). BE CAREFUL THAT **\\(g^{(s^i)} \neq (g^s)^i\\)**. The Prover can still evaluate \\(g^p = g^{P(s)}\\) using these powers of \\(g\\):
 
 \begin{equation}
-    g^{p} = g^{P(s)} = g^{c_0} \alpha_{1}^{c_1} (\alpha_{2})^{c_2} \cdots (\alpha_{n})^{c_n}
+    g^{p} = g^{P(s)} = g^{c_0} \gamma_{1}^{c_1} \gamma_{2}^{c_2} \cdots \gamma_{n}^{c_n}
 \end{equation}
 
 Similarly, the Prover can evaluate \\(g^h = g^{H(s)}\\). The Verifier can then check \\(p = ht \iff g^p = (g^h)^t\\). 
@@ -210,7 +210,7 @@ Similarly, the Prover can evaluate \\(g^h = g^{H(s)}\\). The Verifier can then c
 **Protocol:**
 
 - \\(\mathcal{B}\\) randomly draw \\(s\\) from \\(\mathbb{F}\\).
-- *\\(\mathcal{B}\\) computes and sends \\(\\{\alpha, \alpha_2, ..., \alpha_{n}\\}\\), where \\(\alpha_i= g^{(s^{i})}\\).*
+- *\\(\mathcal{B}\\) computes and sends \\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\), where \\(\gamma_i= g^{(s^{i})}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\) and \\(v = g^{h}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).*
 
@@ -285,7 +285,7 @@ pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F
 
 **Vulnerability:**
 
-However, this protocol still has a flaw. Since the Prover can compute \\(g^t = \alpha_{c_1}(\alpha_2)^{c_2}\cdots(\alpha_m)^{c_m}\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
+However, this protocol still has a flaw. Since the Prover can compute \\(g^t\\) from \\(\gamma _1, \cdots \gamma _m\\), they could send fake values \\(((g^{t})^{z}, g^{z})\\) instead of \\((g^p, g^h)\\) for an arbitrary value \\(z\\). The verifier's check would still pass, and they could not detect this deception.
 
 ```rust
 // Simulating a malicious prover
@@ -326,11 +326,11 @@ pub fn malicious_discrete_log_protocol<F: Field>(
 
 ## \\(+\\) Knowledge of Exponent Assumption
 
-To address the vulnerability where the verifier \\(\mathcal{B}\\) cannot distinguish if \\(v (= g^h)\\) from the prover is a power of \\(\alpha_i = g^{(s^i)}\\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
+To address the vulnerability where the verifier \\(\mathcal{B}\\) cannot distinguish if \\(v (= g^h)\\) from the prover is a power of \\(\gamma_i = g^{(s^i)}\\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
 
-- \\(\mathcal{B}\\) sends both \\(\alpha_i\\) and \\(\alpha'_i = \alpha_i^r\\) for a new random value \\(r\\).
-- The prover returns \\(a = (\alpha_i)^{c_i}\\) and \\(a' = (\alpha'\_i)^{c_i}\\) for \\(i = 1, ..., n\\).
-- \\(\mathcal{B}\\) can conclude that \\(a\\) is a power of \\(\alpha_i\\) if \\(a^r = a'\\).
+- \\(\mathcal{B}\\) sends both \\(\gamma_i\\) and \\(\gamma'_i = \gamma_i^r\\) for a new random value \\(r\\).
+- The prover returns \\(a = (\gamma_i)^{c_i}\\) and \\(a' = (\gamma'\_i)^{c_i}\\) for \\(i = 1, ..., n\\).
+- \\(\mathcal{B}\\) can conclude that \\(a\\) is a power of \\(\gamma_i\\) if \\(a^r = a'\\).
 
 
 Based on this assumption, we can design an improved protocol:
@@ -338,12 +338,12 @@ Based on this assumption, we can design an improved protocol:
 **Protocol:**
 
 - \\(\mathcal{B}\\) randomly selects \\(s\\) and *\\(r\\)* from field \\(\mathbb{F}\\).
-- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) *and \\(\\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
+- \\(\mathcal{B}\\) computes and sends \\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\) *and \\(\\{\gamma'\_1, \gamma'\_2, ..., \gamma'\_{n}\\}\\), where \\(\gamma_i = g^{(s^i)}\\) and \\(\gamma' = \gamma_{r} = g^{(s^{i})r}\\).*
 - \\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), *and \\(w = g^{p'}\\), where \\(g^{p'} = g^{rP(s)}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u^{r} = w\\).*
 - \\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).
 
-The prover can compute \\(g^{p'} = g^{rP(s)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\\) using powers of \\(\alpha'\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
+The prover can compute \\(g^{p'} = g^{rP(s)} = g^{c_0} (\gamma\_{1})'^{c_1} (\gamma'\_{2})^{c_2} \cdots (\gamma\_{n}')^{c_n}\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
 
 **Implementation:**
 
@@ -442,7 +442,7 @@ To transform the above protocol into a zk-SNARK, we need to ensure that the veri
 **Protocol:**
 
 - \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
-- \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) and \\(\\{\alpha\_1', \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^{i})}\\) and \\(\alpha_i' = \alpha_i^{r} = g^{(s^{i})r}\\).
+- \\(\mathcal{B}\\) computes and sends \\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\) and \\(\\{\gamma\_1', \gamma'\_2, ..., \gamma'\_{n}\\}\\), where \\(\gamma_i = g^{(s^{i})}\\) and \\(\gamma_i' = \gamma_i^{r} = g^{(s^{i})r}\\).
 - *\\(\mathcal{A}\\) randomly selects \\(\delta\\) from field \\(\mathbb{F}\\).*
 - *\\(\mathcal{A}\\) computes and sends \\(u' = (g^{p})^{\delta}\\), \\(v' = (g^{h})^{\delta}\\), and \\(w' = (g^{p'})^{\delta}\\).*
 - \\(\mathcal{B}\\) checks whether \\(u'^{r} = w'\\).
@@ -557,8 +557,8 @@ The previously described protocol requires each verifier to generate unique rand
 
 - ***Secret Seed:** A trusted third party generates the random values \\(s\\) and \\(r\\)*
 - ***Proof Key:** Provided to the prover*
-    - *\\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\), where \\(\alpha_{i} = g^{(s^i)}\\)*
-    - *\\(\\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i' = g^{(s^{i})r}\\)*
+    - *\\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\), where \\(\gamma_{i} = g^{(s^i)}\\)*
+    - *\\(\\{\gamma'\_1, \gamma'\_2, ..., \gamma'\_{n}\\}\\), where \\(\gamma_i' = g^{(s^{i})r}\\)*
 - ***Verification Key:** Distributed to verifiers*
     - *\\(g^{r}\\)*
     - *\\(g^{T(s)}\\)* 
