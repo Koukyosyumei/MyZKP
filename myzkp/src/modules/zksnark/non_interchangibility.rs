@@ -8,6 +8,10 @@ use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use crate::modules::qap::QAP;
 use crate::modules::ring::Ring;
+use crate::modules::zksnark::utils::{
+    accumulate_curve_points, accumulate_polynomials, generate_alpha_challenge_vec,
+    generate_challenge_vec, generate_s_powers, get_h,
+};
 
 #[derive(Debug, Clone)]
 pub struct ProofKey {
@@ -42,106 +46,41 @@ pub struct Proof {
 }
 
 pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
-    let mut rng = rand::thread_rng();
     let s = FqOrder::random_element(&[]);
     let alpha_ell = FqOrder::random_element(&[]);
     let alpha_r = FqOrder::random_element(&[]);
     let alpha_o = FqOrder::random_element(&[]);
 
-    let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g2_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_o_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_ell_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_o_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_sj_vec = Vec::with_capacity(qap.m);
-
-    for i in 0..qap.d {
-        g1_ell_i_vec.push(g1.mul_ref(qap.ell_i_vec[i].eval(&s).sanitize().get_value()));
-        g1_r_i_vec.push(g1.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
-        g2_r_i_vec.push(g2.mul_ref(qap.r_i_vec[i].eval(&s).sanitize().get_value()));
-        g1_o_i_vec.push(g1.mul_ref(qap.o_i_vec[i].eval(&s).sanitize().get_value()));
-        g1_alpha_ell_i_vec.push(
-            g1.mul_ref((alpha_ell.mul_ref(&qap.ell_i_vec[i].eval(&s).sanitize())).get_value()),
-        );
-        g1_alpha_r_i_vec
-            .push(g1.mul_ref((alpha_r.mul_ref(&qap.r_i_vec[i].eval(&s).sanitize())).get_value()));
-        g1_alpha_o_i_vec
-            .push(g1.mul_ref((alpha_o.mul_ref(&qap.o_i_vec[i].eval(&s).sanitize())).get_value()));
-    }
-
-    let mut s_power = FqOrder::one();
-    for _ in 0..1 + qap.m {
-        g1_sj_vec.push(g1.mul_ref(s_power.clone().get_value()));
-        s_power = s_power * s.clone();
-    }
-
-    let g2_alpha_ell = g2.mul_ref(alpha_ell.get_value());
-    let g2_alpha_r = g2.mul_ref(alpha_r.get_value());
-    let g2_alpha_o = g2.mul_ref(alpha_o.get_value());
-    let g2_t_s = g2.mul_ref(qap.t.eval(&s).sanitize().get_value());
-
     (
         ProofKey {
-            g1_ell_i_vec,
-            g1_r_i_vec,
-            g2_r_i_vec,
-            g1_o_i_vec,
-            g1_alpha_ell_i_vec,
-            g1_alpha_r_i_vec,
-            g1_alpha_o_i_vec,
-            g1_sj_vec,
+            g1_ell_i_vec: generate_challenge_vec(g1, &qap.ell_i_vec, &s),
+            g1_r_i_vec: generate_challenge_vec(g1, &qap.r_i_vec, &s),
+            g2_r_i_vec: generate_challenge_vec(g2, &qap.r_i_vec, &s),
+            g1_o_i_vec: generate_challenge_vec(g1, &qap.o_i_vec, &s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &qap.ell_i_vec, &s, &alpha_ell),
+            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &qap.r_i_vec, &s, &alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &qap.o_i_vec, &s, &alpha_o),
+            g1_sj_vec: generate_s_powers(g1, &s, qap.m),
         },
         VerificationKey {
-            g2_alpha_ell,
-            g2_alpha_r,
-            g2_alpha_o,
-            g2_t_s,
+            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
+            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
+            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
+            g2_t_s: g2.mul_ref(qap.t.eval(&s).sanitize().get_value()),
         },
     )
 }
 
 pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey, qap: &QAP<FqOrder>) -> Proof {
-    let mut g1_ell = G1Point::point_at_infinity();
-    let mut g1_r = G1Point::point_at_infinity();
-    let mut g2_r = G2Point::point_at_infinity();
-    let mut g1_o = G1Point::point_at_infinity();
-    let mut g1_ell_prime = G1Point::point_at_infinity();
-    let mut g1_r_prime = G1Point::point_at_infinity();
-    let mut g1_o_prime = G1Point::point_at_infinity();
-
-    for i in 0..qap.d {
-        g1_ell = g1_ell + proof_key.g1_ell_i_vec[i].mul_ref(assignment[i].get_value());
-        g1_r = g1_r + proof_key.g1_r_i_vec[i].mul_ref(assignment[i].get_value());
-        g2_r = g2_r + proof_key.g2_r_i_vec[i].mul_ref(assignment[i].get_value());
-        g1_o = g1_o + proof_key.g1_o_i_vec[i].mul_ref(assignment[i].get_value());
-        g1_ell_prime =
-            g1_ell_prime + proof_key.g1_alpha_ell_i_vec[i].mul_ref(assignment[i].get_value());
-        g1_r_prime = g1_r_prime + proof_key.g1_alpha_r_i_vec[i].mul_ref(assignment[i].get_value());
-        g1_o_prime = g1_o_prime + proof_key.g1_alpha_o_i_vec[i].mul_ref(assignment[i].get_value());
-    }
-
-    let mut ell = Polynomial::<FqOrder>::zero();
-    let mut r = Polynomial::<FqOrder>::zero();
-    let mut o = Polynomial::<FqOrder>::zero();
-    for i in 0..qap.d {
-        ell = ell + qap.ell_i_vec[i].clone() * assignment[i].clone();
-        r = r + qap.r_i_vec[i].clone() * assignment[i].clone();
-        o = o + qap.o_i_vec[i].clone() * assignment[i].clone();
-    }
-    let h = (ell * r - o) / qap.t.clone();
-    let g1_h = h.eval_with_powers_on_curve(&proof_key.g1_sj_vec);
-
     Proof {
-        g1_ell,
-        g1_r,
-        g2_r,
-        g1_o,
-        g1_ell_prime,
-        g1_r_prime,
-        g1_o_prime,
-        g1_h,
+        g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
+        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment),
+        g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
+        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&proof_key.g1_sj_vec),
     }
 }
 
