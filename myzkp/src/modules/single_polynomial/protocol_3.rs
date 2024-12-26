@@ -5,47 +5,47 @@ use std::str::FromStr;
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 
-pub struct Prover<F: Field> {
+pub struct Prover3<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier3<F: Field> {
     t: Polynomial<F>,
     s: F,
     g: F,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover3<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover3 { p, t, h }
     }
 
-    pub fn compute_values(&self, alpha_powers: &[F]) -> (F, F) {
-        let g_p = self.p.eval_with_powers(alpha_powers);
-        let g_h = self.h.eval_with_powers(alpha_powers);
+    pub fn compute_values(&self, s_powers: &[F]) -> (F, F) {
+        let g_p = self.p.eval_with_powers(s_powers);
+        let g_h = self.h.eval_with_powers(s_powers);
         (g_p, g_h)
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier3<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
         let s = F::random_element(&[]);
         let g = F::from_value(generator);
-        Verifier { t, s, g }
+        Verifier3 { t, s, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> Vec<F> {
-        let mut alpha_powers = vec![];
+        let mut s_powers = vec![];
         for i in 0..(max_degree + 1) {
-            alpha_powers.push(
+            s_powers.push(
                 self.g
                     .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
         }
-        alpha_powers
+        s_powers
     }
 
     pub fn verify(&self, u: &F, v: &F) -> bool {
@@ -55,49 +55,49 @@ impl<F: Field> Verifier<F> {
 }
 
 // Simulating a malicious prover
-pub struct MaliciousProver<F: Field> {
+pub struct MaliciousProver3<F: Field> {
     t: Polynomial<F>,
 }
 
-impl<F: Field> MaliciousProver<F> {
+impl<F: Field> MaliciousProver3<F> {
     pub fn new(t: Polynomial<F>) -> Self {
-        MaliciousProver { t }
+        MaliciousProver3 { t }
     }
 
-    pub fn compute_malicious_values(&self, alpha_powers: &[F]) -> (F, F) {
-        let g_t = self.t.eval_with_powers(alpha_powers);
+    pub fn compute_malicious_values(&self, s_powers: &[F]) -> (F, F) {
+        let g_t = self.t.eval_with_powers(s_powers);
         let z = F::random_element(&[]);
-        let g = &alpha_powers[0];
+        let g = &s_powers[0];
         let fake_v = g.pow(z.get_value());
         let fake_u = g_t.pow(z.get_value());
         (fake_u, fake_v)
     }
 }
 
-pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+pub fn discrete_log_protocol<F: Field>(prover: &Prover3<F>, verifier: &Verifier3<F>) -> bool {
+    // Step 1 & 2: Verifier3 generates a challenge
     let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+    let s_powers = verifier.generate_challenge(max_degree as usize);
 
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&alpha_powers);
+    // Step 3: Prover3 computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&s_powers);
 
-    // Step 4: Verifier checks whether u = v^t
+    // Step 4: Verifier3 checks whether u = v^t
     verifier.verify(&u, &v)
 }
 
 pub fn malicious_discrete_log_protocol<F: Field>(
-    prover: &MaliciousProver<F>,
-    verifier: &Verifier<F>,
+    prover: &MaliciousProver3<F>,
+    verifier: &Verifier3<F>,
 ) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+    // Step 1 & 2: Verifier3 generates a challenge
     let max_degree = prover.t.degree() as usize;
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+    let s_powers = verifier.generate_challenge(max_degree as usize);
 
-    // Step 3: Malicious Prover computes and sends fake u and v
-    let (fake_u, fake_v) = prover.compute_malicious_values(&alpha_powers);
+    // Step 3: Malicious Prover3 computes and sends fake u and v
+    let (fake_u, fake_v) = prover.compute_malicious_values(&s_powers);
 
-    // Step 4: Verifier checks whether u = v^t (which will pass for the fake values)
+    // Step 4: Verifier3 checks whether u = v^t (which will pass for the fake values)
     verifier.verify(&fake_u, &fake_v)
 }
 
@@ -120,14 +120,14 @@ mod tests {
         let t = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2)]);
 
         // Honest protocol
-        let honest_prover = Prover::new(p.clone(), t.clone());
-        let verifier = Verifier::new(t.clone(), GENERATOR);
+        let honest_prover = Prover3::new(p.clone(), t.clone());
+        let verifier = Verifier3::new(t.clone(), GENERATOR);
 
         let honest_result = discrete_log_protocol(&honest_prover, &verifier);
         assert!(honest_result);
 
         // Malicious protocol
-        let malicious_prover = MaliciousProver::new(t);
+        let malicious_prover = MaliciousProver3::new(t);
         let malicious_result = malicious_discrete_log_protocol(&malicious_prover, &verifier);
         assert!(malicious_result);
     }

@@ -1,6 +1,6 @@
-pub mod dl;
-pub mod kea;
-pub mod naive;
 pub mod nizk;
-pub mod sz;
-pub mod zk;
+pub mod protocol_1;
+pub mod protocol_2;
+pub mod protocol_3;
+pub mod protocol_4;
+pub mod protocol_5;
