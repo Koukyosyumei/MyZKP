@@ -3,7 +3,6 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, Fq2, FqOrder, G1Point, G2Point};
 use crate::modules::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
