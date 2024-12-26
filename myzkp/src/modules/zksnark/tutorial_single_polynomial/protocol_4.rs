@@ -1,5 +1,4 @@
-use num_bigint::{BigInt, ToBigInt};
-use num_traits::Zero;
+use num_bigint::ToBigInt;
 
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
