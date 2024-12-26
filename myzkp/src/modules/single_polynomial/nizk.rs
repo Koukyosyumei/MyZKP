@@ -3,7 +3,7 @@ use num_traits::One;
 use num_traits::Zero;
 use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, G1Point, G2Point};
+use crate::modules::bn128::{optimal_ate_pairing, Fq, FqOrder, G1Point, G2Point};
 use crate::modules::polynomial::Polynomial;
 use crate::modules::ring::Ring;
 
@@ -29,15 +29,14 @@ pub struct TrustedSetup {
 }
 
 impl TrustedSetup {
-    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<Fq>, n: usize) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-        let r = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<FqOrder>, n: usize) -> Self {
+        let s = FqOrder::random_element(&[]);
+        let r = FqOrder::random_element(&[]);
 
         let mut alpha = Vec::with_capacity(n);
         let mut alpha_prime = Vec::with_capacity(n);
 
-        let mut s_power = Fq::one();
+        let mut s_power = FqOrder::one();
         for _ in 0..1 + n {
             alpha.push(g1.mul_ref(s_power.clone().get_value()));
             alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
@@ -55,20 +54,18 @@ impl TrustedSetup {
 }
 
 pub struct Prover {
-    pub p: Polynomial<Fq>,
-    pub h: Polynomial<Fq>,
+    pub p: Polynomial<FqOrder>,
+    pub h: Polynomial<FqOrder>,
 }
 
 impl Prover {
-    pub fn new(p: Polynomial<Fq>, t: Polynomial<Fq>) -> Self {
+    pub fn new(p: Polynomial<FqOrder>, t: Polynomial<FqOrder>) -> Self {
         let h = p.clone() / t;
         Prover { p, h }
     }
 
     pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
-        let mut rng = rand::thread_rng();
-        let delta =
-            Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+        let delta = FqOrder::random_element(&[]);
 
         let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
         let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
@@ -128,11 +125,11 @@ mod tests {
 
         // Set up the polynomials
         let p = Polynomial::from_monomials(&[
-            Fq::from_value(-1),
-            Fq::from_value(-2),
-            Fq::from_value(-3),
+            FqOrder::from_value(-1),
+            FqOrder::from_value(-2),
+            FqOrder::from_value(-3),
         ]);
-        let t = Polynomial::from_monomials(&[Fq::from_value(-1), Fq::from_value(-2)]);
+        let t = Polynomial::from_monomials(&[FqOrder::from_value(-1), FqOrder::from_value(-2)]);
 
         let setup = TrustedSetup::generate(&g1, &g2, &t, 3);
 

@@ -73,6 +73,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     fn sub_m1_ref(&self, rhs: &Self) -> Self;
     fn mul_m1_ref(&self, rhs: &Self) -> Self;
     fn pow_m1<M: Into<BigInt>>(&self, n: M) -> Self;
+    fn sanitize(&self) -> Self;
 }
 
 /// Represents an element in a finite field.
@@ -97,19 +98,6 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         let modulus = M::modulus();
         let value_sanitized = value % modulus;
 
-        FiniteFieldElement {
-            value: value_sanitized,
-            _phantom: PhantomData,
-        }
-    }
-
-    /// Ensures the element's value is within the correct range for the field.
-    pub fn sanitize(&self) -> Self {
-        let modulus = M::modulus();
-        let mut value_sanitized = &self.value % modulus;
-        if value_sanitized < BigInt::zero() {
-            value_sanitized += modulus;
-        }
         FiniteFieldElement {
             value: value_sanitized,
             _phantom: PhantomData,
@@ -246,6 +234,19 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
 
     fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
         FiniteFieldElement::<M>::new(mod_pow(&self.value, &n.into(), &(M::modulus() - 1)))
+    }
+
+    /// Ensures the element's value is within the correct range for the field.
+    fn sanitize(&self) -> Self {
+        let modulus = M::modulus();
+        let mut value_sanitized = &self.value % modulus;
+        if value_sanitized < BigInt::zero() {
+            value_sanitized += modulus;
+        }
+        FiniteFieldElement {
+            value: value_sanitized,
+            _phantom: PhantomData,
+        }
     }
 }
 

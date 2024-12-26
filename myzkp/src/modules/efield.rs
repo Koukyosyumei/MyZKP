@@ -99,14 +99,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
             poly: poly,
             _phantom: PhantomData,
         };
-        result.reduce()
-    }
-
-    fn reduce(&self) -> Self {
-        Self {
-            poly: &self.poly.reduce() % P::modulus(),
-            _phantom: PhantomData,
-        }
+        result.sanitize()
     }
 
     pub fn degree(&self) -> isize {
@@ -114,7 +107,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new((Polynomial { coef: vec![value] }).reduce()).reduce()
+        Self::new((Polynomial { coef: vec![value] }).reduce()).sanitize()
     }
 }
 
@@ -166,6 +159,13 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
 
     fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
         unimplemented!("Not applicable for extended field elements")
+    }
+
+    fn sanitize(&self) -> Self {
+        Self {
+            poly: &self.poly.reduce() % P::modulus(),
+            _phantom: PhantomData,
+        }
     }
 }
 

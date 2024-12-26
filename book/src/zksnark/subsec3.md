@@ -337,13 +337,13 @@ Based on this assumption, we can design an improved protocol:
 
 **Protocol:**
 
-- \\(\mathcal{B}\\) randomly selects \\(s\\) and \\(r\\) from field \\(\mathbb{F}\\).
+- \\(\mathcal{B}\\) randomly selects \\(s\\) and *\\(r\\)* from field \\(\mathbb{F}\\).
 - \\(\mathcal{B}\\) computes and sends \\(\\{\alpha_1, \alpha_2, ..., \alpha_{n}\\}\\) *and \\(\\{\alpha'\_1, \alpha'\_2, ..., \alpha'\_{n}\\}\\), where \\(\alpha_i = g^{(s^i)}\\) and \\(\alpha' = \alpha_{r} = g^{(s^{i})r}\\).*
-- \\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), *and \\(w = g^{p'}\\), where \\(g^{p'} = g^{P(sr)}\\).*
+- \\(\mathcal{A}\\) computes and sends \\(u = g^{p}\\), \\(v = g^{h}\\), *and \\(w = g^{p'}\\), where \\(g^{p'} = g^{rP(s)}\\).*
 - *\\(\mathcal{B}\\) checks whether \\(u^{r} = w\\).*
 - \\(\mathcal{B}\\) checks whether \\(u = v^{t}\\).
 
-The prover can compute \\(g^{p'} = g^{P(sr)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\\) using powers of \\(\alpha'\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
+The prover can compute \\(g^{p'} = g^{rP(s)} = \alpha'^{c_1} (\alpha'^{2})^{c_2} \cdots (\alpha'^{n})^{c_n}\\) using powers of \\(\alpha'\\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.
 
 **Implementation:**
 
@@ -581,7 +581,7 @@ Since \\(r\\) is not shared and already destroyed, the verifier \\(\mathcal{B}\\
 - *\\(\mathcal{B}\\) receives the verification key.*
 - *\\(\mathcal{B}\\) receives the proof \\(\pi\\).*
 - *\\(\mathcal{B}\\) checks whether \\(e(u', g^{r}) = e(w', g)\\).*
-- *\\(\mathcal{B}\\) checks whether \\(u' = v'^{t}\\).*
+- *\\(\mathcal{B}\\) checks whether \\(e(u', g) = e (v', g^{T(s)})\\).*
 
 **Implementation:**
 

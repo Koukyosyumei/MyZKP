@@ -32,7 +32,6 @@ impl<F: Field> Prover<F> {
 
 impl<F: Field> Verifier<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let mut rng = rand::thread_rng();
         let s = F::random_element(&[]);
         let g = F::from_value(generator);
         Verifier { t, s, g }
