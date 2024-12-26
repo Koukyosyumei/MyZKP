@@ -8,7 +8,7 @@ use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use crate::modules::qap::QAP;
 use crate::modules::ring::Ring;
-use crate::modules::zksnark::utils::{
+use crate::modules::snark::utils::{
     accumulate_curve_points, accumulate_polynomials, generate_alpha_challenge_vec,
     generate_challenge_vec, generate_s_powers, get_h,
 };
@@ -194,7 +194,7 @@ mod tests {
     use crate::modules::r1cs::R1CS;
 
     #[test]
-    fn test_zksnark_variable_consistency_single_multiplication() {
+    fn test_snark_variable_consistency_single_multiplication() {
         let left = vec![
             vec![
                 FqOrder::zero(),
