@@ -9,6 +9,7 @@ use crate::modules::polynomial::Polynomial;
 use crate::modules::qap::QAP;
 use crate::modules::ring::Ring;
 
+#[derive(Debug, Clone)]
 pub struct ProofKey {
     g1_ell_i_vec: Vec<G1Point>,
     g1_r_i_vec: Vec<G1Point>,
@@ -20,11 +21,13 @@ pub struct ProofKey {
     g1_sj_vec: Vec<G1Point>,
 }
 
+#[derive(Debug, Clone)]
 pub struct VerificationKey {
     g2_alpha: G2Point,
     g2_t_s: G2Point,
 }
 
+#[derive(Debug, Clone)]
 pub struct Proof {
     g1_ell: G1Point,
     g1_r: G1Point,
@@ -166,15 +169,11 @@ pub fn verify(
     pairing7 == pairing8 * pairing9
 }
 
-pub fn modify_qap<F: Field>(qap: &QAP<F>) -> QAP<F> {
-    QAP {
-        m: qap.m,
-        d: qap.d,
-        ell_i_vec: qap.r_i_vec.clone(),
-        r_i_vec: qap.ell_i_vec.clone(),
-        o_i_vec: qap.o_i_vec.clone(),
-        t: qap.t.clone(),
-    }
+pub fn interchange_attack(proof: &Proof) -> Proof {
+    let mut new_proof = proof.clone();
+    new_proof.g1_r = proof.g1_ell.clone();
+    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
+    new_proof
 }
 
 #[cfg(test)]
@@ -321,8 +320,7 @@ mod tests {
         let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
 
-        let m_qap = modify_qap(&qap);
-        let bogus_proof = prove(&g1, &g2, &v, &proof_key, &m_qap);
+        let bogus_proof = interchange_attack(&proof);
         assert!(verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }

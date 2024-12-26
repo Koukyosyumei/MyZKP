@@ -2325,7 +2325,7 @@ pub fn non_interactive_zkp_protocol(
 </ul>
 <p><strong>Vulnerability</strong></p>
 <p>A critical issue with this protocol is that the checks may pass even if \(g^{\ell}\) is computed not from \(\{g^{\ell_i(s)}\}_{i \in [d]}\) but from \(\{g^{r_i(s)}\} _{i \in [d]}\), \(\{g^{o_i(s)}\} _{i \in [d]}\), or their combinations. The same issue applies to \(g^{r}\) and \(g^{o}\).</p>
-<p>For example, if the prover sends \((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.</p>
+<p>For example, if the prover sends \((g^{\ell(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.</p>
 <h2 id="second-protocol-non-interchangibility"><a class="header" href="#second-protocol-non-interchangibility">Second Protocol: Non-Interchangibility</a></h2>
 <p>To address the interchangeability issue, the next protocol uses distinct the different \(\alpha\)-shift for \(\ell\), \(r\), and \(o\).</p>
 <p><strong>Protocol (Setup)</strong></p>
@@ -2666,22 +2666,6 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

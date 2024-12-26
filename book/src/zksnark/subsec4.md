@@ -56,7 +56,7 @@ Both the proof key and the verification key are publicly available, enabling any
 
 A critical issue with this protocol is that the checks may pass even if \\(g^{\ell}\\) is computed not from \\(\\{g^{\ell_i(s)}\\}_{i \in [d]}\\) but from \\(\\{g^{r_i(s)}\\} _{i \in [d]}\\), \\(\\{g^{o_i(s)}\\} _{i \in [d]}\\), or their combinations. The same issue applies to \\(g^{r}\\) and \\(g^{o}\\). 
 
-For example, if the prover sends \\((g^{r(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.
+For example, if the prover sends \\((g^{\ell(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.
 
 ## Second Protocol: Non-Interchangibility
 
