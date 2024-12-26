@@ -126,13 +126,7 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
     )
 }
 
-pub fn prove(
-    g1: &G1Point,
-    g2: &G2Point,
-    assignment: &Vec<FqOrder>,
-    proof_key: &ProofKey,
-    qap: &QAP<FqOrder>,
-) -> Proof {
+pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey, qap: &QAP<FqOrder>) -> Proof {
     let mut g1_ell = G1Point::point_at_infinity();
     let mut g1_r = G1Point::point_at_infinity();
     let mut g2_r = G2Point::point_at_infinity();
@@ -363,10 +357,10 @@ mod tests {
 
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
-        let proof = prove(&g1, &g2, &v, &proof_key, &qap);
+        let proof = prove(&v, &proof_key, &qap);
         assert!(verify(&g1, &g2, &proof, &verification_key));
 
-        let proof_prime = prove(&&g1, &g2, &v_prime, &proof_key, &qap);
+        let proof_prime = prove(&v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
 
         let bogus_proof = interchange_attack(&proof);
