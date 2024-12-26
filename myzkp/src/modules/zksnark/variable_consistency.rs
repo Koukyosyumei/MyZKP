@@ -8,6 +8,10 @@ use crate::modules::field::Field;
 use crate::modules::polynomial::Polynomial;
 use crate::modules::qap::QAP;
 use crate::modules::ring::Ring;
+use crate::modules::zksnark::utils::{
+    accumulate_curve_points, accumulate_polynomials, generate_alpha_challenge_vec,
+    generate_challenge_vec, generate_s_powers, get_h,
+};
 
 #[derive(Debug, Clone)]
 pub struct ProofKey {
@@ -47,7 +51,6 @@ pub struct Proof {
 }
 
 pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, VerificationKey) {
-    let mut rng = rand::thread_rng();
     let s = FqOrder::random_element(&[]);
     let alpha_ell = FqOrder::random_element(&[]);
     let alpha_r = FqOrder::random_element(&[]);
@@ -56,28 +59,12 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
     let beta_r = FqOrder::random_element(&[]);
     let beta_o = FqOrder::random_element(&[]);
 
-    let mut g1_ell_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g2_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_o_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_ell_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_r_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_alpha_o_i_vec = Vec::with_capacity(qap.d);
-    let mut g1_sj_vec = Vec::with_capacity(qap.m);
     let mut g1_checksum_vec = Vec::with_capacity(qap.d);
 
     for i in 0..qap.d {
         let ell_i_s = qap.ell_i_vec[i].eval(&s).sanitize();
         let r_i_s = qap.r_i_vec[i].eval(&s).sanitize();
         let o_i_s = qap.o_i_vec[i].eval(&s).sanitize();
-
-        g1_ell_i_vec.push(g1.mul_ref(ell_i_s.get_value()));
-        g1_r_i_vec.push(g1.mul_ref(r_i_s.get_value()));
-        g2_r_i_vec.push(g2.mul_ref(r_i_s.get_value()));
-        g1_o_i_vec.push(g1.mul_ref(o_i_s.get_value()));
-        g1_alpha_ell_i_vec.push(g1.mul_ref((alpha_ell.mul_ref(&ell_i_s)).get_value()));
-        g1_alpha_r_i_vec.push(g1.mul_ref((alpha_r.mul_ref(&r_i_s)).get_value()));
-        g1_alpha_o_i_vec.push(g1.mul_ref((alpha_o.mul_ref(&o_i_s)).get_value()));
         g1_checksum_vec.push(
             g1.mul_ref(
                 ((beta_ell.mul_ref(&ell_i_s))
@@ -88,40 +75,26 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey, Verif
         );
     }
 
-    let mut s_power = FqOrder::one();
-    for _ in 0..1 + qap.m {
-        g1_sj_vec.push(g1.mul_ref(s_power.clone().get_value()));
-        s_power = s_power * s.clone();
-    }
-
-    let g2_alpha_ell = g2.mul_ref(alpha_ell.get_value());
-    let g2_alpha_r = g2.mul_ref(alpha_r.get_value());
-    let g2_alpha_o = g2.mul_ref(alpha_o.get_value());
-    let g2_beta_ell = g2.mul_ref(beta_ell.get_value());
-    let g2_beta_r = g2.mul_ref(beta_r.get_value());
-    let g2_beta_o = g2.mul_ref(beta_o.get_value());
-    let g2_t_s = g2.mul_ref(qap.t.eval(&s).sanitize().get_value());
-
     (
         ProofKey {
-            g1_ell_i_vec,
-            g1_r_i_vec,
-            g2_r_i_vec,
-            g1_o_i_vec,
-            g1_alpha_ell_i_vec,
-            g1_alpha_r_i_vec,
-            g1_alpha_o_i_vec,
-            g1_sj_vec,
-            g1_checksum_vec,
+            g1_ell_i_vec: generate_challenge_vec(g1, &qap.ell_i_vec, &s),
+            g1_r_i_vec: generate_challenge_vec(g1, &qap.r_i_vec, &s),
+            g2_r_i_vec: generate_challenge_vec(g2, &qap.r_i_vec, &s),
+            g1_o_i_vec: generate_challenge_vec(g1, &qap.o_i_vec, &s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &qap.ell_i_vec, &s, &alpha_ell),
+            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &qap.r_i_vec, &s, &alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &qap.o_i_vec, &s, &alpha_o),
+            g1_sj_vec: generate_s_powers(g1, &s, qap.m),
+            g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey {
-            g2_alpha_ell,
-            g2_alpha_r,
-            g2_alpha_o,
-            g2_beta_ell,
-            g2_beta_r,
-            g2_beta_o,
-            g2_t_s,
+            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
+            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
+            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
+            g2_beta_ell: g2.mul_ref(beta_ell.get_value()),
+            g2_beta_r: g2.mul_ref(beta_r.get_value()),
+            g2_beta_o: g2.mul_ref(beta_o.get_value()),
+            g2_t_s: g2.mul_ref(qap.t.eval(&s).sanitize().get_value()),
         },
     )
 }
