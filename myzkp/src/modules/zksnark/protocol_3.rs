@@ -160,6 +160,31 @@ pub fn interchange_attack(proof: &Proof3) -> Proof3 {
     new_proof
 }
 
+pub fn inconsistent_variable_attack(
+    assignment_ell: &Vec<FqOrder>,
+    assignment_r: &Vec<FqOrder>,
+    assignment_o: &Vec<FqOrder>,
+    proof_key: &ProofKey3,
+    qap: &QAP<FqOrder>,
+) -> Proof3 {
+    let ell = accumulate_polynomials(&qap.ell_i_vec, assignment_ell);
+    let r = accumulate_polynomials(&qap.r_i_vec, assignment_r);
+    let o = accumulate_polynomials(&qap.o_i_vec, assignment_o);
+    let h = (ell * r - o) / qap.t.clone();
+
+    Proof3 {
+        g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment_ell),
+        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment_r),
+        g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment_r),
+        g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment_o),
+        g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment_ell),
+        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
+        g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
+        g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
+        g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment_ell),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -304,7 +329,43 @@ mod tests {
         let proof_prime = prove(&v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
 
-        let bogus_proof = interchange_attack(&proof);
-        assert!(!verify(&g1, &g2, &bogus_proof, &verification_key));
+        let bogus_proof_1 = interchange_attack(&proof);
+        assert!(!verify(&g1, &g2, &bogus_proof_1, &verification_key));
+
+        let v_ell = vec![
+            FqOrder::one(),
+            FqOrder::from_value(210),
+            FqOrder::from_value(2),
+            FqOrder::from_value(3),
+            FqOrder::from_value(5),
+            FqOrder::from_value(7),
+            FqOrder::from_value(6),
+            FqOrder::from_value(35),
+        ];
+
+        let v_r = vec![
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+            FqOrder::one(),
+        ];
+
+        let v_o = vec![
+            FqOrder::one(),
+            FqOrder::from_value(6),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::zero(),
+            FqOrder::from_value(2),
+            FqOrder::from_value(5),
+        ];
+
+        let bogus_proof_2 = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &bogus_proof_2, &verification_key));
     }
 }
