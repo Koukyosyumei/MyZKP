@@ -10,7 +10,7 @@ Let's recap the previous sections. First, the relationship between the inputs an
 
 Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test.
 
-## First Protocol Idea
+## First Protocol: Naive Approach
 
 The simplest protocol, based on the previous chapter, is as follows:
 
