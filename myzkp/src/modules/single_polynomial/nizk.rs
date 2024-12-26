@@ -23,94 +23,61 @@ pub struct Proof {
     w_prime: G1Point,
 }
 
-pub struct TrustedSetup {
-    proof_key: ProofKey,
-    verification_key: VerificationKey,
+pub fn setup(
+    g1: &G1Point,
+    g2: &G2Point,
+    t: &Polynomial<FqOrder>,
+    n: usize,
+) -> (ProofKey, VerificationKey) {
+    let s = FqOrder::random_element(&[]);
+    let r = FqOrder::random_element(&[]);
+
+    let mut alpha = Vec::with_capacity(n);
+    let mut alpha_prime = Vec::with_capacity(n);
+
+    let mut s_power = FqOrder::one();
+    for _ in 0..1 + n {
+        alpha.push(g1.mul_ref(s_power.clone().get_value()));
+        alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
+        s_power = s_power * s.clone();
+    }
+
+    let g_r = g2.mul_ref(r.clone().get_value());
+    let g_t_s = g2.mul_ref(t.eval(&s).get_value());
+
+    (
+        ProofKey { alpha, alpha_prime },
+        VerificationKey { g_r, g_t_s },
+    )
 }
 
-impl TrustedSetup {
-    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<FqOrder>, n: usize) -> Self {
-        let s = FqOrder::random_element(&[]);
-        let r = FqOrder::random_element(&[]);
+pub fn prove(p: &Polynomial<FqOrder>, t: &Polynomial<FqOrder>, proof_key: &ProofKey) -> Proof {
+    let h = p.clone() / t.clone();
+    let delta = FqOrder::random_element(&[]);
 
-        let mut alpha = Vec::with_capacity(n);
-        let mut alpha_prime = Vec::with_capacity(n);
+    let g_p = p.eval_with_powers_on_curve(&proof_key.alpha);
+    let g_h = h.eval_with_powers_on_curve(&proof_key.alpha);
+    let g_p_prime = p.eval_with_powers_on_curve(&proof_key.alpha_prime);
 
-        let mut s_power = FqOrder::one();
-        for _ in 0..1 + n {
-            alpha.push(g1.mul_ref(s_power.clone().get_value()));
-            alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
-            s_power = s_power * s.clone();
-        }
-
-        let g_r = g2.mul_ref(r.clone().get_value());
-        let g_t_s = g2.mul_ref(t.eval(&s).get_value());
-
-        TrustedSetup {
-            proof_key: ProofKey { alpha, alpha_prime },
-            verification_key: VerificationKey { g_r, g_t_s },
-        }
+    Proof {
+        u_prime: g_p * delta.get_value(),
+        v_prime: g_h * delta.get_value(),
+        w_prime: g_p_prime * delta.get_value(),
     }
 }
 
-pub struct Prover {
-    pub p: Polynomial<FqOrder>,
-    pub h: Polynomial<FqOrder>,
-}
+pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
+    // Check e(u', g^r) = e(w', g)
+    let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
+    let pairing2 = optimal_ate_pairing(&proof.w_prime, g2);
+    let check1 = pairing1 == pairing2;
 
-impl Prover {
-    pub fn new(p: Polynomial<FqOrder>, t: Polynomial<FqOrder>) -> Self {
-        let h = p.clone() / t;
-        Prover { p, h }
-    }
+    // Check e(u', g^t) = e(v', g)
+    let pairing3 = optimal_ate_pairing(&proof.u_prime, g2);
+    let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
+    let check2 = pairing3 == pairing4;
 
-    pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
-        let delta = FqOrder::random_element(&[]);
-
-        let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_p_prime = self.p.eval_with_powers_on_curve(&proof_key.alpha_prime);
-
-        Proof {
-            u_prime: g_p * delta.get_value(),
-            v_prime: g_h * delta.get_value(),
-            w_prime: g_p_prime * delta.get_value(),
-        }
-    }
-}
-
-pub struct Verifier {
-    pub g1: G1Point,
-    pub g2: G2Point,
-}
-
-impl Verifier {
-    pub fn new(g1: G1Point, g2: G2Point) -> Self {
-        Verifier { g1, g2 }
-    }
-
-    pub fn verify(&self, proof: &Proof, vk: &VerificationKey) -> bool {
-        // Check e(u', g^r) = e(w', g)
-        let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
-        let pairing2 = optimal_ate_pairing(&proof.w_prime, &self.g2);
-        let check1 = pairing1 == pairing2;
-
-        // Check e(u', g^t) = e(v', g)
-        let pairing3 = optimal_ate_pairing(&proof.u_prime, &self.g2);
-        let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
-        let check2 = pairing3 == pairing4;
-
-        check1 && check2
-    }
-}
-
-pub fn non_interactive_zkp_protocol(
-    prover: &Prover,
-    verifier: &Verifier,
-    setup: &TrustedSetup,
-) -> bool {
-    let proof = prover.generate_proof(&setup.proof_key);
-    verifier.verify(&proof, &setup.verification_key)
+    check1 && check2
 }
 
 #[cfg(test)]
@@ -131,14 +98,8 @@ mod tests {
         ]);
         let t = Polynomial::from_monomials(&[FqOrder::from_value(-1), FqOrder::from_value(-2)]);
 
-        let setup = TrustedSetup::generate(&g1, &g2, &t, 3);
-
-        // Create prover and verifier
-        let prover = Prover::new(p, t.clone());
-        let verifier = Verifier::new(g1.clone(), g2.clone());
-
-        // Run the protocol
-        let result = non_interactive_zkp_protocol(&prover, &verifier, &setup);
-        assert!(result);
+        let (proof_key, verification_key) = setup(&g1, &g2, &t, 3);
+        let proof = prove(&p, &t, &proof_key);
+        assert!(verify(&g2, &proof, &verification_key));
     }
 }
