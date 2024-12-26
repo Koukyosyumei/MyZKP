@@ -10,7 +10,7 @@ Assume \\(P(x)\\) has \\(n\\) roots, \\(a_1, a_2, \ldots, a_n \in \mathbb{F}\\),
 
 The Prover's objective is to convince the Verifier that \\(\mathcal{A}\\) knows a polynomial \\(H(x) = \frac{P(x)}{T(x)}\\).
 
-## Naive Approach
+## First Protocol: Naive Approach
 
 The simplest approach to prove that \\(\mathcal{A}\\) knows \\(H(x)\\) is as follows:
 
@@ -25,21 +25,21 @@ This protocol is highly inefficient, requiring \\(\mathcal{O}(|\mathbb{F}|)\\) e
 **Implementation:**
 
 ```rust
-pub struct Prover<F: Field> {
+pub struct Prover1<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier1<F: Field> {
     pub t: Polynomial<F>,
     pub known_roots: Vec<F>,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover1<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover1 { p, t, h }
     }
 
     pub fn compute_all_values(&self, modulus: i128) -> (HashMap<F, F>, HashMap<F, F>) {
@@ -56,10 +56,10 @@ impl<F: Field> Prover<F> {
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier1<F> {
     pub fn new(known_roots: Vec<F>) -> Self {
         let t = Polynomial::from_monomials(&known_roots);
-        Verifier { t, known_roots }
+        Verifier1 { t, known_roots }
     }
 
     pub fn verify(&self, h_values: &HashMap<F, F>, p_values: &HashMap<F, F>) -> bool {
@@ -74,18 +74,22 @@ impl<F: Field> Verifier<F> {
     }
 }
 
-pub fn naive_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>, modulus: i128) -> bool {
-    // Step 1: Verifier sends all possible values (implicitly done by Prover computing all values)
+pub fn naive_protocol<F: Field>(
+    prover: &Prover1<F>,
+    verifier: &Verifier1<F>,
+    modulus: i128,
+) -> bool {
+    // Step 1: Verifier1 sends all possible values (implicitly done by Prover1 computing all values)
 
-    // Step 2: Prover computes and sends all possible outputs
+    // Step 2: Prover1 computes and sends all possible outputs
     let (h_values, p_values) = prover.compute_all_values(modulus);
 
-    // Step 3: Verifier checks whether H(a)T(a) = P(a) holds for any a in F
+    // Step 3: Verifier1 checks whether H(a)T(a) = P(a) holds for any a in F
     verifier.verify(&h_values, &p_values)
 }
 ```
 
-## \\(+\\) Schwartz-Zippel Lemma
+## Second Protocol: Schwartz-Zippel Lemma
 
 Instead of evaluating polynomials at all values in \\(\mathbb{F}\\), we can leverage the Schwartz-Zippel Lemma: if \\(H(s) = \frac{P(s)}{T(s)}\\) or equivalently \\(H(s)T(s) = P(s)\\) for a random element \\(s\\), we can conclude that \\(H(x) = \frac{P(x)}{T(x)}\\) with high probability. Thus, the Prover \\(\mathcal{A}\\) only needs to send evaluations of \\(P(s)\\) and \\(H(s)\\) for a random input \\(s\\) received from \\(\mathcal{B}\\).
 
@@ -100,20 +104,20 @@ This protocol is efficient, requiring only a constant number of evaluations and 
 **Implementation:**
 
 ```rust
-pub struct Prover<F: Field> {
+pub struct Prover2<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier2<F: Field> {
     pub t: Polynomial<F>,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover2<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover2 { p, t, h }
     }
 
     pub fn compute_values(&self, s: &F) -> (F, F) {
@@ -123,9 +127,9 @@ impl<F: Field> Prover<F> {
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier2<F> {
     pub fn new(t: Polynomial<F>) -> Self {
-        Verifier { t }
+        Verifier2 { t }
     }
 
     pub fn generate_challenge(&self) -> F {
@@ -138,14 +142,14 @@ impl<F: Field> Verifier<F> {
     }
 }
 
-pub fn schwartz_zippel_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1: Verifier generates a random challenge
+pub fn schwartz_zippel_protocol<F: Field>(prover: &Prover2<F>, verifier: &Verifier2<F>) -> bool {
+    // Step 1: Verifier2 generates a random challenge
     let s = verifier.generate_challenge();
 
-    // Step 2: Prover computes and sends h and p
+    // Step 2: Prover2 computes and sends h and p
     let (h, p) = prover.compute_values(&s);
 
-    // Step 3: Verifier checks whether p = t * h
+    // Step 3: Verifier2 checks whether p = t * h
     verifier.verify(&s, &h, &p)
 }
 ```
@@ -156,13 +160,13 @@ However, it is vulnerable to a malicious prover who could send an arbitrary valu
 
 ```rust
 // Simulating a malicious prover
-pub struct MaliciousProver<F: Field> {
+pub struct MaliciousProver2<F: Field> {
     t: Polynomial<F>,
 }
 
-impl<F: Field> MaliciousProver<F> {
+impl<F: Field> MaliciousProver2<F> {
     pub fn new(t: Polynomial<F>) -> Self {
-        MaliciousProver { t }
+        MaliciousProver2 { t }
     }
 
     pub fn compute_malicious_values(&self, s: &F) -> (F, F) {
@@ -174,22 +178,21 @@ impl<F: Field> MaliciousProver<F> {
 }
 
 pub fn malicious_schwartz_zippel_protocol<F: Field>(
-    prover: &MaliciousProver<F>,
-    verifier: &Verifier<F>,
+    prover: &MaliciousProver2<F>,
+    verifier: &Verifier2<F>,
 ) -> bool {
-    // Step 1: Verifier generates a random challenge
+    // Step 1: Verifier2 generates a random challenge
     let s = verifier.generate_challenge();
 
-    // Step 2: Malicious Prover computes and sends h' and p'
+    // Step 2: Malicious Prover2 computes and sends h' and p'
     let (h_prime, p_prime) = prover.compute_malicious_values(&s);
 
-    // Step 3: Verifier checks whether p' = t * h'
+    // Step 3: Verifier2 checks whether p' = t * h'
     verifier.verify(&s, &h_prime, &p_prime)
 }
-
 ```
 
-## \\(+\\) Discrete Logarithm Assumption
+## Third Protocol: Discrete Logarithm Assumption
 
 To address this vulnerability, the Verifier must hide the randomly chosen input \\(s\\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \\(s\\) from \\(\gamma\\), where \\(\gamma = g^s \bmod p\\). Thus, it's safe for the Verifier to send \\(\gamma\\), as the Prover cannot easily derive \\(s\\) from it.
 
@@ -217,68 +220,64 @@ Similarly, the Prover can evaluate \\(g^h = g^{H(s)}\\). The Verifier can then c
 This approach prevents the Prover from obtaining \\(s\\) or \\(t = T(s)\\), making it impossible to send fake \\((h', p')\\) such that \\(p' = h't\\).
 
 ```rust
-pub struct Prover<F: Field> {
+pub struct Prover3<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier3<F: Field> {
     t: Polynomial<F>,
     s: F,
     g: F,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover3<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover3 { p, t, h }
     }
 
-    pub fn compute_values(&self, alpha_powers: &[F]) -> (F, F) {
-        let g_p = self.p.eval_with_powers(alpha_powers);
-        let g_h = self.h.eval_with_powers(alpha_powers);
+    pub fn compute_values(&self, s_powers: &[F]) -> (F, F) {
+        let g_p = self.p.eval_with_powers(s_powers);
+        let g_h = self.h.eval_with_powers(s_powers);
         (g_p, g_h)
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier3<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = F::random_element(&[]);
         let g = F::from_value(generator);
-        Verifier { t, s, g }
+        Verifier3 { t, s, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> Vec<F> {
-        let mut alpha_powers = vec![];
+        let mut s_powers = vec![];
         for i in 0..(max_degree + 1) {
-            alpha_powers.push(
+            s_powers.push(
                 self.g
-                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
         }
-        alpha_powers
+        s_powers
     }
 
     pub fn verify(&self, u: &F, v: &F) -> bool {
-        let t_s = self.t.eval(&self.s);
+        let t_s = self.t.eval_m1(&self.s);
         u == &v.pow(t_s.get_value())
     }
 }
 
-pub fn discrete_log_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+pub fn discrete_log_protocol<F: Field>(prover: &Prover3<F>, verifier: &Verifier3<F>) -> bool {
+    // Step 1 & 2: Verifier3 generates a challenge
     let max_degree = prover.p.degree();
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+    let s_powers = verifier.generate_challenge(max_degree as usize);
 
-    // Step 3: Prover computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&alpha_powers);
+    // Step 3: Prover3 computes and sends u = g^p and v = g^h
+    let (u, v) = prover.compute_values(&s_powers);
 
-    // Step 4: Verifier checks whether u = v^t
+    // Step 4: Verifier3 checks whether u = v^t
     verifier.verify(&u, &v)
 }
 ```
@@ -289,19 +288,19 @@ However, this protocol still has a flaw. Since the Prover can compute \\(g^t\\) 
 
 ```rust
 // Simulating a malicious prover
-pub struct MaliciousProver<F: Field> {
+pub struct MaliciousProver3<F: Field> {
     t: Polynomial<F>,
 }
 
-impl<F: Field> MaliciousProver<F> {
+impl<F: Field> MaliciousProver3<F> {
     pub fn new(t: Polynomial<F>) -> Self {
-        MaliciousProver { t }
+        MaliciousProver3 { t }
     }
 
-    pub fn compute_malicious_values(&self, alpha_powers: &[F]) -> (F, F) {
-        let g_t = self.t.eval_with_powers(alpha_powers);
+    pub fn compute_malicious_values(&self, s_powers: &[F]) -> (F, F) {
+        let g_t = self.t.eval_with_powers(s_powers);
         let z = F::random_element(&[]);
-        let g = &alpha_powers[0];
+        let g = &s_powers[0];
         let fake_v = g.pow(z.get_value());
         let fake_u = g_t.pow(z.get_value());
         (fake_u, fake_v)
@@ -309,22 +308,22 @@ impl<F: Field> MaliciousProver<F> {
 }
 
 pub fn malicious_discrete_log_protocol<F: Field>(
-    prover: &MaliciousProver<F>,
-    verifier: &Verifier<F>,
+    prover: &MaliciousProver3<F>,
+    verifier: &Verifier3<F>,
 ) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+    // Step 1 & 2: Verifier3 generates a challenge
     let max_degree = prover.t.degree() as usize;
-    let alpha_powers = verifier.generate_challenge(max_degree as usize);
+    let s_powers = verifier.generate_challenge(max_degree as usize);
 
-    // Step 3: Malicious Prover computes and sends fake u and v
-    let (fake_u, fake_v) = prover.compute_malicious_values(&alpha_powers);
+    // Step 3: Malicious Prover3 computes and sends fake u and v
+    let (fake_u, fake_v) = prover.compute_malicious_values(&s_powers);
 
-    // Step 4: Verifier checks whether u = v^t (which will pass for the fake values)
+    // Step 4: Verifier3 checks whether u = v^t (which will pass for the fake values)
     verifier.verify(&fake_u, &fake_v)
 }
 ```
 
-## \\(+\\) Knowledge of Exponent Assumption
+## Forth Protocol: Knowledge of Exponent Assumption
 
 To address the vulnerability where the verifier \\(\mathcal{B}\\) cannot distinguish if \\(v (= g^h)\\) from the prover is a power of \\(\gamma_i = g^{(s^i)}\\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:
 
@@ -348,65 +347,58 @@ The prover can compute \\(g^{p'} = g^{rP(s)} = g^{c_0} (\gamma\_{1})'^{c_1} (\ga
 **Implementation:**
 
 ```rust
-pub struct Prover<F: Field> {
+pub struct Prover4<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier4<F: Field> {
     t: Polynomial<F>,
     s: F,
     r: F,
     g: F,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover4<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover4 { p, t, h }
     }
 
-    pub fn compute_values(&self, alpha_powers: &[F], alpha_prime_powers: &[F]) -> (F, F, F) {
-        let g_p = self.p.eval_with_powers(alpha_powers);
-        let g_h = self.h.eval_with_powers(alpha_powers);
-        let g_p_prime = self.p.eval_with_powers(alpha_prime_powers);
+    pub fn compute_values(&self, s_powers: &[F], s_prime_powers: &[F]) -> (F, F, F) {
+        let g_p = self.p.eval_with_powers(s_powers);
+        let g_h = self.h.eval_with_powers(s_powers);
+        let g_p_prime = self.p.eval_with_powers(s_prime_powers);
         (g_p, g_h, g_p_prime)
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier4<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
-        let r = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = F::random_element(&[]);
+        let r = F::random_element(&[]);
         let g = F::from_value(generator);
-        Verifier { t, s, r, g }
+        Verifier4 { t, s, r, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> (Vec<F>, Vec<F>) {
-        let mut alpha_powers = vec![];
-        let mut alpha_prime_powers = vec![];
+        let mut s_powers = vec![];
+        let mut s_prime_powers = vec![];
 
         for i in 0..(max_degree + 1) {
-            alpha_powers.push(
+            s_powers.push(
                 self.g
-                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
-            alpha_prime_powers.push(alpha_powers.last().unwrap().pow(self.r.get_value()));
+            s_prime_powers.push(s_powers.last().unwrap().pow(self.r.get_value()));
         }
 
-        (alpha_powers, alpha_prime_powers)
+        (s_powers, s_prime_powers)
     }
 
     pub fn verify(&self, u: &F, v: &F, w: &F) -> bool {
-        let t_s = self.t.eval(&self.s);
+        let t_s = self.t.eval_m1(&self.s);
         let u_r = u.pow(self.r.clone().get_value());
 
         // Check 1: u^r = w
@@ -420,22 +412,22 @@ impl<F: Field> Verifier<F> {
 }
 
 pub fn knowledge_of_exponent_protocol<F: Field>(
-    prover: &Prover<F>,
-    verifier: &Verifier<F>,
+    prover: &Prover4<F>,
+    verifier: &Verifier4<F>,
 ) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+    // Step 1 & 2: Verifier4 generates a challenge
     let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
-    let (alpha_powers, alpha_prime_powers) = verifier.generate_challenge(max_degree + 1);
+    let (s_powers, s_prime_powers) = verifier.generate_challenge(max_degree + 1);
 
-    // Step 3: Prover computes and sends u = g^p, v = g^h, and w = g^p'
-    let (u, v, w) = prover.compute_values(&alpha_powers, &alpha_prime_powers);
+    // Step 3: Prover4 computes and sends u = g^p, v = g^h, and w = g^p'
+    let (u, v, w) = prover.compute_values(&s_powers, &s_prime_powers);
 
-    // Step 4 & 5: Verifier checks whether u^r = w and u = v^t
+    // Step 4 & 5: Verifier4 checks whether u^r = w and u = v^t
     verifier.verify(&u, &v, &w)
 }
 ```
 
-## \\(+\\) Zero Knowledge
+## Fifth Protocol: Zero Knowledge
 
 To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \\(P(x)\\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \\(\delta\\):
 
@@ -454,35 +446,31 @@ By introducing the random value \\(\delta\\), the verifier can no longer learn a
 **Implementation:**
 
 ```rust
-pub struct Prover<F: Field> {
+pub struct Prover5<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier<F: Field> {
+pub struct Verifier5<F: Field> {
     t: Polynomial<F>,
     s: F,
     r: F,
     g: F,
 }
 
-impl<F: Field> Prover<F> {
+impl<F: Field> Prover5<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover { p, t, h }
+        Prover5 { p, t, h }
     }
 
-    pub fn compute_values(&self, alpha_powers: &[F], alpha_prime_powers: &[F]) -> (F, F, F) {
-        let mut rng = rand::thread_rng();
-        let delta = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+    pub fn compute_values(&self, s_powers: &[F], s_prime_powers: &[F]) -> (F, F, F) {
+        let delta = F::random_element(&[]);
 
-        let g_p = self.p.eval_with_powers(alpha_powers);
-        let g_h = self.h.eval_with_powers(alpha_powers);
-        let g_p_prime = self.p.eval_with_powers(alpha_prime_powers);
+        let g_p = self.p.eval_with_powers(s_powers);
+        let g_h = self.h.eval_with_powers(s_powers);
+        let g_p_prime = self.p.eval_with_powers(s_prime_powers);
 
         let u_prime = g_p.pow(delta.get_value());
         let v_prime = g_h.pow(delta.get_value());
@@ -492,38 +480,31 @@ impl<F: Field> Prover<F> {
     }
 }
 
-impl<F: Field> Verifier<F> {
+impl<F: Field> Verifier5<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
-        let r = F::from_value(rng.gen_bigint_range(
-            &BigInt::zero(),
-            &BigInt::from(std::u64::MAX),
-        ));
+        let s = F::random_element(&[]);
+        let r = F::random_element(&[]);
         let g = F::from_value(generator);
-        Verifier { t, s, r, g }
+        Verifier5 { t, s, r, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> (Vec<F>, Vec<F>) {
-        let mut alpha_powers = vec![];
-        let mut alpha_prime_powers = vec![];
+        let mut s_powers = vec![];
+        let mut s_prime_powers = vec![];
 
         for i in 0..(max_degree + 1) {
-            alpha_powers.push(
+            s_powers.push(
                 self.g
-                    .pow(self.s.clone().pow(i.to_bigint().unwrap()).get_value()),
+                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
             );
-            alpha_prime_powers.push(alpha_powers.last().unwrap().pow(self.r.get_value()));
+            s_prime_powers.push(s_powers.last().unwrap().pow(self.r.get_value()));
         }
 
-        (alpha_powers, alpha_prime_powers)
+        (s_powers, s_prime_powers)
     }
 
     pub fn verify(&self, u_prime: &F, v_prime: &F, w_prime: &F) -> bool {
-        let t_s = self.t.eval(&self.s);
+        let t_s = self.t.eval_m1(&self.s);
         let u_prime_r = u_prime.pow(self.r.clone().get_value());
 
         // Check 1: u'^r = w'
@@ -536,20 +517,20 @@ impl<F: Field> Verifier<F> {
     }
 }
 
-pub fn zk_protocol<F: Field>(prover: &Prover<F>, verifier: &Verifier<F>) -> bool {
-    // Step 1 & 2: Verifier generates a challenge
+pub fn zk_protocol<F: Field>(prover: &Prover5<F>, verifier: &Verifier5<F>) -> bool {
+    // Step 1 & 2: Verifier5 generates a challenge
     let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
-    let (alpha_powers, alpha_prime_powers) = verifier.generate_challenge(max_degree + 1);
+    let (s_powers, s_prime_powers) = verifier.generate_challenge(max_degree + 1);
 
-    // Step 3 & 4: Prover computes and sends u' = (g^p)^δ, v' = (g^h)^δ, and w' = (g^p')^δ
-    let (u_prime, v_prime, w_prime) = prover.compute_values(&alpha_powers, &alpha_prime_powers);
+    // Step 3 & 4: Prover5 computes and sends u' = (g^p)^δ, v' = (g^h)^δ, and w' = (g^p')^δ
+    let (u_prime, v_prime, w_prime) = prover.compute_values(&s_powers, &s_prime_powers);
 
-    // Step 5 & 6: Verifier checks whether u'^r = w' and u' = v'^t
+    // Step 5 & 6: Verifier5 checks whether u'^r = w' and u' = v'^t
     verifier.verify(&u_prime, &v_prime, &w_prime)
 }
 ```
 
-## \\(+\\) Non-interactivity
+## Sixth Protocol: Non-interactivity
 
 The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.
 
@@ -602,97 +583,61 @@ pub struct Proof {
     w_prime: G1Point,
 }
 
-pub struct TrustedSetup {
-    proof_key: ProofKey,
-    verification_key: VerificationKey,
+pub fn setup(
+    g1: &G1Point,
+    g2: &G2Point,
+    t: &Polynomial<FqOrder>,
+    n: usize,
+) -> (ProofKey, VerificationKey) {
+    let s = FqOrder::random_element(&[]);
+    let r = FqOrder::random_element(&[]);
+
+    let mut alpha = Vec::with_capacity(n);
+    let mut alpha_prime = Vec::with_capacity(n);
+
+    let mut s_power = FqOrder::one();
+    for _ in 0..1 + n {
+        alpha.push(g1.mul_ref(s_power.clone().get_value()));
+        alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
+        s_power = s_power * s.clone();
+    }
+
+    let g_r = g2.mul_ref(r.clone().get_value());
+    let g_t_s = g2.mul_ref(t.eval(&s).get_value());
+
+    (
+        ProofKey { alpha, alpha_prime },
+        VerificationKey { g_r, g_t_s },
+    )
 }
 
-impl TrustedSetup {
-    pub fn generate(g1: &G1Point, g2: &G2Point, t: &Polynomial<Fq>, n: usize) -> Self {
-        let mut rng = rand::thread_rng();
-        let s = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-        let r = Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
+pub fn prove(p: &Polynomial<FqOrder>, t: &Polynomial<FqOrder>, proof_key: &ProofKey) -> Proof {
+    let h = p.clone() / t.clone();
+    let delta = FqOrder::random_element(&[]);
 
-        let mut alpha = Vec::with_capacity(n);
-        let mut alpha_prime = Vec::with_capacity(n);
+    let g_p = p.eval_with_powers_on_curve(&proof_key.alpha);
+    let g_h = h.eval_with_powers_on_curve(&proof_key.alpha);
+    let g_p_prime = p.eval_with_powers_on_curve(&proof_key.alpha_prime);
 
-        let mut s_power = Fq::one();
-        for _ in 0..1 + n {
-            alpha.push(g1.clone() * s_power.clone().get_value());
-            alpha_prime.push(g1.clone() * (s_power.clone() * r.clone()).get_value());
-            s_power = s_power * s.clone();
-        }
-
-        let g_r = g2.clone() * r.clone().get_value();
-        let g_t_s = g2.clone() * t.eval(&s).get_value();
-
-        TrustedSetup {
-            proof_key: ProofKey { alpha, alpha_prime },
-            verification_key: VerificationKey { g_r, g_t_s },
-        }
+    Proof {
+        u_prime: g_p * delta.get_value(),
+        v_prime: g_h * delta.get_value(),
+        w_prime: g_p_prime * delta.get_value(),
     }
 }
 
-pub struct Prover {
-    pub p: Polynomial<Fq>,
-    pub h: Polynomial<Fq>,
-}
+pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
+    // Check e(u', g^r) = e(w', g)
+    let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
+    let pairing2 = optimal_ate_pairing(&proof.w_prime, g2);
+    let check1 = pairing1 == pairing2;
 
-impl Prover {
-    pub fn new(p: Polynomial<Fq>, t: Polynomial<Fq>) -> Self {
-        let h = p.clone() / t;
-        Prover { p, h }
-    }
+    // Check e(u', g^t) = e(v', g)
+    let pairing3 = optimal_ate_pairing(&proof.u_prime, g2);
+    let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
+    let check2 = pairing3 == pairing4;
 
-    pub fn generate_proof(&self, proof_key: &ProofKey) -> Proof {
-        let mut rng = rand::thread_rng();
-        let delta =
-            Fq::from_value(rng.gen_bigint_range(&BigInt::zero(), &BigInt::from(std::u32::MAX)));
-
-        let g_p = self.p.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_h = self.h.eval_with_powers_on_curve(&proof_key.alpha);
-        let g_p_prime = self.p.eval_with_powers_on_curve(&proof_key.alpha_prime);
-
-        Proof {
-            u_prime: g_p * delta.get_value(),
-            v_prime: g_h * delta.get_value(),
-            w_prime: g_p_prime * delta.get_value(),
-        }
-    }
-}
-
-pub struct Verifier {
-    pub g1: G1Point,
-    pub g2: G2Point,
-}
-
-impl Verifier {
-    pub fn new(g1: G1Point, g2: G2Point) -> Self {
-        Verifier { g1, g2 }
-    }
-
-    pub fn verify(&self, proof: &Proof, vk: &VerificationKey) -> bool {
-        // Check e(u', g^r) = e(w', g)
-        let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
-        let pairing2 = optimal_ate_pairing(&proof.w_prime, &self.g2);
-        let check1 = pairing1 == pairing2;
-
-        // Check e(u', g^t) = e(v', g)
-        let pairing3 = optimal_ate_pairing(&proof.u_prime, &self.g2);
-        let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
-        let check2 = pairing3 == pairing4;
-
-        check1 && check2
-    }
-}
-
-pub fn non_interactive_zkp_protocol(
-    prover: &Prover,
-    verifier: &Verifier,
-    setup: &TrustedSetup,
-) -> bool {
-    let proof = prover.generate_proof(&setup.proof_key);
-    verifier.verify(&proof, &setup.verification_key)
+    check1 && check2
 }
 ```
     
