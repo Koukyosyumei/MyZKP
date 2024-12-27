@@ -1,7 +1,7 @@
 use num_bigint::ToBigInt;
 use num_traits::One;
 
-use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, Fq, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 

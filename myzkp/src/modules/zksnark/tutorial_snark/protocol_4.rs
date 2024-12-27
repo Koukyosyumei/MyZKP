@@ -1,10 +1,7 @@
 use num_bigint::{BigInt, ToBigInt};
-use num_traits::{One, Zero};
 
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
-use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
-use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::arithmetization::qap::QAP;
 use crate::modules::zksnark::utils::{
@@ -190,6 +187,8 @@ pub fn inconsistent_variable_attack(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use num_traits::{One, Zero};
 
     use crate::modules::algebra::curve::bn128::BN128;
     use crate::modules::arithmetization::r1cs::R1CS;

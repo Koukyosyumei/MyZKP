@@ -1,7 +1,6 @@
-use num_bigint::{BigInt, RandBigInt, ToBigInt};
+use num_bigint::{BigInt, ToBigInt};
 use num_traits::One;
 use num_traits::Zero;
-use std::str::FromStr;
 
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;

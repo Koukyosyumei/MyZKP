@@ -1,15 +1,12 @@
 use num_bigint::{BigInt, ToBigInt};
-use num_traits::{One, Zero};
 
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
-use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
-use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::arithmetization::qap::QAP;
 use crate::modules::zksnark::utils::{
-    accumulate_curve_points, accumulate_polynomials, generate_alpha_challenge_vec,
-    generate_challenge_vec, generate_s_powers, get_h,
+    accumulate_curve_points, generate_alpha_challenge_vec, generate_challenge_vec,
+    generate_s_powers, get_h,
 };
 
 #[derive(Debug, Clone)]
@@ -77,12 +74,7 @@ pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey1, qap: &QAP<FqOrder
     }
 }
 
-pub fn verify(
-    g1: &G1Point,
-    g2: &G2Point,
-    proof: &Proof1,
-    verification_key: &VerificationKey1,
-) -> bool {
+pub fn verify(g2: &G2Point, proof: &Proof1, verification_key: &VerificationKey1) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
     if pairing1 != pairing2 {
@@ -118,6 +110,8 @@ pub fn interchange_attack(proof: &Proof1) -> Proof1 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use num_traits::{One, Zero};
 
     use crate::modules::algebra::curve::bn128::BN128;
     use crate::modules::arithmetization::r1cs::R1CS;
@@ -253,12 +247,12 @@ mod tests {
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
         let proof = prove(&v, &proof_key, &qap);
-        assert!(verify(&g1, &g2, &proof, &verification_key));
+        assert!(verify(&g2, &proof, &verification_key));
 
         let proof_prime = prove(&v_prime, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
+        assert!(!verify(&g2, &proof_prime, &verification_key));
 
         let bogus_proof = interchange_attack(&proof);
-        assert!(verify(&g1, &g2, &bogus_proof, &verification_key));
+        assert!(verify(&g2, &bogus_proof, &verification_key));
     }
 }
