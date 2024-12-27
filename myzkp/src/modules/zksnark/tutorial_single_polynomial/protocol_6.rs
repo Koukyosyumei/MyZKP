@@ -65,12 +65,10 @@ pub fn prove(p: &Polynomial<FqOrder>, t: &Polynomial<FqOrder>, proof_key: &Proof
 }
 
 pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
-    // Check e(u', g^r) = e(w', g)
     let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
     let pairing2 = optimal_ate_pairing(&proof.w_prime, g2);
     let check1 = pairing1 == pairing2;
 
-    // Check e(u', g^t) = e(v', g)
     let pairing3 = optimal_ate_pairing(&proof.u_prime, g2);
     let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
     let check2 = pairing3 == pairing4;
