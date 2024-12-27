@@ -16,10 +16,8 @@ pub struct ProofKey5 {
     g1_alpha_ell_i_vec: Vec<G1Point>,
     g1_alpha_r_i_vec: Vec<G1Point>,
     g1_alpha_o_i_vec: Vec<G1Point>,
-    g1_beta_ell_i_vec: Vec<G1Point>,
-    g1_beta_r_i_vec: Vec<G1Point>,
-    g1_beta_o_i_vec: Vec<G1Point>,
     g1_sj_vec: Vec<G1Point>,
+    g1_checksum_vec: Vec<G1Point>,
 }
 
 #[derive(Debug, Clone)]
@@ -62,6 +60,19 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
     let g1_o = g1 * rho_o.get_value();
     let g2_o = g2 * rho_o.get_value();
 
+    let mut g1_checksum_vec = Vec::with_capacity(qap.d);
+
+    for i in 0..qap.d {
+        let ell_i_s = qap.ell_i_vec[i].eval(&s).sanitize();
+        let r_i_s = qap.r_i_vec[i].eval(&s).sanitize();
+        let o_i_s = qap.o_i_vec[i].eval(&s).sanitize();
+        g1_checksum_vec.push(
+            &g1_ell * beta.mul_ref(&ell_i_s).get_value()
+                + &g1_r * beta.mul_ref(&r_i_s).get_value()
+                + &g1_o * beta.mul_ref(&o_i_s).get_value(),
+        );
+    }
+
     (
         ProofKey5 {
             g1_ell_i_vec: generate_challenge_vec(&g1_ell, &qap.ell_i_vec, &s),
@@ -76,10 +87,8 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
             ),
             g1_alpha_r_i_vec: generate_alpha_challenge_vec(&g1_r, &qap.r_i_vec, &s, &alpha_r),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(&g1_o, &qap.o_i_vec, &s, &alpha_o),
-            g1_beta_ell_i_vec: generate_alpha_challenge_vec(&g1_ell, &qap.ell_i_vec, &s, &beta),
-            g1_beta_r_i_vec: generate_alpha_challenge_vec(&g1_r, &qap.r_i_vec, &s, &beta),
-            g1_beta_o_i_vec: generate_alpha_challenge_vec(&g1_o, &qap.o_i_vec, &s, &beta),
             g1_sj_vec: generate_s_powers(&g1, &s, qap.m),
+            g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey5 {
             g2_alpha_ell: g2 * alpha_ell.get_value(),
@@ -102,9 +111,7 @@ pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey5, qap: &QAP<FqOrder
         g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment)
-            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment)
-            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment),
+        g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
 
@@ -172,9 +179,7 @@ pub fn inconsistent_variable_attack(
         g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
         g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment_ell)
-            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment_ell)
-            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment_ell),
+        g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment_ell),
     }
 }
 

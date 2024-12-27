@@ -53,8 +53,8 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey1, Veri
             g1_sj_vec: generate_s_powers(g1, &s, qap.m),
         },
         VerificationKey1 {
-            g2_alpha: g2.mul_ref(alpha.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&s).sanitize().get_value()),
+            g2_alpha: g2 * alpha.get_value(),
+            g2_t_s: g2 * qap.t.eval(&s).sanitize().get_value(),
         },
     )
 }
