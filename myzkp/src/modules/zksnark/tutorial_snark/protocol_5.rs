@@ -56,11 +56,11 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
     let rho_r = FqOrder::random_element(&[]);
     let rho_o = rho_ell.mul_ref(&rho_r);
 
-    let g1_ell = g1.mul_ref(rho_ell.get_value());
-    let g1_r = g1.mul_ref(rho_r.get_value());
-    let g2_r = g2.mul_ref(rho_r.get_value());
-    let g1_o = g1.mul_ref(rho_o.get_value());
-    let g2_o = g2.mul_ref(rho_o.get_value());
+    let g1_ell = g1 * rho_ell.get_value();
+    let g1_r = g1 * rho_r.get_value();
+    let g2_r = g2 * rho_r.get_value();
+    let g1_o = g1 * rho_o.get_value();
+    let g2_o = g2 * rho_o.get_value();
 
     (
         ProofKey5 {
@@ -82,12 +82,12 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
             g1_sj_vec: generate_s_powers(&g1, &s, qap.m),
         },
         VerificationKey5 {
-            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
-            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
-            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
-            g2_beta_eta: g2.mul_ref(beta.get_value()).mul_ref(eta.get_value()),
-            g2_t_s: g2_o.mul_ref(qap.t.eval(&s).sanitize().get_value()),
-            g2_eta: g2.mul_ref(eta.get_value()),
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g2_alpha_r: g2 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_eta: g2 * beta.get_value() * eta.get_value(),
+            g2_t_s: g2_o * qap.t.eval(&s).sanitize().get_value(),
+            g2_eta: g2 * eta.get_value(),
         },
     )
 }
@@ -102,11 +102,9 @@ pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey5, qap: &QAP<FqOrder
         g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment).add_ref(
-            &accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment).add_ref(
-                &accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment),
-            ),
-        ),
+        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment)
+            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment)
+            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment),
     }
 }
 
@@ -174,11 +172,9 @@ pub fn inconsistent_variable_attack(
         g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
         g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment_ell).add_ref(
-            &accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment_ell).add_ref(
-                &accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment_ell),
-            ),
-        ),
+        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment)
+            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment)
+            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment),
     }
 }
 

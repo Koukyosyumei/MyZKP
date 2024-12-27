@@ -141,6 +141,14 @@ impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
     }
 }
 
+impl<F: Field, E: EllipticCurve> Add for &EllipticCurvePoint<F, E> {
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn add(self, other: Self) -> EllipticCurvePoint<F, E> {
+        self.add_ref(&other)
+    }
+}
+
 impl<F: Field, E: EllipticCurve> Neg for EllipticCurvePoint<F, E> {
     type Output = Self;
     fn neg(self) -> Self {
@@ -163,6 +171,14 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<
     type Output = Self;
 
     fn mul(self, scalar_val: V) -> Self {
+        self.mul_ref(scalar_val)
+    }
+}
+
+impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for &EllipticCurvePoint<F, E> {
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn mul(self, scalar_val: V) -> EllipticCurvePoint<F, E> {
         self.mul_ref(scalar_val)
     }
 }
