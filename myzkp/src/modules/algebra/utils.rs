@@ -1,6 +1,5 @@
 use std::ops::{Add, BitAnd, Div, Mul, Rem, Shl, ShrAssign, Sub};
 
-use num_bigint::BigInt;
 use num_traits::{One, Signed, Zero};
 
 /// Computes the greatest common divisor (GCD) of two numbers `a` and `b`
