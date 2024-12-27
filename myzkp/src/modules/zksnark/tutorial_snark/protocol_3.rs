@@ -1,6 +1,5 @@
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::field::Field;
-use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::arithmetization::qap::QAP;
 use crate::modules::zksnark::utils::{
@@ -108,12 +107,7 @@ pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey3, qap: &QAP<FqOrder
     }
 }
 
-pub fn verify(
-    g1: &G1Point,
-    g2: &G2Point,
-    proof: &Proof3,
-    verification_key: &VerificationKey3,
-) -> bool {
+pub fn verify(g2: &G2Point, proof: &Proof3, verification_key: &VerificationKey3) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha_ell);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
     if pairing1 != pairing2 {
@@ -320,13 +314,13 @@ mod tests {
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
         let proof = prove(&v, &proof_key, &qap);
-        assert!(verify(&g1, &g2, &proof, &verification_key));
+        assert!(verify(&g2, &proof, &verification_key));
 
         let proof_prime = prove(&v_prime, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
+        assert!(!verify(&g2, &proof_prime, &verification_key));
 
         let bogus_proof_1 = interchange_attack(&proof);
-        assert!(!verify(&g1, &g2, &bogus_proof_1, &verification_key));
+        assert!(!verify(&g2, &bogus_proof_1, &verification_key));
 
         let v_ell = vec![
             FqOrder::one(),
@@ -362,6 +356,6 @@ mod tests {
         ];
 
         let bogus_proof_2 = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &bogus_proof_2, &verification_key));
+        assert!(!verify(&g2, &bogus_proof_2, &verification_key));
     }
 }

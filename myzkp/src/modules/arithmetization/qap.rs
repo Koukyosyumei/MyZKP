@@ -189,7 +189,7 @@ mod tests {
             ],
         ];
         let r1cs = R1CS::new(left, right, out);
-        let qap = QAP::from_r1cs(&r1cs);
+        let _qap = QAP::from_r1cs(&r1cs);
 
         /*
         for i in 0..(qap.d) {

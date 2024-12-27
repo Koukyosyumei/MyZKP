@@ -90,7 +90,7 @@ where
         + Rem<&'a F, Output = F>
         + Mul<&'a F, Output = F>,
 {
-    let mut r = modulus.clone();
+    let r = modulus.clone();
     let mut new_r = a.clone();
 
     if new_r.is_negative() {
