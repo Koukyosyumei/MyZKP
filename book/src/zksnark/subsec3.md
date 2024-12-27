@@ -552,17 +552,17 @@ The previously described protocol requires each verifier to generate unique rand
 
 Specifically, we let a thrid trusted party generate the secret seeds, which neither the prover nor the verifier can access. However, this prevents the verifier \\(\mathcal{B}\\) from calculating \\(u'^{r}\\) to check \\(u'^{r} = w'\\). Instead, the verifier can use a paring with bilinear mapping; \\(u'^{r} = w'\\) is equivalent to \\(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\\). 
 
-In this tutorial, we adopt the optimal ate pairing, which is an asynmetric pairing and uses two different cyclic groups derived from elliptic curves; \\(e(a G_1, b G_2) = e(ab G_1, G_2) = e(G_1, ab G_2)\\), where \\(G_1\\) and \\(G_2\\) are the generators of two different cyclic groups.
+In this tutorial, we adopt the optimal ate pairing, which is an asynmetric pairing and uses two different cyclic groups derived from elliptic curves; \\(e(g_1^a, g_2^b) = e(g_1^{ab}, g_2) = e(b_1, g_2^{ab})\\), where \\(g_1\\) and \\(g_2\\) are the generators of two different cyclic groups.
 
 **Protocol (Trusted Setup):**
 
 - ***Secret Seed:** A trusted third party generates the random values \\(s\\) and \\(r\\)*
 - ***Proof Key:** Provided to the prover*
-    - *\\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\), where \\(\gamma_{i} = s^iG_1\\)*
-    - *\\(\\{\gamma'\_1, \gamma'\_2, ..., \gamma'\_{n}\\}\\), where \\(\gamma_i' = s^{i}rG_1\\)*
+    - *\\(\\{\gamma_1, \gamma_2, ..., \gamma_{n}\\}\\), where \\(\gamma_{i} = g_1^{(s^i)}\\)*
+    - *\\(\\{\gamma'\_1, \gamma'\_2, ..., \gamma'\_{n}\\}\\), where \\(\gamma_i' = g_1^{(s^{i})r}\\)*
 - ***Verification Key:** Distributed to verifiers*
-    - *\\(rG_2\\)*
-    - *\\(tG := T(s)G_2\\)* 
+    - *\\(g_2^r\\)*
+    - *\\(g_2^t := g_2^{T(s)}\\)* 
 - *After distribution, the original secret seeds are securely destroyed.*
 
 
@@ -572,14 +572,14 @@ Then, the non-interactive protocol consists of two main parts: proof generation 
     
 - *\\(\mathcal{A}\\) receives the proof key*
 - *\\(\mathcal{A}\\) randomly selects \\(\delta\\) from field \\(\mathbb{F}\\).*
-- *\\(\mathcal{A}\\) broadcast the proof \\(\pi = (u' = \delta p G_1, v' = \delta h G_1, w' = \delta p' G_1)\\)*
+- *\\(\mathcal{A}\\) broadcast the proof \\(\pi = (u' = (g_1^{p})^{\delta}, v' = (g_1^{h})^{\delta}, w' = (g_1^{p'})^{\delta})\\)*
 
 **Protocol (Verification):**
     
 - *\\(\mathcal{B}\\) receives the verification key.*
 - *\\(\mathcal{B}\\) receives the proof \\(\pi\\).*
-- *\\(\mathcal{B}\\) checks whether \\(e(u', rG_2) = e(w', G_2)\\).*
-- *\\(\mathcal{B}\\) checks whether \\(e(u', G_2) = e (v', tG_2)\\).*
+- *\\(\mathcal{B}\\) checks whether \\(e(u', g_2^r) = e(w', g_2)\\).*
+- *\\(\mathcal{B}\\) checks whether \\(e(u', g_2) = e (v', g_2^t)\\).*
 
 **Implementation:**
 
@@ -587,15 +587,21 @@ This tutorial utilize elliptic curves called `BN128` for pairing:
 
 - First Group:
   - Curve: \\(Y^2 = x^3 + 3\\) over the finite field \\(\mathbb{F}_{q}\\), where \\(q\\) is defined as 21888242871839275222246405745257275088696311157297823662689037894645226208583.
-  - Generator \\(G_1 := (1, 2)\\)
+  - Generator \\(\mathscr{g}_1 := (1, 2)\\)
 
 
 - Second Group:
   - Curve: \\(Y^2 = x^3 + 3\\) over the finite field \\(\mathbb{F} _{q^2}\\)
   - Modulus polynomial for \\(\mathbb{F} _{q^2}\\): \\(x^2 + 1\\)
-  - Generator \\(G_2\\) := (11559732032986387107991004021392285783925812861821192530917403151452391805634x + 10857046999023057135944570762232829481370756359578518086990519993285655852781, 4082367875863433681332203403145435568316851327593401208105741076214120093531x + 8495653923123431417604973247489272438418190587263600148770280649306958101930)
+  - Generator \\(\mathscr{g}_2\\) := (11559732032986387107991004021392285783925812861821192530917403151452391805634x + 10857046999023057135944570762232829481370756359578518086990519993285655852781, 4082367875863433681332203403145435568316851327593401208105741076214120093531x + 8495653923123431417604973247489272438418190587263600148770280649306958101930)
 
 The orders of two groups are \\(\omega := \\) 21888242871839275222246405745257275088548364400416034343698204186575808495617. Thus, we evaluate the polynomials over the finite field \\(\mathbb{F}_{\omega}\\).
+
+In the context of elliptic curves, the power of a generator corresponds to the multiplication of an elliptic curve point. This property is reflected in the ate pairing on BN128, which satisfies:
+
+\\[
+e(a  \mathscr{g}_1, b \mathscr{g}_2) =  e(ab \mathscr{g}_1, \mathscr{g}_2) = e(\mathscr{g}_1, ab\mathscr{g}_2)  
+\\]
 
 ```rust
 pub struct ProofKey {

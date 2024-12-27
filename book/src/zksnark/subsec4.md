@@ -8,7 +8,13 @@ Let's recap the previous sections. First, the relationship between the inputs an
 
 , where \\(v\\) is the concatenation of all inputs, outputs, and intermediate values. This allows us to transform the statement, "I know the input values \\(x\\) that make the program returns the output values \\(y\\)", into "I know \\(v\\), whose outputs components are \\(y\\), that satisfies the constraint system corresponding to the program". 
 
-Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test.
+Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test: 
+
+\\[
+\ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
+\\]
+
+In this tutorial, we use symmetric pairing to formulate each protocol for simplicity, where the first and second arguments are in the same group, while the actual implementation adopts an asymmetric pairing, similar to the final protocol in the previous chapter
 
 ## First Protocol: Naive Approach
 
