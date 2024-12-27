@@ -145,19 +145,19 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         self.mul_ref(&other.inverse())
     }
 
-    fn add_m1_ref(&self, other: &Self) -> Self {
+    fn add_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn mul_m1_ref(&self, other: &Self) -> Self {
+    fn mul_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn sub_m1_ref(&self, other: &Self) -> Self {
+    fn sub_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
+    fn pow_m1<V: Into<BigInt>>(&self, _n: V) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 

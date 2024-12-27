@@ -1,5 +1,4 @@
 use num_bigint::{BigInt, ToBigInt};
-use num_traits::One;
 use num_traits::Zero;
 
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};

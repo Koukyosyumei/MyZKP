@@ -1,5 +1,3 @@
-use num_bigint::{BigInt, ToBigInt};
-
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::ring::Ring;
