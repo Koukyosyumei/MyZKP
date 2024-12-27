@@ -49,7 +49,6 @@ mod tests {
     use num_traits::Zero;
 
     use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::algebra::ring::Ring;
 
     type F = FiniteFieldElement<ModEIP197>;
 

@@ -3,7 +3,6 @@ use num_traits::Zero;
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
-use crate::modules::algebra::ring::Ring;
 use crate::modules::arithmetization::qap::QAP;
 
 pub fn generate_challenge_vec<F1: Field, F2: Field, E: EllipticCurve>(
