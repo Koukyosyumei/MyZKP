@@ -155,14 +155,6 @@ pub fn verify(
     pairing10 * pairing11 == pairing12
 }
 
-/*
-pub fn interchange_attack(proof: &Proof5) -> Proof5 {
-    let mut new_proof = proof.clone();
-    new_proof.g1_r = proof.g1_ell.clone();
-    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
-    new_proof
-}*/
-
 pub fn inconsistent_variable_attack(
     assignment_ell: &Vec<FqOrder>,
     assignment_r: &Vec<FqOrder>,
@@ -329,11 +321,8 @@ mod tests {
         let proof = prove(&v, &proof_key, &qap);
         assert!(verify(&g1, &g2, &proof, &verification_key));
 
-        let proof_prime = prove(&v_prime, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &proof_prime, &verification_key));
-
-        //let bogus_proof_1 = interchange_attack(&proof);
-        //assert!(!verify(&g2, &bogus_proof_1, &verification_key));
+        let wrong_proof = prove(&v_prime, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &wrong_proof, &verification_key));
 
         let v_ell = vec![
             FqOrder::one(),
@@ -368,7 +357,7 @@ mod tests {
             FqOrder::from_value(5),
         ];
 
-        let bogus_proof_2 = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
-        assert!(!verify(&g1, &g2, &bogus_proof_2, &verification_key));
+        let bogus_proof = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }
