@@ -84,14 +84,14 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey4 {
-            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
-            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
-            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
-            g2_beta_ell_eta: g2.mul_ref(beta_ell.get_value()).mul_ref(eta.get_value()),
-            g2_beta_r_eta: g2.mul_ref(beta_r.get_value()).mul_ref(eta.get_value()),
-            g2_beta_o_eta: g2.mul_ref(beta_o.get_value()).mul_ref(eta.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&s).sanitize().get_value()),
-            g2_eta: g2.mul_ref(eta.get_value()),
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g2_alpha_r: g2 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
+            g2_beta_r_eta: (g2 * beta_r.get_value()) * eta.get_value(),
+            g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
+            g2_t_s: g2 * qap.t.eval(&s).sanitize().get_value(),
+            g2_eta: g2 * eta.get_value(),
         },
     )
 }
