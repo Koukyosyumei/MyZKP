@@ -10,11 +10,10 @@ use crate::modules::zksnark::utils::{
 #[derive(Debug, Clone)]
 pub struct ProofKey4 {
     g1_ell_i_vec: Vec<G1Point>,
-    g1_r_i_vec: Vec<G1Point>,
     g2_r_i_vec: Vec<G2Point>,
     g1_o_i_vec: Vec<G1Point>,
     g1_alpha_ell_i_vec: Vec<G1Point>,
-    g1_alpha_r_i_vec: Vec<G1Point>,
+    g2_alpha_r_i_vec: Vec<G2Point>,
     g1_alpha_o_i_vec: Vec<G1Point>,
     g1_sj_vec: Vec<G1Point>,
     g1_checksum_vec: Vec<G1Point>,
@@ -23,10 +22,10 @@ pub struct ProofKey4 {
 #[derive(Debug, Clone)]
 pub struct VerificationKey4 {
     g2_alpha_ell: G2Point,
-    g2_alpha_r: G2Point,
+    g1_alpha_r: G1Point,
     g2_alpha_o: G2Point,
     g2_beta_ell_eta: G2Point,
-    g2_beta_r_eta: G2Point,
+    g1_beta_r_eta: G1Point,
     g2_beta_o_eta: G2Point,
     g2_t_s: G2Point,
     g2_eta: G2Point,
@@ -35,11 +34,10 @@ pub struct VerificationKey4 {
 #[derive(Debug, Clone)]
 pub struct Proof4 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
     g1_z: G1Point,
@@ -74,21 +72,20 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
     (
         ProofKey4 {
             g1_ell_i_vec: generate_challenge_vec(g1, &qap.ell_i_vec, &s),
-            g1_r_i_vec: generate_challenge_vec(g1, &qap.r_i_vec, &s),
             g2_r_i_vec: generate_challenge_vec(g2, &qap.r_i_vec, &s),
             g1_o_i_vec: generate_challenge_vec(g1, &qap.o_i_vec, &s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &qap.ell_i_vec, &s, &alpha_ell),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &qap.r_i_vec, &s, &alpha_r),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &qap.r_i_vec, &s, &alpha_r),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &qap.o_i_vec, &s, &alpha_o),
             g1_sj_vec: generate_s_powers(g1, &s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey4 {
             g2_alpha_ell: g2 * alpha_ell.get_value(),
-            g2_alpha_r: g2 * alpha_r.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
             g2_alpha_o: g2 * alpha_o.get_value(),
             g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
-            g2_beta_r_eta: (g2 * beta_r.get_value()) * eta.get_value(),
+            g1_beta_r_eta: (g1 * beta_r.get_value()) * eta.get_value(),
             g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
             g2_t_s: g2 * qap.t.eval(&s).sanitize().get_value(),
             g2_eta: g2 * eta.get_value(),
@@ -99,26 +96,30 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
 pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey4, qap: &QAP<FqOrder>) -> Proof4 {
     Proof4 {
         g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&proof_key.g1_sj_vec),
         g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
 
-pub fn verify(g2: &G2Point, proof: &Proof4, verification_key: &VerificationKey4) -> bool {
+pub fn verify(
+    g1: &G1Point,
+    g2: &G2Point,
+    proof: &Proof4,
+    verification_key: &VerificationKey4,
+) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha_ell);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
     if pairing1 != pairing2 {
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_alpha_r);
-    let pairing4 = optimal_ate_pairing(&proof.g1_r_prime, &g2);
+    let pairing3 = optimal_ate_pairing(&verification_key.g1_alpha_r, &proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&g1, &proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -138,18 +139,11 @@ pub fn verify(g2: &G2Point, proof: &Proof4, verification_key: &VerificationKey4)
     }
 
     let pairing10 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_beta_ell_eta);
-    let pairing11 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_beta_r_eta);
+    let pairing11 = optimal_ate_pairing(&verification_key.g1_beta_r_eta, &proof.g2_r);
     let pairing12 = optimal_ate_pairing(&proof.g1_o, &verification_key.g2_beta_o_eta);
     let pairing13 = optimal_ate_pairing(&proof.g1_z, &verification_key.g2_eta);
 
     pairing10 * pairing11 * pairing12 == pairing13
-}
-
-pub fn interchange_attack(proof: &Proof4) -> Proof4 {
-    let mut new_proof = proof.clone();
-    new_proof.g1_r = proof.g1_ell.clone();
-    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
-    new_proof
 }
 
 pub fn inconsistent_variable_attack(
@@ -166,11 +160,10 @@ pub fn inconsistent_variable_attack(
 
     Proof4 {
         g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment_ell),
-        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment_r),
         g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment_r),
         g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment_o),
         g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment_ell),
-        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
+        g2_r_prime: accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment_r),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
         g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
         g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment_ell),
@@ -317,13 +310,10 @@ mod tests {
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
         let proof = prove(&v, &proof_key, &qap);
-        assert!(verify(&g2, &proof, &verification_key));
+        assert!(verify(&g1, &g2, &proof, &verification_key));
 
-        let proof_prime = prove(&v_prime, &proof_key, &qap);
-        assert!(!verify(&g2, &proof_prime, &verification_key));
-
-        let bogus_proof_1 = interchange_attack(&proof);
-        assert!(!verify(&g2, &bogus_proof_1, &verification_key));
+        let wrong_proof = prove(&v_prime, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &wrong_proof, &verification_key));
 
         let v_ell = vec![
             FqOrder::one(),
@@ -358,7 +348,7 @@ mod tests {
             FqOrder::from_value(5),
         ];
 
-        let bogus_proof_2 = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
-        assert!(!verify(&g2, &bogus_proof_2, &verification_key));
+        let bogus_proof = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }
