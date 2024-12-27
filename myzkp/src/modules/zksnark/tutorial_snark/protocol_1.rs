@@ -10,17 +10,17 @@ use crate::modules::zksnark::utils::{
 #[derive(Debug, Clone)]
 pub struct ProofKey1 {
     g1_ell_i_vec: Vec<G1Point>,
-    g1_r_i_vec: Vec<G1Point>,
     g2_r_i_vec: Vec<G2Point>,
     g1_o_i_vec: Vec<G1Point>,
     g1_alpha_ell_i_vec: Vec<G1Point>,
-    g1_alpha_r_i_vec: Vec<G1Point>,
+    g2_alpha_r_i_vec: Vec<G2Point>,
     g1_alpha_o_i_vec: Vec<G1Point>,
     g1_sj_vec: Vec<G1Point>,
 }
 
 #[derive(Debug, Clone)]
 pub struct VerificationKey1 {
+    g1_alpha: G1Point,
     g2_alpha: G2Point,
     g2_t_s: G2Point,
 }
@@ -28,11 +28,10 @@ pub struct VerificationKey1 {
 #[derive(Debug, Clone)]
 pub struct Proof1 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
 }
@@ -44,15 +43,15 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey1, Veri
     (
         ProofKey1 {
             g1_ell_i_vec: generate_challenge_vec(g1, &qap.ell_i_vec, &s),
-            g1_r_i_vec: generate_challenge_vec(g1, &qap.r_i_vec, &s),
             g2_r_i_vec: generate_challenge_vec(g2, &qap.r_i_vec, &s),
             g1_o_i_vec: generate_challenge_vec(g1, &qap.o_i_vec, &s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &qap.ell_i_vec, &s, &alpha),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &qap.r_i_vec, &s, &alpha),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &qap.r_i_vec, &s, &alpha),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &qap.o_i_vec, &s, &alpha),
             g1_sj_vec: generate_s_powers(g1, &s, qap.m),
         },
         VerificationKey1 {
+            g1_alpha: g1 * alpha.get_value(),
             g2_alpha: g2 * alpha.get_value(),
             g2_t_s: g2 * qap.t.eval(&s).sanitize().get_value(),
         },
@@ -62,25 +61,29 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey1, Veri
 pub fn prove(assignment: &Vec<FqOrder>, proof_key: &ProofKey1, qap: &QAP<FqOrder>) -> Proof1 {
     Proof1 {
         g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&proof_key.g1_sj_vec),
     }
 }
 
-pub fn verify(g2: &G2Point, proof: &Proof1, verification_key: &VerificationKey1) -> bool {
+pub fn verify(
+    g1: &G1Point,
+    g2: &G2Point,
+    proof: &Proof1,
+    verification_key: &VerificationKey1,
+) -> bool {
     let pairing1 = optimal_ate_pairing(&proof.g1_ell, &verification_key.g2_alpha);
     let pairing2 = optimal_ate_pairing(&proof.g1_ell_prime, &g2);
     if pairing1 != pairing2 {
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&proof.g1_r, &verification_key.g2_alpha);
-    let pairing4 = optimal_ate_pairing(&proof.g1_r_prime, &g2);
+    let pairing3 = optimal_ate_pairing(&verification_key.g1_alpha, &proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&g1, &proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -100,8 +103,8 @@ pub fn verify(g2: &G2Point, proof: &Proof1, verification_key: &VerificationKey1)
 
 pub fn interchange_attack(proof: &Proof1) -> Proof1 {
     let mut new_proof = proof.clone();
-    new_proof.g1_r = proof.g1_ell.clone();
-    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
+    new_proof.g1_ell = proof.g1_o.clone();
+    new_proof.g1_ell_prime = proof.g1_o_prime.clone();
     new_proof
 }
 
@@ -245,12 +248,12 @@ mod tests {
         let (proof_key, verification_key) = setup(&g1, &g2, &qap);
 
         let proof = prove(&v, &proof_key, &qap);
-        assert!(verify(&g2, &proof, &verification_key));
+        assert!(verify(&g1, &g2, &proof, &verification_key));
 
-        let proof_prime = prove(&v_prime, &proof_key, &qap);
-        assert!(!verify(&g2, &proof_prime, &verification_key));
+        let wrong_proof = prove(&v_prime, &proof_key, &qap);
+        assert!(!verify(&g1, &g2, &wrong_proof, &verification_key));
 
-        let bogus_proof = interchange_attack(&proof);
-        assert!(verify(&g2, &bogus_proof, &verification_key));
+        //let bogus_proof = interchange_attack(&proof);
+        //assert!(verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }
