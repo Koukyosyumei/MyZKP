@@ -230,15 +230,6 @@ A critical issue with this protocol is that the checks may pass even if \\(g^{\e
 
 For example, if the prover sends \\((g^{\ell(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.
 
-```rust
-pub fn interchange_attack(proof: &Proof1) -> Proof1 {
-    let mut new_proof = proof.clone();
-    new_proof.g1_r = proof.g1_ell.clone();
-    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
-    new_proof
-}
-```
-
 ## Second Protocol: Non-Interchangibility
 
 To address the interchangeability issue, the next protocol uses distinct the different \\(\alpha\\)-shift for \\(\ell\\), \\(r\\), and \\(o\\).

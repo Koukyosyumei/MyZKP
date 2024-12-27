@@ -424,15 +424,6 @@ pub fn get_h&lt;F: Field&gt;(qap: &amp;QAP&lt;F&gt;, assignment: &amp;Vec&lt;F&g
 <p><strong>Vulnerability</strong></p>
 <p>A critical issue with this protocol is that the checks may pass even if \(g^{\ell}\) is computed not from \(\{g^{\ell_i(s)}\}_{i \in [d]}\) but from \(\{g^{r_i(s)}\} _{i \in [d]}\), \(\{g^{o_i(s)}\} _{i \in [d]}\), or their combinations. The same issue applies to \(g^{r}\) and \(g^{o}\).</p>
 <p>For example, if the prover sends \((g^{\ell(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn interchange_attack(proof: &amp;Proof1) -&gt; Proof1 {
-    let mut new_proof = proof.clone();
-    new_proof.g1_r = proof.g1_ell.clone();
-    new_proof.g1_r_prime = proof.g1_ell_prime.clone();
-    new_proof
-}
-<span class="boring">}</span></code></pre></pre>
 <h2 id="second-protocol-non-interchangibility"><a class="header" href="#second-protocol-non-interchangibility">Second Protocol: Non-Interchangibility</a></h2>
 <p>To address the interchangeability issue, the next protocol uses distinct the different \(\alpha\)-shift for \(\ell\), \(r\), and \(o\).</p>
 <p><strong>Protocol (Setup)</strong></p>
