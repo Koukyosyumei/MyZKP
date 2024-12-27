@@ -1,6 +1,7 @@
 use num_traits::One;
 
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
@@ -40,7 +41,7 @@ pub fn setup(
     }
 
     let g_r = g2.mul_ref(r.clone().get_value());
-    let g_t_s = g2.mul_ref(t.eval(&s).get_value());
+    let g_t_s = g2.mul_ref(t.eval(&s).sanitize().get_value());
 
     (
         ProofKey { alpha, alpha_prime },

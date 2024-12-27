@@ -205,7 +205,7 @@
 <li>\(g^{t(s)}, g^{\alpha}\)</li>
 </ul>
 </li>
-<li>After distribution, the original \(s\) and \(\alpha\) values are securely destroyed.</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
 </ul>
 <p>Both the proof key and the verification key are publicly available, enabling anyone to generate and verify proofs based on the target program.</p>
 <p><strong>Protocol (Proving)</strong></p>
@@ -448,7 +448,7 @@ pub fn get_h&lt;F: Field&gt;(qap: &amp;QAP&lt;F&gt;, assignment: &amp;Vec&lt;F&g
 <li>\(g^{t(s)}\) <em>\(, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\)</em></li>
 </ul>
 </li>
-<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -661,7 +661,7 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 <li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(, g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
 </ul>
 </li>
-<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -891,7 +891,7 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 <li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(, g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
 </ul>
 </li>
-<li>After distribution, the original \(s,\alpha_{\ell},\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -1099,22 +1099,22 @@ pub fn verify(
 <ul>
 <li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
 <li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
-<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
 <li><strong>Randized Generators:</strong> <em>\(g _{\ell} = g^{\rho _{\ell}}\), \(g _{r} = g^{\rho _{r}}\), and \(g _{o} = g^{\rho _{o}}\)</em></li>
 <li><strong>Proof Key:</strong> Provided to the prover
 <ul>
 <li><em>\(\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\}_{i\in[d]}\)</em></li>
 <li><em>\(\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
 <li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
-<li>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+<li><em>\(\{g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)}\} _{i \in [d]}\)</em></li>
 </ul>
 </li>
 <li><strong>Verification Key:</strong>
 <ul>
-<li><em>\(g _{o}^{t(s)}\)</em> \(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}, g^{\beta _{\ell} \eta}, g^{\beta _{r} \eta}, g^{\beta _{o} \eta}\)</li>
+<li><em>\(g _{o}^{t(s)}\)</em> \(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}\) <em>\(,g^{\beta \eta}\)</em></li>
 </ul>
 </li>
-<li>After distribution, the original \(s\), \(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\) values are securely destroyed.</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
 </ul>
 <p><strong>Protocol (Proving)</strong></p>
 <ul>
@@ -1131,17 +1131,17 @@ pub fn verify(
 </li>
 <li>Evaluate each polynomial at \(s\):
 <ul>
-<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g _{\ell}^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g _{r}^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g _{o}^{o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each shifted polynomial at \(s\):
 <ul>
-<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g _{\ell}^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g _{r}^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g _{o}^{\alpha _{o} o _i(s)})^{v _i} \)</li>
 </ul>
 </li>
 <li>Evaluate each consistency polynomial at \(s\):
 <ul>
-<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta _{\ell} \ell _{i}(s)} \cdot g _{r}^{\beta _{r} r _{i}(s)} \cdot g _{o}^{\beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)})^{v _{i}}\)</em></li>
 </ul>
 </li>
 <li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
@@ -1153,7 +1153,7 @@ pub fn verify(
 </ul>
 <p><strong>Protocol (Verification)</strong></p>
 <ul>
-<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Parse proof as \((g _{\ell}^{\ell}, g _{r}^r, g _{o}^o, g _{\ell}^{\ell'}, g _{r}^{r'}, g _{o}^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
 <li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em>, <em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em>, <em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
@@ -1166,7 +1166,7 @@ pub fn verify(
 </li>
 <li>Validity check
 <ul>
-<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+<li><em>\(e(g _{\ell}^{\ell}, g _{r}^{r}) = e(g _{o}^t,g^h) \cdot e(g _{o}^o, g)\)</em></li>
 </ul>
 </li>
 </ul>
@@ -1201,6 +1201,22 @@ pub fn verify(
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

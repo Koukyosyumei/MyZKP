@@ -25,7 +25,7 @@ The simplest protocol, based on the previous chapter, is as follows:
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
 - **Verification Key:**
   - \\(g^{t(s)}, g^{\alpha}\\)
-- After distribution, the original \\(s\\) and \\(\alpha\\) values are securely destroyed.
+- After distribution, the original secret seeds are securely destroyed.
 
 Both the proof key and the verification key are publicly available, enabling anyone to generate and verify proofs based on the target program.
 
@@ -248,7 +248,7 @@ To address the interchangeability issue, the next protocol uses distinct the dif
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
 - **Verification Key (public):**
   - \\(g^{t(s)}\\) *\\(, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\\)*
-- After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
+- After distribution, the original secret seeds are securely destroyed.
 
 **Protocol (Proving)**
 
@@ -446,7 +446,7 @@ The new protocol using the above variable-consistency check is as follows:
   - *\\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)*
 - **Verification Key:**
   - \\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\\) *\\(, g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\\)*
-- After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
+- After distribution, the original secret seeds are securely destroyed.
 
 **Protocol (Proving)**
 
@@ -654,7 +654,7 @@ One way to surrogate the above malleability is hiding \\(g^{\beta _{\ell}}\\), \
   - \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
 - **Verification Key:**
   - \\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\\) *\\(, g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\\)*
-- After distribution, the original \\(s,\alpha_{\ell},\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
+- After distribution, the original secret seeds are securely destroyed.
 
 **Protocol (Proving)**
 
@@ -838,16 +838,16 @@ The above protocol introduces four expensive pairing operations. To make it fast
 
 - **Interpolated Polynomial:** Construct \\(\\{\ell_i, r_i, o_i\\}_{i\in[d]}\\) from \\(L\\), \\(R\\), and \\(O\\), respectively.
 - **Target Polynomial:** \\(t(x) = (x-1)(x-2) \cdots (x-m)\\)
-- **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), \\(\beta_{\ell}\\), \\(\beta_{r}\\), \\(\beta_{o}\\), \\(\eta\\), *\\(\rho _{\ell}\\), and \\(\rho _{r}\\), and set \\(\rho _{o} = \rho _{\ell} \rho _{r}\\)*.
+- **Secret Seed:** A trusted party generates the random value \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), \\(\alpha_o\\), \\(\beta\\), \\(\eta\\), *\\(\rho _{\ell}\\), and \\(\rho _{r}\\), and set \\(\rho _{o} = \rho _{\ell} \rho _{r}\\)*.
 - **Randized Generators:** *\\(g _{\ell} = g^{\rho _{\ell}}\\), \\(g _{r} = g^{\rho _{r}}\\), and \\(g _{o} = g^{\rho _{o}}\\)*
 - **Proof Key:** Provided to the prover
   - *\\(\\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\\}_{i\in[d]}\\)*
   - *\\(\\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\\}_{i\in[d]}\\)*
   - \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
-  - \\(\\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\\} _{i \in [d]}\\)
+  - *\\(\\{g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)}\\} _{i \in [d]}\\)*
 - **Verification Key:**
-  - *\\(g _{o}^{t(s)}\\)* \\(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}, g^{\beta _{\ell} \eta}, g^{\beta _{r} \eta}, g^{\beta _{o} \eta}\\)
-- After distribution, the original \\(s\\), \\(\alpha_{\ell}\\), \\(\alpha_r\\), and \\(\alpha_o\\) values are securely destroyed.
+  - *\\(g _{o}^{t(s)}\\)* \\(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}\\) *\\(,g^{\beta \eta}\\)*
+- After distribution, the original secret seeds are securely destroyed.
 
 **Protocol (Proving)**
 
@@ -857,23 +857,23 @@ The above protocol introduces four expensive pairing operations. To make it fast
 - Compute the quotient polynomial:
   - \\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\\)
 - Evaluate each polynomial at \\(s\\):
-  - \\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \\)
+  - \\(g^{\ell(s)} = \prod^{d}_{i=1} (g _{\ell}^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g _{r}^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g _{o}^{o _i(s)})^{v _i} \\)
 - Evaluate each shifted polynomial at \\(s\\):
-  - \\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \\)
+  - \\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g _{\ell}^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g _{r}^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g _{o}^{\alpha _{o} o _i(s)})^{v _i} \\)
 - Evaluate each consistency polynomial at \\(s\\):
-  - *\\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta _{\ell} \ell _{i}(s)} \cdot g _{r}^{\beta _{r} r _{i}(s)} \cdot g _{o}^{\beta _{o} o _{i}(s)})^{v _{i}}\\)*
+  - *\\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)})^{v _{i}}\\)*
 - Calculate \\(g^{h(s)}\\) from \\(\\{g^{(s^j)}\\}_{j\in[m]}\\)
 - **Proof**: 
   - \\((\\) \\(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\\) \\(g^{z(s)}\\) \\()\\)
 
 **Protocol (Verification)**
 
-- Parse proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\\)
+- Parse proof as \\((g _{\ell}^{\ell}, g _{r}^r, g _{o}^o, g _{\ell}^{\ell'}, g _{r}^{r'}, g _{o}^{o'}, g^{h}, g^{z})\\)
 - Check polynomial restrictions
   - *\\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\\)*, *\\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\\)*, *\\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\\)*
 - Check variable consistency
   - *\\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}) = e(g^{z}, g^{\eta})\\)*
 - Validity check
-  - \\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\\)
+  - *\\(e(g _{\ell}^{\ell}, g _{r}^{r}) = e(g _{o}^t,g^h) \cdot e(g _{o}^o, g)\\)*
 
 This protocol reduces two pairing operations.
