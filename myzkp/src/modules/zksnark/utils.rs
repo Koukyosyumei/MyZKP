@@ -12,7 +12,7 @@ pub fn generate_challenge_vec<F1: Field, F2: Field, E: EllipticCurve>(
 ) -> Vec<EllipticCurvePoint<F1, E>> {
     poly_vec
         .iter()
-        .map(|poly| point.mul_ref(poly.eval(s).sanitize().get_value()))
+        .map(|poly| point * poly.eval(s).sanitize().get_value())
         .collect()
 }
 
@@ -24,7 +24,7 @@ pub fn generate_alpha_challenge_vec<F1: Field, F2: Field, E: EllipticCurve>(
 ) -> Vec<EllipticCurvePoint<F1, E>> {
     poly_vec
         .iter()
-        .map(|poly| point.mul_ref((alpha.mul_ref(&poly.eval(s).sanitize())).get_value()))
+        .map(|poly| point * (alpha.mul_ref(&poly.eval(s).sanitize())).get_value())
         .collect()
 }
 
@@ -36,7 +36,7 @@ pub fn generate_s_powers<F1: Field, F2: Field, E: EllipticCurve>(
     let mut powers = Vec::with_capacity(m + 1);
     let mut current = F2::one();
     for _ in 0..=m {
-        powers.push(point.mul_ref(current.get_value()));
+        powers.push(point * current.get_value());
         current = current * s.clone();
     }
     powers
@@ -48,7 +48,7 @@ pub fn accumulate_curve_points<F1: Field, F2: Field, E: EllipticCurve>(
 ) -> EllipticCurvePoint<F1, E> {
     g_vec.iter().zip(assignment.iter()).fold(
         EllipticCurvePoint::<F1, E>::point_at_infinity(),
-        |acc, (g, &ref a)| acc + g.mul_ref(a.get_value()),
+        |acc, (g, &ref a)| acc + g * a.get_value(),
     )
 }
 

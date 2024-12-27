@@ -172,9 +172,9 @@ pub fn inconsistent_variable_attack(
         g1_r_prime: accumulate_curve_points(&proof_key.g1_alpha_r_i_vec, assignment_r),
         g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
         g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment)
-            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment)
-            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment),
+        g1_z: accumulate_curve_points(&proof_key.g1_beta_ell_i_vec, assignment_ell)
+            + accumulate_curve_points(&proof_key.g1_beta_r_i_vec, assignment_ell)
+            + accumulate_curve_points(&proof_key.g1_beta_o_i_vec, assignment_ell),
     }
 }
 
