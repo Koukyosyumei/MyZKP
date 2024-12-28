@@ -6,11 +6,13 @@ use num_bigint::ToBigInt;
 use num_traits::{One, Zero};
 use paste::paste;
 
-use crate::modules::curve::{get_lambda, miller, EllipticCurve, EllipticCurvePoint};
-use crate::modules::efield::{ExtendedFieldElement, IrreduciblePoly};
-use crate::modules::field::{FiniteFieldElement, ModEIP197, ModulusValue};
-use crate::modules::polynomial::Polynomial;
-use crate::modules::ring::Ring;
+use crate::modules::algebra::curve::curve::{
+    get_lambda, miller, EllipticCurve, EllipticCurvePoint,
+};
+use crate::modules::algebra::efield::{ExtendedFieldElement, IrreduciblePoly};
+use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197, ModulusValue};
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 use crate::{define_myzkp_curve_type, define_myzkp_modulus_type};
 
 define_myzkp_modulus_type!(
@@ -232,6 +234,8 @@ impl BN128 {
 mod tests {
     use super::*;
 
+    use crate::modules::algebra::field::Field;
+
     #[test]
     fn test_fq() {
         assert_eq!(Fq::from_value(2) * Fq::from_value(2), Fq::from_value(4));
@@ -247,8 +251,6 @@ mod tests {
 
     #[test]
     fn test_fq2() {
-        use crate::modules::field::Field;
-
         let x = Fq2::new(Polynomial {
             coef: vec![Fq::one(), Fq::zero()],
         });

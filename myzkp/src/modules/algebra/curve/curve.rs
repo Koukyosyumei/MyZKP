@@ -6,7 +6,7 @@ use std::ops::{Add, Mul, Neg, Sub};
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
-use crate::modules::field::Field;
+use crate::modules::algebra::field::Field;
 
 pub trait EllipticCurve: Debug + Clone + PartialEq {
     fn get_a() -> BigInt;
@@ -141,6 +141,14 @@ impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
     }
 }
 
+impl<F: Field, E: EllipticCurve> Add for &EllipticCurvePoint<F, E> {
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn add(self, other: Self) -> EllipticCurvePoint<F, E> {
+        self.add_ref(&other)
+    }
+}
+
 impl<F: Field, E: EllipticCurve> Neg for EllipticCurvePoint<F, E> {
     type Output = Self;
     fn neg(self) -> Self {
@@ -163,6 +171,14 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for EllipticCurvePoint<
     type Output = Self;
 
     fn mul(self, scalar_val: V) -> Self {
+        self.mul_ref(scalar_val)
+    }
+}
+
+impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for &EllipticCurvePoint<F, E> {
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn mul(self, scalar_val: V) -> EllipticCurvePoint<F, E> {
         self.mul_ref(scalar_val)
     }
 }
@@ -311,15 +327,16 @@ macro_rules! define_myzkp_curve_type {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::ring::Ring;
-    use crate::{
-        define_myzkp_modulus_type,
-        modules::field::{FiniteFieldElement, ModulusValue},
-    };
+
+    use std::str::FromStr;
+
     use lazy_static::lazy_static;
     use num_bigint::{BigInt, ToBigInt};
     use paste::paste;
-    use std::str::FromStr;
+
+    use crate::define_myzkp_modulus_type;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModulusValue};
+    use crate::modules::algebra::ring::Ring;
 
     define_myzkp_modulus_type!(Mod631, "631");
     define_myzkp_curve_type!(CurveA30B34, "30", "34");

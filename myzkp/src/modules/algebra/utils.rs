@@ -1,6 +1,5 @@
 use std::ops::{Add, BitAnd, Div, Mul, Rem, Shl, ShrAssign, Sub};
 
-use num_bigint::BigInt;
 use num_traits::{One, Signed, Zero};
 
 /// Computes the greatest common divisor (GCD) of two numbers `a` and `b`
@@ -36,7 +35,7 @@ use num_traits::{One, Signed, Zero};
 /// ```
 /// use num_bigint::BigInt;
 /// use num_traits::{One, Zero};
-/// use myzkp::modules::utils::extended_euclidean;
+/// use myzkp::modules::algebra::utils::extended_euclidean;
 ///
 /// fn main() {
 ///     let a = BigInt::from(56);
@@ -90,7 +89,7 @@ where
         + Rem<&'a F, Output = F>
         + Mul<&'a F, Output = F>,
 {
-    let mut r = modulus.clone();
+    let r = modulus.clone();
     let mut new_r = a.clone();
 
     if new_r.is_negative() {

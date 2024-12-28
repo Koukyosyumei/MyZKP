@@ -1,5 +1,5 @@
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
 
 pub struct Prover2<F: Field> {
     pub p: Polynomial<F>,
@@ -86,9 +86,9 @@ pub fn malicious_schwartz_zippel_protocol<F: Field>(
 mod tests {
     use super::*;
 
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::polynomial::Polynomial;
-    use crate::modules::ring::Ring;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::algebra::polynomial::Polynomial;
+    use crate::modules::algebra::ring::Ring;
 
     #[test]
     fn test_sz_protocol() {

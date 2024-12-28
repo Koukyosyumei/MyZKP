@@ -359,7 +359,7 @@ pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="third-protocol-discrete-logarithm-assumption"><a class="header" href="#third-protocol-discrete-logarithm-assumption">Third Protocol: Discrete Logarithm Assumption</a></h2>
-<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\gamma\), where \(\gamma = g^s \bmod p\). Thus, it's safe for the Verifier to send \(\gamma\), as the Prover cannot easily derive \(s\) from it.</p>
+<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\gamma\), where \(\gamma = g^s \bmod q\). Thus, it's safe for the Verifier to send \(\gamma\), as the Prover cannot easily derive \(s\) from it.</p>
 <p>An interesting property of polynomial exponentiation is:</p>
 <p>\begin{align}
 g^{P(x)} &amp;= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
@@ -377,6 +377,14 @@ g^{p} = g^{P(s)} = g^{c_0} \gamma_{1}^{c_1} \gamma_{2}^{c_2} \cdots \gamma_{n}^{
 <li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
 </ul>
 <p>This approach prevents the Prover from obtaining \(s\) or \(t = T(s)\), making it impossible to send fake \((h', p')\) such that \(p' = h't\).</p>
+<p><strong>Implementation:</strong></p>
+<p>Suppose we are working in a finite field (\mathbb{F}_q) derived from a prime number (q). It’s important to note that</p>
+<p>\[g^{c_0} \cdot (g^{s^{1} \bmod q})^{c_1} \cdots (g^{s^{n} \bmod q})^{c_n} \bmod q \]</p>
+<p>is <strong>not</strong> equal to</p>
+<p>\[g^{c_0 + c_1 s^{1} + c_2 s^{2} + \cdots c_n s^{n}} \bmod q\]</p>
+<p>However, directly calculating \(s^i\) without taking modulo results in too large values to handle. To address this, we leverage Fermat's Little Theorem, which states that for a prime \(q\):</p>
+<p>\[a^{b \bmod q - 1} \bmod q\]</p>
+<p>Following this principle, our implementation computes \(s^i\) modulo \(q - 1\) to keep the values manageable.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct Prover3&lt;F: Field&gt; {
@@ -678,39 +686,63 @@ pub fn zk_protocol&lt;F: Field&gt;(prover: &amp;Prover5&lt;F&gt;, verifier: &amp
 <span class="boring">}</span></code></pre></pre>
 <h2 id="sixth-protocol-non-interactivity"><a class="header" href="#sixth-protocol-non-interactivity">Sixth Protocol: Non-interactivity</a></h2>
 <p>The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.</p>
+<p>Specifically, we let a thrid trusted party generate the secret seeds, which neither the prover nor the verifier can access. However, this prevents the verifier \(\mathcal{B}\) from calculating \(u'^{r}\) to check \(u'^{r} = w'\). Instead, the verifier can use a paring with bilinear mapping; \(u'^{r} = w'\) is equivalent to \(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\).</p>
+<p>In this tutorial, we adopt the optimal ate pairing, which is an asynmetric pairing and uses two different cyclic groups derived from elliptic curves; \(e(g_1^a, g_2^b) = e(g_1^{ab}, g_2) = e(b_1, g_2^{ab})\), where \(g_1\) and \(g_2\) are the generators of two different cyclic groups.</p>
 <p><strong>Protocol (Trusted Setup):</strong></p>
 <ul>
 <li><em><strong>Secret Seed:</strong> A trusted third party generates the random values \(s\) and \(r\)</em></li>
 <li><em><strong>Proof Key:</strong> Provided to the prover</em>
 <ul>
-<li><em>\(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_{i} = g^{(s^i)}\)</em></li>
-<li><em>\(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i' = g^{(s^{i})r}\)</em></li>
+<li><em>\(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_{i} = g_1^{(s^i)}\)</em></li>
+<li><em>\(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i' = g_1^{(s^{i})r}\)</em></li>
 </ul>
 </li>
 <li><em><strong>Verification Key:</strong> Distributed to verifiers</em>
 <ul>
-<li><em>\(g^{r}\)</em></li>
-<li><em>\(g^{T(s)}\)</em></li>
+<li><em>\(g_2^r\)</em></li>
+<li><em>\(g_2^t := g_2^{T(s)}\)</em></li>
 </ul>
 </li>
-<li><em>After distribution, the original \(s\) and \(r\) values are securely destroyed.</em></li>
+<li><em>After distribution, the original secret seeds are securely destroyed.</em></li>
 </ul>
 <p>Then, the non-interactive protocol consists of two main parts: proof generation and verification.</p>
 <p><strong>Protocol (Proof):</strong></p>
 <ul>
 <li><em>\(\mathcal{A}\) receives the proof key</em></li>
 <li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{A}\) broadcast the proof \(\pi = (u' = (g^{p})^{\delta}, v' = (g^{h})^{\delta}, w' = (g^{p'})^{\delta})\)</em></li>
+<li><em>\(\mathcal{A}\) broadcast the proof \(\pi = (u' = (g_1^{p})^{\delta}, v' = (g_1^{h})^{\delta}, w' = (g_1^{p'})^{\delta})\)</em></li>
 </ul>
-<p>Since \(r\) is not shared and already destroyed, the verifier \(\mathcal{B}\) cannot calculate \(u'^{r}\) to check \(u'^{r} = w'\). Instead, the verifier can use a paring with bilinear mapping; \(u'^{r} = w'\) is equivalent to \(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\).</p>
 <p><strong>Protocol (Verification):</strong></p>
 <ul>
 <li><em>\(\mathcal{B}\) receives the verification key.</em></li>
 <li><em>\(\mathcal{B}\) receives the proof \(\pi\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(e(u', g^{r}) = e(w', g)\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(e(u', g) = e (v', g^{T(s)})\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(e(u', g_2^r) = e(w', g_2)\).</em></li>
+<li><em>\(\mathcal{B}\) checks whether \(e(u', g_2) = e (v', g_2^t)\).</em></li>
 </ul>
 <p><strong>Implementation:</strong></p>
+<p>This tutorial utilize elliptic curves called <code>BN128</code> for pairing:</p>
+<ul>
+<li>
+<p>First Group:</p>
+<ul>
+<li>Curve: \(Y^2 = x^3 + 3\) over the finite field \(\mathbb{F}_{q}\), where \(q\) is defined as 21888242871839275222246405745257275088696311157297823662689037894645226208583.</li>
+<li>Generator \(\mathscr{g}_1 := (1, 2)\)</li>
+</ul>
+</li>
+<li>
+<p>Second Group:</p>
+<ul>
+<li>Curve: \(Y^2 = x^3 + 3\) over the finite field \(\mathbb{F} _{q^2}\)</li>
+<li>Modulus polynomial for \(\mathbb{F} _{q^2}\): \(x^2 + 1\)</li>
+<li>Generator \(\mathscr{g}_2\) := (11559732032986387107991004021392285783925812861821192530917403151452391805634x + 10857046999023057135944570762232829481370756359578518086990519993285655852781, 4082367875863433681332203403145435568316851327593401208105741076214120093531x + 8495653923123431417604973247489272438418190587263600148770280649306958101930)</li>
+</ul>
+</li>
+</ul>
+<p>The orders of two groups are \(\omega := \) 21888242871839275222246405745257275088548364400416034343698204186575808495617. Thus, we evaluate the polynomials over the finite field \(\mathbb{F}_{\omega}\).</p>
+<p>In the context of elliptic curves, the power of a generator corresponds to the multiplication of an elliptic curve point. This property is reflected in the ate pairing on BN128, which satisfies:</p>
+<p>\[
+e(a  \mathscr{g}_1, b \mathscr{g}_2) =  e(ab \mathscr{g}_1, \mathscr{g}_2) = e(\mathscr{g}_1, ab\mathscr{g}_2)<br />
+\]</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct ProofKey {
@@ -773,12 +805,12 @@ pub fn prove(p: &amp;Polynomial&lt;FqOrder&gt;, t: &amp;Polynomial&lt;FqOrder&gt
 }
 
 pub fn verify(g2: &amp;G2Point, proof: &amp;Proof, vk: &amp;VerificationKey) -&gt; bool {
-    // Check e(u', g^r) = e(w', g)
+    // Check e(u', rG_2) = e(w', G_2)
     let pairing1 = optimal_ate_pairing(&amp;proof.u_prime, &amp;vk.g_r);
     let pairing2 = optimal_ate_pairing(&amp;proof.w_prime, g2);
     let check1 = pairing1 == pairing2;
 
-    // Check e(u', g^t) = e(v', g)
+    // Check e(u', G_2) = e(v', tG_2)
     let pairing3 = optimal_ate_pairing(&amp;proof.u_prime, g2);
     let pairing4 = optimal_ate_pairing(&amp;proof.v_prime, &amp;vk.g_t_s);
     let check2 = pairing3 == pairing4;

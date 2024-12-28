@@ -1,7 +1,4 @@
-use num_traits::One;
-use num_traits::Zero;
-
-use crate::modules::field::Field;
+use crate::modules::algebra::field::Field;
 
 pub fn dot<F: Field>(a: &Vec<F>, b: &Vec<F>) -> F {
     let mut result = F::zero();
@@ -47,8 +44,11 @@ impl<F: Field> R1CS<F> {
 mod tests {
     use super::*;
 
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::ring::Ring;
+    use num_traits::One;
+    use num_traits::Zero;
+
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::algebra::ring::Ring;
 
     type F = FiniteFieldElement<ModEIP197>;
 

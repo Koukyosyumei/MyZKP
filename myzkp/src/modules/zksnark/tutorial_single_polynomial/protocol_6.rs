@@ -1,11 +1,9 @@
-use num_bigint::{BigInt, RandBigInt};
 use num_traits::One;
-use num_traits::Zero;
-use std::str::FromStr;
 
-use crate::modules::bn128::{optimal_ate_pairing, Fq, FqOrder, G1Point, G2Point};
-use crate::modules::polynomial::Polynomial;
-use crate::modules::ring::Ring;
+use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 
 pub struct ProofKey {
     alpha: Vec<G1Point>,
@@ -43,7 +41,7 @@ pub fn setup(
     }
 
     let g_r = g2.mul_ref(r.clone().get_value());
-    let g_t_s = g2.mul_ref(t.eval(&s).get_value());
+    let g_t_s = g2.mul_ref(t.eval(&s).sanitize().get_value());
 
     (
         ProofKey { alpha, alpha_prime },
@@ -67,12 +65,10 @@ pub fn prove(p: &Polynomial<FqOrder>, t: &Polynomial<FqOrder>, proof_key: &Proof
 }
 
 pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
-    // Check e(u', g^r) = e(w', g)
     let pairing1 = optimal_ate_pairing(&proof.u_prime, &vk.g_r);
     let pairing2 = optimal_ate_pairing(&proof.w_prime, g2);
     let check1 = pairing1 == pairing2;
 
-    // Check e(u', g^t) = e(v', g)
     let pairing3 = optimal_ate_pairing(&proof.u_prime, g2);
     let pairing4 = optimal_ate_pairing(&proof.v_prime, &vk.g_t_s);
     let check2 = pairing3 == pairing4;
@@ -83,7 +79,8 @@ pub fn verify(g2: &G2Point, proof: &Proof, vk: &VerificationKey) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::bn128::BN128;
+
+    use crate::modules::algebra::curve::bn128::BN128;
 
     #[test]
     fn test_non_interactive_zkp() {

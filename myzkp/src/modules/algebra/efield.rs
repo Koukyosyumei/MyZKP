@@ -31,12 +31,12 @@
 //! use lazy_static::lazy_static;
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::define_extension_field;
-//! use myzkp::modules::ring::Ring;
-//! use myzkp::modules::field::ModulusValue;
-//! use myzkp::modules::field::FiniteFieldElement;
-//! use myzkp::modules::polynomial::Polynomial;
-//! use myzkp::modules::efield::IrreduciblePoly;
-//! use myzkp::modules::efield::ExtendedFieldElement;
+//! use myzkp::modules::algebra::ring::Ring;
+//! use myzkp::modules::algebra::field::ModulusValue;
+//! use myzkp::modules::algebra::field::FiniteFieldElement;
+//! use myzkp::modules::algebra::polynomial::Polynomial;
+//! use myzkp::modules::algebra::efield::IrreduciblePoly;
+//! use myzkp::modules::algebra::efield::ExtendedFieldElement;
 //!
 //! define_myzkp_modulus_type!(Mod7, "7");
 //! define_extension_field!(
@@ -77,9 +77,9 @@ use num_bigint::BigInt;
 use num_traits::One;
 use num_traits::Zero;
 
-use crate::modules::field::{Field, FiniteFieldElement, ModulusValue};
-use crate::modules::polynomial::Polynomial;
-use crate::modules::ring::Ring;
+use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 
 pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> &'static Polynomial<F>;
@@ -145,19 +145,19 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
         self.mul_ref(&other.inverse())
     }
 
-    fn add_m1_ref(&self, other: &Self) -> Self {
+    fn add_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn mul_m1_ref(&self, other: &Self) -> Self {
+    fn mul_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn sub_m1_ref(&self, other: &Self) -> Self {
+    fn sub_m1_ref(&self, _other: &Self) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 
-    fn pow_m1<V: Into<BigInt>>(&self, n: V) -> Self {
+    fn pow_m1<V: Into<BigInt>>(&self, _n: V) -> Self {
         unimplemented!("Not applicable for extended field elements")
     }
 

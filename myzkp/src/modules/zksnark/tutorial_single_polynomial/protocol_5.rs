@@ -1,43 +1,48 @@
-use num_bigint::{BigInt, RandBigInt, ToBigInt};
-use num_traits::Zero;
-use std::str::FromStr;
+use num_bigint::ToBigInt;
 
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
 
-pub struct Prover4<F: Field> {
+pub struct Prover5<F: Field> {
     pub p: Polynomial<F>,
     pub t: Polynomial<F>,
     pub h: Polynomial<F>,
 }
 
-pub struct Verifier4<F: Field> {
+pub struct Verifier5<F: Field> {
     t: Polynomial<F>,
     s: F,
     r: F,
     g: F,
 }
 
-impl<F: Field> Prover4<F> {
+impl<F: Field> Prover5<F> {
     pub fn new(p: Polynomial<F>, t: Polynomial<F>) -> Self {
         let h = p.clone() / t.clone();
-        Prover4 { p, t, h }
+        Prover5 { p, t, h }
     }
 
     pub fn compute_values(&self, s_powers: &[F], s_prime_powers: &[F]) -> (F, F, F) {
+        let delta = F::random_element(&[]);
+
         let g_p = self.p.eval_with_powers(s_powers);
         let g_h = self.h.eval_with_powers(s_powers);
         let g_p_prime = self.p.eval_with_powers(s_prime_powers);
-        (g_p, g_h, g_p_prime)
+
+        let u_prime = g_p.pow(delta.get_value());
+        let v_prime = g_h.pow(delta.get_value());
+        let w_prime = g_p_prime.pow(delta.get_value());
+
+        (u_prime, v_prime, w_prime)
     }
 }
 
-impl<F: Field> Verifier4<F> {
+impl<F: Field> Verifier5<F> {
     pub fn new(t: Polynomial<F>, generator: i128) -> Self {
         let s = F::random_element(&[]);
         let r = F::random_element(&[]);
         let g = F::from_value(generator);
-        Verifier4 { t, s, r, g }
+        Verifier5 { t, s, r, g }
     }
 
     pub fn generate_challenge(&self, max_degree: usize) -> (Vec<F>, Vec<F>) {
@@ -55,42 +60,39 @@ impl<F: Field> Verifier4<F> {
         (s_powers, s_prime_powers)
     }
 
-    pub fn verify(&self, u: &F, v: &F, w: &F) -> bool {
+    pub fn verify(&self, u_prime: &F, v_prime: &F, w_prime: &F) -> bool {
         let t_s = self.t.eval_m1(&self.s);
-        let u_r = u.pow(self.r.clone().get_value());
+        let u_prime_r = u_prime.pow(self.r.clone().get_value());
 
-        // Check 1: u^r = w
-        let check1 = u_r == *w;
+        // Check 1: u'^r = w'
+        let check1 = u_prime_r == *w_prime;
 
-        // Check 2: u = v^t
-        let check2 = *u == v.pow(t_s.get_value());
+        // Check 2: u' = v'^t
+        let check2 = *u_prime == v_prime.pow(t_s.get_value());
 
         check1 && check2
     }
 }
 
-pub fn knowledge_of_exponent_protocol<F: Field>(
-    prover: &Prover4<F>,
-    verifier: &Verifier4<F>,
-) -> bool {
-    // Step 1 & 2: Verifier4 generates a challenge
+pub fn zk_protocol<F: Field>(prover: &Prover5<F>, verifier: &Verifier5<F>) -> bool {
+    // Step 1 & 2: Verifier5 generates a challenge
     let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
     let (s_powers, s_prime_powers) = verifier.generate_challenge(max_degree + 1);
 
-    // Step 3: Prover4 computes and sends u = g^p, v = g^h, and w = g^p'
-    let (u, v, w) = prover.compute_values(&s_powers, &s_prime_powers);
+    // Step 3 & 4: Prover5 computes and sends u' = (g^p)^δ, v' = (g^h)^δ, and w' = (g^p')^δ
+    let (u_prime, v_prime, w_prime) = prover.compute_values(&s_powers, &s_prime_powers);
 
-    // Step 4 & 5: Verifier4 checks whether u^r = w and u = v^t
-    verifier.verify(&u, &v, &w)
+    // Step 5 & 6: Verifier5 checks whether u'^r = w' and u' = v'^t
+    verifier.verify(&u_prime, &v_prime, &w_prime)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::polynomial::Polynomial;
-    use crate::modules::ring::Ring;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::algebra::polynomial::Polynomial;
+    use crate::modules::algebra::ring::Ring;
 
     #[test]
     fn test_kea_protocol() {
@@ -102,11 +104,11 @@ mod tests {
         let p = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2), F::from_value(3)]);
         let t = Polynomial::from_monomials(&[F::from_value(1), F::from_value(2)]);
 
-        // Honest protocol
-        let honest_prover = Prover4::new(p.clone(), t.clone());
-        let verifier = Verifier4::new(t.clone(), GENERATOR);
+        // ZK protocol
+        let prover = Prover5::new(p.clone(), t.clone());
+        let verifier = Verifier5::new(t.clone(), GENERATOR);
 
-        let honest_result = knowledge_of_exponent_protocol(&honest_prover, &verifier);
-        println!("Honest protocol result: {}", honest_result);
+        let result = zk_protocol(&prover, &verifier);
+        println!("ZK protocol result: {}", result);
     }
 }

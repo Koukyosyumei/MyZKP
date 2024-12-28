@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
 
 pub struct Prover1<F: Field> {
     pub p: Polynomial<F>,
@@ -69,17 +69,17 @@ pub fn naive_protocol<F: Field>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use num_bigint::BigInt;
+
     use std::str::FromStr;
 
-    use crate::modules::ring::Ring;
-    use crate::{
-        define_myzkp_modulus_type,
-        modules::field::{FiniteFieldElement, ModulusValue},
-        modules::polynomial::Polynomial,
-    };
     use lazy_static::lazy_static;
+    use num_bigint::BigInt;
     use paste::paste;
+
+    use crate::define_myzkp_modulus_type;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModulusValue};
+    use crate::modules::algebra::polynomial::Polynomial;
+    use crate::modules::algebra::ring::Ring;
 
     #[test]
     fn test_naive_protocol() {

@@ -1,9 +1,6 @@
-use num_traits::One;
-use num_traits::Zero;
-
-use crate::modules::field::Field;
-use crate::modules::polynomial::Polynomial;
-use crate::modules::r1cs::R1CS;
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::arithmetization::r1cs::R1CS;
 
 pub struct QAP<F: Field> {
     pub m: usize,
@@ -48,8 +45,10 @@ impl<F: Field> QAP<F> {
 mod tests {
     use super::*;
 
-    use crate::modules::field::{FiniteFieldElement, ModEIP197};
-    use crate::modules::ring::Ring;
+    use num_traits::One;
+    use num_traits::Zero;
+
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 
     type F = FiniteFieldElement<ModEIP197>;
 
@@ -189,7 +188,7 @@ mod tests {
             ],
         ];
         let r1cs = R1CS::new(left, right, out);
-        let qap = QAP::from_r1cs(&r1cs);
+        let _qap = QAP::from_r1cs(&r1cs);
 
         /*
         for i in 0..(qap.d) {
