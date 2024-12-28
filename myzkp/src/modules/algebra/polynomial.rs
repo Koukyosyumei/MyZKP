@@ -390,6 +390,16 @@ impl<'a, F: Field> Mul<&'a F> for Polynomial<F> {
     }
 }
 
+impl<'a, 'b, F: Field> Mul<&'a F> for &'b Polynomial<F> {
+    type Output = Polynomial<F>;
+
+    fn mul(self, scalar: &F) -> Polynomial<F> {
+        Polynomial {
+            coef: self.coef.iter().map(|x| x.mul_ref(scalar)).collect(),
+        }
+    }
+}
+
 impl<F: Field> Div for Polynomial<F> {
     type Output = Self;
 

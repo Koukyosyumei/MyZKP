@@ -10,7 +10,6 @@ use crate::modules::zksnark::utils::{
     generate_challenge_vec, generate_s_powers,
 };
 
-#[derive(Debug, Clone)]
 pub struct PinocchioProofKey {
     g1_ell_i_vec: Vec<G1Point>,
     g2_r_i_vec: Vec<G2Point>,
@@ -31,7 +30,6 @@ pub struct PinocchioProofKey {
     g1_o_beta_ts: G1Point,
 }
 
-#[derive(Debug, Clone)]
 pub struct PinocchioVerificationKey {
     g2_alpha_ell: G2Point,
     g1_alpha_r: G1Point,
@@ -42,7 +40,6 @@ pub struct PinocchioVerificationKey {
     g2_eta: G2Point,
 }
 
-#[derive(Debug, Clone)]
 pub struct PinocchioProof {
     g1_ell: G1Point,
     g2_r: G2Point,
@@ -129,13 +126,13 @@ pub fn setup(
     )
 }
 
-pub fn get_shifted_h<F: Field>(
-    qap: &QAP<F>,
-    assignment: &Vec<F>,
-    delta_ell: &F,
-    delta_r: &F,
-    delta_o: &F,
-) -> Polynomial<F> {
+pub fn get_shifted_h(
+    qap: &QAP<FqOrder>,
+    assignment: &Vec<FqOrder>,
+    delta_ell: &FqOrder,
+    delta_r: &FqOrder,
+    delta_o: &FqOrder,
+) -> Polynomial<FqOrder> {
     let ell = accumulate_polynomials(&qap.ell_i_vec, assignment);
     let r = accumulate_polynomials(&qap.r_i_vec, assignment);
     let o = accumulate_polynomials(&qap.o_i_vec, assignment);
@@ -143,7 +140,7 @@ pub fn get_shifted_h<F: Field>(
         + ell * delta_r
         + r * delta_ell
         + qap.t.clone() * (delta_ell.clone() * delta_r)
-        - (Polynomial::<F>::one() * delta_o)
+        - (Polynomial::<FqOrder>::one() * delta_o)
 }
 
 pub fn prove(
@@ -384,7 +381,6 @@ mod tests {
 
         let proof = prove(&v, &proof_key, &qap);
         assert!(verify(&g1, &g2, &proof, &verification_key));
-        assert!(false);
 
         let wrong_proof = prove(&v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &wrong_proof, &verification_key));

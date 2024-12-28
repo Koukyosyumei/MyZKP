@@ -316,6 +316,14 @@ impl<'a, M: ModulusValue> Mul<&'a FiniteFieldElement<M>> for FiniteFieldElement<
     }
 }
 
+impl<'a, M: ModulusValue> Mul<&'a FiniteFieldElement<M>> for &'a FiniteFieldElement<M> {
+    type Output = FiniteFieldElement<M>;
+
+    fn mul(self, other: &'a FiniteFieldElement<M>) -> FiniteFieldElement<M> {
+        self.mul_ref(other)
+    }
+}
+
 impl<M: ModulusValue> Neg for FiniteFieldElement<M> {
     type Output = Self;
 
