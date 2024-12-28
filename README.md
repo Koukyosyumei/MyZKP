@@ -43,9 +43,9 @@ MyZKP is a growing library that provides:
 
 **🔒 Basic of zk-SNARKs**
 
-- ⚡ [Arithmetization](https://koukyosyumei.github.io/MyZKP/zksnark/subsec2.html)
-- 🛠️ [Proving Single Polynomial](https://koukyosyumei.github.io/MyZKP/zksnark/subsec3.html)
-- 🐍 [Bringing It All Together: SNARK](https://koukyosyumei.github.io/MyZKP/zksnark/subsec4.html)
+- ⚡ [Arithmetization](https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html)
+- 🛠️ [Proving Single Polynomial](https://koukyosyumei.github.io/MyZKP/zksnark/subsec2.html)
+- 🐍 [Bringing It All Together: SNARK](https://koukyosyumei.github.io/MyZKP/zksnark/subsec3.html)
   
 **🌟 Basic of zk-STARKs**
 
