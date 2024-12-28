@@ -57,14 +57,17 @@ MyZKP is a growing library that provides:
 
 ## 🛠️ Code Reference
 
-| Module              | Description  |📂 File Path                                      |
-|---------------------|--------------| ---------------------------------------------------|
-| **Ring**            | Defines Ring  | [ring.rs](./myzkp/src/modules/ring.rs)           |
-| **Field**           | Defines Finite Field | [field.rs](./myzkp/src/modules/field.rs)         |
-| **Extended Field**  | Field Extension (Galois Field) |[efield.rs](./myzkp/src/modules/efield.rs)       |
-| **Polynomial**      | Polynomial Arithmetic | [polynomial.rs](./myzkp/src/modules/polynomial.rs)|
-| **Elliptic Curve**  | Elliptic curve operations | [curve.rs](./myzkp/src/modules/curve.rs)         |
-| **zkSNARKs**        | | ✍️ Coming soon                                   |
+|Module       | Submodule   | Description  |📂 Path                                      |
+|-------------|-------------|--------------|-------------------------------------------------- |
+| **albebra** | `ring`      | Defines Ring  | [ring.rs](./myzkp/src/modules/algebra/ring.rs)           |
+|             | `field`     | Defines Finite Field | [field.rs](./myzkp/src/modules/algebra/field.rs)           |
+|             | `efield`    | Field Extension (Galois Field) |[efield.rs](./myzkp/src/modules/algebra/efield.rs)           |
+|             | `Polynomial`| Polynomial Arithmetic | [polynomial.rs](./myzkp/src/modules/algebra/polynomial.rs)|
+|             | `curve`     | Elliptic curve operations | [curve](./myzkp/src/modules/algebra/curve/)           |
+| **Arithmetization** | `r1cs` | Rank One Constraint System | [r1cs.rs](./myzkp/src/modules/arithmetization/r1cs.rs) |
+|             | `qap` | Quadratic Arithmetic Program | [qap.rs](./myzkp/src/modules/arithmetization/qap.rs) |
+| **zkSNARKs**| `tutoriak_single_polynomial` | | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
+|             | `tutorial_snark` | | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
 
 ## 🤝 Contributions are Welcome!
 
@@ -72,6 +75,6 @@ We welcome your ideas, feedback, and contributions!
 
 💡 Here are ways to contribute:
 
-1. Report Issues: Found a bug or have a suggestion? Open an issue!
-2. Submit Pull Requests: Have code improvements? Feel free to submit them.
-3. Write Documentation: Help us make the educational modules clearer.
+1. *Report Issues*: Found a bug or have a suggestion? Open an issue!
+2. *Submit Pull Requests*: Have code improvements? Feel free to submit them.
+3. *Write Documentation*: Help us make the educational modules clearer.
