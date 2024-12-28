@@ -11,9 +11,8 @@
 
 **MyZKP** is a Rust implementation of zero-knowledge protocols built entirely from scratch! This project serves as an educational resource for understanding and working with zero-knowledge proofs. 
 
-🌟 Explore the accompanying textbook: [**Book of MyZKP**](https://koukyosyumei.github.io/MyZKP/).
-
-📢 Contributions and feedback are encouraged to help make this project even better!
+- 🌟 Explore the accompanying textbook: [**Book of MyZKP**](https://koukyosyumei.github.io/MyZKP/).
+- 📢 Contributions and feedback are encouraged to help make this project even better!
 
 
 > [!WARNING]  
