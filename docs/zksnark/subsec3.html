@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Proving Single Polynomial - Book of MyZKP</title>
+        <title>Bringing It All Together: SNARK - Book of MyZKP</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec4.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together: : SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec1.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html" class="active"><strong aria-hidden="true">3.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -179,643 +179,1130 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="proving-single-polynomial"><a class="header" href="#proving-single-polynomial">Proving Single Polynomial</a></h1>
-<p>Before dealing with all of \(\ell(x)\), \(r(x)\), and \(o(x)\) at once, we design a protocol that allows the Prover \(\mathcal{A}\) to convince the Verifier \(\mathcal{B}\) that \(\mathcal{A}\) knows a specific polynomial. Let's denote this polynomial of degree \(n\) with coefficients in a finite field as:</p>
-<p>\begin{equation}
-P(x) = c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}
-\end{equation}</p>
-<p>Assume \(P(x)\) has \(n\) roots, \(a_1, a_2, \ldots, a_n \in \mathbb{F}\), such that \(P(x) = (x - a_1)(x - a_2)\cdots(x - a_n)\). The Verifier \(\mathcal{B}\) knows \(m &lt; n\) roots of \(P(x)\), namely \(a_1, a_2, \ldots, a_m\). Let \(T(x) = (x - a_1)(x - a_2)\cdots(x - a_m)\). Note that the Prover also knows \(T(x)\).</p>
-<p>The Prover's objective is to convince the Verifier that \(\mathcal{A}\) knows a polynomial \(H(x) = \frac{P(x)}{T(x)}\).</p>
-<h2 id="first-protocol-naive-approach"><a class="header" href="#first-protocol-naive-approach">First Protocol: Naive Approach</a></h2>
-<p>The simplest approach to prove that \(\mathcal{A}\) knows \(H(x)\) is as follows:</p>
-<p><strong>Protocol:</strong></p>
-<ul>
-<li>\(\mathcal{B}\) sends all possible values in \(\mathbb{F}\) to \(\mathcal{A}\).</li>
-<li>\(\mathcal{A}\) computes and sends all possible outputs of \(H(x)\) and \(P(x)\).</li>
-<li>\(\mathcal{B}\) checks whether \(H(a)T(a) = P(a)\) holds for any \(a\) in \(\mathbb{F}\).</li>
-</ul>
-<p>This protocol is highly inefficient, requiring \(\mathcal{O}(|\mathbb{F}|)\) evaluations and communications.</p>
-<p><strong>Implementation:</strong></p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Prover1&lt;F: Field&gt; {
-    pub p: Polynomial&lt;F&gt;,
-    pub t: Polynomial&lt;F&gt;,
-    pub h: Polynomial&lt;F&gt;,
-}
-
-pub struct Verifier1&lt;F: Field&gt; {
-    pub t: Polynomial&lt;F&gt;,
-    pub known_roots: Vec&lt;F&gt;,
-}
-
-impl&lt;F: Field&gt; Prover1&lt;F&gt; {
-    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
-        let h = p.clone() / t.clone();
-        Prover1 { p, t, h }
-    }
-
-    pub fn compute_all_values(&amp;self, modulus: i128) -&gt; (HashMap&lt;F, F&gt;, HashMap&lt;F, F&gt;) {
-        let mut h_values = HashMap::new();
-        let mut p_values = HashMap::new();
-
-        for i in 0..modulus {
-            let x = F::from_value(i);
-            h_values.insert(x.clone(), self.h.eval(&amp;x));
-            p_values.insert(x.clone(), self.p.eval(&amp;x));
-        }
-
-        (h_values, p_values)
-    }
-}
-
-impl&lt;F: Field&gt; Verifier1&lt;F&gt; {
-    pub fn new(known_roots: Vec&lt;F&gt;) -&gt; Self {
-        let t = Polynomial::from_monomials(&amp;known_roots);
-        Verifier1 { t, known_roots }
-    }
-
-    pub fn verify(&amp;self, h_values: &amp;HashMap&lt;F, F&gt;, p_values: &amp;HashMap&lt;F, F&gt;) -&gt; bool {
-        for (x, h_x) in h_values {
-            let t_x = self.t.eval(x);
-            let p_x = p_values.get(x).unwrap();
-            if h_x.clone() * t_x != *p_x {
-                return false;
-            }
-        }
-        true
-    }
-}
-
-pub fn naive_protocol&lt;F: Field&gt;(
-    prover: &amp;Prover1&lt;F&gt;,
-    verifier: &amp;Verifier1&lt;F&gt;,
-    modulus: i128,
-) -&gt; bool {
-    // Step 1: Verifier1 sends all possible values (implicitly done by Prover1 computing all values)
-
-    // Step 2: Prover1 computes and sends all possible outputs
-    let (h_values, p_values) = prover.compute_all_values(modulus);
-
-    // Step 3: Verifier1 checks whether H(a)T(a) = P(a) holds for any a in F
-    verifier.verify(&amp;h_values, &amp;p_values)
-}
-<span class="boring">}</span></code></pre></pre>
-<h2 id="second-protocol-schwartz-zippel-lemma"><a class="header" href="#second-protocol-schwartz-zippel-lemma">Second Protocol: Schwartz-Zippel Lemma</a></h2>
-<p>Instead of evaluating polynomials at all values in \(\mathbb{F}\), we can leverage the Schwartz-Zippel Lemma: if \(H(s) = \frac{P(s)}{T(s)}\) or equivalently \(H(s)T(s) = P(s)\) for a random element \(s\), we can conclude that \(H(x) = \frac{P(x)}{T(x)}\) with high probability. Thus, the Prover \(\mathcal{A}\) only needs to send evaluations of \(P(s)\) and \(H(s)\) for a random input \(s\) received from \(\mathcal{B}\).</p>
-<p><strong>Protocol:</strong></p>
-<ul>
-<li><em>\(\mathcal{B}\) draws random \(s\) from \(\mathbb{F}\) and sends it to \(\mathcal{A}\).</em></li>
-<li><em>\(\mathcal{A}\) computes \(h = H(s)\) and \(p = P(s)\) and send them to \(\mathcal{B}\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(p = t h\), where \(t\) denotes \(T(s)\).</em></li>
-</ul>
-<p>This protocol is efficient, requiring only a constant number of evaluations and communications.</p>
-<p><strong>Implementation:</strong></p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Prover2&lt;F: Field&gt; {
-    pub p: Polynomial&lt;F&gt;,
-    pub t: Polynomial&lt;F&gt;,
-    pub h: Polynomial&lt;F&gt;,
-}
-
-pub struct Verifier2&lt;F: Field&gt; {
-    pub t: Polynomial&lt;F&gt;,
-}
-
-impl&lt;F: Field&gt; Prover2&lt;F&gt; {
-    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
-        let h = p.clone() / t.clone();
-        Prover2 { p, t, h }
-    }
-
-    pub fn compute_values(&amp;self, s: &amp;F) -&gt; (F, F) {
-        let h_s = self.h.eval(s);
-        let p_s = self.p.eval(s);
-        (h_s, p_s)
-    }
-}
-
-impl&lt;F: Field&gt; Verifier2&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
-        Verifier2 { t }
-    }
-
-    pub fn generate_challenge(&amp;self) -&gt; F {
-        F::random_element(&amp;[])
-    }
-
-    pub fn verify(&amp;self, s: &amp;F, h: &amp;F, p: &amp;F) -&gt; bool {
-        let t_s = self.t.eval(s);
-        h.clone() * t_s == *p
-    }
-}
-
-pub fn schwartz_zippel_protocol&lt;F: Field&gt;(prover: &amp;Prover2&lt;F&gt;, verifier: &amp;Verifier2&lt;F&gt;) -&gt; bool {
-    // Step 1: Verifier2 generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Prover2 computes and sends h and p
-    let (h, p) = prover.compute_values(&amp;s);
-
-    // Step 3: Verifier2 checks whether p = t * h
-    verifier.verify(&amp;s, &amp;h, &amp;p)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, it is vulnerable to a malicious prover who could send an arbitrary value \(h'\) and the corresponding \(p'\) such that \(p' = h't\).</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>// Simulating a malicious prover
-pub struct MaliciousProver2&lt;F: Field&gt; {
-    t: Polynomial&lt;F&gt;,
-}
-
-impl&lt;F: Field&gt; MaliciousProver2&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
-        MaliciousProver2 { t }
-    }
-
-    pub fn compute_malicious_values(&amp;self, s: &amp;F) -&gt; (F, F) {
-        let h_prime = F::random_element(&amp;[]);
-        let t_s = self.t.eval(s);
-        let p_prime = h_prime.clone() * t_s;
-        (h_prime, p_prime)
-    }
-}
-
-pub fn malicious_schwartz_zippel_protocol&lt;F: Field&gt;(
-    prover: &amp;MaliciousProver2&lt;F&gt;,
-    verifier: &amp;Verifier2&lt;F&gt;,
-) -&gt; bool {
-    // Step 1: Verifier2 generates a random challenge
-    let s = verifier.generate_challenge();
-
-    // Step 2: Malicious Prover2 computes and sends h' and p'
-    let (h_prime, p_prime) = prover.compute_malicious_values(&amp;s);
-
-    // Step 3: Verifier2 checks whether p' = t * h'
-    verifier.verify(&amp;s, &amp;h_prime, &amp;p_prime)
-}
-<span class="boring">}</span></code></pre></pre>
-<h2 id="third-protocol-discrete-logarithm-assumption"><a class="header" href="#third-protocol-discrete-logarithm-assumption">Third Protocol: Discrete Logarithm Assumption</a></h2>
-<p>To address this vulnerability, the Verifier must hide the randomly chosen input \(s\) from the Prover. This can be achieved using the discrete logarithm assumption: it is computationally hard to determine \(s\) from \(\gamma\), where \(\gamma = g^s \bmod q\). Thus, it's safe for the Verifier to send \(\gamma\), as the Prover cannot easily derive \(s\) from it.</p>
-<p>An interesting property of polynomial exponentiation is:</p>
-<p>\begin{align}
-g^{P(x)} &amp;= g^{c_0 + c_1 x + c_2 x^{2} + \cdots c_n x^{n}} = g^{c_0} (g^{x})^{c_1}  (g^{(x^2)})^{c_2} \cdots (g^{(x^n)})^{c_n}
-\end{align}</p>
-<p>Instead of sending \(s\), the Verifier can send \(g\) and \(\gamma_{i} = g^{(s^i)}\) for \(i = 1, \cdots n\). BE CAREFUL THAT <strong>\(g^{(s^i)} \neq (g^s)^i\)</strong>. The Prover can still evaluate \(g^p = g^{P(s)}\) using these powers of \(g\):</p>
-<p>\begin{equation}
-g^{p} = g^{P(s)} = g^{c_0} \gamma_{1}^{c_1} \gamma_{2}^{c_2} \cdots \gamma_{n}^{c_n}
-\end{equation}</p>
-<p>Similarly, the Prover can evaluate \(g^h = g^{H(s)}\). The Verifier can then check \(p = ht \iff g^p = (g^h)^t\).</p>
-<p><strong>Protocol:</strong></p>
-<ul>
-<li>\(\mathcal{B}\) randomly draw \(s\) from \(\mathbb{F}\).</li>
-<li><em>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_i= g^{(s^{i})}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends \(u = g^{p}\) and \(v = g^{h}\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u = v^{t}\).</em></li>
-</ul>
-<p>This approach prevents the Prover from obtaining \(s\) or \(t = T(s)\), making it impossible to send fake \((h', p')\) such that \(p' = h't\).</p>
-<p><strong>Implementation:</strong></p>
-<p>Suppose we are working in a finite field (\mathbb{F}_q) derived from a prime number (q). It’s important to note that</p>
-<p>\[g^{c_0} \cdot (g^{s^{1} \bmod q})^{c_1} \cdots (g^{s^{n} \bmod q})^{c_n} \bmod q \]</p>
-<p>is <strong>not</strong> equal to</p>
-<p>\[g^{c_0 + c_1 s^{1} + c_2 s^{2} + \cdots c_n s^{n}} \bmod q\]</p>
-<p>However, directly calculating \(s^i\) without taking modulo results in too large values to handle. To address this, we leverage Fermat's Little Theorem, which states that for a prime \(q\):</p>
-<p>\[a^{b \bmod q - 1} \bmod q\]</p>
-<p>Following this principle, our implementation computes \(s^i\) modulo \(q - 1\) to keep the values manageable.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Prover3&lt;F: Field&gt; {
-    pub p: Polynomial&lt;F&gt;,
-    pub t: Polynomial&lt;F&gt;,
-    pub h: Polynomial&lt;F&gt;,
-}
-
-pub struct Verifier3&lt;F: Field&gt; {
-    t: Polynomial&lt;F&gt;,
-    s: F,
-    g: F,
-}
-
-impl&lt;F: Field&gt; Prover3&lt;F&gt; {
-    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
-        let h = p.clone() / t.clone();
-        Prover3 { p, t, h }
-    }
-
-    pub fn compute_values(&amp;self, s_powers: &amp;[F]) -&gt; (F, F) {
-        let g_p = self.p.eval_with_powers(s_powers);
-        let g_h = self.h.eval_with_powers(s_powers);
-        (g_p, g_h)
-    }
-}
-
-impl&lt;F: Field&gt; Verifier3&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
-        let s = F::random_element(&amp;[]);
-        let g = F::from_value(generator);
-        Verifier3 { t, s, g }
-    }
-
-    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; Vec&lt;F&gt; {
-        let mut s_powers = vec![];
-        for i in 0..(max_degree + 1) {
-            s_powers.push(
-                self.g
-                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
-            );
-        }
-        s_powers
-    }
-
-    pub fn verify(&amp;self, u: &amp;F, v: &amp;F) -&gt; bool {
-        let t_s = self.t.eval_m1(&amp;self.s);
-        u == &amp;v.pow(t_s.get_value())
-    }
-}
-
-pub fn discrete_log_protocol&lt;F: Field&gt;(prover: &amp;Prover3&lt;F&gt;, verifier: &amp;Verifier3&lt;F&gt;) -&gt; bool {
-    // Step 1 &amp; 2: Verifier3 generates a challenge
-    let max_degree = prover.p.degree();
-    let s_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Prover3 computes and sends u = g^p and v = g^h
-    let (u, v) = prover.compute_values(&amp;s_powers);
-
-    // Step 4: Verifier3 checks whether u = v^t
-    verifier.verify(&amp;u, &amp;v)
-}
-<span class="boring">}</span></code></pre></pre>
-<p><strong>Vulnerability:</strong></p>
-<p>However, this protocol still has a flaw. Since the Prover can compute \(g^t\) from \(\gamma _1, \cdots \gamma _m\), they could send fake values \(((g^{t})^{z}, g^{z})\) instead of \((g^p, g^h)\) for an arbitrary value \(z\). The verifier's check would still pass, and they could not detect this deception.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>// Simulating a malicious prover
-pub struct MaliciousProver3&lt;F: Field&gt; {
-    t: Polynomial&lt;F&gt;,
-}
-
-impl&lt;F: Field&gt; MaliciousProver3&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;) -&gt; Self {
-        MaliciousProver3 { t }
-    }
-
-    pub fn compute_malicious_values(&amp;self, s_powers: &amp;[F]) -&gt; (F, F) {
-        let g_t = self.t.eval_with_powers(s_powers);
-        let z = F::random_element(&amp;[]);
-        let g = &amp;s_powers[0];
-        let fake_v = g.pow(z.get_value());
-        let fake_u = g_t.pow(z.get_value());
-        (fake_u, fake_v)
-    }
-}
-
-pub fn malicious_discrete_log_protocol&lt;F: Field&gt;(
-    prover: &amp;MaliciousProver3&lt;F&gt;,
-    verifier: &amp;Verifier3&lt;F&gt;,
-) -&gt; bool {
-    // Step 1 &amp; 2: Verifier3 generates a challenge
-    let max_degree = prover.t.degree() as usize;
-    let s_powers = verifier.generate_challenge(max_degree as usize);
-
-    // Step 3: Malicious Prover3 computes and sends fake u and v
-    let (fake_u, fake_v) = prover.compute_malicious_values(&amp;s_powers);
-
-    // Step 4: Verifier3 checks whether u = v^t (which will pass for the fake values)
-    verifier.verify(&amp;fake_u, &amp;fake_v)
-}
-<span class="boring">}</span></code></pre></pre>
-<h2 id="forth-protocol-knowledge-of-exponent-assumption"><a class="header" href="#forth-protocol-knowledge-of-exponent-assumption">Forth Protocol: Knowledge of Exponent Assumption</a></h2>
-<p>To address the vulnerability where the verifier \(\mathcal{B}\) cannot distinguish if \(v (= g^h)\) from the prover is a power of \(\gamma_i = g^{(s^i)}\), we can employ the Knowledge of Exponent Assumption. This approach involves the following steps:</p>
-<ul>
-<li>\(\mathcal{B}\) sends both \(\gamma_i\) and \(\gamma'_i = \gamma_i^r\) for a new random value \(r\).</li>
-<li>The prover returns \(a = (\gamma_i)^{c_i}\) and \(a' = (\gamma'_i)^{c_i}\) for \(i = 1, ..., n\).</li>
-<li>\(\mathcal{B}\) can conclude that \(a\) is a power of \(\gamma_i\) if \(a^r = a'\).</li>
-</ul>
-<p>Based on this assumption, we can design an improved protocol:</p>
-<p><strong>Protocol:</strong></p>
-<ul>
-<li>\(\mathcal{B}\) randomly selects \(s\) and <em>\(r\)</em> from field \(\mathbb{F}\).</li>
-<li>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\) <em>and \(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i = g^{(s^i)}\) and \(\gamma' = \gamma_{r} = g^{(s^{i})r}\).</em></li>
-<li>\(\mathcal{A}\) computes and sends \(u = g^{p}\), \(v = g^{h}\), <em>and \(w = g^{p'}\), where \(g^{p'} = g^{rP(s)}\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(u^{r} = w\).</em></li>
-<li>\(\mathcal{B}\) checks whether \(u = v^{t}\).</li>
-</ul>
-<p>The prover can compute \(g^{p'} = g^{rP(s)} = g^{c_0} (\gamma_{1})'^{c_1} (\gamma'_{2})^{c_2} \cdots (\gamma_{n}')^{c_n}\). This protocol now satisfies the properties of a SNARK: completeness, soundness, and efficiency.</p>
-<p><strong>Implementation:</strong></p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Prover4&lt;F: Field&gt; {
-    pub p: Polynomial&lt;F&gt;,
-    pub t: Polynomial&lt;F&gt;,
-    pub h: Polynomial&lt;F&gt;,
-}
-
-pub struct Verifier4&lt;F: Field&gt; {
-    t: Polynomial&lt;F&gt;,
-    s: F,
-    r: F,
-    g: F,
-}
-
-impl&lt;F: Field&gt; Prover4&lt;F&gt; {
-    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
-        let h = p.clone() / t.clone();
-        Prover4 { p, t, h }
-    }
-
-    pub fn compute_values(&amp;self, s_powers: &amp;[F], s_prime_powers: &amp;[F]) -&gt; (F, F, F) {
-        let g_p = self.p.eval_with_powers(s_powers);
-        let g_h = self.h.eval_with_powers(s_powers);
-        let g_p_prime = self.p.eval_with_powers(s_prime_powers);
-        (g_p, g_h, g_p_prime)
-    }
-}
-
-impl&lt;F: Field&gt; Verifier4&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
-        let s = F::random_element(&amp;[]);
-        let r = F::random_element(&amp;[]);
-        let g = F::from_value(generator);
-        Verifier4 { t, s, r, g }
-    }
-
-    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; (Vec&lt;F&gt;, Vec&lt;F&gt;) {
-        let mut s_powers = vec![];
-        let mut s_prime_powers = vec![];
-
-        for i in 0..(max_degree + 1) {
-            s_powers.push(
-                self.g
-                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
-            );
-            s_prime_powers.push(s_powers.last().unwrap().pow(self.r.get_value()));
-        }
-
-        (s_powers, s_prime_powers)
-    }
-
-    pub fn verify(&amp;self, u: &amp;F, v: &amp;F, w: &amp;F) -&gt; bool {
-        let t_s = self.t.eval_m1(&amp;self.s);
-        let u_r = u.pow(self.r.clone().get_value());
-
-        // Check 1: u^r = w
-        let check1 = u_r == *w;
-
-        // Check 2: u = v^t
-        let check2 = *u == v.pow(t_s.get_value());
-
-        check1 &amp;&amp; check2
-    }
-}
-
-pub fn knowledge_of_exponent_protocol&lt;F: Field&gt;(
-    prover: &amp;Prover4&lt;F&gt;,
-    verifier: &amp;Verifier4&lt;F&gt;,
-) -&gt; bool {
-    // Step 1 &amp; 2: Verifier4 generates a challenge
-    let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
-    let (s_powers, s_prime_powers) = verifier.generate_challenge(max_degree + 1);
-
-    // Step 3: Prover4 computes and sends u = g^p, v = g^h, and w = g^p'
-    let (u, v, w) = prover.compute_values(&amp;s_powers, &amp;s_prime_powers);
-
-    // Step 4 &amp; 5: Verifier4 checks whether u^r = w and u = v^t
-    verifier.verify(&amp;u, &amp;v, &amp;w)
-}
-<span class="boring">}</span></code></pre></pre>
-<h2 id="fifth-protocol-zero-knowledge"><a class="header" href="#fifth-protocol-zero-knowledge">Fifth Protocol: Zero Knowledge</a></h2>
-<p>To transform the above protocol into a zk-SNARK, we need to ensure that the verifier cannot learn anything about \(P(x)\) from the prover's information. This is achieved by having the prover obfuscate all information with a random secret value \(\delta\):</p>
-<p><strong>Protocol:</strong></p>
-<ul>
-<li>\(\mathcal{B}\) randomly selects \(s\) and \(r\) from field \(\mathbb{F}\).</li>
-<li>\(\mathcal{B}\) computes and sends \(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\) and \(\{\gamma_1', \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i = g^{(s^{i})}\) and \(\gamma_i' = \gamma_i^{r} = g^{(s^{i})r}\).</li>
-<li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{A}\) computes and sends \(u' = (g^{p})^{\delta}\), \(v' = (g^{h})^{\delta}\), and \(w' = (g^{p'})^{\delta}\).</em></li>
-<li>\(\mathcal{B}\) checks whether \(u'^{r} = w'\).</li>
-<li>\(\mathcal{B}\) checks whether \(u' = v'^{t}\).</li>
-</ul>
-<p>By introducing the random value \(\delta\), the verifier can no longer learn anything about \(p\), \(h\), or \(w\), thus achieving zero knowledge.</p>
-<p><strong>Implementation:</strong></p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Prover5&lt;F: Field&gt; {
-    pub p: Polynomial&lt;F&gt;,
-    pub t: Polynomial&lt;F&gt;,
-    pub h: Polynomial&lt;F&gt;,
-}
-
-pub struct Verifier5&lt;F: Field&gt; {
-    t: Polynomial&lt;F&gt;,
-    s: F,
-    r: F,
-    g: F,
-}
-
-impl&lt;F: Field&gt; Prover5&lt;F&gt; {
-    pub fn new(p: Polynomial&lt;F&gt;, t: Polynomial&lt;F&gt;) -&gt; Self {
-        let h = p.clone() / t.clone();
-        Prover5 { p, t, h }
-    }
-
-    pub fn compute_values(&amp;self, s_powers: &amp;[F], s_prime_powers: &amp;[F]) -&gt; (F, F, F) {
-        let delta = F::random_element(&amp;[]);
-
-        let g_p = self.p.eval_with_powers(s_powers);
-        let g_h = self.h.eval_with_powers(s_powers);
-        let g_p_prime = self.p.eval_with_powers(s_prime_powers);
-
-        let u_prime = g_p.pow(delta.get_value());
-        let v_prime = g_h.pow(delta.get_value());
-        let w_prime = g_p_prime.pow(delta.get_value());
-
-        (u_prime, v_prime, w_prime)
-    }
-}
-
-impl&lt;F: Field&gt; Verifier5&lt;F&gt; {
-    pub fn new(t: Polynomial&lt;F&gt;, generator: i128) -&gt; Self {
-        let s = F::random_element(&amp;[]);
-        let r = F::random_element(&amp;[]);
-        let g = F::from_value(generator);
-        Verifier5 { t, s, r, g }
-    }
-
-    pub fn generate_challenge(&amp;self, max_degree: usize) -&gt; (Vec&lt;F&gt;, Vec&lt;F&gt;) {
-        let mut s_powers = vec![];
-        let mut s_prime_powers = vec![];
-
-        for i in 0..(max_degree + 1) {
-            s_powers.push(
-                self.g
-                    .pow(self.s.clone().pow_m1(i.to_bigint().unwrap()).get_value()),
-            );
-            s_prime_powers.push(s_powers.last().unwrap().pow(self.r.get_value()));
-        }
-
-        (s_powers, s_prime_powers)
-    }
-
-    pub fn verify(&amp;self, u_prime: &amp;F, v_prime: &amp;F, w_prime: &amp;F) -&gt; bool {
-        let t_s = self.t.eval_m1(&amp;self.s);
-        let u_prime_r = u_prime.pow(self.r.clone().get_value());
-
-        // Check 1: u'^r = w'
-        let check1 = u_prime_r == *w_prime;
-
-        // Check 2: u' = v'^t
-        let check2 = *u_prime == v_prime.pow(t_s.get_value());
-
-        check1 &amp;&amp; check2
-    }
-}
-
-pub fn zk_protocol&lt;F: Field&gt;(prover: &amp;Prover5&lt;F&gt;, verifier: &amp;Verifier5&lt;F&gt;) -&gt; bool {
-    // Step 1 &amp; 2: Verifier5 generates a challenge
-    let max_degree = std::cmp::max(prover.p.degree(), prover.h.degree()) as usize;
-    let (s_powers, s_prime_powers) = verifier.generate_challenge(max_degree + 1);
-
-    // Step 3 &amp; 4: Prover5 computes and sends u' = (g^p)^δ, v' = (g^h)^δ, and w' = (g^p')^δ
-    let (u_prime, v_prime, w_prime) = prover.compute_values(&amp;s_powers, &amp;s_prime_powers);
-
-    // Step 5 &amp; 6: Verifier5 checks whether u'^r = w' and u' = v'^t
-    verifier.verify(&amp;u_prime, &amp;v_prime, &amp;w_prime)
-}
-<span class="boring">}</span></code></pre></pre>
-<h2 id="sixth-protocol-non-interactivity"><a class="header" href="#sixth-protocol-non-interactivity">Sixth Protocol: Non-interactivity</a></h2>
-<p>The previously described protocol requires each verifier to generate unique random values, which becomes inefficient when a prover needs to demonstrate knowledge to multiple verifiers. To address this, we aim to eliminate the interaction between the prover and verifier. One effective solution is the use of a trusted setup.</p>
-<p>Specifically, we let a thrid trusted party generate the secret seeds, which neither the prover nor the verifier can access. However, this prevents the verifier \(\mathcal{B}\) from calculating \(u'^{r}\) to check \(u'^{r} = w'\). Instead, the verifier can use a paring with bilinear mapping; \(u'^{r} = w'\) is equivalent to \(e(u' = (g^{p})^{\delta}, g^{r}) = e(w'=(g^{p'})^{\delta}, g)\).</p>
-<p>In this tutorial, we adopt the optimal ate pairing, which is an asynmetric pairing and uses two different cyclic groups derived from elliptic curves; \(e(g_1^a, g_2^b) = e(g_1^{ab}, g_2) = e(b_1, g_2^{ab})\), where \(g_1\) and \(g_2\) are the generators of two different cyclic groups.</p>
-<p><strong>Protocol (Trusted Setup):</strong></p>
-<ul>
-<li><em><strong>Secret Seed:</strong> A trusted third party generates the random values \(s\) and \(r\)</em></li>
-<li><em><strong>Proof Key:</strong> Provided to the prover</em>
-<ul>
-<li><em>\(\{\gamma_1, \gamma_2, ..., \gamma_{n}\}\), where \(\gamma_{i} = g_1^{(s^i)}\)</em></li>
-<li><em>\(\{\gamma'_1, \gamma'_2, ..., \gamma'_{n}\}\), where \(\gamma_i' = g_1^{(s^{i})r}\)</em></li>
-</ul>
-</li>
-<li><em><strong>Verification Key:</strong> Distributed to verifiers</em>
-<ul>
-<li><em>\(g_2^r\)</em></li>
-<li><em>\(g_2^t := g_2^{T(s)}\)</em></li>
-</ul>
-</li>
-<li><em>After distribution, the original secret seeds are securely destroyed.</em></li>
-</ul>
-<p>Then, the non-interactive protocol consists of two main parts: proof generation and verification.</p>
-<p><strong>Protocol (Proof):</strong></p>
-<ul>
-<li><em>\(\mathcal{A}\) receives the proof key</em></li>
-<li><em>\(\mathcal{A}\) randomly selects \(\delta\) from field \(\mathbb{F}\).</em></li>
-<li><em>\(\mathcal{A}\) broadcast the proof \(\pi = (u' = (g_1^{p})^{\delta}, v' = (g_1^{h})^{\delta}, w' = (g_1^{p'})^{\delta})\)</em></li>
-</ul>
-<p><strong>Protocol (Verification):</strong></p>
-<ul>
-<li><em>\(\mathcal{B}\) receives the verification key.</em></li>
-<li><em>\(\mathcal{B}\) receives the proof \(\pi\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(e(u', g_2^r) = e(w', g_2)\).</em></li>
-<li><em>\(\mathcal{B}\) checks whether \(e(u', g_2) = e (v', g_2^t)\).</em></li>
-</ul>
-<p><strong>Implementation:</strong></p>
-<p>This tutorial utilize elliptic curves called <code>BN128</code> for pairing:</p>
-<ul>
-<li>
-<p>First Group:</p>
-<ul>
-<li>Curve: \(Y^2 = x^3 + 3\) over the finite field \(\mathbb{F}_{q}\), where \(q\) is defined as 21888242871839275222246405745257275088696311157297823662689037894645226208583.</li>
-<li>Generator \(\mathscr{g}_1 := (1, 2)\)</li>
-</ul>
-</li>
-<li>
-<p>Second Group:</p>
-<ul>
-<li>Curve: \(Y^2 = x^3 + 3\) over the finite field \(\mathbb{F} _{q^2}\)</li>
-<li>Modulus polynomial for \(\mathbb{F} _{q^2}\): \(x^2 + 1\)</li>
-<li>Generator \(\mathscr{g}_2\) := (11559732032986387107991004021392285783925812861821192530917403151452391805634x + 10857046999023057135944570762232829481370756359578518086990519993285655852781, 4082367875863433681332203403145435568316851327593401208105741076214120093531x + 8495653923123431417604973247489272438418190587263600148770280649306958101930)</li>
-</ul>
-</li>
-</ul>
-<p>The orders of two groups are \(\omega := \) 21888242871839275222246405745257275088548364400416034343698204186575808495617. Thus, we evaluate the polynomials over the finite field \(\mathbb{F}_{\omega}\).</p>
-<p>In the context of elliptic curves, the power of a generator corresponds to the multiplication of an elliptic curve point. This property is reflected in the ate pairing on BN128, which satisfies:</p>
+                        <h1 id="bringing-it-all-together-snark"><a class="header" href="#bringing-it-all-together-snark">Bringing It All Together: SNARK</a></h1>
+<p>Let's recap the previous sections. First, the relationship between the inputs and outputs of any program can be expressed as a rank-one constraint system (R1CS) as follows:</p>
 <p>\[
-e(a  \mathscr{g}_1, b \mathscr{g}_2) =  e(ab \mathscr{g}_1, \mathscr{g}_2) = e(\mathscr{g}_1, ab\mathscr{g}_2)<br />
+(L \cdot v) \circ (R \cdot v) - O \cdot v = 0<br />
 \]</p>
+<p>, where \(v\) is the concatenation of all inputs, outputs, and intermediate values. This allows us to transform the statement, "I know the input values \(x\) that make the program returns the output values \(y\)", into "I know \(v\), whose outputs components are \(y\), that satisfies the constraint system corresponding to the program".</p>
+<p>Then, instead of separately checking each constraint (which corresponds to a row in the R1CS matrix), we can convert this into a more efficient polynomial-equivalence test:</p>
+<p>\[
+\ell(x) \cdot r(x) = o(x) + h(x) \cdot t(x)
+\]</p>
+<p>In this tutorial, we use symmetric pairing to formulate each protocol for simplicity, where the first and second arguments are in the same group, while the actual implementation adopts an asymmetric pairing, similar to the final protocol in the previous chapter</p>
+<h2 id="first-protocol-naive-approach"><a class="header" href="#first-protocol-naive-approach">First Protocol: Naive Approach</a></h2>
+<p>The simplest protocol, based on the previous chapter, is as follows:</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\) and \(\alpha\).</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha \ell_i(s)},g^{\alpha r_i(s)},g^{\alpha o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}, g^{\alpha}\)</li>
+</ul>
+</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
+</ul>
+<p>Both the proof key and the verification key are publicly available, enabling anyone to generate and verify proofs based on the target program.</p>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Run the program to obtain the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
+<li>Evaluate each polynomial at \(s\).
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate the shifted polynomials at \(s\).
+<ul>
+<li>\(g^{\alpha \ell(s)} = \prod^{d} _{i=1} (g^{\alpha \ell _i(s)})^{v _i} ,\quad g^{\alpha r(s)} = \prod^{d} _{i=1} (g^{\alpha r _i(s)})^{v _i} ,\quad g^{\alpha o(s)} = \prod^{d} _{i=1} (g^{\alpha o_i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Compute \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha \ell(s)}, g^{\alpha r(s)}, g^{\alpha o(s)}, g^{h(s)})\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse the proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Check the polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Verify validity of the proof
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Implementation</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub struct ProofKey {
-    alpha: Vec&lt;G1Point&gt;,
-    alpha_prime: Vec&lt;G1Point&gt;,
+</span>#[derive(Debug, Clone)]
+pub struct ProofKey1 {
+    g1_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_sj_vec: Vec&lt;G1Point&gt;,
 }
 
-pub struct VerificationKey {
-    g_r: G2Point,
-    g_t_s: G2Point,
+#[derive(Debug, Clone)]
+pub struct VerificationKey1 {
+    g1_alpha: G1Point,
+    g2_alpha: G2Point,
+    g2_t_s: G2Point,
 }
 
-pub struct Proof {
-    u_prime: G1Point,
-    v_prime: G1Point,
-    w_prime: G1Point,
+#[derive(Debug, Clone)]
+pub struct Proof1 {
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
 }
 
-pub fn setup(
-    g1: &amp;G1Point,
-    g2: &amp;G2Point,
-    t: &amp;Polynomial&lt;FqOrder&gt;,
-    n: usize,
-) -&gt; (ProofKey, VerificationKey) {
+pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; (ProofKey1, VerificationKey1) {
     let s = FqOrder::random_element(&amp;[]);
-    let r = FqOrder::random_element(&amp;[]);
-
-    let mut alpha = Vec::with_capacity(n);
-    let mut alpha_prime = Vec::with_capacity(n);
-
-    let mut s_power = FqOrder::one();
-    for _ in 0..1 + n {
-        alpha.push(g1.mul_ref(s_power.clone().get_value()));
-        alpha_prime.push(g1.mul_ref((s_power.clone() * r.clone()).get_value()));
-        s_power = s_power * s.clone();
-    }
-
-    let g_r = g2.mul_ref(r.clone().get_value());
-    let g_t_s = g2.mul_ref(t.eval(&amp;s).get_value());
+    let alpha = FqOrder::random_element(&amp;[]);
 
     (
-        ProofKey { alpha, alpha_prime },
-        VerificationKey { g_r, g_t_s },
+        ProofKey1 {
+            g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
+            g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
+            g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha),
+            g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
+        },
+        VerificationKey1 {
+            g1_alpha: g1 * alpha.get_value(),
+            g2_alpha: g2 * alpha.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
+        },
     )
 }
 
-pub fn prove(p: &amp;Polynomial&lt;FqOrder&gt;, t: &amp;Polynomial&lt;FqOrder&gt;, proof_key: &amp;ProofKey) -&gt; Proof {
-    let h = p.clone() / t.clone();
-    let delta = FqOrder::random_element(&amp;[]);
-
-    let g_p = p.eval_with_powers_on_curve(&amp;proof_key.alpha);
-    let g_h = h.eval_with_powers_on_curve(&amp;proof_key.alpha);
-    let g_p_prime = p.eval_with_powers_on_curve(&amp;proof_key.alpha_prime);
-
-    Proof {
-        u_prime: g_p * delta.get_value(),
-        v_prime: g_h * delta.get_value(),
-        w_prime: g_p_prime * delta.get_value(),
+pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey1, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof1 {
+    Proof1 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
     }
 }
 
-pub fn verify(g2: &amp;G2Point, proof: &amp;Proof, vk: &amp;VerificationKey) -&gt; bool {
-    // Check e(u', rG_2) = e(w', G_2)
-    let pairing1 = optimal_ate_pairing(&amp;proof.u_prime, &amp;vk.g_r);
-    let pairing2 = optimal_ate_pairing(&amp;proof.w_prime, g2);
-    let check1 = pairing1 == pairing2;
+pub fn verify(
+    g1: &amp;G1Point,
+    g2: &amp;G2Point,
+    proof: &amp;Proof1,
+    verification_key: &amp;VerificationKey1,
+) -&gt; bool {
+    let pairing1 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_alpha);
+    let pairing2 = optimal_ate_pairing(&amp;proof.g1_ell_prime, &amp;g2);
+    if pairing1 != pairing2 {
+        return false;
+    }
 
-    // Check e(u', G_2) = e(v', tG_2)
-    let pairing3 = optimal_ate_pairing(&amp;proof.u_prime, g2);
-    let pairing4 = optimal_ate_pairing(&amp;proof.v_prime, &amp;vk.g_t_s);
-    let check2 = pairing3 == pairing4;
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
+    if pairing3 != pairing4 {
+        return false;
+    }
 
-    check1 &amp;&amp; check2
+    let pairing5 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_alpha);
+    let pairing6 = optimal_ate_pairing(&amp;proof.g1_o_prime, &amp;g2);
+    if pairing5 != pairing6 {
+        return false;
+    }
+
+    let pairing7 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;proof.g2_r);
+    let pairing8 = optimal_ate_pairing(&amp;proof.g1_h, &amp;verification_key.g2_t_s);
+    let pairing9 = optimal_ate_pairing(&amp;proof.g1_o, &amp;g2);
+
+    pairing7 == pairing8 * pairing9
+}
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn generate_challenge_vec&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
+    point: &amp;EllipticCurvePoint&lt;F1, E&gt;,
+    poly_vec: &amp;[Polynomial&lt;F2&gt;],
+    s: &amp;F2,
+) -&gt; Vec&lt;EllipticCurvePoint&lt;F1, E&gt;&gt; {
+    poly_vec
+        .iter()
+        .map(|poly| point.mul_ref(poly.eval(s).sanitize().get_value()))
+        .collect()
+}
+
+pub fn generate_alpha_challenge_vec&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
+    point: &amp;EllipticCurvePoint&lt;F1, E&gt;,
+    poly_vec: &amp;[Polynomial&lt;F2&gt;],
+    s: &amp;F2,
+    alpha: &amp;F2,
+) -&gt; Vec&lt;EllipticCurvePoint&lt;F1, E&gt;&gt; {
+    poly_vec
+        .iter()
+        .map(|poly| point.mul_ref((alpha.mul_ref(&amp;poly.eval(s).sanitize())).get_value()))
+        .collect()
+}
+
+pub fn generate_s_powers&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
+    point: &amp;EllipticCurvePoint&lt;F1, E&gt;,
+    s: &amp;F2,
+    m: usize,
+) -&gt; Vec&lt;EllipticCurvePoint&lt;F1, E&gt;&gt; {
+    let mut powers = Vec::with_capacity(m + 1);
+    let mut current = F2::one();
+    for _ in 0..=m {
+        powers.push(point.mul_ref(current.get_value()));
+        current = current * s.clone();
+    }
+    powers
+}
+
+pub fn accumulate_curve_points&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
+    g_vec: &amp;[EllipticCurvePoint&lt;F1, E&gt;],
+    assignment: &amp;[F2],
+) -&gt; EllipticCurvePoint&lt;F1, E&gt; {
+    g_vec.iter().zip(assignment.iter()).fold(
+        EllipticCurvePoint::&lt;F1, E&gt;::point_at_infinity(),
+        |acc, (g, &amp;ref a)| acc + g.mul_ref(a.get_value()),
+    )
+}
+
+pub fn accumulate_polynomials&lt;F: Field&gt;(
+    poly_vec: &amp;[Polynomial&lt;F&gt;],
+    assignment: &amp;[F],
+) -&gt; Polynomial&lt;F&gt; {
+    poly_vec
+        .iter()
+        .zip(assignment.iter())
+        .fold(Polynomial::&lt;F&gt;::zero(), |acc, (poly, &amp;ref a)| {
+            acc + poly.clone() * a.clone()
+        })
+}
+
+pub fn get_h&lt;F: Field&gt;(qap: &amp;QAP&lt;F&gt;, assignment: &amp;Vec&lt;F&gt;) -&gt; Polynomial&lt;F&gt; {
+    let ell = accumulate_polynomials(&amp;qap.ell_i_vec, assignment);
+    let r = accumulate_polynomials(&amp;qap.r_i_vec, assignment);
+    let o = accumulate_polynomials(&amp;qap.o_i_vec, assignment);
+    (ell * r - o) / qap.t.clone()
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability</strong></p>
+<p>A critical issue with this protocol is that the checks may pass even if \(g^{\ell}\) is computed not from \(\{g^{\ell_i(s)}\}_{i \in [d]}\) but from \(\{g^{r_i(s)}\} _{i \in [d]}\), \(\{g^{o_i(s)}\} _{i \in [d]}\), or their combinations. The same issue applies to \(g^{r}\) and \(g^{o}\).</p>
+<p>For example, if the prover sends \((g^{\ell(s)}, g^{\ell(s)}, g^{o(s)}, g^{\alpha r(s)}, g^{\alpha \ell(s)}, g^{\alpha o(s)}, g^{h(s)})\) as the proof, all the verification checks still pass, even although the proved statement differs from the original one.</p>
+<h2 id="second-protocol-non-interchangibility"><a class="header" href="#second-protocol-non-interchangibility">Second Protocol: Non-Interchangibility</a></h2>
+<p>To address the interchangeability issue, the next protocol uses distinct the different \(\alpha\)-shift for \(\ell\), \(r\), and \(o\).</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), <em>\(\alpha_{\ell}\), \(\alpha_r\), and \(\alpha_o\)</em>.</li>
+<li><strong>Proof Key (for the prover):</strong>
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li><em>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key (public):</strong>
+<ul>
+<li>\(g^{t(s)}\) <em>\(, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
+<li>Evaluate each polynomial at \(s\).
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\).
+<ul>
+<li><em>\(g^{\alpha_{\ell} \ell(s)} = \prod^{d}_{i=1} (g^{\alpha _{\ell} \ell_i(s)})^{v_i} \)</em>, <em>\(g^{\alpha_{r} r(s)} = \prod^{d}_{i=1} (g^{\alpha _{r} r_i(s)})^{v_i} \)</em>, <em>\(g^{\alpha_{o} o(s)} = \prod^{d}_{i=1} (g^{\alpha _{o} o_i(s)})^{v_i} \)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((g^{\ell(s)}, g^{r(s)}, g^{o(s)},\) <em>\(g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)},\)</em> \(g^{h(s)})\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g)\)</em>, \(\quad \) <em>\(e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g)\)</em>, \(\quad \) <em>\(e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Implementation</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+pub struct ProofKey2 {
+    g1_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_sj_vec: Vec&lt;G1Point&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct VerificationKey2 {
+    g2_alpha_ell: G2Point,
+    g1_alpha_r: G1Point,
+    g2_alpha_o: G2Point,
+    g2_t_s: G2Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Proof2 {
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
+}
+
+pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; (ProofKey2, VerificationKey2) {
+    let s = FqOrder::random_element(&amp;[]);
+    let alpha_ell = FqOrder::random_element(&amp;[]);
+    let alpha_r = FqOrder::random_element(&amp;[]);
+    let alpha_o = FqOrder::random_element(&amp;[]);
+
+    (
+        ProofKey2 {
+            g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
+            g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
+            g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
+            g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
+        },
+        VerificationKey2 {
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
+        },
+    )
+}
+
+pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey2, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof2 {
+    Proof2 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
+    }
+}
+
+pub fn verify(
+    g1: &amp;G1Point,
+    g2: &amp;G2Point,
+    proof: &amp;Proof2,
+    verification_key: &amp;VerificationKey2,
+) -&gt; bool {
+    let pairing1 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_alpha_ell);
+    let pairing2 = optimal_ate_pairing(&amp;proof.g1_ell_prime, &amp;g2);
+    if pairing1 != pairing2 {
+        return false;
+    }
+
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
+    if pairing3 != pairing4 {
+        return false;
+    }
+
+    let pairing5 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_alpha_o);
+    let pairing6 = optimal_ate_pairing(&amp;proof.g1_o_prime, &amp;g2);
+    if pairing5 != pairing6 {
+        return false;
+    }
+
+    let pairing7 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;proof.g2_r);
+    let pairing8 = optimal_ate_pairing(&amp;proof.g1_h, &amp;verification_key.g2_t_s);
+    let pairing9 = optimal_ate_pairing(&amp;proof.g1_o, &amp;g2);
+
+    pairing7 == pairing8 * pairing9
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability</strong></p>
+<p>This protocol resolves interchangeability but does not enforce consistency acros \(\ell\), \(r\), and \(o\). Variables \(v_i\) can still take different values in each polynoimal because verification checks are performed separately.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn inconsistent_variable_attack(
+    assignment_ell: &amp;Vec&lt;FqOrder&gt;,
+    assignment_r: &amp;Vec&lt;FqOrder&gt;,
+    assignment_o: &amp;Vec&lt;FqOrder&gt;,
+    proof_key: &amp;ProofKey2,
+    qap: &amp;QAP&lt;FqOrder&gt;,
+) -&gt; Proof2 {
+    let ell = accumulate_polynomials(&amp;qap.ell_i_vec, assignment_ell);
+    let r = accumulate_polynomials(&amp;qap.r_i_vec, assignment_r);
+    let o = accumulate_polynomials(&amp;qap.o_i_vec, assignment_o);
+    let h = (ell * r - o) / qap.t.clone();
+
+    Proof2 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment_ell),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment_r),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment_o),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment_ell),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment_r),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment_o),
+        g1_h: h.eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="thrid-protocol-variable-consistency"><a class="header" href="#thrid-protocol-variable-consistency">Thrid Protocol: Variable Consistency</a></h2>
+<p>To achive the variable consistency, we employ a checksum mechanism. Specifically, we first draw a new random value \(\beta\) and define the checksum of \(v_i\) as \(g^{\beta(\ell_{i}(s) + r_i(s) + o_i(s))}\). Let \(v _{\ell, i}\), \(v _{r,i}\), \(v _{o,i}\), and \(v _{\beta,i}\) denote the \(i\)-th value of the assignment vectors for \(\ell\), \(r\), \(o\) and the checksum, respectively. If all of them are the same, the following equation holds:</p>
+<p>\[
+e(g^{v _{\ell, i} \ell_i(s)} g^{v _{r, i} r_i(s)} g^{v _{o, i} o_i(s)}, g^{\beta}) = e(g^{v _{\beta, i} \beta(\ell _{i}(s) + r _{i}(s) + o _{i}(s))}, g)
+\]</p>
+<p>Unfortunately, this condition is not strictly equivalent. For example, consider the case where \(\ell_i(x) = r_i(x)\). In this scenario, we have:</p>
+<p>\begin{align*}
+&amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} r_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (\ell _{i}(s) + r _{i}(s) + o _{i}(s)) \\
+\iff &amp;\beta(v _{\ell, i} \ell_i(s) + v _{r, i} \ell_i(s) + v _{o, i} o_i(s)) = v _{\beta, i} \beta (2\ell _{i}(s) + o _{i}(s))
+\end{align*}</p>
+<p>This equation holds for arbitrary \(v _{r,i}\) and \(v _{o,i}\) if we set \(v _{\beta, i} = v _{o, i}\) and \(v _{\ell, i} = 2 v _{o, i} - v _{r, i}\).</p>
+<p>To address this issue, we use distinct different \(\beta\) values for \(\ell\), \(r\) and \(o\). The consistency check then verifies the following equation:</p>
+<p>\[
+e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(s)}, g^{\beta _{r}}) \cdot e(g^{v _{o, i} o _{i}(s)}, g^{\beta _{o}}) = e(g^{v _{\beta, i}(\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s))}, g)<br />
+\]</p>
+<p>The new protocol using the above variable-consistency check is as follows:</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), <em>\(\beta_{\ell}\), \(\beta_{r}\), and \(\beta_{o}\)</em>.</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><em>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</em></li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(, g^{\beta_{\ell}}, g^{\beta_{r}}, g^{\beta_{o}}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li><em>Evaluate each consistency polynomial at \(s\):</em>
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) <em>\(g^{z(s)}\)</em> \()\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z}, g)\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Implementation</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+pub struct ProofKey3 {
+    g1_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_sj_vec: Vec&lt;G1Point&gt;,
+    g1_checksum_vec: Vec&lt;G1Point&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct VerificationKey3 {
+    g2_alpha_ell: G2Point,
+    g1_alpha_r: G1Point,
+    g2_alpha_o: G2Point,
+    g2_beta_ell: G2Point,
+    g1_beta_r: G1Point,
+    g2_beta_o: G2Point,
+    g2_t_s: G2Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Proof3 {
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
+    g1_z: G1Point,
+}
+
+pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; (ProofKey3, VerificationKey3) {
+    let s = FqOrder::random_element(&amp;[]);
+    let alpha_ell = FqOrder::random_element(&amp;[]);
+    let alpha_r = FqOrder::random_element(&amp;[]);
+    let alpha_o = FqOrder::random_element(&amp;[]);
+    let beta_ell = FqOrder::random_element(&amp;[]);
+    let beta_r = FqOrder::random_element(&amp;[]);
+    let beta_o = FqOrder::random_element(&amp;[]);
+
+    let mut g1_checksum_vec = Vec::with_capacity(qap.d);
+
+    for i in 0..qap.d {
+        let ell_i_s = qap.ell_i_vec[i].eval(&amp;s).sanitize();
+        let r_i_s = qap.r_i_vec[i].eval(&amp;s).sanitize();
+        let o_i_s = qap.o_i_vec[i].eval(&amp;s).sanitize();
+        g1_checksum_vec.push(
+            g1.mul_ref(
+                ((beta_ell.mul_ref(&amp;ell_i_s))
+                    .add_ref(&amp;beta_r.mul_ref(&amp;r_i_s))
+                    .add_ref(&amp;beta_o.mul_ref(&amp;o_i_s)))
+                .get_value(),
+            ),
+        );
+    }
+
+    (
+        ProofKey3 {
+            g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
+            g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
+            g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
+            g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
+            g1_checksum_vec: g1_checksum_vec,
+        },
+        VerificationKey3 {
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_ell: g2 * beta_ell.get_value(),
+            g1_beta_r: g1 * beta_r.get_value(),
+            g2_beta_o: g2 * beta_o.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
+        },
+    )
+}
+
+pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey3, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof3 {
+    Proof3 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
+        g1_z: accumulate_curve_points(&amp;proof_key.g1_checksum_vec, assignment),
+    }
+}
+
+pub fn verify(
+    g1: &amp;G1Point,
+    g2: &amp;G2Point,
+    proof: &amp;Proof3,
+    verification_key: &amp;VerificationKey3,
+) -&gt; bool {
+    let pairing1 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_alpha_ell);
+    let pairing2 = optimal_ate_pairing(&amp;proof.g1_ell_prime, &amp;g2);
+    if pairing1 != pairing2 {
+        return false;
+    }
+
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
+    if pairing3 != pairing4 {
+        return false;
+    }
+
+    let pairing5 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_alpha_o);
+    let pairing6 = optimal_ate_pairing(&amp;proof.g1_o_prime, &amp;g2);
+    if pairing5 != pairing6 {
+        return false;
+    }
+
+    let pairing7 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;proof.g2_r);
+    let pairing8 = optimal_ate_pairing(&amp;proof.g1_h, &amp;verification_key.g2_t_s);
+    let pairing9 = optimal_ate_pairing(&amp;proof.g1_o, &amp;g2);
+
+    if pairing7 != pairing8 * pairing9 {
+        return false;
+    }
+
+    let pairing10 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_beta_ell);
+    let pairing11 = optimal_ate_pairing(&amp;verification_key.g1_beta_r, &amp;proof.g2_r);
+    let pairing12 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_beta_o);
+    let pairing13 = optimal_ate_pairing(&amp;proof.g1_z, &amp;g2);
+
+    pairing10 * pairing11 * pairing12 == pairing13
+}
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Vulnerability</strong></p>
+<p>Despite these checks, the protocol is vulnerable to <strong>malleability</strong>. Specifically, a malicious prover can exploit the polynomial restriction check to introduce arbitrary constants, altering the proof witout detection.</p>
+<p>Recall that the verifier validates whether the submitted \(g^{\ell}\) is actually calculated by \(\{g^{\ell _i(s)}\} _{i \in [d]}\) by checking \(e(g^{\ell}, g^{\alpha _{\ell}}) = e(g^{\ell'}, g)\). However, this process is not sound. Recall that the verification key is publicaly available, and the prover knows both of \(g^{\alpha _{\ell}}\) and \(g^{\beta _{\ell}}\). Here, suppose the prover submits \(g^{\ell} g^{c}\) and \(g^{\ell'} (g^{\alpha _{\ell}})^{c}\) insteads of \(g^{\ell}\) and \(g^{\ell'}\), where \(c\) is a constatn value. Then, the polynomial restriction check still passes:</p>
+<p>\[
+e(g^{\ell} g^{c}, g^{\alpha _{\ell}}) = e(g^{\alpha _{\ell} \ell + \alpha _{\ell} c}, g) = e(g^{\ell'}g^{\alpha _{\ell}c}, g) = e(g^{\ell'} (g^{\alpha _{\ell}})^{c}, g)
+\]</p>
+<p>In addition, if the prover submits \(g^{z} (g^{\beta _{\ell}})^{c}\) as the checksum, it also passes the polynomial checksum verification:</p>
+<p>\[
+e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z} (g^{\beta _{\ell}})^{c}, g)
+\]</p>
+<p>This phenomenon also can occur for \(r\) and \(o\).</p>
+<h2 id="forth-protocol-non-malleability"><a class="header" href="#forth-protocol-non-malleability">Forth Protocol: Non-Malleability</a></h2>
+<p>One way to surrogate the above malleability is hiding \(g^{\beta _{\ell}}\), \(g^{\beta _{r}}\), and \(g^{\beta _{o}}\) by powering them with a new random value \(\eta\).</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta_{\ell}\), \(\beta_{r}\), \(\beta_{o}\), and <em>\(\eta\)</em>.</li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li>\(\{g^{\ell_i(s)},g^{r_i(s)},g^{o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{\alpha_{\ell} \ell_i(s)},g^{\alpha_{r} r_i(s)},g^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li>\(\{g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)}\} _{i \in [d]}\)</li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li>\(g^{t(s)}, g^{\alpha_{\ell}},g^{\alpha_{r}},g^{\alpha_{o}}\) <em>\(,g^{\eta}, g^{\beta_{\ell} \eta}, g^{\beta_{r} \eta}, g^{\beta_{o} \eta}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g^{o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g^{\alpha _{o} o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li>\(g^{z(s)} = \prod^{d}_{i=1} (g^{\beta _{\ell} \ell _{i}(s) + \beta _{r} r _{i}(s) + \beta _{o} o _{i}(s)})^{v _{i}}\)</li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g^{\ell}, g^{\beta _{\ell} \eta}) \cdot e(g^{r}, g^{\beta _{r} \eta}) \cdot e(g^{o}, g^{\beta _{o} \eta}) = e(g^{z}, g^{\eta})\)</em></li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li>\(e(g^{\ell}, g^{r}) = e(g^t,g^h) \cdot e(g^o, g)\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Implementation</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+pub struct ProofKey4 {
+    g1_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_sj_vec: Vec&lt;G1Point&gt;,
+    g1_checksum_vec: Vec&lt;G1Point&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct VerificationKey4 {
+    g2_alpha_ell: G2Point,
+    g1_alpha_r: G1Point,
+    g2_alpha_o: G2Point,
+    g2_beta_ell_eta: G2Point,
+    g1_beta_r_eta: G1Point,
+    g2_beta_o_eta: G2Point,
+    g2_t_s: G2Point,
+    g2_eta: G2Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Proof4 {
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
+    g1_z: G1Point,
+}
+
+pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; (ProofKey4, VerificationKey4) {
+    let s = FqOrder::random_element(&amp;[]);
+    let alpha_ell = FqOrder::random_element(&amp;[]);
+    let alpha_r = FqOrder::random_element(&amp;[]);
+    let alpha_o = FqOrder::random_element(&amp;[]);
+    let beta_ell = FqOrder::random_element(&amp;[]);
+    let beta_r = FqOrder::random_element(&amp;[]);
+    let beta_o = FqOrder::random_element(&amp;[]);
+    let eta = FqOrder::random_element(&amp;[]);
+
+    let mut g1_checksum_vec = Vec::with_capacity(qap.d);
+
+    for i in 0..qap.d {
+        let ell_i_s = qap.ell_i_vec[i].eval(&amp;s).sanitize();
+        let r_i_s = qap.r_i_vec[i].eval(&amp;s).sanitize();
+        let o_i_s = qap.o_i_vec[i].eval(&amp;s).sanitize();
+        g1_checksum_vec.push(
+            g1.mul_ref(
+                ((beta_ell.mul_ref(&amp;ell_i_s))
+                    .add_ref(&amp;beta_r.mul_ref(&amp;r_i_s))
+                    .add_ref(&amp;beta_o.mul_ref(&amp;o_i_s)))
+                .get_value(),
+            ),
+        );
+    }
+
+    (
+        ProofKey4 {
+            g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
+            g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
+            g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
+            g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
+            g1_checksum_vec: g1_checksum_vec,
+        },
+        VerificationKey4 {
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
+            g1_beta_r_eta: (g1 * beta_r.get_value()) * eta.get_value(),
+            g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
+            g2_eta: g2 * eta.get_value(),
+        },
+    )
+}
+
+pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey4, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof4 {
+    Proof4 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
+        g1_z: accumulate_curve_points(&amp;proof_key.g1_checksum_vec, assignment),
+    }
+}
+
+pub fn verify(
+    g1: &amp;G1Point,
+    g2: &amp;G2Point,
+    proof: &amp;Proof4,
+    verification_key: &amp;VerificationKey4,
+) -&gt; bool {
+    let pairing1 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_alpha_ell);
+    let pairing2 = optimal_ate_pairing(&amp;proof.g1_ell_prime, &amp;g2);
+    if pairing1 != pairing2 {
+        return false;
+    }
+
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
+    if pairing3 != pairing4 {
+        return false;
+    }
+
+    let pairing5 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_alpha_o);
+    let pairing6 = optimal_ate_pairing(&amp;proof.g1_o_prime, &amp;g2);
+    if pairing5 != pairing6 {
+        return false;
+    }
+
+    let pairing7 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;proof.g2_r);
+    let pairing8 = optimal_ate_pairing(&amp;proof.g1_h, &amp;verification_key.g2_t_s);
+    let pairing9 = optimal_ate_pairing(&amp;proof.g1_o, &amp;g2);
+
+    if pairing7 != pairing8 * pairing9 {
+        return false;
+    }
+
+    let pairing10 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_beta_ell_eta);
+    let pairing11 = optimal_ate_pairing(&amp;verification_key.g1_beta_r_eta, &amp;proof.g2_r);
+    let pairing12 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_beta_o_eta);
+    let pairing13 = optimal_ate_pairing(&amp;proof.g1_z, &amp;verification_key.g2_eta);
+
+    pairing10 * pairing11 * pairing12 == pairing13
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="fifth-protocol-pinocchio"><a class="header" href="#fifth-protocol-pinocchio">Fifth Protocol: Pinocchio</a></h2>
+<p>The above protocol requires 13 expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.</p>
+<p><strong>Protocol (Setup)</strong></p>
+<ul>
+<li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
+<li><strong>Target Polynomial:</strong> \(t(x) = (x-1)(x-2) \cdots (x-m)\)</li>
+<li><strong>Secret Seed:</strong> A trusted party generates the random value \(s\), \(\alpha_{\ell}\), \(\alpha_r\), \(\alpha_o\), \(\beta\), \(\eta\), <em>\(\rho _{\ell}\), and \(\rho _{r}\), and set \(\rho _{o} = \rho _{\ell} \rho _{r}\)</em>.</li>
+<li><strong>Randized Generators:</strong> <em>\(g _{\ell} = g^{\rho _{\ell}}\), \(g _{r} = g^{\rho _{r}}\), and \(g _{o} = g^{\rho _{o}}\)</em></li>
+<li><strong>Proof Key:</strong> Provided to the prover
+<ul>
+<li><em>\(\{g_{\ell}^{\ell_i(s)},g_{r}^{r_i(s)},g_{o}^{o_i(s)}\}_{i\in[d]}\)</em></li>
+<li><em>\(\{g_{\ell}^{\alpha_{\ell} \ell_i(s)},g_{r}^{\alpha_{r} r_i(s)},g_{o}^{\alpha_{o} o_i(s)}\}_{i\in[d]}\)</em></li>
+<li>\(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><em>\(\{g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)}\} _{i \in [d]}\)</em></li>
+</ul>
+</li>
+<li><strong>Verification Key:</strong>
+<ul>
+<li><em>\(g _{o}^{t(s)}\)</em> \(, g^{\alpha _{\ell}}, g^{\alpha _{r}}, g^{\alpha _{o}}, g^{\eta}\) <em>\(,g^{\beta \eta}\)</em></li>
+</ul>
+</li>
+<li>After distribution, the original secret seeds are securely destroyed.</li>
+</ul>
+<p><strong>Protocol (Proving)</strong></p>
+<ul>
+<li>Execute the program and get the assignment vector \(v\).</li>
+<li>Compute the linear-combinations of polynomials
+<ul>
+<li>\(\ell(x) = \sum_{i=1}^{d} v_i \ell_{i}(x),\quad r(x) = \sum_{i=1}^{d} v_i r_{i}(x),\quad o(x) = \sum_{i=1}^{d} v_i o_{i}(x)\)</li>
+</ul>
+</li>
+<li>Compute the quotient polynomial:
+<ul>
+<li>\(h(x) = \frac{\ell(x) r(x) - o(x)}{t(x)}\)</li>
+</ul>
+</li>
+<li>Evaluate each polynomial at \(s\):
+<ul>
+<li>\(g^{\ell(s)} = \prod^{d}_{i=1} (g _{\ell}^{\ell_i(s)})^{v _i} ,\quad g^{r(s)} = \prod^{d} _{i=1} (g _{r}^{r_i(s)})^{v_i} ,\quad g^{o(s)} = \prod^{d} _{i=1} (g _{o}^{o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each shifted polynomial at \(s\):
+<ul>
+<li>\(g^{\alpha _{\ell} \ell(s)} = \prod^{d} _{i=1} (g _{\ell}^{\alpha _{\ell} \ell _i(s)})^{v _i} ,g^{\alpha _{r} r(s)} = \prod^{d} _{i=1} (g _{r}^{\alpha _{r} r _i(s)})^{v _i} ,g^{\alpha _{o} o(s)} = \prod^{d} _{i=1} (g _{o}^{\alpha _{o} o _i(s)})^{v _i} \)</li>
+</ul>
+</li>
+<li>Evaluate each consistency polynomial at \(s\):
+<ul>
+<li><em>\(g^{z(s)} = \prod^{d}_{i=1} (g _{\ell}^{\beta \ell _{i}(s)} \cdot g _{r}^{\beta r _{i}(s)} \cdot g _{o}^{\beta o _{i}(s)})^{v _{i}}\)</em></li>
+</ul>
+</li>
+<li>Calculate \(g^{h(s)}\) from \(\{g^{(s^j)}\}_{j\in[m]}\)</li>
+<li><strong>Proof</strong>:
+<ul>
+<li>\((\) \(g^{\ell(s)}, g^{r(s)}, g^{o(s)}, g^{\alpha_{\ell} \ell(s)}, g^{\alpha_{r} r(s)}, g^{\alpha_{o} o(s)}, g^{h(s)},\) \(g^{z(s)}\) \()\)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Protocol (Verification)</strong></p>
+<ul>
+<li>Parse proof as \((g _{\ell}^{\ell}, g _{r}^r, g _{o}^o, g _{\ell}^{\ell'}, g _{r}^{r'}, g _{o}^{o'}, g^{h}, g^{z})\)</li>
+<li>Check polynomial restrictions
+<ul>
+<li><em>\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\)</em>, <em>\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\)</em>, <em>\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\)</em></li>
+</ul>
+</li>
+<li>Check variable consistency
+<ul>
+<li><em>\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}, g^{\beta \eta}) = e(g^{z}, g^{\eta})\)</em></li>
+<li>(Alternative for the asymmetric pairing: <em>\(e(g _{\ell}^{\ell} \cdot g _{o}^{o}, g^{\beta \eta}) \cdot e(g^{\beta \eta}, g _{r}^{r}) = e(g^{z}, g^{\eta})\)</em>)</li>
+</ul>
+</li>
+<li>Validity check
+<ul>
+<li><em>\(e(g _{\ell}^{\ell}, g _{r}^{r}) = e(g _{o}^t,g^h) \cdot e(g _{o}^o, g)\)</em></li>
+</ul>
+</li>
+</ul>
+<p>This protocol reduces two pairing operations when using symmetric pairings. However, with asymmetric pairings, one additional pairing is required because \(g _{r}^{r}\) is derived from the generator of the second group, \(\mathscr{g} _2\), while \(g _{\ell}^{\ell}\) annd \(g _{o}^{o}\) are derived from the generator of the first group, \(\mathscr{g} _1\).</p>
+<p><strong>Implementation</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+pub struct ProofKey5 {
+    g1_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
+    g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
+    g1_sj_vec: Vec&lt;G1Point&gt;,
+    g1_checksum_vec: Vec&lt;G1Point&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct VerificationKey5 {
+    g2_alpha_ell: G2Point,
+    g1_alpha_r: G1Point,
+    g2_alpha_o: G2Point,
+    g1_beta_eta: G1Point,
+    g2_beta_eta: G2Point,
+    g2_t_s: G2Point,
+    g2_eta: G2Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Proof5 {
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
+    g1_z: G1Point,
+}
+
+pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; (ProofKey5, VerificationKey5) {
+    let s = FqOrder::random_element(&amp;[]);
+    let alpha_ell = FqOrder::random_element(&amp;[]);
+    let alpha_r = FqOrder::random_element(&amp;[]);
+    let alpha_o = FqOrder::random_element(&amp;[]);
+    let beta = FqOrder::random_element(&amp;[]);
+    let eta = FqOrder::random_element(&amp;[]);
+    let rho_ell = FqOrder::random_element(&amp;[]);
+    let rho_r = FqOrder::random_element(&amp;[]);
+    let rho_o = rho_ell.mul_ref(&amp;rho_r);
+
+    let g1_ell = g1 * rho_ell.get_value();
+    let g1_r = g1 * rho_r.get_value();
+    let g2_r = g2 * rho_r.get_value();
+    let g1_o = g1 * rho_o.get_value();
+    let g2_o = g2 * rho_o.get_value();
+
+    let mut g1_checksum_vec = Vec::with_capacity(qap.d);
+
+    for i in 0..qap.d {
+        let ell_i_s = qap.ell_i_vec[i].eval(&amp;s).sanitize();
+        let r_i_s = qap.r_i_vec[i].eval(&amp;s).sanitize();
+        let o_i_s = qap.o_i_vec[i].eval(&amp;s).sanitize();
+        g1_checksum_vec.push(
+            &amp;g1_ell * beta.mul_ref(&amp;ell_i_s).get_value()
+                + &amp;g1_r * beta.mul_ref(&amp;r_i_s).get_value()
+                + &amp;g1_o * beta.mul_ref(&amp;o_i_s).get_value(),
+        );
+    }
+
+    (
+        ProofKey5 {
+            g1_ell_i_vec: generate_challenge_vec(&amp;g1_ell, &amp;qap.ell_i_vec, &amp;s),
+            g2_r_i_vec: generate_challenge_vec(&amp;g2_r, &amp;qap.r_i_vec, &amp;s),
+            g1_o_i_vec: generate_challenge_vec(&amp;g1_o, &amp;qap.o_i_vec, &amp;s),
+            g1_alpha_ell_i_vec: generate_alpha_challenge_vec(
+                &amp;g1_ell,
+                &amp;qap.ell_i_vec,
+                &amp;s,
+                &amp;alpha_ell,
+            ),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(&amp;g2_r, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g1_alpha_o_i_vec: generate_alpha_challenge_vec(&amp;g1_o, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
+            g1_sj_vec: generate_s_powers(&amp;g1, &amp;s, qap.m),
+            g1_checksum_vec: g1_checksum_vec,
+        },
+        VerificationKey5 {
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g1_beta_eta: g1 * beta.get_value() * eta.get_value(),
+            g2_beta_eta: g2 * beta.get_value() * eta.get_value(),
+            g2_t_s: g2_o * qap.t.eval(&amp;s).sanitize().get_value(),
+            g2_eta: g2 * eta.get_value(),
+        },
+    )
+}
+
+pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey5, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof5 {
+    Proof5 {
+        g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
+        g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
+        g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
+        g1_z: accumulate_curve_points(&amp;proof_key.g1_checksum_vec, assignment),
+    }
+}
+
+pub fn verify(
+    g1: &amp;G1Point,
+    g2: &amp;G2Point,
+    proof: &amp;Proof5,
+    verification_key: &amp;VerificationKey5,
+) -&gt; bool {
+    let pairing1 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_alpha_ell);
+    let pairing2 = optimal_ate_pairing(&amp;proof.g1_ell_prime, &amp;g2);
+    if pairing1 != pairing2 {
+        return false;
+    }
+
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
+    if pairing3 != pairing4 {
+        return false;
+    }
+
+    let pairing5 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_alpha_o);
+    let pairing6 = optimal_ate_pairing(&amp;proof.g1_o_prime, &amp;g2);
+    if pairing5 != pairing6 {
+        return false;
+    }
+
+    let pairing7 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;proof.g2_r);
+    let pairing8 = optimal_ate_pairing(&amp;proof.g1_h, &amp;verification_key.g2_t_s);
+    let pairing9 = optimal_ate_pairing(&amp;proof.g1_o, &amp;g2);
+
+    if pairing7 != pairing8 * pairing9 {
+        return false;
+    }
+
+    let pairing10 = optimal_ate_pairing(
+        &amp;proof.g1_ell.add_ref(&amp;proof.g1_o),
+        &amp;verification_key.g2_beta_eta,
+    );
+    let pairing11 = optimal_ate_pairing(&amp;verification_key.g1_beta_eta, &amp;proof.g2_r);
+    let pairing12 = optimal_ate_pairing(&amp;proof.g1_z, &amp;verification_key.g2_eta);
+
+    pairing10 * pairing11 == pairing12
 }
 <span class="boring">}</span></code></pre></pre>
 
@@ -827,7 +1314,7 @@ pub fn verify(g2: &amp;G2Point, proof: &amp;Proof, vk: &amp;VerificationKey) -&g
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zksnark/subsec4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../zkstark/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -841,7 +1328,7 @@ pub fn verify(g2: &amp;G2Point, proof: &amp;Proof, vk: &amp;VerificationKey) -&g
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zksnark/subsec4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../zkstark/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
