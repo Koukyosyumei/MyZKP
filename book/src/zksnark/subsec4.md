@@ -461,7 +461,7 @@ The new protocol using the above variable-consistency check is as follows:
 
 - Parse proof as \\((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\\)
 - Check polynomial restrictions
-  - \\(\quad e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\\)
+  - \\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\\)
 - Check variable consistency
   - *\\(e(g^{\ell}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o}, g^{\beta _{o}}) = e(g^{z}, g)\\)*
 - Validity check
@@ -816,7 +816,7 @@ pub fn verify(
 
 ## Fifth Protocol: Pinocchio
 
-The above protocol introduces four expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.
+The above protocol requires 13 expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.
 
 **Protocol (Setup)**
 
@@ -857,10 +857,11 @@ The above protocol introduces four expensive pairing operations. To make it fast
   - *\\(e(g _{\ell}^{\ell}, g^{\alpha _{\ell}}) = e(g _{\ell}^{\ell'}, g)\\)*, *\\(e(g _{r}^{r}, g^{\alpha _{r}}) = e(g _{r}^{r'}, g)\\)*, *\\(e(g _{o}^{o}, g^{\alpha _{o}}) = e(g _{o}^{o'}, g)\\)*
 - Check variable consistency
   - *\\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}, g^{\beta \eta}) = e(g^{z}, g^{\eta})\\)*
+  - (Alternative for the asymmetric pairing: *\\(e(g _{\ell}^{\ell} \cdot g _{o}^{o}, g^{\beta \eta}) \cdot e(g^{\beta \eta}, g _{r}^{r}) = e(g^{z}, g^{\eta})\\)*)
 - Validity check
   - *\\(e(g _{\ell}^{\ell}, g _{r}^{r}) = e(g _{o}^t,g^h) \cdot e(g _{o}^o, g)\\)*
 
-This protocol reduces two pairing operations.
+This protocol reduces two pairing operations when using symmetric pairings. However, with asymmetric pairings, one additional pairing is required because \\(g _{r}^{r}\\) is derived from the generator of the second group, \\(\mathscr{g} _2\\), while \\(g _{\ell}^{\ell}\\) annd \\(g _{o}^{o}\\) are derived from the generator of the first group, \\(\mathscr{g} _1\\).
 
 **Implementation**
 

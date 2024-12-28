@@ -262,17 +262,17 @@
 </span>#[derive(Debug, Clone)]
 pub struct ProofKey1 {
     g1_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_r_i_vec: Vec&lt;G1Point&gt;,
     g2_r_i_vec: Vec&lt;G2Point&gt;,
     g1_o_i_vec: Vec&lt;G1Point&gt;,
     g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_alpha_r_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
     g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
     g1_sj_vec: Vec&lt;G1Point&gt;,
 }
 
 #[derive(Debug, Clone)]
 pub struct VerificationKey1 {
+    g1_alpha: G1Point,
     g2_alpha: G2Point,
     g2_t_s: G2Point,
 }
@@ -280,11 +280,10 @@ pub struct VerificationKey1 {
 #[derive(Debug, Clone)]
 pub struct Proof1 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
 }
@@ -296,17 +295,17 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
     (
         ProofKey1 {
             g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
-            g1_r_i_vec: generate_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s),
             g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
             g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s, &amp;alpha),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha),
             g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
         },
         VerificationKey1 {
-            g2_alpha: g2.mul_ref(alpha.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&amp;s).sanitize().get_value()),
+            g1_alpha: g1 * alpha.get_value(),
+            g2_alpha: g2 * alpha.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
         },
     )
 }
@@ -314,11 +313,10 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
 pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey1, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof1 {
     Proof1 {
         g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&amp;proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
     }
@@ -336,8 +334,8 @@ pub fn verify(
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_alpha);
-    let pairing4 = optimal_ate_pairing(&amp;proof.g1_r_prime, &amp;g2);
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -354,8 +352,10 @@ pub fn verify(
 
     pairing7 == pairing8 * pairing9
 }
-
-pub fn generate_challenge_vec&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn generate_challenge_vec&lt;F1: Field, F2: Field, E: EllipticCurve&gt;(
     point: &amp;EllipticCurvePoint&lt;F1, E&gt;,
     poly_vec: &amp;[Polynomial&lt;F2&gt;],
     s: &amp;F2,
@@ -495,11 +495,10 @@ pub fn get_h&lt;F: Field&gt;(qap: &amp;QAP&lt;F&gt;, assignment: &amp;Vec&lt;F&g
 </span>#[derive(Debug, Clone)]
 pub struct ProofKey2 {
     g1_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_r_i_vec: Vec&lt;G1Point&gt;,
     g2_r_i_vec: Vec&lt;G2Point&gt;,
     g1_o_i_vec: Vec&lt;G1Point&gt;,
     g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_alpha_r_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
     g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
     g1_sj_vec: Vec&lt;G1Point&gt;,
 }
@@ -507,7 +506,7 @@ pub struct ProofKey2 {
 #[derive(Debug, Clone)]
 pub struct VerificationKey2 {
     g2_alpha_ell: G2Point,
-    g2_alpha_r: G2Point,
+    g1_alpha_r: G1Point,
     g2_alpha_o: G2Point,
     g2_t_s: G2Point,
 }
@@ -515,11 +514,10 @@ pub struct VerificationKey2 {
 #[derive(Debug, Clone)]
 pub struct Proof2 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
 }
@@ -533,19 +531,18 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
     (
         ProofKey2 {
             g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
-            g1_r_i_vec: generate_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s),
             g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
             g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
             g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
         },
         VerificationKey2 {
-            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
-            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
-            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&amp;s).sanitize().get_value()),
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
         },
     )
 }
@@ -553,11 +550,10 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
 pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey2, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof2 {
     Proof2 {
         g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&amp;proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
     }
@@ -575,8 +571,8 @@ pub fn verify(
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_alpha_r);
-    let pairing4 = optimal_ate_pairing(&amp;proof.g1_r_prime, &amp;g2);
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -612,11 +608,10 @@ pub fn verify(
 
     Proof2 {
         g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment_ell),
-        g1_r: accumulate_curve_points(&amp;proof_key.g1_r_i_vec, assignment_r),
         g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment_r),
         g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment_o),
         g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment_ell),
-        g1_r_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_r_i_vec, assignment_r),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment_r),
         g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment_o),
         g1_h: h.eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
     }
@@ -698,7 +693,7 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 <li>Parse proof as \((g^{\ell}, g^r, g^o, g^{\ell'}, g^{r'}, g^{o'}, g^{h}, g^{z})\)</li>
 <li>Check polynomial restrictions
 <ul>
-<li>\(\quad e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
+<li>\(e(g^{\ell}, g^{\alpha_{\ell}}) = e(g^{\ell'}, g),\quad e(g^{r}, g^{\alpha_{r}}) = e(g^{r'}, g),\quad e(g^{o}, g^{\alpha_{o}}) = e(g^{o'}, g)\)</li>
 </ul>
 </li>
 <li>Check variable consistency
@@ -718,11 +713,10 @@ e(g^{v _{\ell, i} \ell _{i}(s)}, g^{\beta _{\ell}}) \cdot e(g^{v _{r, i} r _{i}(
 </span>#[derive(Debug, Clone)]
 pub struct ProofKey3 {
     g1_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_r_i_vec: Vec&lt;G1Point&gt;,
     g2_r_i_vec: Vec&lt;G2Point&gt;,
     g1_o_i_vec: Vec&lt;G1Point&gt;,
     g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_alpha_r_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
     g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
     g1_sj_vec: Vec&lt;G1Point&gt;,
     g1_checksum_vec: Vec&lt;G1Point&gt;,
@@ -731,10 +725,10 @@ pub struct ProofKey3 {
 #[derive(Debug, Clone)]
 pub struct VerificationKey3 {
     g2_alpha_ell: G2Point,
-    g2_alpha_r: G2Point,
+    g1_alpha_r: G1Point,
     g2_alpha_o: G2Point,
     g2_beta_ell: G2Point,
-    g2_beta_r: G2Point,
+    g1_beta_r: G1Point,
     g2_beta_o: G2Point,
     g2_t_s: G2Point,
 }
@@ -742,11 +736,10 @@ pub struct VerificationKey3 {
 #[derive(Debug, Clone)]
 pub struct Proof3 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
     g1_z: G1Point,
@@ -780,23 +773,22 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
     (
         ProofKey3 {
             g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
-            g1_r_i_vec: generate_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s),
             g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
             g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
             g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey3 {
-            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
-            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
-            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
-            g2_beta_ell: g2.mul_ref(beta_ell.get_value()),
-            g2_beta_r: g2.mul_ref(beta_r.get_value()),
-            g2_beta_o: g2.mul_ref(beta_o.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&amp;s).sanitize().get_value()),
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_ell: g2 * beta_ell.get_value(),
+            g1_beta_r: g1 * beta_r.get_value(),
+            g2_beta_o: g2 * beta_o.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
         },
     )
 }
@@ -804,11 +796,10 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
 pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey3, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof3 {
     Proof3 {
         g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&amp;proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
         g1_z: accumulate_curve_points(&amp;proof_key.g1_checksum_vec, assignment),
@@ -827,8 +818,8 @@ pub fn verify(
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_alpha_r);
-    let pairing4 = optimal_ate_pairing(&amp;proof.g1_r_prime, &amp;g2);
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -848,7 +839,7 @@ pub fn verify(
     }
 
     let pairing10 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_beta_ell);
-    let pairing11 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_beta_r);
+    let pairing11 = optimal_ate_pairing(&amp;verification_key.g1_beta_r, &amp;proof.g2_r);
     let pairing12 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_beta_o);
     let pairing13 = optimal_ate_pairing(&amp;proof.g1_z, &amp;g2);
 
@@ -948,11 +939,10 @@ e(g^{\ell} g^{c}, g^{\beta _{\ell}}) \cdot e(g^{r}, g^{\beta _{r}}) \cdot e(g^{o
 </span>#[derive(Debug, Clone)]
 pub struct ProofKey4 {
     g1_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_r_i_vec: Vec&lt;G1Point&gt;,
     g2_r_i_vec: Vec&lt;G2Point&gt;,
     g1_o_i_vec: Vec&lt;G1Point&gt;,
     g1_alpha_ell_i_vec: Vec&lt;G1Point&gt;,
-    g1_alpha_r_i_vec: Vec&lt;G1Point&gt;,
+    g2_alpha_r_i_vec: Vec&lt;G2Point&gt;,
     g1_alpha_o_i_vec: Vec&lt;G1Point&gt;,
     g1_sj_vec: Vec&lt;G1Point&gt;,
     g1_checksum_vec: Vec&lt;G1Point&gt;,
@@ -961,10 +951,10 @@ pub struct ProofKey4 {
 #[derive(Debug, Clone)]
 pub struct VerificationKey4 {
     g2_alpha_ell: G2Point,
-    g2_alpha_r: G2Point,
+    g1_alpha_r: G1Point,
     g2_alpha_o: G2Point,
     g2_beta_ell_eta: G2Point,
-    g2_beta_r_eta: G2Point,
+    g1_beta_r_eta: G1Point,
     g2_beta_o_eta: G2Point,
     g2_t_s: G2Point,
     g2_eta: G2Point,
@@ -973,11 +963,10 @@ pub struct VerificationKey4 {
 #[derive(Debug, Clone)]
 pub struct Proof4 {
     g1_ell: G1Point,
-    g1_r: G1Point,
     g2_r: G2Point,
     g1_o: G1Point,
     g1_ell_prime: G1Point,
-    g1_r_prime: G1Point,
+    g2_r_prime: G2Point,
     g1_o_prime: G1Point,
     g1_h: G1Point,
     g1_z: G1Point,
@@ -1012,24 +1001,23 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
     (
         ProofKey4 {
             g1_ell_i_vec: generate_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s),
-            g1_r_i_vec: generate_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s),
             g2_r_i_vec: generate_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s),
             g1_o_i_vec: generate_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s),
             g1_alpha_ell_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.ell_i_vec, &amp;s, &amp;alpha_ell),
-            g1_alpha_r_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
+            g2_alpha_r_i_vec: generate_alpha_challenge_vec(g2, &amp;qap.r_i_vec, &amp;s, &amp;alpha_r),
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(g1, &amp;qap.o_i_vec, &amp;s, &amp;alpha_o),
             g1_sj_vec: generate_s_powers(g1, &amp;s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey4 {
-            g2_alpha_ell: g2.mul_ref(alpha_ell.get_value()),
-            g2_alpha_r: g2.mul_ref(alpha_r.get_value()),
-            g2_alpha_o: g2.mul_ref(alpha_o.get_value()),
-            g2_beta_ell_eta: g2.mul_ref(beta_ell.get_value()).mul_ref(eta.get_value()),
-            g2_beta_r_eta: g2.mul_ref(beta_r.get_value()).mul_ref(eta.get_value()),
-            g2_beta_o_eta: g2.mul_ref(beta_o.get_value()).mul_ref(eta.get_value()),
-            g2_t_s: g2.mul_ref(qap.t.eval(&amp;s).sanitize().get_value()),
-            g2_eta: g2.mul_ref(eta.get_value()),
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
+            g1_beta_r_eta: (g1 * beta_r.get_value()) * eta.get_value(),
+            g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
+            g2_t_s: g2 * qap.t.eval(&amp;s).sanitize().get_value(),
+            g2_eta: g2 * eta.get_value(),
         },
     )
 }
@@ -1037,11 +1025,10 @@ pub fn setup(g1: &amp;G1Point, g2: &amp;G2Point, qap: &amp;QAP&lt;FqOrder&gt;) -
 pub fn prove(assignment: &amp;Vec&lt;FqOrder&gt;, proof_key: &amp;ProofKey4, qap: &amp;QAP&lt;FqOrder&gt;) -&gt; Proof4 {
     Proof4 {
         g1_ell: accumulate_curve_points(&amp;proof_key.g1_ell_i_vec, assignment),
-        g1_r: accumulate_curve_points(&amp;proof_key.g1_r_i_vec, assignment),
         g2_r: accumulate_curve_points(&amp;proof_key.g2_r_i_vec, assignment),
         g1_o: accumulate_curve_points(&amp;proof_key.g1_o_i_vec, assignment),
         g1_ell_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_ell_i_vec, assignment),
-        g1_r_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_r_i_vec, assignment),
+        g2_r_prime: accumulate_curve_points(&amp;proof_key.g2_alpha_r_i_vec, assignment),
         g1_o_prime: accumulate_curve_points(&amp;proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_h(qap, assignment).eval_with_powers_on_curve(&amp;proof_key.g1_sj_vec),
         g1_z: accumulate_curve_points(&amp;proof_key.g1_checksum_vec, assignment),
@@ -1060,8 +1047,8 @@ pub fn verify(
         return false;
     }
 
-    let pairing3 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_alpha_r);
-    let pairing4 = optimal_ate_pairing(&amp;proof.g1_r_prime, &amp;g2);
+    let pairing3 = optimal_ate_pairing(&amp;verification_key.g1_alpha_r, &amp;proof.g2_r);
+    let pairing4 = optimal_ate_pairing(&amp;g1, &amp;proof.g2_r_prime);
     if pairing3 != pairing4 {
         return false;
     }
@@ -1081,7 +1068,7 @@ pub fn verify(
     }
 
     let pairing10 = optimal_ate_pairing(&amp;proof.g1_ell, &amp;verification_key.g2_beta_ell_eta);
-    let pairing11 = optimal_ate_pairing(&amp;proof.g1_r, &amp;verification_key.g2_beta_r_eta);
+    let pairing11 = optimal_ate_pairing(&amp;verification_key.g1_beta_r_eta, &amp;proof.g2_r);
     let pairing12 = optimal_ate_pairing(&amp;proof.g1_o, &amp;verification_key.g2_beta_o_eta);
     let pairing13 = optimal_ate_pairing(&amp;proof.g1_z, &amp;verification_key.g2_eta);
 
@@ -1089,7 +1076,7 @@ pub fn verify(
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="fifth-protocol-pinocchio"><a class="header" href="#fifth-protocol-pinocchio">Fifth Protocol: Pinocchio</a></h2>
-<p>The above protocol introduces four expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.</p>
+<p>The above protocol requires 13 expensive pairing operations. To make it faster, Pinocchio protocl randomizes the generators.</p>
 <p><strong>Protocol (Setup)</strong></p>
 <ul>
 <li><strong>Interpolated Polynomial:</strong> Construct \(\{\ell_i, r_i, o_i\}_{i\in[d]}\) from \(L\), \(R\), and \(O\), respectively.</li>
@@ -1157,6 +1144,7 @@ pub fn verify(
 <li>Check variable consistency
 <ul>
 <li><em>\(e(g _{\ell}^{\ell} \cdot g _{r}^{r} \cdot g _{o}^{o}, g^{\beta \eta}) = e(g^{z}, g^{\eta})\)</em></li>
+<li>(Alternative for the asymmetric pairing: <em>\(e(g _{\ell}^{\ell} \cdot g _{o}^{o}, g^{\beta \eta}) \cdot e(g^{\beta \eta}, g _{r}^{r}) = e(g^{z}, g^{\eta})\)</em>)</li>
 </ul>
 </li>
 <li>Validity check
@@ -1165,7 +1153,7 @@ pub fn verify(
 </ul>
 </li>
 </ul>
-<p>This protocol reduces two pairing operations.</p>
+<p>This protocol reduces two pairing operations when using symmetric pairings. However, with asymmetric pairings, one additional pairing is required because \(g _{r}^{r}\) is derived from the generator of the second group, \(\mathscr{g} _2\), while \(g _{\ell}^{\ell}\) annd \(g _{o}^{o}\) are derived from the generator of the first group, \(\mathscr{g} _1\).</p>
 <p><strong>Implementation</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1347,22 +1335,6 @@ pub fn verify(
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
