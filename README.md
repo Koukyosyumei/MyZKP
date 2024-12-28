@@ -66,7 +66,7 @@ MyZKP is a growing library that provides:
 |             | `curve`     | Elliptic curve operations | [curve](./myzkp/src/modules/algebra/curve/)           |
 | **Arithmetization** | `r1cs` | Rank One Constraint System | [r1cs.rs](./myzkp/src/modules/arithmetization/r1cs.rs) |
 |             | `qap` | Quadratic Arithmetic Program | [qap.rs](./myzkp/src/modules/arithmetization/qap.rs) |
-| **zkSNARKs**| `tutoriak_single_polynomial` | | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
+| **zkSNARKs**| `tutorial_single_polynomial` | | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
 |             | `tutorial_snark` | | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
 
 ## 🤝 Contributions are Welcome!
