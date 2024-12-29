@@ -146,8 +146,10 @@ impl<F: Field> Polynomial<F> {
     ) -> EllipticCurvePoint<P, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
-            result += powers[i].mul_ref(coef.get_value());
+            println!("i={}, coef={}", i, coef);
+            result += powers[i].mul_ref(coef.sanitize().get_value());
         }
+        println!("666");
         result
     }
 

@@ -84,6 +84,7 @@ pub fn accumulate_curve_points<F1: Field, F2: Field, E: EllipticCurve>(
     g_vec: &[EllipticCurvePoint<F1, E>],
     assignment: &[F2],
 ) -> EllipticCurvePoint<F1, E> {
+    println!("3333");
     g_vec.iter().zip(assignment.iter()).fold(
         EllipticCurvePoint::<F1, E>::point_at_infinity(),
         |acc, (g, &ref a)| acc + g * a.get_value(),

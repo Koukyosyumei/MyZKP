@@ -19,15 +19,15 @@ pub struct PinocchioProofKey {
     g1_alpha_o_i_vec: Vec<G1Point>,
     g1_sj_vec: Vec<G1Point>,
     g1_checksum_vec: Vec<G1Point>,
-    g1_ell_ts: Box<G1Point>,
-    g2_r_ts: Box<G2Point>,
-    g1_o_ts: Box<G1Point>,
-    g1_ell_alpha_ts: Box<G1Point>,
-    g2_r_alpha_ts: Box<G2Point>,
-    g1_o_alpha_ts: Box<G1Point>,
-    g1_ell_beta_ts: Box<G1Point>,
-    g1_r_beta_ts: Box<G1Point>,
-    g1_o_beta_ts: Box<G1Point>,
+    g1_ell_ts: G1Point,
+    g2_r_ts: G2Point,
+    g1_o_ts: G1Point,
+    g1_ell_alpha_ts: G1Point,
+    g2_r_alpha_ts: G2Point,
+    g1_o_alpha_ts: G1Point,
+    g1_ell_beta_ts: G1Point,
+    g1_r_beta_ts: G1Point,
+    g1_o_beta_ts: G1Point,
 }
 
 pub struct PinocchioVerificationKey {
@@ -41,14 +41,14 @@ pub struct PinocchioVerificationKey {
 }
 
 pub struct PinocchioProof {
-    g1_ell: Box<G1Point>,
-    g2_r: Box<G2Point>,
-    g1_o: Box<G1Point>,
-    g1_ell_prime: Box<G1Point>,
-    g2_r_prime: Box<G2Point>,
-    g1_o_prime: Box<G1Point>,
-    g1_h: Box<G1Point>,
-    g1_z: Box<G1Point>,
+    g1_ell: G1Point,
+    g2_r: G2Point,
+    g1_o: G1Point,
+    g1_ell_prime: G1Point,
+    g2_r_prime: G2Point,
+    g1_o_prime: G1Point,
+    g1_h: G1Point,
+    g1_z: G1Point,
 }
 
 pub fn setup(
@@ -64,7 +64,7 @@ pub fn setup(
     let eta = FqOrder::random_element(&[]);
     let rho_ell = FqOrder::random_element(&[]);
     let rho_r = FqOrder::random_element(&[]);
-    let rho_o = rho_ell.mul_ref(&rho_r);
+    let rho_o = &rho_ell * &rho_r;
 
     let g1_ell = g1 * rho_ell.get_value();
     let g1_r = g1 * rho_r.get_value();
@@ -104,24 +104,24 @@ pub fn setup(
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(&g1_o, &qap.o_i_vec, &s, &alpha_o),
             g1_sj_vec: generate_s_powers(&g1, &s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
-            g1_ell_ts: Box::new(g1_ell.mul_ref(t_s.get_value())),
-            g2_r_ts: Box::new(g2_r.mul_ref(t_s.get_value())),
-            g1_o_ts: Box::new(g1_o.mul_ref(t_s.get_value())),
-            g1_ell_alpha_ts: Box::new(g1_ell.mul_ref((t_s.clone() * &alpha_ell).get_value())),
-            g2_r_alpha_ts: Box::new(g2_r.mul_ref((t_s.clone() * &alpha_r).get_value())),
-            g1_o_alpha_ts: Box::new(g1_o.mul_ref((t_s.clone() * &alpha_o).get_value())),
-            g1_ell_beta_ts: Box::new(g1_ell * beta_t_s.get_value()),
-            g1_r_beta_ts: Box::new(g1_r * beta_t_s.get_value()),
-            g1_o_beta_ts: Box::new(g1_o * beta_t_s.get_value()),
+            g1_ell_ts: &g1_ell * t_s.get_value(),
+            g2_r_ts: &g2_r * t_s.get_value(),
+            g1_o_ts: &g1_o * t_s.get_value(),
+            g1_ell_alpha_ts: &g1_ell * (t_s.clone() * &alpha_ell).get_value(),
+            g2_r_alpha_ts: &g2_r * (t_s.clone() * &alpha_r).get_value(),
+            g1_o_alpha_ts: &g1_o * (t_s.clone() * &alpha_o).get_value(),
+            g1_ell_beta_ts: g1_ell * beta_t_s.get_value(),
+            g1_r_beta_ts: g1_r * beta_t_s.get_value(),
+            g1_o_beta_ts: g1_o * beta_t_s.get_value(),
         },
         PinocchioVerificationKey {
-            g2_alpha_ell: g2 * alpha_ell.value,
-            g1_alpha_r: g1 * alpha_r.value,
-            g2_alpha_o: g2 * alpha_o.value,
+            g2_alpha_ell: g2 * alpha_ell.get_value(),
+            g1_alpha_r: g1 * alpha_r.get_value(),
+            g2_alpha_o: g2 * alpha_o.get_value(),
             g1_beta_eta: g1 * beta_eta.get_value(),
             g2_beta_eta: g2 * beta_eta.get_value(),
-            g2_t_s: g2_o * t_s.value,
-            g2_eta: g2 * eta.value,
+            g2_t_s: g2_o * t_s.get_value(),
+            g2_eta: g2 * eta.get_value(),
         },
     )
 }
@@ -136,19 +136,12 @@ pub fn get_shifted_h(
     let ell = accumulate_polynomials(&qap.ell_i_vec, assignment);
     let r = accumulate_polynomials(&qap.r_i_vec, assignment);
     let o = accumulate_polynomials(&qap.o_i_vec, assignment);
-    /*
-       ((&ell * &r - o) / qap.t.clone())
-       + ell * delta_r
-       + r * delta_ell
-       + qap.t.clone() * (delta_ell.clone() * delta_r)
-       - (Polynomial::<FqOrder>::one() * delta_o)
-    */
     let mut h = (&ell * &r - o) / qap.t.clone();
     h += ell * delta_r;
-    h += r * delta_ell.clone();
+    h += r * delta_ell;
     h += qap.t.clone() * (delta_ell * delta_r);
-    h - Polynomial::<FqOrder>::one() * delta_o
-    //h
+    h = h - Polynomial::<FqOrder>::one() * delta_o;
+    h
 }
 
 pub fn prove(
@@ -161,40 +154,24 @@ pub fn prove(
     let delta_o = FqOrder::random_element(&[]);
 
     PinocchioProof {
-        g1_ell: Box::new(
-            (*proof_key.g1_ell_ts).mul_ref(delta_ell.get_value())
-                + accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        ),
-        g2_r: Box::new(
-            (*proof_key.g2_r_ts).mul_ref(delta_r.get_value())
-                + accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
-        ),
-        g1_o: Box::new(
-            (*proof_key.g1_o_ts).mul_ref(delta_o.get_value())
-                + accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
-        ),
-        g1_ell_prime: Box::new(
-            (*proof_key.g1_ell_alpha_ts).mul_ref(delta_ell.get_value())
-                + accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        ),
-        g2_r_prime: Box::new(
-            (*proof_key.g2_r_alpha_ts).mul_ref(delta_r.get_value())
-                + accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
-        ),
-        g1_o_prime: Box::new(
-            (*proof_key.g1_o_alpha_ts).mul_ref(delta_o.get_value())
-                + accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
-        ),
-        g1_h: Box::new(
-            get_shifted_h(qap, assignment, &delta_ell, &delta_r, &delta_o)
-                .eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        ),
-        g1_z: Box::new(
-            (*proof_key.g1_ell_beta_ts).mul_ref(delta_ell.get_value())
-                + (*proof_key.g1_r_beta_ts).mul_ref(delta_r.get_value())
-                + (*proof_key.g1_o_beta_ts).mul_ref(delta_o.get_value())
-                + accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
-        ),
+        g1_ell: &proof_key.g1_ell_ts * delta_ell.get_value()
+            + accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
+        g2_r: (proof_key.g2_r_ts).mul_ref(delta_r.get_value())
+            + accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
+        g1_o: (proof_key.g1_o_ts).mul_ref(delta_o.get_value())
+            + accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
+        g1_ell_prime: (proof_key.g1_ell_alpha_ts).mul_ref(delta_ell.get_value())
+            + accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
+        g2_r_prime: (proof_key.g2_r_alpha_ts).mul_ref(delta_r.get_value())
+            + accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
+        g1_o_prime: (proof_key.g1_o_alpha_ts).mul_ref(delta_o.get_value())
+            + accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
+        g1_h: get_shifted_h(qap, assignment, &delta_ell, &delta_r, &delta_o)
+            .eval_with_powers_on_curve(&proof_key.g1_sj_vec),
+        g1_z: (proof_key.g1_ell_beta_ts).mul_ref(delta_ell.get_value())
+            + (proof_key.g1_r_beta_ts).mul_ref(delta_r.get_value())
+            + (proof_key.g1_o_beta_ts).mul_ref(delta_o.get_value())
+            + accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
 
@@ -239,31 +216,6 @@ pub fn verify(
 
     pairing10 * pairing11 == pairing12
 }
-
-/*
-pub fn inconsistent_variable_attack(
-    assignment_ell: &Vec<FqOrder>,
-    assignment_r: &Vec<FqOrder>,
-    assignment_o: &Vec<FqOrder>,
-    proof_key: &PinocchioProofKey,
-    qap: &QAP<FqOrder>,
-) -> PinocchioProof {
-    let ell = accumulate_polynomials(&qap.ell_i_vec, assignment_ell);
-    let r = accumulate_polynomials(&qap.r_i_vec, assignment_r);
-    let o = accumulate_polynomials(&qap.o_i_vec, assignment_o);
-    let h = (ell * r - o) / qap.t.clone();
-
-    PinocchioProof {
-        g1_ell: accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment_ell),
-        g2_r: accumulate_curve_points(&proof_key.g2_r_i_vec, assignment_r),
-        g1_o: accumulate_curve_points(&proof_key.g1_o_i_vec, assignment_o),
-        g1_ell_prime: accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment_ell),
-        g2_r_prime: accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment_r),
-        g1_o_prime: accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment_o),
-        g1_h: h.eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: accumulate_curve_points(&proof_key.g1_checksum_vec, assignment_ell),
-    }
-}*/
 
 #[cfg(test)]
 mod tests {
@@ -409,41 +361,5 @@ mod tests {
 
         let wrong_proof = prove(&v_prime, &proof_key, &qap);
         assert!(!verify(&g1, &g2, &wrong_proof, &verification_key));
-
-        let v_ell = vec![
-            FqOrder::one(),
-            FqOrder::from_value(210),
-            FqOrder::from_value(2),
-            FqOrder::from_value(3),
-            FqOrder::from_value(5),
-            FqOrder::from_value(7),
-            FqOrder::from_value(6),
-            FqOrder::from_value(35),
-        ];
-
-        let v_r = vec![
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-            FqOrder::one(),
-        ];
-
-        let v_o = vec![
-            FqOrder::one(),
-            FqOrder::from_value(6),
-            FqOrder::zero(),
-            FqOrder::zero(),
-            FqOrder::zero(),
-            FqOrder::zero(),
-            FqOrder::from_value(2),
-            FqOrder::from_value(5),
-        ];
-
-        //let bogus_proof = inconsistent_variable_attack(&v_ell, &v_r, &v_o, &proof_key, &qap);
-        //assert!(!verify(&g1, &g2, &bogus_proof, &verification_key));
     }
 }
