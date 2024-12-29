@@ -53,11 +53,11 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
     let rho_r = FqOrder::random_element(&[]);
     let rho_o = rho_ell.mul_ref(&rho_r);
 
-    let g1_ell = g1 * rho_ell.get_value();
-    let g1_r = g1 * rho_r.get_value();
-    let g2_r = g2 * rho_r.get_value();
-    let g1_o = g1 * rho_o.get_value();
-    let g2_o = g2 * rho_o.get_value();
+    let g1_ell = g1 * &rho_ell;
+    let g1_r = g1 * &rho_r;
+    let g2_r = g2 * &rho_r;
+    let g1_o = g1 * &rho_o;
+    let g2_o = g2 * &rho_o;
 
     let mut g1_checksum_vec = Vec::with_capacity(qap.d);
 
@@ -89,9 +89,9 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey5, Veri
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey5 {
-            g2_alpha_ell: g2 * alpha_ell.get_value(),
-            g1_alpha_r: g1 * alpha_r.get_value(),
-            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_alpha_ell: g2 * &alpha_ell,
+            g1_alpha_r: g1 * &alpha_r,
+            g2_alpha_o: g2 * &alpha_o,
             g1_beta_eta: g1 * beta.get_value() * eta.get_value(),
             g2_beta_eta: g2 * beta.get_value() * eta.get_value(),
             g2_t_s: g2_o * qap.t.eval(&s).sanitize().get_value(),
