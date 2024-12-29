@@ -170,9 +170,9 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
             -q1.y.clone().unwrap().pow(m.clone()),
         );
 
-        f = f.mul_ref(&get_lambda(&r, &q1, &p));
-        r = r.add_ref(&q1);
-        f = f.mul_ref(&get_lambda(&r, &nq2, &p));
+        f *= get_lambda(&r, &q1, &p);
+        r += q1;
+        f *= get_lambda(&r, &nq2, &p);
     }
 
     let exp = (m.pow(12) - BigInt::one()) / (BN128::order());

@@ -56,7 +56,7 @@
 //! the `lazy_static` crate for defining modulus types.
 
 use std::fmt;
-use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use num_traits::{One, Zero};
 
@@ -134,7 +134,7 @@ impl<F: Field> Polynomial<F> {
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result * powers[i].pow(coef.get_value());
+            result *= powers[i].pow(coef.get_value());
         }
         result
     }
@@ -146,8 +146,10 @@ impl<F: Field> Polynomial<F> {
     ) -> EllipticCurvePoint<P, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result + powers[i].mul_ref(coef.get_value());
+            println!("i={}, coef={}", i, coef);
+            result += powers[i].mul_ref(coef.sanitize().get_value());
         }
+        println!("666");
         result
     }
 
@@ -205,6 +207,18 @@ impl<F: Field> Polynomial<F> {
         }
     }
 
+    fn add_assign_ref<'b>(&mut self, other: &'b Polynomial<F>) {
+        let max_len = std::cmp::max(self.coef.len(), other.coef.len());
+        self.coef.resize(max_len, F::zero()); // Extend self.coef with zeros if needed.
+
+        for (i, b) in other.coef.iter().enumerate() {
+            self.coef[i] = self.coef[i].add_ref(b); // Update in place.
+        }
+
+        // Trim trailing zeros for proper representation.
+        self.coef = Self::trim_trailing_zeros(&self.coef);
+    }
+
     fn mul_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
         if self.is_zero() || other.is_zero() {
             return Polynomial::<F>::zero();
@@ -219,6 +233,26 @@ impl<F: Field> Polynomial<F> {
         Polynomial {
             coef: Polynomial::<F>::trim_trailing_zeros(&result),
         }
+    }
+
+    fn mul_assign_ref<'b>(&mut self, other: &'b Polynomial<F>) {
+        if self.is_zero() || other.is_zero() {
+            // If either polynomial is zero, the result is zero.
+            self.coef.clear();
+            return;
+        }
+
+        let result_len = self.degree() + other.degree() + 1;
+        let mut result = vec![F::zero(); result_len as usize];
+
+        for (i, a) in self.coef.iter().enumerate() {
+            for (j, b) in other.coef.iter().enumerate() {
+                result[i + j] = result[i + j].add_ref(&a.mul_ref(b)); // Accumulate the product.
+            }
+        }
+
+        // Update self with the result and trim trailing zeros.
+        self.coef = Self::trim_trailing_zeros(&result);
     }
 
     fn div_rem_ref<'b>(&self, other: &'b Polynomial<F>) -> (Polynomial<F>, Polynomial<F>) {
@@ -330,6 +364,18 @@ impl<F: Field> Add for Polynomial<F> {
     }
 }
 
+impl<F: Field> AddAssign for Polynomial<F> {
+    fn add_assign(&mut self, other: Self) {
+        self.add_assign_ref(&other)
+    }
+}
+
+impl<'b, F: Field> AddAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn add_assign(&mut self, other: &'b Polynomial<F>) {
+        self.add_assign_ref(other)
+    }
+}
+
 impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
 
@@ -343,6 +389,12 @@ impl<F: Field> Sub for Polynomial<F> {
 
     fn sub(self, other: Self) -> Polynomial<F> {
         self.add_ref(&-other)
+    }
+}
+
+impl<'b, F: Field> SubAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn sub_assign(&mut self, other: &'b Polynomial<F>) {
+        self.add_assign_ref(&-other.clone())
     }
 }
 
@@ -362,6 +414,18 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
     }
 }
 
+impl<F: Field> MulAssign<Polynomial<F>> for Polynomial<F> {
+    fn mul_assign(&mut self, other: Polynomial<F>) {
+        self.mul_assign_ref(&other)
+    }
+}
+
+impl<'b, F: Field> MulAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn mul_assign(&mut self, other: &'b Polynomial<F>) {
+        self.mul_assign_ref(other)
+    }
+}
+
 impl<'a, 'b, F: Field> Mul<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
 
@@ -376,6 +440,26 @@ impl<F: Field> Mul<F> for Polynomial<F> {
     fn mul(self, scalar: F) -> Polynomial<F> {
         Polynomial {
             coef: self.coef.iter().map(|x| x.mul_ref(&scalar)).collect(),
+        }
+    }
+}
+
+impl<'a, F: Field> Mul<&'a F> for Polynomial<F> {
+    type Output = Self;
+
+    fn mul(self, scalar: &F) -> Polynomial<F> {
+        Polynomial {
+            coef: self.coef.iter().map(|x| x.mul_ref(scalar)).collect(),
+        }
+    }
+}
+
+impl<'a, 'b, F: Field> Mul<&'a F> for &'b Polynomial<F> {
+    type Output = Polynomial<F>;
+
+    fn mul(self, scalar: &F) -> Polynomial<F> {
+        Polynomial {
+            coef: self.coef.iter().map(|x| x.mul_ref(scalar)).collect(),
         }
     }
 }
