@@ -51,6 +51,17 @@ pub struct PinocchioProof {
     g1_z: G1Point,
 }
 
+/// Generates the proving and verification keys for the Pinocchio zk-SNARK scheme.
+///
+/// # Parameters:
+/// - `g1`: A reference to a G1 curve point.
+/// - `g2`: A reference to a G2 curve point.
+/// - `qap`: The quadratic arithmetic program (QAP) representing the circuit.
+///
+/// # Returns:
+/// A tuple containing:
+/// - `PinocchioProofKey`: The proving key.
+/// - `PinocchioVerificationKey`: The verification key.
 pub fn setup(
     g1: &G1Point,
     g2: &G2Point,
@@ -141,6 +152,15 @@ pub fn get_shifted_h(
         - Polynomial::<FqOrder>::one() * delta_o
 }
 
+/// Generates a zk-SNARK proof using the Pinocchio scheme.
+///
+/// # Parameters:
+/// - `assignment`: A vector of field elements representing the circuit assignment.
+/// - `proof_key`: A reference to the proving key.
+/// - `qap`: The QAP representation of the circuit.
+///
+/// # Returns:
+/// A `PinocchioProof` object representing the proof.
 pub fn prove(
     assignment: &Vec<FqOrder>,
     proof_key: &PinocchioProofKey,
@@ -172,6 +192,16 @@ pub fn prove(
     }
 }
 
+/// Verifies a zk-SNARK proof using the Pinocchio scheme.
+///
+/// # Parameters:
+/// - `g1`: A reference to a G1 curve point.
+/// - `g2`: A reference to a G2 curve point.
+/// - `proof`: A reference to the proof to be verified.
+/// - `verification_key`: A reference to the verification key.
+///
+/// # Returns:
+/// `true` if the proof is valid; otherwise, `false`.
 pub fn verify(
     g1: &G1Point,
     g2: &G2Point,

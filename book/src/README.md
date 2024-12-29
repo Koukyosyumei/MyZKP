@@ -63,6 +63,7 @@ MyZKP is a growing library that provides:
 |             | `qap` | Quadratic Arithmetic Program | [qap.rs](https://github.com/Koukyosyumei/MyZKP/myzkp/src/modules/arithmetization/qap.rs) |
 | **zkSNARKs**| `tutorial_single_polynomial` | | [tutorial_single_polynomial](https://github.com/Koukyosyumei/MyZKP/myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
 |             | `tutorial_snark` | | [tutorial_snark](https://github.com/Koukyosyumei/MyZKP/myzkp/src/modules/zksnark/tutorial_snark/) |
+|             | `pinocchio` | [Pinocchio Protocol](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](https://github.com/Koukyosyumei/MyZKP/myzkp/src/modules/zksnark/pinocchio.rs) |
 
 ## 🤝 Contributions are Welcome!
 
