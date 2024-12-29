@@ -146,7 +146,7 @@ pub fn get_shifted_h(
     let mut h = (&ell * &r - o) / qap.t.clone();
     h += ell * delta_r;
     h += r.clone() * delta_ell.clone();
-    //h += qap.t.clone() * (delta_ell.clone() * delta_r.clone());
+    h += qap.t.clone() * (delta_ell.clone() * delta_r.clone());
     //h = h - Polynomial::<FqOrder>::one() * delta_o.clone();
     h
 }
