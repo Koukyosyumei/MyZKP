@@ -136,11 +136,21 @@ pub fn get_shifted_h(
     let ell = accumulate_polynomials(&qap.ell_i_vec, assignment);
     let r = accumulate_polynomials(&qap.r_i_vec, assignment);
     let o = accumulate_polynomials(&qap.o_i_vec, assignment);
-    ((&ell * &r - o) / qap.t.clone())
-        + ell * delta_r
-        + r * delta_ell
-        + qap.t.clone() * (delta_ell.clone() * delta_r)
-        - (Polynomial::<FqOrder>::one() * delta_o)
+    /*
+       ((&ell * &r - o) / qap.t.clone())
+       + ell * delta_r
+       + r * delta_ell
+       + qap.t.clone() * (delta_ell.clone() * delta_r)
+       - (Polynomial::<FqOrder>::one() * delta_o)
+    */
+    let mut h = (&ell * &r - o) / qap.t.clone();
+    h += ell * delta_r;
+    let r_ell = r.clone() * delta_ell.clone();
+    println!("r_ell: {}", r_ell);
+    h += r_ell; //* delta_ell.clone();
+                //h += qap.t.clone() * (delta_ell.clone() * delta_r.clone());
+                //h = h - Polynomial::<FqOrder>::one() * delta_o.clone();
+    h
 }
 
 pub fn prove(

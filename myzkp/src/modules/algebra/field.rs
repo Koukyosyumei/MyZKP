@@ -49,7 +49,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 use std::str::FromStr;
 
 use lazy_static::lazy_static;
@@ -154,12 +154,27 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
         FiniteFieldElement::<M>::new(&self.value + &other.value)
     }
 
+    fn add_assign_ref(&mut self, other: &Self) {
+        self.value += &other.value;
+        self.value %= M::modulus();
+    }
+
     fn mul_ref(&self, other: &Self) -> Self {
         FiniteFieldElement::<M>::new(&self.value * &other.value)
     }
 
+    fn mul_assign_ref(&mut self, other: &Self) {
+        self.value *= &other.value;
+        self.value %= M::modulus();
+    }
+
     fn sub_ref(&self, other: &Self) -> Self {
         FiniteFieldElement::<M>::new(&self.value - &other.value)
+    }
+
+    fn sub_assign_ref(&mut self, other: &Self) {
+        self.value -= &other.value;
+        self.value %= M::modulus();
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
@@ -276,6 +291,12 @@ impl<M: ModulusValue> Add for FiniteFieldElement<M> {
     }
 }
 
+impl<M: ModulusValue> AddAssign for FiniteFieldElement<M> {
+    fn add_assign(&mut self, other: Self) {
+        self.add_assign_ref(&other)
+    }
+}
+
 impl<'a, M: ModulusValue> Add<&'a FiniteFieldElement<M>> for FiniteFieldElement<M> {
     type Output = FiniteFieldElement<M>;
 
@@ -292,6 +313,12 @@ impl<M: ModulusValue> Sub for FiniteFieldElement<M> {
     }
 }
 
+impl<M: ModulusValue> SubAssign for FiniteFieldElement<M> {
+    fn sub_assign(&mut self, other: Self) {
+        self.sub_assign_ref(&other)
+    }
+}
+
 impl<'a, M: ModulusValue> Sub<&'a FiniteFieldElement<M>> for FiniteFieldElement<M> {
     type Output = Self;
 
@@ -305,6 +332,12 @@ impl<M: ModulusValue> Mul<FiniteFieldElement<M>> for FiniteFieldElement<M> {
 
     fn mul(self, other: Self) -> Self {
         self.mul_ref(&other)
+    }
+}
+
+impl<M: ModulusValue> MulAssign for FiniteFieldElement<M> {
+    fn mul_assign(&mut self, other: Self) {
+        self.mul_assign_ref(&other)
     }
 }
 

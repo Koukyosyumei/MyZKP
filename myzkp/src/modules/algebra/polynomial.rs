@@ -56,7 +56,7 @@
 //! the `lazy_static` crate for defining modulus types.
 
 use std::fmt;
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use num_traits::{One, Zero};
 
@@ -368,6 +368,12 @@ impl<F: Field> AddAssign for Polynomial<F> {
     }
 }
 
+impl<'b, F: Field> AddAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn add_assign(&mut self, other: &'b Polynomial<F>) {
+        self.add_assign_ref(other)
+    }
+}
+
 impl<'a, 'b, F: Field> Add<&'b Polynomial<F>> for &'a Polynomial<F> {
     type Output = Polynomial<F>;
 
@@ -381,6 +387,12 @@ impl<F: Field> Sub for Polynomial<F> {
 
     fn sub(self, other: Self) -> Polynomial<F> {
         self.add_ref(&-other)
+    }
+}
+
+impl<'b, F: Field> SubAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn sub_assign(&mut self, other: &'b Polynomial<F>) {
+        self.add_assign_ref(&-other.clone())
     }
 }
 
@@ -403,6 +415,12 @@ impl<F: Field> Mul<Polynomial<F>> for Polynomial<F> {
 impl<F: Field> MulAssign<Polynomial<F>> for Polynomial<F> {
     fn mul_assign(&mut self, other: Polynomial<F>) {
         self.mul_assign_ref(&other)
+    }
+}
+
+impl<'b, F: Field> MulAssign<&'b Polynomial<F>> for Polynomial<F> {
+    fn mul_assign(&mut self, other: &'b Polynomial<F>) {
+        self.mul_assign_ref(other)
     }
 }
 

@@ -71,7 +71,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::marker::PhantomData;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use num_bigint::BigInt;
 use num_traits::One;
@@ -222,6 +222,14 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Add
     }
 }
 
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> AddAssign
+    for ExtendedFieldElement<M, P>
+{
+    fn add_assign(&mut self, other: Self) {
+        self.add_assign_ref(&other)
+    }
+}
+
 impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     Add<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
 {
@@ -242,6 +250,14 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Sub
     }
 }
 
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> SubAssign
+    for ExtendedFieldElement<M, P>
+{
+    fn sub_assign(&mut self, other: Self) {
+        self.sub_assign_ref(&other)
+    }
+}
+
 impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     Sub<&'a ExtendedFieldElement<M, P>> for ExtendedFieldElement<M, P>
 {
@@ -259,6 +275,14 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Mul
 
     fn mul(self, other: Self) -> Self {
         self.mul_ref(&other)
+    }
+}
+
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> MulAssign
+    for ExtendedFieldElement<M, P>
+{
+    fn mul_assign(&mut self, other: Self) {
+        self.mul_assign_ref(&other)
     }
 }
 
@@ -299,12 +323,27 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
         Self::new(&self.poly + &other.poly)
     }
 
+    fn add_assign_ref(&mut self, other: &Self) {
+        self.poly += &other.poly;
+        self.sanitize();
+    }
+
     fn mul_ref(&self, other: &Self) -> Self {
         Self::new(&self.poly * &other.poly)
     }
 
+    fn mul_assign_ref(&mut self, other: &Self) {
+        self.poly *= &other.poly;
+        self.sanitize();
+    }
+
     fn sub_ref(&self, other: &Self) -> Self {
         Self::new(&self.poly - &other.poly)
+    }
+
+    fn sub_assign_ref(&mut self, other: &Self) {
+        self.poly -= &other.poly;
+        self.sanitize();
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
