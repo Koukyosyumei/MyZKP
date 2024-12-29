@@ -83,6 +83,22 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
         Self::new(new_x, new_y)
     }
 
+    pub fn inplace_double(&mut self) {
+        if self.is_point_at_infinity() {
+            return;
+        }
+
+        let slope = self.line_slope(&self);
+        let x = self.x.as_ref().unwrap();
+        let y = self.y.as_ref().unwrap();
+
+        let new_x = slope.mul_ref(&slope).sub_ref(&x).sub_ref(&x);
+        let new_y = -slope.mul_ref(&new_x) + slope * x - y;
+
+        self.x = Some(new_x);
+        self.y = Some(new_y);
+    }
+
     pub fn add_ref(&self, other: &Self) -> Self {
         if self.is_point_at_infinity() {
             return other.clone();
@@ -101,13 +117,46 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
         let x1 = self.x.as_ref().unwrap();
         let y1 = self.y.as_ref().unwrap();
         let x2 = other.x.as_ref().unwrap();
-        let y2 = other.y.as_ref().unwrap();
+        //let y2 = other.y.as_ref().unwrap();
 
         let new_x = slope.mul_ref(&slope).sub_ref(&x1).sub_ref(&x2);
         let new_y = ((-slope.clone()).mul_ref(&new_x)) + (&slope.mul_ref(&x1).sub_ref(&y1));
-        assert!(new_y == -slope.clone() * &new_x + slope.mul_ref(&x2).sub_ref(&y2));
+        //assert!(new_y == -slope.clone() * &new_x + slope.mul_ref(&x2).sub_ref(&y2));
 
         Self::new(new_x, new_y)
+    }
+
+    pub fn add_assign_ref(&mut self, other: &Self) {
+        if self.is_point_at_infinity() {
+            *self = other.clone();
+            return;
+        }
+        if other.is_point_at_infinity() {
+            return;
+        }
+
+        if self.x == other.x && self.y == other.y {
+            *self = self.double();
+            return;
+        } else if self.x == other.x {
+            *self = Self::point_at_infinity();
+            return;
+        }
+
+        let slope = self.line_slope(other);
+        let x1 = self.x.as_mut().unwrap();
+        let y1 = self.y.as_mut().unwrap();
+        let x2 = other.x.as_ref().unwrap();
+        //let y2 = other.y.as_ref().unwrap();
+
+        let new_x = slope.mul_ref(&slope).sub_ref(x1).sub_ref(x2);
+        let new_y = (-slope.clone())
+            .mul_ref(&new_x)
+            .add_ref(&slope.mul_ref(x1).sub_ref(y1));
+        //assert!(new_y == -slope.clone() * &new_x + slope.mul_ref(&x2).sub_ref(&y2));
+
+        self.x = Some(new_x);
+        self.y = Some(new_y);
     }
 
     pub fn mul_ref<V: Into<BigInt>>(&self, scalar_val: V) -> Self {
@@ -123,9 +172,9 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
 
         while !scalar_bits.is_zero() {
             if scalar_bits.bit(0) {
-                result = result.add_ref(&current);
+                result.add_assign_ref(&current);
             }
-            current = current.add_ref(&current); // Double the point
+            current.inplace_double();
             scalar_bits >>= 1; // Move to the next bit
         }
 
