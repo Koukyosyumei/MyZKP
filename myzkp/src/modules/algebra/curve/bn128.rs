@@ -171,7 +171,7 @@ pub fn optimal_ate_pairing(p_g1: &G1Point, q_g2: &G2Point) -> Fq12 {
         );
 
         f *= get_lambda(&r, &q1, &p);
-        r = r.add_ref(&q1);
+        r += q1;
         f *= get_lambda(&r, &nq2, &p);
     }
 

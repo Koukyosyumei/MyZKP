@@ -67,7 +67,7 @@ pub fn generate_s_powers<F1: Field, F2: Field, E: EllipticCurve>(
     let mut current = F2::one();
     for _ in 0..=m {
         powers.push(point * current.get_value());
-        current = current * s.clone();
+        current *= s.clone();
     }
     powers
 }
