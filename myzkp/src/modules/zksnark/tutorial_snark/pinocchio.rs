@@ -147,8 +147,8 @@ pub fn get_shifted_h(
     h += ell * delta_r;
     h += r * delta_ell.clone();
     h += qap.t.clone() * (delta_ell * delta_r);
-    //h - Polynomial::<FqOrder>::one() * delta_o
-    h
+    h - Polynomial::<FqOrder>::one() * delta_o
+    //h
 }
 
 pub fn prove(
