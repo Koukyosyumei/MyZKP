@@ -145,11 +145,9 @@ pub fn get_shifted_h(
     */
     let mut h = (&ell * &r - o) / qap.t.clone();
     h += ell * delta_r;
-    let r_ell = r.clone() * delta_ell.clone();
-    println!("r_ell: {}", r_ell);
-    h += r_ell; //* delta_ell.clone();
-                //h += qap.t.clone() * (delta_ell.clone() * delta_r.clone());
-                //h = h - Polynomial::<FqOrder>::one() * delta_o.clone();
+    h += r.clone() * delta_ell.clone();
+    //h += qap.t.clone() * (delta_ell.clone() * delta_r.clone());
+    //h = h - Polynomial::<FqOrder>::one() * delta_o.clone();
     h
 }
 
