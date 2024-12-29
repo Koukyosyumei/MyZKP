@@ -81,11 +81,11 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
             g2_alpha_ell: g2 * &alpha_ell,
             g1_alpha_r: g1 * &alpha_r,
             g2_alpha_o: g2 * &alpha_o,
-            g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
-            g1_beta_r_eta: (g1 * beta_r.get_value()) * eta.get_value(),
-            g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
+            g2_beta_ell_eta: g2 * (beta_ell * &eta),
+            g1_beta_r_eta: g1 * (beta_r * &eta),
+            g2_beta_o_eta: g2 * (beta_o * &eta),
             g2_t_s: g2 * qap.t.eval(&s).sanitize(),
-            g2_eta: g2 * eta.get_value(),
+            g2_eta: g2 * eta,
         },
     )
 }
