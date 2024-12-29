@@ -86,7 +86,7 @@ pub fn setup(
     }
 
     let t_s = qap.t.eval(&s).sanitize();
-    let beta_eta = beta.clone() * eta.clone();
+    let beta_eta = &beta * &eta;
     let beta_t_s = beta * &t_s;
 
     (
