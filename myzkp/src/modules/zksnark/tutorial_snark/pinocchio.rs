@@ -115,13 +115,13 @@ pub fn setup(
             g1_o_beta_ts: g1_o * beta_t_s.get_value(),
         },
         PinocchioVerificationKey {
-            g2_alpha_ell: g2 * alpha_ell.get_value(),
-            g1_alpha_r: g1 * alpha_r.get_value(),
-            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_alpha_ell: g2 * alpha_ell.value,
+            g1_alpha_r: g1 * alpha_r.value,
+            g2_alpha_o: g2 * alpha_o.value,
             g1_beta_eta: g1 * beta_eta.get_value(),
             g2_beta_eta: g2 * beta_eta.get_value(),
-            g2_t_s: g2_o * t_s.get_value(),
-            g2_eta: g2 * eta.get_value(),
+            g2_t_s: g2_o * t_s.value,
+            g2_eta: g2 * eta.value,
         },
     )
 }
