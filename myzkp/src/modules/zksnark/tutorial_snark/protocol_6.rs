@@ -136,12 +136,11 @@ pub fn get_shifted_h(
     let ell = accumulate_polynomials(&qap.ell_i_vec, assignment);
     let r = accumulate_polynomials(&qap.r_i_vec, assignment);
     let o = accumulate_polynomials(&qap.o_i_vec, assignment);
-    let mut h = (&ell * &r - o) / qap.t.clone();
-    h += ell * delta_r;
-    h += r * delta_ell;
-    h += qap.t.clone() * (delta_ell * delta_r);
-    h = h - Polynomial::<FqOrder>::one() * delta_o;
-    h
+    (&ell * &r - o) / qap.t.clone()
+        + ell * delta_r
+        + r * delta_ell
+        + qap.t.clone() * (delta_ell * delta_r)
+        - Polynomial::<FqOrder>::one() * delta_o
 }
 
 pub fn prove(
@@ -156,21 +155,21 @@ pub fn prove(
     PinocchioProof {
         g1_ell: &proof_key.g1_ell_ts * delta_ell.get_value()
             + accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        g2_r: (proof_key.g2_r_ts).mul_ref(delta_r.get_value())
+        g2_r: &proof_key.g2_r_ts * delta_r.get_value()
             + accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
-        g1_o: (proof_key.g1_o_ts).mul_ref(delta_o.get_value())
+        g1_o: &proof_key.g1_o_ts * delta_o.get_value()
             + accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
-        g1_ell_prime: (proof_key.g1_ell_alpha_ts).mul_ref(delta_ell.get_value())
+        g1_ell_prime: &proof_key.g1_ell_alpha_ts * delta_ell.get_value()
             + accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        g2_r_prime: (proof_key.g2_r_alpha_ts).mul_ref(delta_r.get_value())
+        g2_r_prime: &proof_key.g2_r_alpha_ts * delta_r.get_value()
             + accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
-        g1_o_prime: (proof_key.g1_o_alpha_ts).mul_ref(delta_o.get_value())
+        g1_o_prime: &proof_key.g1_o_alpha_ts * delta_o.get_value()
             + accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_shifted_h(qap, assignment, &delta_ell, &delta_r, &delta_o)
             .eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: (proof_key.g1_ell_beta_ts).mul_ref(delta_ell.get_value())
-            + (proof_key.g1_r_beta_ts).mul_ref(delta_r.get_value())
-            + (proof_key.g1_o_beta_ts).mul_ref(delta_o.get_value())
+        g1_z: &proof_key.g1_ell_beta_ts * delta_ell.get_value()
+            + &proof_key.g1_r_beta_ts * delta_r.get_value()
+            + &proof_key.g1_o_beta_ts * delta_o.get_value()
             + accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
