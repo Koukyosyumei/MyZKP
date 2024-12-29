@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
@@ -187,6 +187,12 @@ impl<F: Field, E: EllipticCurve> Add for EllipticCurvePoint<F, E> {
 
     fn add(self, other: Self) -> Self {
         self.add_ref(&other)
+    }
+}
+
+impl<F: Field, E: EllipticCurve> AddAssign for EllipticCurvePoint<F, E> {
+    fn add_assign(&mut self, other: Self) {
+        self.add_assign_ref(&other)
     }
 }
 
