@@ -60,12 +60,9 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
         let r_i_s = qap.r_i_vec[i].eval(&s).sanitize();
         let o_i_s = qap.o_i_vec[i].eval(&s).sanitize();
         g1_checksum_vec.push(
-            g1.mul_ref(
-                ((beta_ell.mul_ref(&ell_i_s))
-                    .add_ref(&beta_r.mul_ref(&r_i_s))
-                    .add_ref(&beta_o.mul_ref(&o_i_s)))
-                .get_value(),
-            ),
+            g1 * ((beta_ell.mul_ref(&ell_i_s))
+                .add_ref(&beta_r.mul_ref(&r_i_s))
+                .add_ref(&beta_o.mul_ref(&o_i_s))),
         );
     }
 
@@ -81,13 +78,13 @@ pub fn setup(g1: &G1Point, g2: &G2Point, qap: &QAP<FqOrder>) -> (ProofKey4, Veri
             g1_checksum_vec: g1_checksum_vec,
         },
         VerificationKey4 {
-            g2_alpha_ell: g2 * alpha_ell.get_value(),
-            g1_alpha_r: g1 * alpha_r.get_value(),
-            g2_alpha_o: g2 * alpha_o.get_value(),
+            g2_alpha_ell: g2 * &alpha_ell,
+            g1_alpha_r: g1 * &alpha_r,
+            g2_alpha_o: g2 * &alpha_o,
             g2_beta_ell_eta: (g2 * beta_ell.get_value()) * eta.get_value(),
             g1_beta_r_eta: (g1 * beta_r.get_value()) * eta.get_value(),
             g2_beta_o_eta: (g2 * beta_o.get_value()) * eta.get_value(),
-            g2_t_s: g2 * qap.t.eval(&s).sanitize().get_value(),
+            g2_t_s: g2 * qap.t.eval(&s).sanitize(),
             g2_eta: g2 * eta.get_value(),
         },
     )
