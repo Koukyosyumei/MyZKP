@@ -19,15 +19,15 @@ pub struct PinocchioProofKey {
     g1_alpha_o_i_vec: Vec<G1Point>,
     g1_sj_vec: Vec<G1Point>,
     g1_checksum_vec: Vec<G1Point>,
-    g1_ell_ts: G1Point,
-    g2_r_ts: G2Point,
-    g1_o_ts: G1Point,
-    g1_ell_alpha_ts: G1Point,
-    g2_r_alpha_ts: G2Point,
-    g1_o_alpha_ts: G1Point,
-    g1_ell_beta_ts: G1Point,
-    g1_r_beta_ts: G1Point,
-    g1_o_beta_ts: G1Point,
+    g1_ell_ts: Box<G1Point>,
+    g2_r_ts: Box<G2Point>,
+    g1_o_ts: Box<G1Point>,
+    g1_ell_alpha_ts: Box<G1Point>,
+    g2_r_alpha_ts: Box<G2Point>,
+    g1_o_alpha_ts: Box<G1Point>,
+    g1_ell_beta_ts: Box<G1Point>,
+    g1_r_beta_ts: Box<G1Point>,
+    g1_o_beta_ts: Box<G1Point>,
 }
 
 pub struct PinocchioVerificationKey {
@@ -104,15 +104,15 @@ pub fn setup(
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(&g1_o, &qap.o_i_vec, &s, &alpha_o),
             g1_sj_vec: generate_s_powers(&g1, &s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
-            g1_ell_ts: g1_ell.mul_ref(t_s.get_value()),
-            g2_r_ts: g2_r.mul_ref(t_s.get_value()),
-            g1_o_ts: g1_o.mul_ref(t_s.get_value()),
-            g1_ell_alpha_ts: g1_ell.mul_ref((t_s.clone() * &alpha_ell).get_value()),
-            g2_r_alpha_ts: g2_r.mul_ref((t_s.clone() * &alpha_r).get_value()),
-            g1_o_alpha_ts: g1_o.mul_ref((t_s.clone() * &alpha_o).get_value()),
-            g1_ell_beta_ts: g1_ell * beta_t_s.get_value(),
-            g1_r_beta_ts: g1_r * beta_t_s.get_value(),
-            g1_o_beta_ts: g1_o * beta_t_s.get_value(),
+            g1_ell_ts: Box::new(g1_ell.mul_ref(t_s.get_value())),
+            g2_r_ts: Box::new(g2_r.mul_ref(t_s.get_value())),
+            g1_o_ts: Box::new(g1_o.mul_ref(t_s.get_value())),
+            g1_ell_alpha_ts: Box::new(g1_ell.mul_ref((t_s.clone() * &alpha_ell).get_value())),
+            g2_r_alpha_ts: Box::new(g2_r.mul_ref((t_s.clone() * &alpha_r).get_value())),
+            g1_o_alpha_ts: Box::new(g1_o.mul_ref((t_s.clone() * &alpha_o).get_value())),
+            g1_ell_beta_ts: Box::new(g1_ell * beta_t_s.get_value()),
+            g1_r_beta_ts: Box::new(g1_r * beta_t_s.get_value()),
+            g1_o_beta_ts: Box::new(g1_o * beta_t_s.get_value()),
         },
         PinocchioVerificationKey {
             g2_alpha_ell: g2 * alpha_ell.value,
@@ -147,7 +147,7 @@ pub fn get_shifted_h(
     h += ell * delta_r;
     h += r * delta_ell.clone();
     h += qap.t.clone() * (delta_ell * delta_r);
-    h - Polynomial::<FqOrder>::one() * delta_o.clone()
+    h - Polynomial::<FqOrder>::one() * delta_o
 }
 
 pub fn prove(
@@ -160,23 +160,23 @@ pub fn prove(
     let delta_o = FqOrder::random_element(&[]);
 
     PinocchioProof {
-        g1_ell: proof_key.g1_ell_ts.mul_ref(delta_ell.get_value())
+        g1_ell: (*proof_key.g1_ell_ts).mul_ref(delta_ell.get_value())
             + accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        g2_r: proof_key.g2_r_ts.mul_ref(delta_r.get_value())
+        g2_r: (*proof_key.g2_r_ts).mul_ref(delta_r.get_value())
             + accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
-        g1_o: proof_key.g1_o_ts.mul_ref(delta_o.get_value())
+        g1_o: (*proof_key.g1_o_ts).mul_ref(delta_o.get_value())
             + accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
-        g1_ell_prime: proof_key.g1_ell_alpha_ts.mul_ref(delta_ell.get_value())
+        g1_ell_prime: (*proof_key.g1_ell_alpha_ts).mul_ref(delta_ell.get_value())
             + accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        g2_r_prime: proof_key.g2_r_alpha_ts.mul_ref(delta_r.get_value())
+        g2_r_prime: (*proof_key.g2_r_alpha_ts).mul_ref(delta_r.get_value())
             + accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
-        g1_o_prime: proof_key.g1_o_alpha_ts.mul_ref(delta_o.get_value())
+        g1_o_prime: (*proof_key.g1_o_alpha_ts).mul_ref(delta_o.get_value())
             + accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_shifted_h(qap, assignment, &delta_ell, &delta_r, &delta_o)
             .eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: proof_key.g1_ell_beta_ts.mul_ref(delta_ell.get_value())
-            + proof_key.g1_r_beta_ts.mul_ref(delta_r.get_value())
-            + proof_key.g1_o_beta_ts.mul_ref(delta_o.get_value())
+        g1_z: (*proof_key.g1_ell_beta_ts).mul_ref(delta_ell.get_value())
+            + (*proof_key.g1_r_beta_ts).mul_ref(delta_r.get_value())
+            + (*proof_key.g1_o_beta_ts).mul_ref(delta_o.get_value())
             + accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
