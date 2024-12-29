@@ -134,7 +134,7 @@ impl<F: Field> Polynomial<F> {
     pub fn eval_with_powers(&self, powers: &[F]) -> F {
         let mut result = F::one();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result * powers[i].pow(coef.get_value());
+            result *= powers[i].pow(coef.get_value());
         }
         result
     }
@@ -146,7 +146,7 @@ impl<F: Field> Polynomial<F> {
     ) -> EllipticCurvePoint<P, E> {
         let mut result = EllipticCurvePoint::point_at_infinity();
         for (i, coef) in self.coef.iter().enumerate() {
-            result = result + powers[i].mul_ref(coef.get_value());
+            result += powers[i].mul_ref(coef.get_value());
         }
         result
     }
