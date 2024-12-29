@@ -4,9 +4,9 @@ use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 
 use num_bigint::BigInt;
-use num_traits::{One, Zero};
+use num_traits::{One, Signed, Zero};
 
-use crate::modules::algebra::field::Field;
+use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 
 pub trait EllipticCurve: Debug + Clone + PartialEq {
     fn get_a() -> BigInt;
@@ -161,9 +161,17 @@ impl<F: Field, E: EllipticCurve> EllipticCurvePoint<F, E> {
 
     pub fn mul_ref<V: Into<BigInt>>(&self, scalar_val: V) -> Self {
         let scalar: BigInt = scalar_val.into();
+        self.mul_ref_bigint(&scalar)
+    }
+
+    pub fn mul_ref_bigint(&self, scalar: &BigInt) -> Self {
         if scalar.is_zero() {
             // Return the point at infinity for scalar * 0
             return EllipticCurvePoint::point_at_infinity();
+        }
+
+        if scalar.is_negative() {
+            panic!("multiplier should be non-negative");
         }
 
         let mut result = EllipticCurvePoint::point_at_infinity();
@@ -235,6 +243,26 @@ impl<F: Field, E: EllipticCurve, V: Into<BigInt>> Mul<V> for &EllipticCurvePoint
 
     fn mul(self, scalar_val: V) -> EllipticCurvePoint<F, E> {
         self.mul_ref(scalar_val)
+    }
+}
+
+impl<F: Field, E: EllipticCurve, M: ModulusValue> Mul<FiniteFieldElement<M>>
+    for &EllipticCurvePoint<F, E>
+{
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn mul(self, field_val: FiniteFieldElement<M>) -> EllipticCurvePoint<F, E> {
+        self.mul_ref_bigint(&field_val.value)
+    }
+}
+
+impl<'a, F: Field, E: EllipticCurve, M: ModulusValue> Mul<&'a FiniteFieldElement<M>>
+    for &EllipticCurvePoint<F, E>
+{
+    type Output = EllipticCurvePoint<F, E>;
+
+    fn mul(self, field_val: &'a FiniteFieldElement<M>) -> EllipticCurvePoint<F, E> {
+        self.mul_ref_bigint(&field_val.value)
     }
 }
 

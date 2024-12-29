@@ -66,11 +66,11 @@ pub fn setup(
     let rho_r = FqOrder::random_element(&[]);
     let rho_o = &rho_ell * &rho_r;
 
-    let g1_ell = g1 * rho_ell.get_value();
-    let g1_r = g1 * rho_r.get_value();
-    let g2_r = g2 * rho_r.get_value();
-    let g1_o = g1 * rho_o.get_value();
-    let g2_o = g2 * rho_o.get_value();
+    let g1_ell = g1 * &rho_ell;
+    let g1_r = g1 * &rho_r;
+    let g2_r = g2 * &rho_r;
+    let g1_o = g1 * &rho_o;
+    let g2_o = g2 * &rho_o;
 
     let mut g1_checksum_vec = Vec::with_capacity(qap.d);
 
@@ -79,9 +79,9 @@ pub fn setup(
         let r_i_s = qap.r_i_vec[i].eval(&s).sanitize();
         let o_i_s = qap.o_i_vec[i].eval(&s).sanitize();
         g1_checksum_vec.push(
-            &g1_ell * beta.mul_ref(&ell_i_s).get_value()
-                + &g1_r * beta.mul_ref(&r_i_s).get_value()
-                + &g1_o * beta.mul_ref(&o_i_s).get_value(),
+            &g1_ell * beta.mul_ref(&ell_i_s)
+                + &g1_r * beta.mul_ref(&r_i_s)
+                + &g1_o * beta.mul_ref(&o_i_s),
         );
     }
 
@@ -104,9 +104,9 @@ pub fn setup(
             g1_alpha_o_i_vec: generate_alpha_challenge_vec(&g1_o, &qap.o_i_vec, &s, &alpha_o),
             g1_sj_vec: generate_s_powers(&g1, &s, qap.m),
             g1_checksum_vec: g1_checksum_vec,
-            g1_ell_ts: &g1_ell * t_s.get_value(),
-            g2_r_ts: &g2_r * t_s.get_value(),
-            g1_o_ts: &g1_o * t_s.get_value(),
+            g1_ell_ts: &g1_ell * &t_s,
+            g2_r_ts: &g2_r * &t_s,
+            g1_o_ts: &g1_o * &t_s,
             g1_ell_alpha_ts: &g1_ell * (&t_s * &alpha_ell).get_value(),
             g2_r_alpha_ts: &g2_r * (&t_s * &alpha_r).get_value(),
             g1_o_alpha_ts: &g1_o * (&t_s * &alpha_o).get_value(),
@@ -153,23 +153,23 @@ pub fn prove(
     let delta_o = FqOrder::random_element(&[]);
 
     PinocchioProof {
-        g1_ell: &proof_key.g1_ell_ts * delta_ell.get_value()
+        g1_ell: &proof_key.g1_ell_ts * &delta_ell
             + accumulate_curve_points(&proof_key.g1_ell_i_vec, assignment),
-        g2_r: &proof_key.g2_r_ts * delta_r.get_value()
+        g2_r: &proof_key.g2_r_ts * &delta_r
             + accumulate_curve_points(&proof_key.g2_r_i_vec, assignment),
-        g1_o: &proof_key.g1_o_ts * delta_o.get_value()
+        g1_o: &proof_key.g1_o_ts * &delta_o
             + accumulate_curve_points(&proof_key.g1_o_i_vec, assignment),
-        g1_ell_prime: &proof_key.g1_ell_alpha_ts * delta_ell.get_value()
+        g1_ell_prime: &proof_key.g1_ell_alpha_ts * &delta_ell
             + accumulate_curve_points(&proof_key.g1_alpha_ell_i_vec, assignment),
-        g2_r_prime: &proof_key.g2_r_alpha_ts * delta_r.get_value()
+        g2_r_prime: &proof_key.g2_r_alpha_ts * &delta_r
             + accumulate_curve_points(&proof_key.g2_alpha_r_i_vec, assignment),
-        g1_o_prime: &proof_key.g1_o_alpha_ts * delta_o.get_value()
+        g1_o_prime: &proof_key.g1_o_alpha_ts * &delta_o
             + accumulate_curve_points(&proof_key.g1_alpha_o_i_vec, assignment),
         g1_h: get_shifted_h(qap, assignment, &delta_ell, &delta_r, &delta_o)
             .eval_with_powers_on_curve(&proof_key.g1_sj_vec),
-        g1_z: &proof_key.g1_ell_beta_ts * delta_ell.get_value()
-            + &proof_key.g1_r_beta_ts * delta_r.get_value()
-            + &proof_key.g1_o_beta_ts * delta_o.get_value()
+        g1_z: &proof_key.g1_ell_beta_ts * &delta_ell
+            + &proof_key.g1_r_beta_ts * &delta_r
+            + &proof_key.g1_o_beta_ts * &delta_o
             + accumulate_curve_points(&proof_key.g1_checksum_vec, assignment),
     }
 }
