@@ -1,6 +1,7 @@
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::merkle::merkle::Merkle;
+use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 
 pub struct FRI<F: Field> {
     pub offset: F,
@@ -29,7 +30,22 @@ impl<F: Field> FRI<F> {
             .collect()
     }
 
-    pub fn commit(&self, initial_codeword: &Vec<F>) -> Vec<Vec<F>> {
+    pub fn prove(&self, codeword: &Vec<F>, proof_stream: &mut FiatShamirTransformer) {
+        let codewords = self.commit(codeword);
+        let top_level_indices = self.sample_indices();
+        let mut indicies = top_level_indices.clone();
+
+        for i in 0..(codewords.len() - 1) {
+            indices = indices.map(|idx| idx % (codewords[i].len() / 2)).collect();
+            self.query(codewords[i], codewords[i + 1], indices, proof_stream);
+        }
+    }
+
+    pub fn commit(
+        &self,
+        initial_codeword: &Vec<F>,
+        proof_stream: &mut FiatShamirTransformer,
+    ) -> Vec<Vec<F>> {
         let one = F::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
@@ -39,7 +55,8 @@ impl<F: Field> FRI<F> {
         let mut codewords = Vec::new();
 
         for r in 0..self.num_rounds() {
-            // let root = Merkle::commit(codeword);
+            let root = Merkle::commit(codeword);
+            proof_stream.push(root);
 
             if r == self.num_rounds() - 1 {
                 break;
@@ -62,6 +79,7 @@ impl<F: Field> FRI<F> {
             offset = offset.clone() * offset.clone();
         }
 
+        proof_stream.push(codeword);
         codewords.push(codeword);
         codewords
     }
