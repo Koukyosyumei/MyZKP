@@ -167,6 +167,10 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
             _phantom: PhantomData,
         }
     }
+
+    fn serialize(&self) -> Vec<u8> {
+        b"test".to_vec()
+    }
 }
 
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash
