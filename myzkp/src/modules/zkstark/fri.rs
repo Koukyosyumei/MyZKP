@@ -30,15 +30,32 @@ impl<F: Field> FRI<F> {
             .collect()
     }
 
+    fn sample_indices(&self) -> Vec<usize> {
+        todo!()
+    }
+
     pub fn prove(&self, codeword: &Vec<F>, proof_stream: &mut FiatShamirTransformer) {
-        let codewords = self.commit(codeword);
+        let codewords = self.commit(codeword, proof_stream);
         let top_level_indices = self.sample_indices();
-        let mut indicies = top_level_indices.clone();
+        let mut indices = top_level_indices.clone();
 
         for i in 0..(codewords.len() - 1) {
-            indices = indices.map(|idx| idx % (codewords[i].len() / 2)).collect();
-            self.query(codewords[i], codewords[i + 1], indices, proof_stream);
+            indices = indices
+                .into_iter()
+                .map(|idx| idx % (codewords[i].len() / 2))
+                .collect::<Vec<_>>()
+                .clone();
+            self.query(&codewords[i], &codewords[i + 1], &indices, proof_stream);
         }
+    }
+
+    pub fn query(
+        &self,
+        cur_codeword: &Vec<F>,
+        next_codeword: &Vec<F>,
+        c_indices: &Vec<usize>,
+        proof_stream: &FiatShamirTransformer,
+    ) {
     }
 
     pub fn commit(
@@ -55,8 +72,14 @@ impl<F: Field> FRI<F> {
         let mut codewords = Vec::new();
 
         for r in 0..self.num_rounds() {
-            let root = Merkle::commit(codeword);
-            proof_stream.push(root);
+            let root = Merkle::commit(
+                &codeword
+                    .clone()
+                    .into_iter()
+                    .map(|c| c.serialize())
+                    .collect::<Vec<_>>(),
+            );
+            proof_stream.push(&root);
 
             if r == self.num_rounds() - 1 {
                 break;
@@ -79,7 +102,7 @@ impl<F: Field> FRI<F> {
             offset = offset.clone() * offset.clone();
         }
 
-        proof_stream.push(codeword);
+        // proof_stream.push(codeword);
         codewords.push(codeword);
         codewords
     }

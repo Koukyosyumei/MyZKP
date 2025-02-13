@@ -74,6 +74,8 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
     fn mul_m1_ref(&self, rhs: &Self) -> Self;
     fn pow_m1<M: Into<BigInt>>(&self, n: M) -> Self;
     fn sanitize(&self) -> Self;
+
+    fn serialize(&self) -> Vec<u8>;
 }
 
 /// Represents an element in a finite field.
@@ -262,6 +264,10 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
             value: value_sanitized,
             _phantom: PhantomData,
         }
+    }
+
+    fn serialize(&self) -> Vec<u8> {
+        b"test".to_vec()
     }
 }
 
