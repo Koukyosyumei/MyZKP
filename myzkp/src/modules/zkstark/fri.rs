@@ -11,6 +11,8 @@ pub struct FRI<F: Field> {
     pub num_colinearity_tests: usize,
 }
 
+pub type Codeword<F> = Vec<F>;
+
 impl<F: Field> FRI<F> {
     fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
@@ -34,7 +36,7 @@ impl<F: Field> FRI<F> {
         todo!()
     }
 
-    pub fn prove(&self, codeword: &Vec<F>, proof_stream: &mut FiatShamirTransformer) {
+    pub fn prove(&self, codeword: &Codeword<F>, proof_stream: &mut FiatShamirTransformer) {
         let codewords = self.commit(codeword, proof_stream);
         let top_level_indices = self.sample_indices();
         let mut indices = top_level_indices.clone();
@@ -51,8 +53,8 @@ impl<F: Field> FRI<F> {
 
     pub fn query(
         &self,
-        cur_codeword: &Vec<F>,
-        next_codeword: &Vec<F>,
+        cur_codeword: &Codeword<F>,
+        next_codeword: &Codeword<F>,
         c_indices: &Vec<usize>,
         proof_stream: &FiatShamirTransformer,
     ) {
@@ -60,9 +62,9 @@ impl<F: Field> FRI<F> {
 
     pub fn commit(
         &self,
-        initial_codeword: &Vec<F>,
+        initial_codeword: &Codeword<F>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<Vec<F>> {
+    ) -> Vec<Codeword<F>> {
         let one = F::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
