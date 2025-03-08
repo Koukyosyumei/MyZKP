@@ -56,7 +56,7 @@ use lazy_static::lazy_static;
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
 use paste::paste;
-use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::ring::Ring;
 use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
@@ -80,7 +80,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
 /// Represents an element in a finite field.
 ///
 /// The type parameter `M` specifies the modulus of the field.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FiniteFieldElement<M> {
     pub value: BigInt,
     _phantom: PhantomData<M>,
@@ -199,17 +199,6 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
             fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
         }
         fe
-    }
-}
-
-impl<M: ModulusValue> Serialize for FiniteFieldElement<M> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut s = serializer.serialize_struct("FiniteFieldElement", 1)?;
-        s.serialize_field("value", &self.value)?;
-        s.end()
     }
 }
 
