@@ -87,7 +87,7 @@ pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> &'static Polynomial<F>;
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
     pub poly: Polynomial<FiniteFieldElement<M>>,
     _phantom: PhantomData<P>,
