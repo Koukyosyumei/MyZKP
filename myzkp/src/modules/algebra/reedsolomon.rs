@@ -53,8 +53,10 @@ impl<F: Field> ReedSolomon<F> {
     /// The message polynomial must have degree less than k.
     pub fn encode(&self, message: &[F]) -> Vec<F> {
         assert!(
-            message.len() == self.k,
-            "Received message must have length k"
+            message.len() <= self.k,
+            "Received message must be less than or equal to k (k={}, get {})",
+            self.k,
+            message.len()
         );
 
         let m_poly = Polynomial {
@@ -72,7 +74,7 @@ impl<F: Field> ReedSolomon<F> {
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
 
-        let codeword = m_shifted - remainder;
+        let mut codeword = m_shifted - remainder;
         codeword.coef
     }
 
@@ -272,6 +274,70 @@ impl GF2to8 {
     }
 }
 
+pub struct ReedSolomon2D<F: Field> {
+    col_coder: ReedSolomon<F>,
+    row_coder: ReedSolomon<F>,
+}
+
+impl<F: Field> ReedSolomon2D<F> {
+    pub fn new(col_codeword_len: usize, row_codeword_len: usize, message_len: usize, g: F) -> Self {
+        let col_coder = ReedSolomon::new(col_codeword_len, message_len, g.clone());
+        let row_coder = ReedSolomon::new(row_codeword_len, message_len, g.clone());
+        ReedSolomon2D {
+            col_coder,
+            row_coder,
+        }
+    }
+
+    pub fn encode(&self, data: &[F]) -> Vec<Vec<F>> {
+        let mut matrix = self.organize_data_matrix(data);
+
+        // First dimension encoding (rows)
+        // - message_len x row_codeword_len
+        let encoded_row = matrix
+            .iter()
+            .map(|row| self.row_coder.encode(row))
+            .collect::<Vec<_>>();
+
+        // Second dimension encoding (columns)
+        // - row_codeword_len x message_len
+        let transposed_encoded_row = self.transpose_matrix(&encoded_row);
+        // - row_codeword_len x col_codeword_len
+        let encoded_cols = transposed_encoded_row
+            .iter()
+            .map(|col| self.col_coder.encode(col))
+            .collect::<Vec<_>>();
+
+        // col_codeword_len x row_codeword_len
+        self.transpose_matrix(&encoded_cols)
+    }
+
+    fn organize_data_matrix(&self, data: &[F]) -> Vec<Vec<F>> {
+        let size = (data.len() as f64).sqrt().ceil() as usize;
+        let mut matrix = vec![vec![F::zero(); size]; size];
+
+        data.iter().enumerate().for_each(|(i, val)| {
+            let row = i / size;
+            let col = i % size;
+            matrix[row][col] = val.clone();
+        });
+
+        matrix
+    }
+
+    fn transpose_matrix(&self, matrix: &[Vec<F>]) -> Vec<Vec<F>> {
+        let row_size = matrix[0].len();
+        let col_size = matrix.len();
+        let mut transposed = vec![vec![F::zero(); col_size]; row_size];
+        for (row_idx, row) in matrix.iter().enumerate() {
+            for (col_idx, val) in row.iter().enumerate() {
+                transposed[col_idx][row_idx] = val.clone();
+            }
+        }
+        transposed
+    }
+}
+
 pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
@@ -281,15 +347,17 @@ pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8>
     ReedSolomon::new(codeword_len, message_len, generator)
 }
 
-fn to_square_matrix(data: &Vec<u8>) -> Vec<Vec<u8>> {
-    let n = (data.len() as f64).sqrt().ceil() as usize;
-    let mut matrix = vec![vec![0; n]; n];
-
-    for (i, &val) in data.iter().enumerate() {
-        matrix[i / n][i % n] = val;
-    }
-
-    matrix
+pub fn create_rs2d(
+    col_codeword_len: usize,
+    row_codeword_len: usize,
+    message_len: usize,
+) -> ReedSolomon2D<GF2to8> {
+    let coef = vec![
+        FiniteFieldElement::<Mod2>::zero(),
+        FiniteFieldElement::<Mod2>::one(),
+    ];
+    let generator = GF2to8::new(Polynomial { coef });
+    ReedSolomon2D::new(col_codeword_len, row_codeword_len, message_len, generator)
 }
 
 #[cfg(test)]
@@ -381,12 +449,9 @@ mod tests {
     }
 
     #[test]
-    fn test_to_square_matrix() {
-        let data = vec![1, 2, 3, 4, 5, 6, 7];
-        let matrix = to_square_matrix(&data);
-
-        assert_eq!(matrix.len(), 3);
-        assert_eq!(matrix[0].len(), 3);
-        assert_eq!(matrix, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 0],]);
+    fn test_no_errors_2d() {
+        let rs2d = create_rs2d(7, 7, 3);
+        let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
+        let codeword = rs2d.encode(&message);
     }
 }
