@@ -272,13 +272,13 @@ impl GF2to8 {
     }
 }
 
-fn create_rs() -> ReedSolomon<GF2to8> {
+fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
         FiniteFieldElement::<Mod2>::one(),
     ];
     let generator = GF2to8::new(Polynomial { coef });
-    ReedSolomon::new(7, 3, generator)
+    ReedSolomon::new(codeword_len, message_len, generator)
 }
 
 #[cfg(test)]
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn test_syndrome_computation_no_error() {
-        let rs = create_rs();
+        let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         let syndromes = rs.compute_syndromes(&codeword);
@@ -304,7 +304,7 @@ mod tests {
     /// Test that when no errors occur, decode_errors returns the original codeword.
     #[test]
     fn test_no_errors() {
-        let rs = create_rs();
+        let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         println!("aaa {}", codeword.len());
@@ -319,7 +319,7 @@ mod tests {
 
     #[test]
     fn test_single_error_correction() {
-        let rs = create_rs();
+        let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(1), GF2to8::from_u8(2), GF2to8::from_u8(3)];
         let mut codeword = rs.encode(&message);
         // Introduce a single error at position 3: add an offset to the symbol.
@@ -336,7 +336,7 @@ mod tests {
 
     #[test]
     fn test_multiple_error_correction() {
-        let rs = create_rs();
+        let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(4), GF2to8::from_u8(8), GF2to8::from_u8(15)];
         let mut codeword = rs.encode(&message);
         // Introduce errors in two positions.
@@ -354,7 +354,7 @@ mod tests {
 
     #[test]
     fn test_too_many_errors() {
-        let rs = create_rs();
+        let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
         let mut codeword = rs.encode(&message);
         // For n = 7 and k = 3, the decoder can correct up to 2 errors.
