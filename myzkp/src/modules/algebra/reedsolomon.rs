@@ -526,12 +526,5 @@ mod tests {
         assert_eq!(decoded[0].to_u8(), 2);
         assert_eq!(decoded[1].to_u8(), 4);
         assert_eq!(decoded[2].to_u8(), 6);
-        // assert_eq!(decoded[3].to_u8(), 0);
-
-        /*
-        assert_eq!(
-            message, decoded,
-            "Decoding an error-free codeword should yield the original codeword"
-        );*/
     }
 }
