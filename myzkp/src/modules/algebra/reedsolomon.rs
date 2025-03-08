@@ -462,12 +462,16 @@ mod tests {
         codeword[3] = codeword[3].clone() + GF2to8::from_u8(10);
         let corrected = rs
             .correct_errors(&codeword)
-            .expect("Decoding should correct a single error");
+            .expect("Correcting should correct a single error");
         let expected = rs.encode(&message);
         assert_eq!(
             corrected, expected,
             "After correcting a single error, the codeword should match the original encoding"
         );
+        let decoded = rs
+            .decode(&corrected)
+            .expect("Decoding should succeed with no errors");
+        assert_eq!(message, decoded);
     }
 
     #[test]
@@ -480,12 +484,16 @@ mod tests {
         codeword[5] = codeword[5].clone() + GF2to8::from_u8(12);
         let corrected = rs
             .correct_errors(&codeword)
-            .expect("Decoding should correct two errors");
+            .expect("Correcting should correct two errors");
         let expected = rs.encode(&message);
         assert_eq!(
             corrected, expected,
             "After correcting two errors, the codeword should match the original encoding"
         );
+        let decoded = rs
+            .decode(&corrected)
+            .expect("Decoding should succeed with no errors");
+        assert_eq!(message, decoded);
     }
 
     #[test]
