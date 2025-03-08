@@ -51,11 +51,14 @@ impl<F: Field> ReedSolomon<F> {
     ///
     /// The message polynomial must have degree less than k.
     pub fn encode(&self, message: &[F]) -> Vec<F> {
+        assert!(
+            message.len() == self.k,
+            "Received message must have length k"
+        );
+
         let m_poly = Polynomial {
             coef: message.to_vec(),
         };
-        println!("is_zero_m_poly: {}", m_poly.clone().is_zero());
-        println!("m_poly {}", m_poly);
 
         // let shift_length = self.d - message.len();
         let mut m_shifted_coef = vec![F::from_value(0); self.d];
@@ -65,27 +68,16 @@ impl<F: Field> ReedSolomon<F> {
             coef: m_shifted_coef,
         };
 
-        println!("m_shifted: {}", m_shifted.clone().is_zero());
-        println!("m_shifted {}", m_shifted.clone());
-
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
 
-        println!("g {}", g.clone());
-        println!("r {}", remainder.clone());
-
         let codeword = m_shifted - remainder;
-
-        println!("is_zero_codeword: {}", codeword.clone().is_zero());
-
-        println!("codeword {}", codeword);
         codeword.coef
     }
 
     /// Compute syndromes S₁, S₂, …, S₂ₜ from the received codeword.
-    /// Here t = (n - k) / 2.
+    /// Here t = (n - k) / 2 and d = n - k.
     pub fn compute_syndromes(&self, received: &[F]) -> Vec<F> {
-        println!("r-length: {}", received.len());
         let eval_points = self.evaluation_points(self.n);
         let mut syndromes = Vec::with_capacity(self.d);
         for j in 0..self.d {
