@@ -56,6 +56,7 @@ use lazy_static::lazy_static;
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
 use paste::paste;
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 use crate::modules::algebra::ring::Ring;
 use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
@@ -64,7 +65,7 @@ use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
 ///
 /// This trait extends the `Ring` trait and adds operations specific to fields,
 /// such as division and finding multiplicative inverses.
-pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
+pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
     /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
     fn div_ref(&self, other: &Self) -> Self;
@@ -198,6 +199,17 @@ impl<M: ModulusValue> Ring for FiniteFieldElement<M> {
             fe = FiniteFieldElement::<M>::new(rng.gen_bigint_range(&BigInt::zero(), modulus));
         }
         fe
+    }
+}
+
+impl<M: ModulusValue> Serialize for FiniteFieldElement<M> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("FiniteFieldElement", 1)?;
+        s.serialize_field("value", &self.value)?;
+        s.end()
     }
 }
 

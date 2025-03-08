@@ -59,12 +59,13 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use num_traits::{One, Zero};
+use serde::Serialize;
 
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 
 /// A struct representing a polynomial over a finite field.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Polynomial<F: Field> {
     /// Coefficients of the polynomial in increasing order of degree.
     pub coef: Vec<F>,

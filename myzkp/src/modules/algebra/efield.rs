@@ -76,6 +76,7 @@ use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_bigint::BigInt;
 use num_traits::One;
 use num_traits::Zero;
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::polynomial::Polynomial;
@@ -176,6 +177,19 @@ impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash
         for v in &self.poly.coef {
             v.hash(state);
         }
+    }
+}
+
+impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Serialize
+    for ExtendedFieldElement<M, P>
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("ExtendedFieldElement", 1)?;
+        s.serialize_field("poly", &self.poly)?;
+        s.end()
     }
 }
 
