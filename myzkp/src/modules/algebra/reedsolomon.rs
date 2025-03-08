@@ -6,6 +6,7 @@ use crate::modules::algebra::polynomial::Polynomial;
 
 pub struct ReedSolomon<F: Field> {
     n: usize, // codeword length
+    d: usize, // validity length
     k: usize, // message length
     g: F,     // generator
 }
@@ -13,19 +14,20 @@ pub struct ReedSolomon<F: Field> {
 impl<F: Field> ReedSolomon<F> {
     pub fn new(n: usize, k: usize, g: F) -> Self {
         assert!(n >= k, "n must be at least k");
-        ReedSolomon { n, k, g }
+        let d = n - k;
+        ReedSolomon { n, d, k, g }
     }
 
     pub fn generator_polynomial(&self) -> Polynomial<F> {
-        let eval_points = self.evaluation_points();
+        let eval_points = self.evaluation_points(self.d);
         Polynomial::<F>::from_monomials(&eval_points)
     }
 
-    /// Compute evaluation points: [g^0, g^1, ..., g^{n - 1}]
-    fn evaluation_points(&self) -> Vec<F> {
-        let mut points = Vec::with_capacity(self.n);
+    /// Compute evaluation points: [g^0, g^1, ..., g^{el - 1}]
+    fn evaluation_points(&self, el: usize) -> Vec<F> {
+        let mut points = Vec::with_capacity(el);
         let one = F::one();
-        for i in 0..self.n {
+        for i in 0..el {
             let pt = self.g.pow(i);
             points.push(pt);
         }
@@ -40,28 +42,41 @@ impl<F: Field> ReedSolomon<F> {
         let m_poly = Polynomial {
             coef: message.to_vec(),
         };
-        let parity_len = self.n - self.k;
+        println!("is_zero_m_poly: {}", m_poly.clone().is_zero());
+        println!("m_poly {}", m_poly);
 
-        let mut m_shifted_coef = vec![F::from_value(0); parity_len];
+        // let shift_length = self.d - message.len();
+        let mut m_shifted_coef = vec![F::from_value(0); self.d];
         m_shifted_coef.extend(m_poly.coef);
+
         let m_shifted = Polynomial {
             coef: m_shifted_coef,
         };
 
+        println!("m_shifted: {}", m_shifted.clone().is_zero());
+        println!("m_shifted {}", m_shifted.clone());
+
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
+
+        println!("g {}", g.clone());
+        println!("r {}", remainder.clone());
+
         let codeword = m_shifted - remainder;
 
+        println!("is_zero_codeword: {}", codeword.clone().is_zero());
+
+        println!("codeword {}", codeword);
         codeword.coef
     }
 
     /// Compute syndromes S₁, S₂, …, S₂ₜ from the received codeword.
     /// Here t = (n - k) / 2.
     pub fn compute_syndromes(&self, received: &[F]) -> Vec<F> {
-        let t = (self.n - self.k) / 2;
-        let eval_points = self.evaluation_points();
-        let mut syndromes = Vec::with_capacity(2 * t);
-        for j in 1..=2 * t {
+        println!("r-length: {}", received.len());
+        let eval_points = self.evaluation_points(self.n);
+        let mut syndromes = Vec::with_capacity(self.d);
+        for j in 0..self.d {
             let mut s = F::zero();
             for (i, r_i) in received.iter().enumerate() {
                 // (α^i)^j = α^(i * j)
@@ -159,7 +174,7 @@ impl<F: Field> ReedSolomon<F> {
     /// We return the indices where an error is detected.
     fn find_error_locations(&self, sigma: &Polynomial<F>) -> Vec<usize> {
         let mut error_positions = Vec::new();
-        let eval_points = self.evaluation_points();
+        let eval_points = self.evaluation_points(self.n);
         for (i, pt) in eval_points.iter().enumerate() {
             // Compute x = (α^i)⁻¹.
             let pt_inv = pt.clone().inverse();
@@ -201,7 +216,7 @@ impl<F: Field> ReedSolomon<F> {
 
         // Correct errors using Forney’s formula.
         let mut corrected = received.to_vec();
-        let eval_points = self.evaluation_points();
+        let eval_points = self.evaluation_points(self.n);
         for &pos in error_positions.iter() {
             let Xi = eval_points[pos].clone();
             let Xi_inv = Xi.clone().inverse();
@@ -268,8 +283,11 @@ mod tests {
     }
 
     fn create_rs() -> ReedSolomon<ExtendedFieldElement<Mod2, Ip0x11D>> {
-        let generator =
-            ExtendedFieldElement::<Mod2, Ip0x11D>::from_base_field(FiniteFieldElement::one());
+        let coef = vec![
+            FiniteFieldElement::<Mod2>::zero(),
+            FiniteFieldElement::<Mod2>::one(),
+        ];
+        let generator = ExtendedFieldElement::<Mod2, Ip0x11D>::new(Polynomial { coef });
         ReedSolomon::new(7, 3, generator)
     }
 
@@ -287,5 +305,21 @@ mod tests {
                 j + 1
             );
         }
+    }
+
+    /// Test that when no errors occur, decode_errors returns the original codeword.
+    #[test]
+    fn test_no_errors() {
+        let rs = create_rs();
+        let message = vec![from_u8(9), from_u8(1), from_u8(7)];
+        let codeword = rs.encode(&message);
+        println!("aaa {}", codeword.len());
+        let decoded = rs
+            .decode_errors(&codeword)
+            .expect("Decoding should succeed with no errors");
+        assert_eq!(
+            codeword, decoded,
+            "Decoding an error-free codeword should yield the original codeword"
+        );
     }
 }
