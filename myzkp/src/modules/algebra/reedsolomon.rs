@@ -322,4 +322,39 @@ mod tests {
             "Decoding an error-free codeword should yield the original codeword"
         );
     }
+
+    #[test]
+    fn test_single_error_correction() {
+        let rs = create_rs();
+        let message = vec![from_u8(1), from_u8(2), from_u8(3)];
+        let mut codeword = rs.encode(&message);
+        // Introduce a single error at position 3: add an offset to the symbol.
+        codeword[3] = codeword[3].clone() + from_u8(10);
+        let corrected = rs
+            .decode_errors(&codeword)
+            .expect("Decoding should correct a single error");
+        let expected = rs.encode(&message);
+        assert_eq!(
+            corrected, expected,
+            "After correcting a single error, the codeword should match the original encoding"
+        );
+    }
+
+    #[test]
+    fn test_multiple_error_correction() {
+        let rs = create_rs();
+        let message = vec![from_u8(4), from_u8(8), from_u8(15)];
+        let mut codeword = rs.encode(&message);
+        // Introduce errors in two positions.
+        codeword[1] = codeword[1].clone() + from_u8(7);
+        codeword[5] = codeword[5].clone() + from_u8(12);
+        let corrected = rs
+            .decode_errors(&codeword)
+            .expect("Decoding should correct two errors");
+        let expected = rs.encode(&message);
+        assert_eq!(
+            corrected, expected,
+            "After correcting two errors, the codeword should match the original encoding"
+        );
+    }
 }
