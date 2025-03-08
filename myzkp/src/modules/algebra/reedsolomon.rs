@@ -198,9 +198,12 @@ impl<F: Field> ReedSolomon<F> {
     /// Returns the corrected codeword if error correction succeeds, or None if there are too many errors.
     pub fn decode_errors(&self, received: &[F]) -> Option<Vec<F>> {
         assert!(
-            received.len() == self.n,
-            "Received codeword must have length n"
+            received.len() <= self.n,
+            "Received codeword must have length n (n={}, get {})",
+            self.n,
+            received.len()
         );
+
         let syndromes = self.compute_syndromes(received);
         // If all syndromes are zero, no error occurred.
         if syndromes.iter().all(|s| *s == F::zero()) {
@@ -279,6 +282,36 @@ impl<F: Field> ReedSolomon2D<F> {
 
         // col_codeword_len x row_codeword_len
         self.transpose_matrix(&encoded_cols)
+    }
+
+    pub fn decode_errors(&self, received: &[Vec<F>]) -> Option<Vec<Vec<F>>> {
+        // row_codeword_len x col_codeword_len
+        let transposed1 = self.transpose_matrix(received);
+        // row_codeword_len x message_len
+        let mut col_decoded: Vec<Vec<F>> = Vec::with_capacity(transposed1.len());
+        for row in transposed1.iter() {
+            let decoded = self.col_coder.decode_errors(row)?;
+            col_decoded.push(decoded);
+        }
+
+        // message_len x row_codeword_len
+        let transposed2 = self.transpose_matrix(&col_decoded);
+        let mut row_decoded: Vec<Vec<F>> = Vec::with_capacity(transposed2.len());
+        for row in transposed2.iter() {
+            let decoded = self.row_coder.decode_errors(row)?;
+            row_decoded.push(decoded);
+        }
+
+        /*
+        let size = row_decoded.len();
+        let mut result: Vec<F> = Vec::with_capacity(size * size);
+        for i in 0..size {
+            for j in 0..size {
+                result[i * size + j] = row_decoded[i * size][j].clone();
+            }
+        }*/
+
+        Some(row_decoded)
     }
 
     fn organize_data_matrix(&self, data: &[F]) -> Vec<Vec<F>> {
@@ -386,7 +419,6 @@ mod tests {
         let rs = create_rs(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
-        println!("aaa {}", codeword.len());
         let decoded = rs
             .decode_errors(&codeword)
             .expect("Decoding should succeed with no errors");
@@ -453,5 +485,12 @@ mod tests {
         let rs2d = create_rs2d(7, 7, 3);
         let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
         let codeword = rs2d.encode(&message);
+        let decoded = rs2d
+            .decode_errors(&codeword)
+            .expect("Decoding should succeed with no errors");
+        assert_eq!(
+            codeword, decoded,
+            "Decoding an error-free codeword should yield the original codeword"
+        );
     }
 }
