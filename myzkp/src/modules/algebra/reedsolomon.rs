@@ -257,6 +257,7 @@ impl<F: Field> ReedSolomon<F> {
 pub struct ReedSolomon2D<F: Field> {
     col_coder: ReedSolomon<F>,
     row_coder: ReedSolomon<F>,
+    message_len: usize,
 }
 
 impl<F: Field> ReedSolomon2D<F> {
@@ -266,6 +267,7 @@ impl<F: Field> ReedSolomon2D<F> {
         ReedSolomon2D {
             col_coder,
             row_coder,
+            message_len,
         }
     }
 
@@ -292,13 +294,13 @@ impl<F: Field> ReedSolomon2D<F> {
         self.transpose_matrix(&encoded_cols)
     }
 
-    pub fn correct_errors(&self, received: &[Vec<F>]) -> Option<Vec<Vec<F>>> {
+    pub fn decode(&self, received: &[Vec<F>]) -> Option<Vec<F>> {
         // row_codeword_len x col_codeword_len
         let transposed1 = self.transpose_matrix(received);
         // row_codeword_len x message_len
         let mut col_decoded: Vec<Vec<F>> = Vec::with_capacity(transposed1.len());
         for row in transposed1.iter() {
-            let decoded = self.col_coder.correct_errors(row)?;
+            let decoded = self.col_coder.decode(row)?;
             col_decoded.push(decoded);
         }
 
@@ -306,20 +308,19 @@ impl<F: Field> ReedSolomon2D<F> {
         let transposed2 = self.transpose_matrix(&col_decoded);
         let mut row_decoded: Vec<Vec<F>> = Vec::with_capacity(transposed2.len());
         for row in transposed2.iter() {
-            let decoded = self.row_coder.correct_errors(row)?;
+            let decoded = self.row_coder.decode(row)?;
             row_decoded.push(decoded);
         }
 
-        /*
-        let size = row_decoded.len();
-        let mut result: Vec<F> = Vec::with_capacity(size * size);
-        for i in 0..size {
-            for j in 0..size {
-                result[i * size + j] = row_decoded[i * size][j].clone();
+        let size = (self.message_len as f64).sqrt().ceil() as usize;
+        let mut result: Vec<F> = vec![F::zero(); size * size];
+        for i in 0..row_decoded.len() {
+            for j in 0..row_decoded[i].len() {
+                result[i * size + j] = row_decoded[i][j].clone();
             }
-        }*/
+        }
 
-        Some(row_decoded)
+        Some(result[..self.message_len].to_vec())
     }
 
     fn organize_data_matrix(&self, data: &[F]) -> Vec<Vec<F>> {
@@ -506,9 +507,9 @@ mod tests {
         codeword[0] = codeword[0].clone() + GF2to8::from_u8(3);
         codeword[3] = codeword[3].clone() + GF2to8::from_u8(5);
         codeword[6] = codeword[6].clone() + GF2to8::from_u8(7);
-        let decoded = rs.correct_errors(&codeword);
+        let corrected = rs.correct_errors(&codeword);
         assert!(
-            decoded.is_none(),
+            corrected.is_none(),
             "Decoding should fail when more errors occur than the code can correct"
         );
     }
@@ -519,11 +520,18 @@ mod tests {
         let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
         let codeword = rs2d.encode(&message);
         let decoded = rs2d
-            .correct_errors(&codeword)
+            .decode(&codeword)
             .expect("Decoding should succeed with no errors");
+
+        assert_eq!(decoded[0].to_u8(), 2);
+        assert_eq!(decoded[1].to_u8(), 4);
+        assert_eq!(decoded[2].to_u8(), 6);
+        // assert_eq!(decoded[3].to_u8(), 0);
+
+        /*
         assert_eq!(
-            codeword, decoded,
+            message, decoded,
             "Decoding an error-free codeword should yield the original codeword"
-        );
+        );*/
     }
 }
