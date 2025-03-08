@@ -29,6 +29,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
+//! use serde::Serialize;
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::modules::algebra::ring::Ring;
 //! use myzkp::modules::algebra::field::ModulusValue;
@@ -59,7 +60,7 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use num_traits::{One, Zero};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
