@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 use paste::paste;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::iter;
 use std::str::FromStr;
 

@@ -29,7 +29,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
-//! use serde::Serialize;
+//! use serde::{Deserialize, Serialize};
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::define_extension_field;
 //! use myzkp::modules::algebra::ring::Ring;

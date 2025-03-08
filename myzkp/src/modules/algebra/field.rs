@@ -28,7 +28,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
-//! use serde::Serialize;
+//! use serde::{Serialize, Deserialize};
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::modules::algebra::ring::Ring;
 //! use myzkp::modules::algebra::field::ModulusValue;
@@ -81,7 +81,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
 /// Represents an element in a finite field.
 ///
 /// The type parameter `M` specifies the modulus of the field.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FiniteFieldElement<M> {
     pub value: BigInt,
     _phantom: PhantomData<M>,
@@ -386,7 +386,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 /// use paste::paste;
 /// use num_bigint::BigInt;
 /// use lazy_static::lazy_static;
-/// use serde::Serialize;
+/// use serde::{Serialize, Deserialize};
 /// use myzkp::define_myzkp_modulus_type;
 /// use myzkp::modules::algebra::ring::Ring;
 /// use myzkp::modules::algebra::field::ModulusValue;
@@ -397,7 +397,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 #[macro_export]
 macro_rules! define_myzkp_modulus_type {
     ($name:ident, $modulus:expr) => {
-        paste! {#[derive(Debug, Hash, Clone, Serialize)]
+        paste! {#[derive(Debug, Hash, Clone, Serialize, Deserialize)]
             pub struct $name;
 
             lazy_static! {

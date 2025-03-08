@@ -5,7 +5,7 @@ use num_bigint::BigInt;
 use num_bigint::ToBigInt;
 use num_traits::{One, Zero};
 use paste::paste;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::curve::curve::{
     get_lambda, miller, EllipticCurve, EllipticCurvePoint,
