@@ -261,7 +261,6 @@ define_extension_field!(
 );
 
 type GF2to8 = ExtendedFieldElement<Mod2, Ip0x11D>;
-
 impl GF2to8 {
     pub fn from_u8(n: u8) -> Self {
         let mut coef = Vec::with_capacity(8);
@@ -273,13 +272,24 @@ impl GF2to8 {
     }
 }
 
-fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
+pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
         FiniteFieldElement::<Mod2>::one(),
     ];
     let generator = GF2to8::new(Polynomial { coef });
     ReedSolomon::new(codeword_len, message_len, generator)
+}
+
+fn to_square_matrix(data: &Vec<u8>) -> Vec<Vec<u8>> {
+    let n = (data.len() as f64).sqrt().ceil() as usize;
+    let mut matrix = vec![vec![0; n]; n];
+
+    for (i, &val) in data.iter().enumerate() {
+        matrix[i / n][i % n] = val;
+    }
+
+    matrix
 }
 
 #[cfg(test)]
@@ -368,5 +378,15 @@ mod tests {
             decoded.is_none(),
             "Decoding should fail when more errors occur than the code can correct"
         );
+    }
+
+    #[test]
+    fn test_to_square_matrix() {
+        let data = vec![1, 2, 3, 4, 5, 6, 7];
+        let matrix = to_square_matrix(&data);
+
+        assert_eq!(matrix.len(), 3);
+        assert_eq!(matrix[0].len(), 3);
+        assert_eq!(matrix, vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 0, 0],]);
     }
 }
