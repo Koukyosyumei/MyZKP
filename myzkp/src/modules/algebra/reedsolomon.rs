@@ -243,37 +243,6 @@ impl<F: Field> ReedSolomon<F> {
     }
 }
 
-define_myzkp_modulus_type!(Mod2, "2");
-define_extension_field!(
-    Ip0x11D,
-    FiniteFieldElement<Mod2>,
-    Polynomial {
-        coef: vec![
-            FiniteFieldElement::<Mod2>::from_value(1),
-            FiniteFieldElement::<Mod2>::from_value(0),
-            FiniteFieldElement::<Mod2>::from_value(1),
-            FiniteFieldElement::<Mod2>::from_value(1),
-            FiniteFieldElement::<Mod2>::from_value(1),
-            FiniteFieldElement::<Mod2>::from_value(0),
-            FiniteFieldElement::<Mod2>::from_value(0),
-            FiniteFieldElement::<Mod2>::from_value(0),
-            FiniteFieldElement::<Mod2>::from_value(1),
-        ],
-    }
-);
-
-type GF2to8 = ExtendedFieldElement<Mod2, Ip0x11D>;
-impl GF2to8 {
-    pub fn from_u8(n: u8) -> Self {
-        let mut coef = Vec::with_capacity(8);
-        for i in 0..8 {
-            let bit = (n >> i) & 1;
-            coef.push(FiniteFieldElement::<Mod2>::from_value(bit as i32));
-        }
-        GF2to8::new(Polynomial { coef })
-    }
-}
-
 pub struct ReedSolomon2D<F: Field> {
     col_coder: ReedSolomon<F>,
     row_coder: ReedSolomon<F>,
@@ -335,6 +304,37 @@ impl<F: Field> ReedSolomon2D<F> {
             }
         }
         transposed
+    }
+}
+
+define_myzkp_modulus_type!(Mod2, "2");
+define_extension_field!(
+    Ip0x11D,
+    FiniteFieldElement<Mod2>,
+    Polynomial {
+        coef: vec![
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(1),
+        ],
+    }
+);
+
+type GF2to8 = ExtendedFieldElement<Mod2, Ip0x11D>;
+impl GF2to8 {
+    pub fn from_u8(n: u8) -> Self {
+        let mut coef = Vec::with_capacity(8);
+        for i in 0..8 {
+            let bit = (n >> i) & 1;
+            coef.push(FiniteFieldElement::<Mod2>::from_value(bit as i32));
+        }
+        GF2to8::new(Polynomial { coef })
     }
 }
 
