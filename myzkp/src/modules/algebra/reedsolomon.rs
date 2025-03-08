@@ -1,8 +1,20 @@
+use lazy_static::lazy_static;
+use num_bigint::BigInt;
 use num_traits::{One, Zero};
+use paste::paste;
 use std::iter;
+use std::str::FromStr;
 
+use crate::define_extension_field;
+use crate::define_myzkp_modulus_type;
+
+use crate::modules::algebra::efield::ExtendedFieldElement;
+use crate::modules::algebra::efield::IrreduciblePoly;
 use crate::modules::algebra::field::Field;
+use crate::modules::algebra::field::FiniteFieldElement;
+use crate::modules::algebra::field::ModulusValue;
 use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 
 pub struct ReedSolomon<F: Field> {
     n: usize, // codeword length
@@ -236,71 +248,61 @@ impl<F: Field> ReedSolomon<F> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use lazy_static::lazy_static;
-    use num_bigint::BigInt;
-    use paste::paste;
-    use std::str::FromStr;
+define_myzkp_modulus_type!(Mod2, "2");
+define_extension_field!(
+    Ip0x11D,
+    FiniteFieldElement<Mod2>,
+    Polynomial {
+        coef: vec![
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(1),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(0),
+            FiniteFieldElement::<Mod2>::from_value(1),
+        ],
+    }
+);
 
-    use crate::modules::algebra::efield::ExtendedFieldElement;
-    use crate::modules::algebra::efield::IrreduciblePoly;
-    use crate::modules::algebra::field::FiniteFieldElement;
-    use crate::modules::algebra::field::ModulusValue;
-    use crate::modules::algebra::ring::Ring;
+type GF2to8 = ExtendedFieldElement<Mod2, Ip0x11D>;
 
-    use crate::define_extension_field;
-    use crate::define_myzkp_modulus_type;
-
-    define_myzkp_modulus_type!(Mod2, "2");
-
-    define_extension_field!(
-        Ip0x11D,
-        FiniteFieldElement<Mod2>,
-        Polynomial {
-            coef: vec![
-                FiniteFieldElement::<Mod2>::from_value(1),
-                FiniteFieldElement::<Mod2>::from_value(0),
-                FiniteFieldElement::<Mod2>::from_value(1),
-                FiniteFieldElement::<Mod2>::from_value(1),
-                FiniteFieldElement::<Mod2>::from_value(1),
-                FiniteFieldElement::<Mod2>::from_value(0),
-                FiniteFieldElement::<Mod2>::from_value(0),
-                FiniteFieldElement::<Mod2>::from_value(0),
-                FiniteFieldElement::<Mod2>::from_value(1),
-            ],
-        }
-    );
-
-    pub fn from_u8(n: u8) -> ExtendedFieldElement<Mod2, Ip0x11D> {
+impl GF2to8 {
+    pub fn from_u8(n: u8) -> Self {
         let mut coef = Vec::with_capacity(8);
         for i in 0..8 {
             let bit = (n >> i) & 1;
             coef.push(FiniteFieldElement::<Mod2>::from_value(bit as i32));
         }
-        ExtendedFieldElement::<Mod2, Ip0x11D>::new(Polynomial { coef })
+        GF2to8::new(Polynomial { coef })
     }
+}
 
-    fn create_rs() -> ReedSolomon<ExtendedFieldElement<Mod2, Ip0x11D>> {
-        let coef = vec![
-            FiniteFieldElement::<Mod2>::zero(),
-            FiniteFieldElement::<Mod2>::one(),
-        ];
-        let generator = ExtendedFieldElement::<Mod2, Ip0x11D>::new(Polynomial { coef });
-        ReedSolomon::new(7, 3, generator)
-    }
+fn create_rs() -> ReedSolomon<GF2to8> {
+    let coef = vec![
+        FiniteFieldElement::<Mod2>::zero(),
+        FiniteFieldElement::<Mod2>::one(),
+    ];
+    let generator = GF2to8::new(Polynomial { coef });
+    ReedSolomon::new(7, 3, generator)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
 
     #[test]
     fn test_syndrome_computation_no_error() {
         let rs = create_rs();
-        let message = vec![from_u8(9), from_u8(1), from_u8(7)];
+        let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         let syndromes = rs.compute_syndromes(&codeword);
         for (j, s) in syndromes.iter().enumerate() {
             assert_eq!(
                 *s,
-                from_u8(0),
+                GF2to8::from_u8(0),
                 "Syndrome S_{} should be zero for an error-free codeword",
                 j + 1
             );
@@ -311,7 +313,7 @@ mod tests {
     #[test]
     fn test_no_errors() {
         let rs = create_rs();
-        let message = vec![from_u8(9), from_u8(1), from_u8(7)];
+        let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         println!("aaa {}", codeword.len());
         let decoded = rs
@@ -326,10 +328,10 @@ mod tests {
     #[test]
     fn test_single_error_correction() {
         let rs = create_rs();
-        let message = vec![from_u8(1), from_u8(2), from_u8(3)];
+        let message = vec![GF2to8::from_u8(1), GF2to8::from_u8(2), GF2to8::from_u8(3)];
         let mut codeword = rs.encode(&message);
         // Introduce a single error at position 3: add an offset to the symbol.
-        codeword[3] = codeword[3].clone() + from_u8(10);
+        codeword[3] = codeword[3].clone() + GF2to8::from_u8(10);
         let corrected = rs
             .decode_errors(&codeword)
             .expect("Decoding should correct a single error");
@@ -343,11 +345,11 @@ mod tests {
     #[test]
     fn test_multiple_error_correction() {
         let rs = create_rs();
-        let message = vec![from_u8(4), from_u8(8), from_u8(15)];
+        let message = vec![GF2to8::from_u8(4), GF2to8::from_u8(8), GF2to8::from_u8(15)];
         let mut codeword = rs.encode(&message);
         // Introduce errors in two positions.
-        codeword[1] = codeword[1].clone() + from_u8(7);
-        codeword[5] = codeword[5].clone() + from_u8(12);
+        codeword[1] = codeword[1].clone() + GF2to8::from_u8(7);
+        codeword[5] = codeword[5].clone() + GF2to8::from_u8(12);
         let corrected = rs
             .decode_errors(&codeword)
             .expect("Decoding should correct two errors");
@@ -355,6 +357,23 @@ mod tests {
         assert_eq!(
             corrected, expected,
             "After correcting two errors, the codeword should match the original encoding"
+        );
+    }
+
+    #[test]
+    fn test_too_many_errors() {
+        let rs = create_rs();
+        let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
+        let mut codeword = rs.encode(&message);
+        // For n = 7 and k = 3, the decoder can correct up to 2 errors.
+        // Introduce three errors (exceeding the correction capability).
+        codeword[0] = codeword[0].clone() + GF2to8::from_u8(3);
+        codeword[3] = codeword[3].clone() + GF2to8::from_u8(5);
+        codeword[6] = codeword[6].clone() + GF2to8::from_u8(7);
+        let decoded = rs.decode_errors(&codeword);
+        assert!(
+            decoded.is_none(),
+            "Decoding should fail when more errors occur than the code can correct"
         );
     }
 }
