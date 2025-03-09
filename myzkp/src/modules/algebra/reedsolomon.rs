@@ -452,43 +452,22 @@ mod tests {
         }
     }
 
-    /// Test that when no errors occur, correct_errors returns the original codeword.
     #[test]
     fn test_no_errors() {
         let rs = create_rs(7, 3);
-        let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
-        let codeword = rs.encode(&message);
-        let corrected = rs
-            .correct_errors(&codeword)
-            .expect("Correcting should succeed with no errors");
-        assert_eq!(
-            codeword, corrected,
-            "Correcting an error-free codeword should yield the original codeword"
-        );
-        let decoded = rs
-            .decode(&corrected)
-            .expect("Decoding should succeed with no errors");
+        let message = vec![9, 1, 7];
+        let code = encode_rs1d(&message, &rs);
+        let decoded = decode_rs1d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_single_error_correction() {
         let rs = create_rs(7, 3);
-        let message = vec![GF2to8::from_u8(1), GF2to8::from_u8(2), GF2to8::from_u8(3)];
-        let mut codeword = rs.encode(&message);
-        // Introduce a single error at position 3: add an offset to the symbol.
-        codeword[3] = codeword[3].clone() + GF2to8::from_u8(10);
-        let corrected = rs
-            .correct_errors(&codeword)
-            .expect("Correcting should correct a single error");
-        let expected = rs.encode(&message);
-        assert_eq!(
-            corrected, expected,
-            "After correcting a single error, the codeword should match the original encoding"
-        );
-        let decoded = rs
-            .decode(&corrected)
-            .expect("Decoding should succeed with no errors");
+        let message = vec![1, 2, 3];
+        let mut code = encode_rs1d(&message, &rs);
+        code[3] += 10;
+        let decoded = decode_rs1d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
