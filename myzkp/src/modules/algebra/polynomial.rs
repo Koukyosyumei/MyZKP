@@ -29,6 +29,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
+//! use serde::{Deserialize, Serialize};
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::modules::algebra::ring::Ring;
 //! use myzkp::modules::algebra::field::ModulusValue;
@@ -59,12 +60,13 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use num_traits::{One, Zero};
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 
 /// A struct representing a polynomial over a finite field.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Polynomial<F: Field> {
     /// Coefficients of the polynomial in increasing order of degree.
     pub coef: Vec<F>,

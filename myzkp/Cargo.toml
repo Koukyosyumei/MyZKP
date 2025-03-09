@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-num-bigint = { version = "0.4", features = ["rand"] }
+num-bigint = { version = "0.4", features = ["rand", "serde"] }
 num-traits = "0.2"
 rand = "0.8.5"
 lazy_static = "1.4.0"
 paste = "1.0.15"
+serde = { version = "1.0.27", features = ["derive"] }
+blake2 = "0.10.6"
 
 [profile.test]
 opt-level = 3

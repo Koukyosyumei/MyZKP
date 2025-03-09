@@ -75,6 +75,7 @@ mod tests {
     use lazy_static::lazy_static;
     use num_bigint::BigInt;
     use paste::paste;
+    use serde::{Deserialize, Serialize};
 
     use crate::define_myzkp_modulus_type;
     use crate::modules::algebra::field::{FiniteFieldElement, ModulusValue};

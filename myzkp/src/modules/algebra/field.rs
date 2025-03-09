@@ -28,6 +28,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
+//! use serde::{Serialize, Deserialize};
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::modules::algebra::ring::Ring;
 //! use myzkp::modules::algebra::field::ModulusValue;
@@ -56,6 +57,7 @@ use lazy_static::lazy_static;
 use num_bigint::{BigInt, RandBigInt};
 use num_traits::{One, Signed, Zero};
 use paste::paste;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::ring::Ring;
 use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
@@ -64,7 +66,7 @@ use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
 ///
 /// This trait extends the `Ring` trait and adds operations specific to fields,
 /// such as division and finding multiplicative inverses.
-pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
+pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
     /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
     fn div_ref(&self, other: &Self) -> Self;
@@ -79,14 +81,14 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash {
 /// Represents an element in a finite field.
 ///
 /// The type parameter `M` specifies the modulus of the field.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FiniteFieldElement<M> {
     pub value: BigInt,
     _phantom: PhantomData<M>,
 }
 
 /// Trait for defining the modulus of a finite field.
-pub trait ModulusValue: Debug + Clone + Hash {
+pub trait ModulusValue: Debug + Clone + Hash + Serialize {
     fn modulus() -> &'static BigInt;
 }
 
@@ -384,6 +386,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 /// use paste::paste;
 /// use num_bigint::BigInt;
 /// use lazy_static::lazy_static;
+/// use serde::{Serialize, Deserialize};
 /// use myzkp::define_myzkp_modulus_type;
 /// use myzkp::modules::algebra::ring::Ring;
 /// use myzkp::modules::algebra::field::ModulusValue;
@@ -394,7 +397,7 @@ impl<M: ModulusValue> Div for FiniteFieldElement<M> {
 #[macro_export]
 macro_rules! define_myzkp_modulus_type {
     ($name:ident, $modulus:expr) => {
-        paste! {#[derive(Debug, Hash, Clone)]
+        paste! {#[derive(Debug, Hash, Clone, Serialize, Deserialize)]
             pub struct $name;
 
             lazy_static! {

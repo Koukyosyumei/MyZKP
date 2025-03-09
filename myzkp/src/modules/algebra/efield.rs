@@ -29,6 +29,7 @@
 //! use paste::paste;
 //! use num_bigint::BigInt;
 //! use lazy_static::lazy_static;
+//! use serde::{Deserialize, Serialize};
 //! use myzkp::define_myzkp_modulus_type;
 //! use myzkp::define_extension_field;
 //! use myzkp::modules::algebra::ring::Ring;
@@ -76,6 +77,7 @@ use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_bigint::BigInt;
 use num_traits::One;
 use num_traits::Zero;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::polynomial::Polynomial;
@@ -85,7 +87,7 @@ pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
     fn modulus() -> &'static Polynomial<F>;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
     pub poly: Polynomial<FiniteFieldElement<M>>,
     _phantom: PhantomData<P>,
