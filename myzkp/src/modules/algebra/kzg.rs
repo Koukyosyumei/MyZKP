@@ -30,14 +30,14 @@ pub fn commit_kzg(p: &Polynomial<FqOrder>, pk: &PublicKey) -> G1Point {
     p.eval_with_powers_on_curve(&pk.alpha_1)
 }
 
-pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKey) -> G1Point {
+pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKey) -> (FqOrder, G1Point) {
     let y = p.eval(z);
     let y_poly = Polynomial {
-        coef: (&[y]).to_vec(),
+        coef: (&[y.clone()]).to_vec(),
     };
 
     let q = (p - &y_poly) / Polynomial::<FqOrder>::from_monomials(&[z.clone()]);
-    q.eval_with_powers_on_curve(&pk.alpha_1)
+    (y, q.eval_with_powers_on_curve(&pk.alpha_1))
 }
 
 pub fn verify_kzg(z: &FqOrder, y: &FqOrder, c: &G1Point, w: &G1Point, pk: &PublicKey) -> bool {
@@ -52,4 +52,36 @@ pub fn verify_kzg(z: &FqOrder, y: &FqOrder, c: &G1Point, w: &G1Point, pk: &Publi
     let e3 = optimal_ate_pairing(&c, &g2);
 
     e3 == e1 * (e2.pow(y.get_value()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::modules::algebra::curve::bn128::BN128;
+
+    #[test]
+    fn test_kzg() {
+        let g1 = BN128::generator_g1();
+        let g2 = BN128::generator_g2();
+
+        let p = Polynomial::from_monomials(&[
+            FqOrder::from_value(-1),
+            FqOrder::from_value(-2),
+            FqOrder::from_value(-3),
+        ]);
+
+        let pk = setup_kzg(&g1, &g2, 3);
+
+        // Commitment
+        let c = commit_kzg(&p, &pk);
+
+        // Proof
+        let z = FqOrder::from_value(5);
+        let (y, w) = open_kzg(&p, &z, &pk);
+
+        // Verification
+        let flag = verify_kzg(&z, &y, &c, &w, &pk);
+        assert!(flag);
+    }
 }
