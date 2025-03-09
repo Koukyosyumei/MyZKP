@@ -1,6 +1,7 @@
 pub mod curve;
 pub mod efield;
 pub mod field;
+pub mod kzg;
 pub mod merkle;
 pub mod polynomial;
 pub mod reedsolomon;
