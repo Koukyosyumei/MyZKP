@@ -432,6 +432,28 @@ pub fn decode_rs1d(code: &[u8], rs: &ReedSolomon<GF2to8>) -> Option<Vec<u8>> {
     Some(decoded.iter().map(|c| c.to_u8()).collect::<Vec<_>>())
 }
 
+pub fn encode_rs2d(message: &[u8], rs: &ReedSolomon2D<GF2to8>) -> Vec<Vec<u8>> {
+    rs.encode(
+        &message
+            .iter()
+            .map(|m| GF2to8::from_u8(*m))
+            .collect::<Vec<_>>(),
+    )
+    .iter()
+    .map(|row| row.iter().map(|c| c.to_u8()).collect::<Vec<_>>())
+    .collect::<Vec<_>>()
+}
+
+pub fn decode_rs2d(code: &[Vec<u8>], rs: &ReedSolomon2D<GF2to8>) -> Option<Vec<u8>> {
+    let decoded = rs.decode(
+        &code
+            .iter()
+            .map(|row| row.iter().map(|c| GF2to8::from_u8(*c)).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+    )?;
+    Some(decoded.iter().map(|c| c.to_u8()).collect::<Vec<_>>())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -499,15 +521,10 @@ mod tests {
 
     #[test]
     fn test_no_errors_2d() {
-        let rs2d = create_rs2d(7, 7, 3);
-        let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
-        let codeword = rs2d.encode(&message);
-        let decoded = rs2d
-            .decode(&codeword)
-            .expect("Decoding should succeed with no errors");
-
-        assert_eq!(decoded[0].to_u8(), 2);
-        assert_eq!(decoded[1].to_u8(), 4);
-        assert_eq!(decoded[2].to_u8(), 6);
+        let rs = create_rs2d(7, 7, 3);
+        let message = vec![2, 4, 6];
+        let code = encode_rs2d(&message, &rs);
+        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        assert_eq!(message, decoded);
     }
 }
