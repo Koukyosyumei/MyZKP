@@ -474,38 +474,25 @@ mod tests {
     #[test]
     fn test_multiple_error_correction() {
         let rs = create_rs(7, 3);
-        let message = vec![GF2to8::from_u8(4), GF2to8::from_u8(8), GF2to8::from_u8(15)];
-        let mut codeword = rs.encode(&message);
-        // Introduce errors in two positions.
-        codeword[1] = codeword[1].clone() + GF2to8::from_u8(7);
-        codeword[5] = codeword[5].clone() + GF2to8::from_u8(12);
-        let corrected = rs
-            .correct_errors(&codeword)
-            .expect("Correcting should correct two errors");
-        let expected = rs.encode(&message);
-        assert_eq!(
-            corrected, expected,
-            "After correcting two errors, the codeword should match the original encoding"
-        );
-        let decoded = rs
-            .decode(&corrected)
-            .expect("Decoding should succeed with no errors");
+        let message = vec![4, 8, 15];
+        let mut code = encode_rs1d(&message, &rs);
+        code[1] += 7;
+        code[5] += 12;
+        let decoded = decode_rs1d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_too_many_errors() {
         let rs = create_rs(7, 3);
-        let message = vec![GF2to8::from_u8(2), GF2to8::from_u8(4), GF2to8::from_u8(6)];
-        let mut codeword = rs.encode(&message);
-        // For n = 7 and k = 3, the decoder can correct up to 2 errors.
-        // Introduce three errors (exceeding the correction capability).
-        codeword[0] = codeword[0].clone() + GF2to8::from_u8(3);
-        codeword[3] = codeword[3].clone() + GF2to8::from_u8(5);
-        codeword[6] = codeword[6].clone() + GF2to8::from_u8(7);
-        let corrected = rs.correct_errors(&codeword);
+        let message = vec![2, 4, 6];
+        let mut code = encode_rs1d(&message, &rs);
+        code[0] += 3;
+        code[3] += 5;
+        code[6] += 7;
+        let decoded = decode_rs1d(&code, &rs);
         assert!(
-            corrected.is_none(),
+            decoded.is_none(),
             "Decoding should fail when more errors occur than the code can correct"
         );
     }
