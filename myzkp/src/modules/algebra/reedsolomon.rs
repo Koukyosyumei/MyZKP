@@ -415,6 +415,23 @@ pub fn create_rs2d(
     ReedSolomon2D::new(col_codeword_len, row_codeword_len, message_len, generator)
 }
 
+pub fn encode_rs1d(message: &[u8], rs: &ReedSolomon<GF2to8>) -> Vec<u8> {
+    rs.encode(
+        &message
+            .iter()
+            .map(|m| GF2to8::from_u8(*m))
+            .collect::<Vec<_>>(),
+    )
+    .iter()
+    .map(|c| c.to_u8())
+    .collect::<Vec<_>>()
+}
+
+pub fn decode_rs1d(code: &[u8], rs: &ReedSolomon<GF2to8>) -> Option<Vec<u8>> {
+    let decoded = rs.decode(&code.iter().map(|c| GF2to8::from_u8(*c)).collect::<Vec<_>>())?;
+    Some(decoded.iter().map(|c| c.to_u8()).collect::<Vec<_>>())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
