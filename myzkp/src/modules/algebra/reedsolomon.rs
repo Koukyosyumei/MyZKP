@@ -539,12 +539,24 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_error_correction_2d() {
+    fn test_multiple_error_correction_2d_a() {
         let rs = create_rs2d(7, 7, 3);
         let message = vec![5, 4, 16];
         let mut code = encode_rs2d(&message, &rs);
-        code[1][1] += 10;
+        code[1][1] += 6;
         code[0][1] += 5;
+        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        assert_eq!(message, decoded);
+    }
+
+    #[test]
+    fn test_multiple_error_correction_2d_b() {
+        let rs = create_rs2d(7, 7, 3);
+        let message = vec![8, 2, 3];
+        let mut code = encode_rs2d(&message, &rs);
+        code[1][1] += 3;
+        code[0][1] += 1;
+        code[2][0] += 9;
         let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
