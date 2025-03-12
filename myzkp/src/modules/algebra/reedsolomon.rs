@@ -63,7 +63,6 @@ impl<F: Field> ReedSolomon<F> {
             coef: message.to_vec(),
         };
 
-        // let shift_length = self.d - message.len();
         let mut m_shifted_coef = vec![F::from_value(0); self.d];
         m_shifted_coef.extend(m_poly.coef);
 
@@ -262,8 +261,9 @@ pub struct ReedSolomon2D<F: Field> {
 
 impl<F: Field> ReedSolomon2D<F> {
     pub fn new(col_codeword_len: usize, row_codeword_len: usize, message_len: usize, g: F) -> Self {
-        let col_coder = ReedSolomon::new(col_codeword_len, message_len, g.clone());
-        let row_coder = ReedSolomon::new(row_codeword_len, message_len, g.clone());
+        let size = (message_len as f64).sqrt().ceil() as usize;
+        let col_coder = ReedSolomon::new(col_codeword_len, size, g.clone());
+        let row_coder = ReedSolomon::new(row_codeword_len, size, g.clone());
         ReedSolomon2D {
             col_coder,
             row_coder,
@@ -479,6 +479,7 @@ mod tests {
         let rs = create_rs(7, 3);
         let message = vec![9, 1, 7];
         let code = encode_rs1d(&message, &rs);
+        assert_eq!(message, code[4..7]);
         let decoded = decode_rs1d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
@@ -498,6 +499,7 @@ mod tests {
         let rs = create_rs(7, 3);
         let message = vec![4, 8, 15];
         let mut code = encode_rs1d(&message, &rs);
+        assert_eq!(message, code[4..7]);
         code[1] += 7;
         code[5] += 12;
         let decoded = decode_rs1d(&code, &rs).expect("Decoding should succeed with no errors");
@@ -509,6 +511,7 @@ mod tests {
         let rs = create_rs(7, 3);
         let message = vec![2, 4, 6];
         let mut code = encode_rs1d(&message, &rs);
+        assert_eq!(message, code[4..7]);
         code[0] += 3;
         code[3] += 5;
         code[6] += 7;
@@ -521,16 +524,19 @@ mod tests {
 
     #[test]
     fn test_no_errors_2d() {
-        let rs = create_rs2d(5, 5, 3);
+        let rs = create_rs2d(4, 4, 3);
         let message = vec![2, 4, 6];
         let code = encode_rs2d(&message, &rs);
+        assert_eq!(code[2][2], 2);
+        assert_eq!(code[2][3], 4);
+        assert_eq!(code[3][2], 6);
         let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_single_error_correction_2d() {
-        let rs = create_rs2d(5, 5, 3);
+        let rs = create_rs2d(4, 4, 3);
         let message = vec![2, 8, 3];
         let mut code = encode_rs2d(&message, &rs);
         code[1][1] += 10;
@@ -540,7 +546,7 @@ mod tests {
 
     #[test]
     fn test_multiple_error_correction_2d() {
-        let rs = create_rs2d(5, 5, 3);
+        let rs = create_rs2d(4, 4, 3);
         let message = vec![5, 4, 16];
         let mut code = encode_rs2d(&message, &rs);
         code[1][0] += 6;
@@ -551,7 +557,7 @@ mod tests {
 
     #[test]
     fn test_too_many_errors_2d() {
-        let rs = create_rs2d(5, 5, 3);
+        let rs = create_rs2d(4, 4, 3);
         let message = vec![8, 2, 3];
         let mut code = encode_rs2d(&message, &rs);
         code[1][0] += 6;
