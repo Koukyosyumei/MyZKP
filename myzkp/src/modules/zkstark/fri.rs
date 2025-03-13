@@ -5,6 +5,14 @@ use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 
+fn sample<F: Field>(byte_array: &[u8]) -> F {
+    let mut acc: usize = 0;
+    for &b in byte_array {
+        acc = (acc << 8) ^ (b as usize);
+    }
+    F::from_value(acc)
+}
+
 fn sample_index(byte_array: &[u8], size: usize) -> usize {
     let mut acc: usize = 0;
     for &b in byte_array {
@@ -198,7 +206,7 @@ impl<F: Field> FRI<F> {
             }
 
             // get challenge
-            let alpha = F::random_element(&[]);
+            let alpha: F = sample(&proof_stream.prover_fiat_shamir(32));
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -231,4 +239,18 @@ impl<F: Field> FRI<F> {
         codewords.push(codeword);
         codewords
     }
+
+    /*
+    pub fn verify(proof_stream: &mut FiatShamirTransformer) -> bool {
+        let omega = self.omega.clone();
+        let offset = self.offset.clone();
+
+        // extract all roots and alphas
+        let roots = Vec::new();
+        let alphas = Vec::new();
+        for r in 0..self.num_rounds() {
+            roots.push(proof_stream.pull());
+            alphas.push()
+        }
+    }*/
 }
