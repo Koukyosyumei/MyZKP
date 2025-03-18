@@ -289,6 +289,8 @@ impl<M: ModulusValue> FRI<M> {
             return false
         }
 
+        let top_level_indices = sample_indices(&proof_stream.verifier_fiat_shamir(32), self.domain_length >> 1, self.domain_length >> (self.num_rounds() - 1), self.num_colinearity_tests);
+
         true
     }
 }
