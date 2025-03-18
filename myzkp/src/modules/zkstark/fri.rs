@@ -235,7 +235,8 @@ impl<M: ModulusValue> FRI<M> {
 
     // TODO vec<F>をpull/pushできるように、シリアライズ・でぃしありずできるようにしよう
 
-    pub fn verify(self, proof_stream: &mut FiatShamirTransformer) -> bool {
+    pub fn verify(self, proof_stream: &mut FiatShamirTransformer, 
+            polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>) -> bool {
         let omega = self.omega.clone();
         let offset = self.offset.clone();
 
@@ -301,9 +302,20 @@ impl<M: ModulusValue> FRI<M> {
             let mut cc = Vec::<FiniteFieldElement<M>>::new();
             for s in 0..self.num_colinearity_tests {
                 let abc = proof_stream.pull();
-                aa.push(bincode::deserialize(&abc[0]).expect("Deserialization failed"));
-                bb.push(bincode::deserialize(&abc[1]).expect("Deserialization failed"));
-                cc.push(bincode::deserialize(&abc[2]).expect("Deserialization failed"));
+                let ay: FiniteFieldElement<M> = bincode::deserialize(&abc[0]).expect("Deserialization failed"); 
+                let by: FiniteFieldElement<M> = bincode::deserialize(&abc[1]).expect("Deserialization failed");
+                let cy: FiniteFieldElement<M> = bincode::deserialize(&abc[2]).expect("Deserialization failed");
+                aa.push(ay.clone());
+                bb.push(by.clone());
+                cc.push(cy.clone());
+            
+                if r == 0 {
+                    polynomial_values.push((a_indices[s], ay));
+                    polynomial_values.push((b_indices[s], by));
+                    polynomial_values.push((c_indices[s], cy));
+                }
+
+                let ax = &offset * &(omega.pow(a_indices[s]));
             }
         }
 
