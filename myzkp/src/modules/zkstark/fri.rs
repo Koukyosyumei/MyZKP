@@ -1,16 +1,18 @@
+use num_traits::One;
 use blake2::{digest::consts::U32, Blake2b, Digest};
 
-use crate::modules::algebra::field::Field;
+use crate::modules::algebra::ring::Ring;
+use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 
-fn sample<F: Field>(byte_array: &[u8]) -> F {
+fn sample<M: ModulusValue>(byte_array: &[u8]) -> FiniteFieldElement<M> {
     let mut acc: usize = 0;
     for &b in byte_array {
         acc = (acc << 8) ^ (b as usize);
     }
-    F::from_value(acc)
+    FiniteFieldElement::<M>::from_value(acc)
 }
 
 fn sample_index(byte_array: &[u8], size: usize) -> usize {
@@ -57,9 +59,9 @@ fn sample_indices(seed: &[u8], size: usize, reduced_size: usize, number: usize) 
     indices
 }
 
-pub struct FRI<F: Field> {
-    pub offset: F,
-    pub omega: F,
+pub struct FRI<M: ModulusValue> {
+    pub offset: FiniteFieldElement<M>,
+    pub omega: FiniteFieldElement<M>,
     pub domain_length: usize,
     pub expansion_factor: usize,
     pub num_colinearity_tests: usize,
@@ -67,7 +69,7 @@ pub struct FRI<F: Field> {
 
 pub type Codeword<F> = Vec<F>;
 
-impl<F: Field> FRI<F> {
+impl<M: ModulusValue> FRI<M> {
     fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
         let mut num_rounds = 0;
@@ -80,7 +82,7 @@ impl<F: Field> FRI<F> {
         num_rounds
     }
 
-    fn eval_domain(&self) -> Vec<F> {
+    fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()
@@ -88,7 +90,7 @@ impl<F: Field> FRI<F> {
 
     pub fn prove(
         &self,
-        codeword: &Codeword<F>,
+        codeword: &Codeword<FiniteFieldElement<M>>,
         proof_stream: &mut FiatShamirTransformer,
     ) -> Vec<usize> {
         assert!(
@@ -123,8 +125,8 @@ impl<F: Field> FRI<F> {
 
     pub fn query(
         &self,
-        cur_codeword: &Codeword<F>,
-        next_codeword: &Codeword<F>,
+        cur_codeword: &Codeword<FiniteFieldElement<M>>,
+        next_codeword: &Codeword<FiniteFieldElement<M>>,
         c_indices: &Vec<usize>,
         proof_stream: &mut FiatShamirTransformer,
     ) -> Vec<usize> {
@@ -178,10 +180,10 @@ impl<F: Field> FRI<F> {
 
     pub fn commit(
         &self,
-        initial_codeword: &Codeword<F>,
+        initial_codeword: &Codeword<FiniteFieldElement<M>>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<Codeword<F>> {
-        let one = F::one();
+    ) -> Vec<Codeword<FiniteFieldElement<M>>> {
+        let one = FiniteFieldElement::<M>::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
         let mut omega = self.omega.clone();
@@ -206,7 +208,7 @@ impl<F: Field> FRI<F> {
             }
 
             // get challenge
-            let alpha: F = sample(&proof_stream.prover_fiat_shamir(32));
+            let alpha: FiniteFieldElement<M> = sample(&proof_stream.prover_fiat_shamir(32));
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -248,7 +250,7 @@ impl<F: Field> FRI<F> {
 
         // extract all roots and alphas
         let mut roots = Vec::new();
-        let mut alphas: Vec<F> = Vec::new();
+        let mut alphas: Vec<FiniteFieldElement<M>> = Vec::new();
         for r in 0..self.num_rounds() {
             roots.push(proof_stream.pull());
             alphas.push(sample(&proof_stream.verifier_fiat_shamir(32)));
