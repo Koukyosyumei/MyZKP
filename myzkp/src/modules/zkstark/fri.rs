@@ -278,6 +278,10 @@ impl<M: ModulusValue> FRI<M> {
             .map(|i| last_offset.clone() * (last_omega.pow(i))).collect::<Vec<_>>();
         let poly = Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &deserialized_last_codeword);
 
+        for i in 0..last_codeword.len() {
+            assert!(poly.eval(&last_domain[i]) == deserialized_last_codeword[i], "re-evaluated codeword does not match original!");
+        }
+
         true
     }
 }
