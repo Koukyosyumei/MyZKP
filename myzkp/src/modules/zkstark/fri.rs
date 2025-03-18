@@ -1,10 +1,10 @@
-use num_traits::One;
 use blake2::{digest::consts::U32, Blake2b, Digest};
+use num_traits::One;
 
-use crate::modules::algebra::ring::Ring;
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 
 fn sample<M: ModulusValue>(byte_array: &[u8]) -> FiniteFieldElement<M> {
@@ -136,16 +136,14 @@ impl<M: ModulusValue> FRI<M> {
             .map(|idx| idx + cur_codeword.len() / 2)
             .collect::<Vec<_>>();
 
+        // reveal leafs
         for s in 0..self.num_colinearity_tests {
-            proof_stream.push(
-                &bincode::serialize(&cur_codeword[a_indices[s]]).expect("Serialization failed"),
-            );
-            proof_stream.push(
-                &bincode::serialize(&cur_codeword[b_indices[s]]).expect("Serialization failed"),
-            );
-            proof_stream.push(
-                &bincode::serialize(&next_codeword[c_indices[s]]).expect("Serialization failed"),
-            );
+            let obj = vec![
+                bincode::serialize(&cur_codeword[a_indices[s]]).expect("Serialization failed"),
+                bincode::serialize(&cur_codeword[b_indices[s]]).expect("Serialization failed"),
+                bincode::serialize(&next_codeword[c_indices[s]]).expect("Serialization failed"),
+            ];
+            proof_stream.push(&obj);
         }
 
         let serialized_cur_codeword = cur_codeword
@@ -157,19 +155,14 @@ impl<M: ModulusValue> FRI<M> {
             .map(|c| bincode::serialize(&c).expect("Serialization failed"))
             .collect::<Vec<_>>();
 
+        // reveal authentication paths
         for s in 0..self.num_colinearity_tests {
             let path_a = Merkle::open(a_indices[s], &serialized_cur_codeword);
             let path_b = Merkle::open(b_indices[s], &serialized_cur_codeword);
             let path_c = Merkle::open(c_indices[s], &serialized_next_codeword);
-            for p in path_a {
-                proof_stream.push(&p);
-            }
-            for p in path_b {
-                proof_stream.push(&p);
-            }
-            for p in path_c {
-                proof_stream.push(&p);
-            }
+            proof_stream.push(&path_a);
+            proof_stream.push(&path_b);
+            proof_stream.push(&path_c);
         }
 
         let mut result = a_indices.clone();
@@ -200,7 +193,7 @@ impl<M: ModulusValue> FRI<M> {
                     .map(|c| bincode::serialize(&c).expect("Serialization failed"))
                     .collect::<Vec<_>>(),
             );
-            proof_stream.push(&root);
+            proof_stream.push(&vec![root]);
 
             // prepare next round, if necessary
             if r == self.num_rounds() - 1 {
@@ -233,9 +226,7 @@ impl<M: ModulusValue> FRI<M> {
             .into_iter()
             .map(|c| bincode::serialize(&c).expect("Serialization failed"))
             .collect::<Vec<_>>();
-        for c in serialized_codeword {
-            proof_stream.push(&c);
-        }
+        proof_stream.push(&serialized_codeword);
 
         // collect last codeword too
         codewords.push(codeword);
@@ -262,7 +253,7 @@ impl<M: ModulusValue> FRI<M> {
         //    bincode::deserialize(&last_codeword).expect("Deserialization failed");
 
         // check if it matches the given root
-        if *roots.last().unwrap() != Merkle::commit(&[last_codeword.clone()]) {
+        if *roots.last().unwrap().first().unwrap() != Merkle::commit(&last_codeword) {
             return false;
         }
 
