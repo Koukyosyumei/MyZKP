@@ -282,6 +282,13 @@ impl<M: ModulusValue> FRI<M> {
             assert!(poly.eval(&last_domain[i]) == deserialized_last_codeword[i], "re-evaluated codeword does not match original!");
         }
 
+        if poly.degree() > degree.try_into().unwrap() {
+            println!("last codeword does not correspond to polynomial of low enough degree");
+            println!("observed degree: {}", poly.degree());
+            println!("but should be: {}", degree);
+            return false
+        }
+
         true
     }
 }
