@@ -249,8 +249,8 @@ impl<M: ModulusValue> FRI<M> {
 
         // extract last codeword
         let last_codeword = proof_stream.pull();
-        //let deserialized_last_codeword =
-        //    bincode::deserialize(&last_codeword).expect("Deserialization failed");
+        let deserialized_last_codeword: Vec<FiniteFieldElement<M>> = last_codeword.iter().
+            map(|c| bincode::deserialize(&c).expect("Deserialization failed")).collect::<Vec<_>>();
 
         // check if it matches the given root
         if *roots.last().unwrap().first().unwrap() != Merkle::commit(&last_codeword) {
