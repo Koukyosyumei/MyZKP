@@ -233,8 +233,6 @@ impl<M: ModulusValue> FRI<M> {
         codewords
     }
 
-    // TODO vec<F>をpull/pushできるように、シリアライズ・でぃしありずできるようにしよう
-
     pub fn verify(
         self,
         proof_stream: &mut FiatShamirTransformer,
