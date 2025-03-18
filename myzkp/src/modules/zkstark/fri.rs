@@ -310,12 +310,27 @@ impl<M: ModulusValue> FRI<M> {
                 cc.push(cy.clone());
             
                 if r == 0 {
-                    polynomial_values.push((a_indices[s], ay));
-                    polynomial_values.push((b_indices[s], by));
-                    polynomial_values.push((c_indices[s], cy));
+                    polynomial_values.push((a_indices[s], ay.clone()));
+                    polynomial_values.push((b_indices[s], by.clone()));
+                    polynomial_values.push((c_indices[s], cy.clone()));
                 }
 
+                // colinearity check
                 let ax = &offset * &(omega.pow(a_indices[s]));
+                let bx = &offset * &(omega.pow(b_indices[s]));
+                let cx = &alphas[r];
+                let p = Polynomial::<FiniteFieldElement<M>>::interpolate(&[ax.clone(), bx.clone(), cx.clone()], &[ay.clone(), by.clone(), cy.clone()]);
+                if p.degree() > 1 {
+                    return false;
+                }
+            }
+
+            // verify authentication paths
+            for i in 0..self.num_colinearity_tests {
+                let path = proof_stream.pull();
+                if !Merkle::verify(roots.last().unwrap().first().unwrap(), a_indices[i], &path, &bincode::serialize(&aa[i]).expect("Serialization failed")) {
+                    return false;
+                }
             }
         }
 
