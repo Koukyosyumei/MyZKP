@@ -235,8 +235,11 @@ impl<M: ModulusValue> FRI<M> {
 
     // TODO vec<F>をpull/pushできるように、シリアライズ・でぃしありずできるようにしよう
 
-    pub fn verify(self, proof_stream: &mut FiatShamirTransformer, 
-            polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>) -> bool {
+    pub fn verify(
+        self,
+        proof_stream: &mut FiatShamirTransformer,
+        polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
+    ) -> bool {
         let omega = self.omega.clone();
         let offset = self.offset.clone();
 
@@ -250,8 +253,10 @@ impl<M: ModulusValue> FRI<M> {
 
         // extract last codeword
         let last_codeword = proof_stream.pull();
-        let deserialized_last_codeword: Vec<FiniteFieldElement<M>> = last_codeword.iter().
-            map(|c| bincode::deserialize(&c).expect("Deserialization failed")).collect::<Vec<_>>();
+        let deserialized_last_codeword: Vec<FiniteFieldElement<M>> = last_codeword
+            .iter()
+            .map(|c| bincode::deserialize(&c).expect("Deserialization failed"))
+            .collect::<Vec<_>>();
 
         // check if it matches the given root
         if *roots.last().unwrap().first().unwrap() != Merkle::commit(&last_codeword) {
@@ -276,39 +281,60 @@ impl<M: ModulusValue> FRI<M> {
         // compute interpolant
         let last_domain = (0..last_codeword.len())
             .into_iter()
-            .map(|i| last_offset.clone() * (last_omega.pow(i))).collect::<Vec<_>>();
-        let poly = Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &deserialized_last_codeword);
+            .map(|i| last_offset.clone() * (last_omega.pow(i)))
+            .collect::<Vec<_>>();
+        let poly = Polynomial::<FiniteFieldElement<M>>::interpolate(
+            &last_domain,
+            &deserialized_last_codeword,
+        );
 
         for i in 0..last_codeword.len() {
-            assert!(poly.eval(&last_domain[i]) == deserialized_last_codeword[i], "re-evaluated codeword does not match original!");
+            assert!(
+                poly.eval(&last_domain[i]) == deserialized_last_codeword[i],
+                "re-evaluated codeword does not match original!"
+            );
         }
 
         if poly.degree() > degree.try_into().unwrap() {
             println!("last codeword does not correspond to polynomial of low enough degree");
             println!("observed degree: {}", poly.degree());
             println!("but should be: {}", degree);
-            return false
+            return false;
         }
 
-        let top_level_indices = sample_indices(&proof_stream.verifier_fiat_shamir(32), self.domain_length >> 1, self.domain_length >> (self.num_rounds() - 1), self.num_colinearity_tests);
+        let top_level_indices = sample_indices(
+            &proof_stream.verifier_fiat_shamir(32),
+            self.domain_length >> 1,
+            self.domain_length >> (self.num_rounds() - 1),
+            self.num_colinearity_tests,
+        );
 
         for r in 0..(self.num_rounds() - 1) {
-            let c_indices = top_level_indices.iter().map(|i| {i % (self.domain_length >> (r + 1))}).collect::<Vec<_>>();
+            let c_indices = top_level_indices
+                .iter()
+                .map(|i| i % (self.domain_length >> (r + 1)))
+                .collect::<Vec<_>>();
             let a_indices = c_indices.clone();
-            let b_indices = a_indices.iter().map(|i| {i + (self.domain_length >> (r + 1))}).collect::<Vec<_>>();
+            let b_indices = a_indices
+                .iter()
+                .map(|i| i + (self.domain_length >> (r + 1)))
+                .collect::<Vec<_>>();
 
             let mut aa = Vec::<FiniteFieldElement<M>>::new();
             let mut bb = Vec::<FiniteFieldElement<M>>::new();
             let mut cc = Vec::<FiniteFieldElement<M>>::new();
             for s in 0..self.num_colinearity_tests {
                 let abc = proof_stream.pull();
-                let ay: FiniteFieldElement<M> = bincode::deserialize(&abc[0]).expect("Deserialization failed"); 
-                let by: FiniteFieldElement<M> = bincode::deserialize(&abc[1]).expect("Deserialization failed");
-                let cy: FiniteFieldElement<M> = bincode::deserialize(&abc[2]).expect("Deserialization failed");
+                let ay: FiniteFieldElement<M> =
+                    bincode::deserialize(&abc[0]).expect("Deserialization failed");
+                let by: FiniteFieldElement<M> =
+                    bincode::deserialize(&abc[1]).expect("Deserialization failed");
+                let cy: FiniteFieldElement<M> =
+                    bincode::deserialize(&abc[2]).expect("Deserialization failed");
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
-            
+
                 if r == 0 {
                     polynomial_values.push((a_indices[s], ay.clone()));
                     polynomial_values.push((b_indices[s], by.clone()));
@@ -319,7 +345,10 @@ impl<M: ModulusValue> FRI<M> {
                 let ax = &offset * &(omega.pow(a_indices[s]));
                 let bx = &offset * &(omega.pow(b_indices[s]));
                 let cx = &alphas[r];
-                let p = Polynomial::<FiniteFieldElement<M>>::interpolate(&[ax.clone(), bx.clone(), cx.clone()], &[ay.clone(), by.clone(), cy.clone()]);
+                let p = Polynomial::<FiniteFieldElement<M>>::interpolate(
+                    &[ax.clone(), bx.clone(), cx.clone()],
+                    &[ay.clone(), by.clone(), cy.clone()],
+                );
                 if p.degree() > 1 {
                     return false;
                 }
@@ -327,8 +356,34 @@ impl<M: ModulusValue> FRI<M> {
 
             // verify authentication paths
             for i in 0..self.num_colinearity_tests {
-                let path = proof_stream.pull();
-                if !Merkle::verify(roots.last().unwrap().first().unwrap(), a_indices[i], &path, &bincode::serialize(&aa[i]).expect("Serialization failed")) {
+                let path_aa = proof_stream.pull();
+                if !Merkle::verify(
+                    roots[r].first().unwrap(),
+                    a_indices[i],
+                    &path_aa,
+                    &bincode::serialize(&aa[i]).expect("Serialization failed"),
+                ) {
+                    println!("merkle authentication path verification fails for aa");
+                    return false;
+                }
+                let path_bb = proof_stream.pull();
+                if !Merkle::verify(
+                    roots[r].first().unwrap(),
+                    b_indices[i],
+                    &path_bb,
+                    &bincode::serialize(&bb[i]).expect("Serialization failed"),
+                ) {
+                    println!("merkle authentication path verification fails for bb");
+                    return false;
+                }
+                let path_cc = proof_stream.pull();
+                if !Merkle::verify(
+                    roots[r + 1].first().unwrap(),
+                    c_indices[i],
+                    &path_cc,
+                    &bincode::serialize(&cc[i]).expect("Serialization failed"),
+                ) {
+                    println!("merkle authentication path verification fails for cc");
                     return false;
                 }
             }
