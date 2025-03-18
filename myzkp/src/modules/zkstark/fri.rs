@@ -291,6 +291,22 @@ impl<M: ModulusValue> FRI<M> {
 
         let top_level_indices = sample_indices(&proof_stream.verifier_fiat_shamir(32), self.domain_length >> 1, self.domain_length >> (self.num_rounds() - 1), self.num_colinearity_tests);
 
+        for r in 0..(self.num_rounds() - 1) {
+            let c_indices = top_level_indices.iter().map(|i| {i % (self.domain_length >> (r + 1))}).collect::<Vec<_>>();
+            let a_indices = c_indices.clone();
+            let b_indices = a_indices.iter().map(|i| {i + (self.domain_length >> (r + 1))}).collect::<Vec<_>>();
+
+            let mut aa = Vec::<FiniteFieldElement<M>>::new();
+            let mut bb = Vec::<FiniteFieldElement<M>>::new();
+            let mut cc = Vec::<FiniteFieldElement<M>>::new();
+            for s in 0..self.num_colinearity_tests {
+                let abc = proof_stream.pull();
+                aa.push(bincode::deserialize(&abc[0]).expect("Deserialization failed"));
+                bb.push(bincode::deserialize(&abc[1]).expect("Deserialization failed"));
+                cc.push(bincode::deserialize(&abc[2]).expect("Deserialization failed"));
+            }
+        }
+
         true
     }
 }
