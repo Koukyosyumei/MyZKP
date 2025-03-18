@@ -240,14 +240,14 @@ impl<M: ModulusValue> FRI<M> {
         proof_stream: &mut FiatShamirTransformer,
         polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
     ) -> bool {
-        let omega = self.omega.clone();
-        let offset = self.offset.clone();
+        let mut omega = self.omega.clone();
+        let mut offset = self.offset.clone();
 
         // extract all roots and alphas
         let mut roots = Vec::new();
         let mut alphas: Vec<FiniteFieldElement<M>> = Vec::new();
         for r in 0..self.num_rounds() {
-            roots.push(proof_stream.pull());
+            roots.push(proof_stream.pull().first().unwrap().clone());
             alphas.push(sample(&proof_stream.verifier_fiat_shamir(32)));
         }
 
@@ -259,7 +259,7 @@ impl<M: ModulusValue> FRI<M> {
             .collect::<Vec<_>>();
 
         // check if it matches the given root
-        if *roots.last().unwrap().first().unwrap() != Merkle::commit(&last_codeword) {
+        if **roots.last().unwrap() != Merkle::commit(&last_codeword) {
             return false;
         }
 
@@ -358,7 +358,7 @@ impl<M: ModulusValue> FRI<M> {
             for i in 0..self.num_colinearity_tests {
                 let path_aa = proof_stream.pull();
                 if !Merkle::verify(
-                    roots[r].first().unwrap(),
+                    &roots[r],
                     a_indices[i],
                     &path_aa,
                     &bincode::serialize(&aa[i]).expect("Serialization failed"),
@@ -368,7 +368,7 @@ impl<M: ModulusValue> FRI<M> {
                 }
                 let path_bb = proof_stream.pull();
                 if !Merkle::verify(
-                    roots[r].first().unwrap(),
+                    &roots[r],
                     b_indices[i],
                     &path_bb,
                     &bincode::serialize(&bb[i]).expect("Serialization failed"),
@@ -378,7 +378,7 @@ impl<M: ModulusValue> FRI<M> {
                 }
                 let path_cc = proof_stream.pull();
                 if !Merkle::verify(
-                    roots[r + 1].first().unwrap(),
+                    &roots[r + 1],
                     c_indices[i],
                     &path_cc,
                     &bincode::serialize(&cc[i]).expect("Serialization failed"),
@@ -387,6 +387,9 @@ impl<M: ModulusValue> FRI<M> {
                     return false;
                 }
             }
+
+            omega = omega.pow(2);
+            offset = offset.pow(2);
         }
 
         true
