@@ -275,8 +275,8 @@ impl<M: ModulusValue> FRI<M> {
         // compute interpolant
         let last_domain = (0..last_codeword.len())
             .into_iter()
-            .map(|i| last_offset.clone() * (last_omega.pow(i)));
-        //let poly = Polynomial::<F>::interpolate(&last_domain, &deserialized_last_codeword);
+            .map(|i| last_offset.clone() * (last_omega.pow(i))).collect::<Vec<_>>();
+        let poly = Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &deserialized_last_codeword);
 
         true
     }
