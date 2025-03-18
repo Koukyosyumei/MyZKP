@@ -240,17 +240,51 @@ impl<F: Field> FRI<F> {
         codewords
     }
 
-    /*
-    pub fn verify(proof_stream: &mut FiatShamirTransformer) -> bool {
+    // TODO vec<F>をpull/pushできるように、シリアライズ・でぃしありずできるようにしよう
+
+    pub fn verify(self, proof_stream: &mut FiatShamirTransformer) -> bool {
         let omega = self.omega.clone();
         let offset = self.offset.clone();
 
         // extract all roots and alphas
-        let roots = Vec::new();
-        let alphas = Vec::new();
+        let mut roots = Vec::new();
+        let mut alphas: Vec<F> = Vec::new();
         for r in 0..self.num_rounds() {
             roots.push(proof_stream.pull());
-            alphas.push()
+            alphas.push(sample(&proof_stream.verifier_fiat_shamir(32)));
         }
-    }*/
+
+        // extract last codeword
+        let last_codeword = proof_stream.pull();
+        //let deserialized_last_codeword =
+        //    bincode::deserialize(&last_codeword).expect("Deserialization failed");
+
+        // check if it matches the given root
+        if *roots.last().unwrap() != Merkle::commit(&[last_codeword.clone()]) {
+            return false;
+        }
+
+        // check if it is low degree
+        let degree = (last_codeword.len() / self.expansion_factor) - 1;
+        let mut last_omega = omega.clone();
+        let mut last_offset = offset.clone();
+        for r in 0..(self.num_rounds() - 1) {
+            last_omega = last_omega.clone() * last_omega;
+            last_offset = last_offset.clone() * last_offset;
+        }
+
+        // assert that last_omega has the right order
+        assert!(
+            last_omega.inverse() == last_omega.pow(last_codeword.len() - 1),
+            "omega does not have right order"
+        );
+
+        // compute interpolant
+        let last_domain = (0..last_codeword.len())
+            .into_iter()
+            .map(|i| last_offset.clone() * (last_omega.pow(i)));
+        //let poly = Polynomial::<F>::interpolate(&last_domain, &deserialized_last_codeword);
+
+        true
+    }
 }
