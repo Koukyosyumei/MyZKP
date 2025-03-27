@@ -16,11 +16,7 @@ pub struct ProofCelestia {
 
 pub struct Celestia;
 impl Celestia {
-    pub fn encode(
-        width: usize,
-        height: usize,
-        data: &[u8],
-    ) -> (EncodedDataCelestia, CommitmentCelestia) {
+    pub fn encode(width: usize, height: usize, data: &[u8]) -> EncodedDataCelestia {
         let rs = setup_rs2d(width, height, data.len());
         let encoded = encode_rs2d(&data, &rs);
         let reshaped: EncodedDataCelestia = encoded
@@ -32,10 +28,14 @@ impl Celestia {
             })
             .collect();
 
-        let row_roots: Vec<Vec<u8>> = reshaped.iter().map(|row| Merkle::commit(&row)).collect();
-        let col_roots: Vec<Vec<u8>> = (0..reshaped[0].len())
+        reshaped
+    }
+
+    pub fn commit(encoded: &EncodedDataCelestia) -> CommitmentCelestia {
+        let row_roots: Vec<Vec<u8>> = encoded.iter().map(|row| Merkle::commit(&row)).collect();
+        let col_roots: Vec<Vec<u8>> = (0..encoded[0].len())
             .map(|i| {
-                let col = reshaped
+                let col = encoded
                     .iter()
                     .map(|row| row[i].clone())
                     .collect::<Vec<Vec<u8>>>();
@@ -47,14 +47,11 @@ impl Celestia {
         all_roots.extend(col_roots.iter().cloned());
         let data_root = Merkle::commit(&all_roots);
 
-        (
-            reshaped,
-            CommitmentCelestia {
-                row_roots,
-                col_roots,
-                data_root,
-            },
-        )
+        CommitmentCelestia {
+            row_roots,
+            col_roots,
+            data_root,
+        }
     }
 
     pub fn sample(
@@ -100,7 +97,9 @@ mod tests {
     #[test]
     fn test_celestia_no_error() {
         let data = vec![1, 2, 3, 4];
-        let (encoded, commitment) = Celestia::encode(4, 4, &data);
+        let encoded = Celestia::encode(4, 4, &data);
+        let commitment = Celestia::commit(&encoded);
+
         let proof_00_left = Celestia::sample(0, 0, &encoded, true);
         assert!(Celestia::verify(
             0,
