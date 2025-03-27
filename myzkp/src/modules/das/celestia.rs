@@ -75,12 +75,12 @@ impl Celestia {
         proof: &ProofCelestia,
     ) -> bool {
         Merkle::verify(
-            &commitment.row_roots[col_id],
+            &commitment.row_roots[row_id],
             col_id,
             &proof.row_proof,
             chunk,
         ) && Merkle::verify(
-            &commitment.col_roots[row_id],
+            &commitment.col_roots[col_id],
             row_id,
             &proof.col_proof,
             chunk,
@@ -96,7 +96,28 @@ mod tests {
     fn test_celestia_no_error() {
         let data = vec![1, 2, 3, 4];
         let (encoded, commitment) = Celestia::encode(4, 4, &data);
-        let proof = Celestia::sample(0, 0, &encoded);
-        assert!(Celestia::verify(0, 0, &encoded[0][0], &commitment, &proof));
+        let proof_00 = Celestia::sample(0, 0, &encoded);
+        assert!(Celestia::verify(
+            0,
+            0,
+            &encoded[0][0],
+            &commitment,
+            &proof_00
+        ));
+        let proof_01 = Celestia::sample(0, 1, &encoded);
+        assert!(Celestia::verify(
+            0,
+            1,
+            &encoded[0][1],
+            &commitment,
+            &proof_01
+        ));
+        assert!(!Celestia::verify(
+            0,
+            1,
+            &encoded[1][0],
+            &commitment,
+            &proof_01
+        ));
     }
 }
