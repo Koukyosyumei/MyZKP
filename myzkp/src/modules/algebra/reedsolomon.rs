@@ -108,17 +108,17 @@ impl<F: Field> ReedSolomon<F> {
         let mut sigma = Polynomial {
             coef: vec![F::one()],
         };
-        let mut B = Polynomial {
+        let mut bb = Polynomial {
             coef: vec![F::one()],
         };
-        let mut L = 0;
+        let mut el = 0;
         let mut m = 1;
         let mut b = F::one();
 
         for n_iter in 0..n {
             // Compute discrepancy d = S[n_iter] + Σ₍ᵢ₌₁₎^L σᵢ S[n_iter - i]
             let mut d = syndromes[n_iter].clone();
-            for i in 1..=L {
+            for i in 1..=el {
                 if i < sigma.coef.len() {
                     d = d + sigma.coef[i].clone() * syndromes[n_iter - i].clone();
                 }
@@ -126,7 +126,7 @@ impl<F: Field> ReedSolomon<F> {
             if d == F::zero() {
                 m += 1;
             } else {
-                let T = sigma.clone();
+                let t = sigma.clone();
                 // factor = d / b
                 let factor = d.clone() / b.clone();
                 // Multiply B(x) by x^m: create x^m with coefficient 1 in degree m.
@@ -136,12 +136,12 @@ impl<F: Field> ReedSolomon<F> {
                         .chain(iter::once(F::one()))
                         .collect(),
                 };
-                let x_m_B = x_m * B.clone();
+                let x_m_b = x_m * bb.clone();
                 // sigma = sigma - factor * (x^m * B(x))
-                sigma = sigma - x_m_B * factor.clone();
-                if 2 * L <= n_iter {
-                    L = n_iter + 1 - L;
-                    B = T;
+                sigma = sigma - x_m_b * factor.clone();
+                if 2 * el <= n_iter {
+                    el = n_iter + 1 - el;
+                    bb = t;
                     b = d;
                     m = 1;
                 } else {
@@ -169,10 +169,10 @@ impl<F: Field> ReedSolomon<F> {
     fn compute_error_evaluator(&self, syndromes: &[F], sigma: &Polynomial<F>) -> Polynomial<F> {
         let t = (self.n - self.k) / 2;
         // Build syndrome polynomial S(x) = S₁ + S₂x + … + S₂ₜ x^(2t-1).
-        let S_poly = Polynomial {
+        let s_poly = Polynomial {
             coef: syndromes.to_vec(),
         };
-        let prod = sigma.clone() * S_poly;
+        let prod = sigma.clone() * s_poly;
         // Truncate the product to degree < 2t.
         let mut truncated = prod;
         if truncated.coef.len() > 2 * t {
