@@ -1,7 +1,10 @@
-use crate::modules::algebra::algebra::kzg::{
+use crate::modules::algebra::curve::bn128::{FqOrder, G1Point, G2Point};
+use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
+use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{encode_rs2d, setup_rs2d};
+use crate::modules::algebra::ring::Ring;
 
 pub type EncodedDataAvail = Vec<Vec<u8>>;
 
@@ -28,18 +31,24 @@ impl Avail {
     }
 
     pub fn commit(encoded: &EncodedDataAvail, pk: &PublicKeyKZG) -> CommitmentAvail {
-        let row_commits = encoded
+        let row_commitments = encoded
             .iter()
             .map(|row| {
-                let poly = Polynomial::from_coefficients(row);
+                let poly = Polynomial {
+                    coef: row.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
+                };
                 commit_kzg(&poly, &pk)
             })
             .collect();
 
-        let col_commits = (0..encoded[0].len())
+        let col_commitments = (0..encoded[0].len())
             .map(|i| {
-                let col_poly =
-                    Polynomial::from_coefficients(encoded.iter().map(|row| row[i]).collect());
+                let col_poly = Polynomial {
+                    coef: encoded
+                        .iter()
+                        .map(|row| FqOrder::from_value(row[i].clone()))
+                        .collect(),
+                };
                 commit_kzg(&col_poly, &pk)
             })
             .collect();
@@ -59,9 +68,19 @@ impl Avail {
         pk: &PublicKeyKZG,
     ) -> ProofAvail {
         let poly = if is_row {
-            Polynomial::from_coefficients(encoded[row_id]);
+            Polynomial {
+                coef: encoded[row_id]
+                    .iter()
+                    .map(|e| FqOrder::from_value(e.clone()))
+                    .collect(),
+            }
         } else {
-            Polynomial::from_coefficients(encoded.iter().map(|r| r[col]).collect())
+            Polynomial {
+                coef: encoded
+                    .iter()
+                    .map(|r| FqOrder::from_value(r[col_id].clone()))
+                    .collect(),
+            }
         };
         let proof_kzg = open_kzg(&poly, x, &pk);
         ProofAvail { proof_kzg, is_row }
@@ -76,9 +95,9 @@ impl Avail {
         pk: &PublicKeyKZG,
     ) -> bool {
         if proof.is_row {
-            verify_kzg(x, &commitment.row_commitments[row_id], proof.proof_kzg, pk)
+            verify_kzg(x, &commitment.row_commitments[row_id], &proof.proof_kzg, pk)
         } else {
-            verify_kzg(x, &commitment.row_commitments[col_id], proof.proof_kzg, pk)
+            verify_kzg(x, &commitment.row_commitments[col_id], &proof.proof_kzg, pk)
         }
     }
 }
