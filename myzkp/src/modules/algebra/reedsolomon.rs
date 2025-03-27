@@ -39,7 +39,7 @@ impl<F: Field> ReedSolomon<F> {
     /// Compute evaluation points: [g^0, g^1, ..., g^{el - 1}]
     fn evaluation_points(&self, el: usize) -> Vec<F> {
         let mut points = Vec::with_capacity(el);
-        let one = F::one();
+        // let one = F::one();
         for i in 0..el {
             let pt = self.g.pow(i);
             points.push(pt);
@@ -73,7 +73,7 @@ impl<F: Field> ReedSolomon<F> {
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
 
-        let mut codeword = m_shifted - remainder;
+        let codeword = m_shifted - remainder;
         codeword.coef
     }
 
@@ -235,16 +235,16 @@ impl<F: Field> ReedSolomon<F> {
         let mut corrected = received.to_vec();
         let eval_points = self.evaluation_points(self.n);
         for &pos in error_positions.iter() {
-            let Xi = eval_points[pos].clone();
-            let Xi_inv = Xi.clone().inverse();
-            let omega_val = omega.eval(&Xi_inv);
-            let sigma_deriv_val = sigma_deriv.eval(&Xi_inv);
+            let xi = eval_points[pos].clone();
+            let xi_inv = xi.clone().inverse();
+            let omega_val = omega.eval(&xi_inv);
+            let sigma_deriv_val = sigma_deriv.eval(&xi_inv);
             if sigma_deriv_val == F::zero() {
                 // Cannot correct if derivative evaluates to zero.
                 return None;
             }
-            // Forney’s formula: error magnitude = - (Xi * Ω(Xi⁻¹)) / σ'(Xi⁻¹)
-            let error_mag = -(Xi * omega_val) / sigma_deriv_val;
+            // Forney’s formula: error magnitude = - (xi * Ω(xi⁻¹)) / σ'(xi⁻¹)
+            let error_mag = -(xi * omega_val) / sigma_deriv_val;
             // Correct the error (assuming r = c + e, we subtract the error magnitude).
             corrected[pos] = corrected[pos].clone() - error_mag;
         }
@@ -272,7 +272,7 @@ impl<F: Field> ReedSolomon2D<F> {
     }
 
     pub fn encode(&self, data: &[F]) -> Vec<Vec<F>> {
-        let mut matrix = self.organize_data_matrix(data);
+        let matrix = self.organize_data_matrix(data);
 
         // First dimension encoding (rows)
         // - message_len x row_codeword_len

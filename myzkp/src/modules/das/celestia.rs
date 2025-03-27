@@ -1,5 +1,5 @@
 use crate::modules::algebra::merkle::Merkle;
-use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
+use crate::modules::algebra::reedsolomon::{encode_rs2d, setup_rs2d};
 
 pub type EncodedDataCelestia = Vec<Vec<Vec<u8>>>;
 
