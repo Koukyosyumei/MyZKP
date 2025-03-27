@@ -393,7 +393,7 @@ impl GF2to8 {
     }
 }
 
-pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
+pub fn setup_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
         FiniteFieldElement::<Mod2>::one(),
@@ -402,7 +402,7 @@ pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8>
     ReedSolomon::new(codeword_len, message_len, generator)
 }
 
-pub fn create_rs2d(
+pub fn setup_rs2d(
     col_codeword_len: usize,
     row_codeword_len: usize,
     message_len: usize,
@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn test_syndrome_computation_no_error() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         let syndromes = rs.compute_syndromes(&codeword);
@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn test_no_errors() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![9, 1, 7];
         let code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -486,7 +486,7 @@ mod tests {
 
     #[test]
     fn test_single_error_correction() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![1, 2, 3];
         let mut code = encode_rs1d(&message, &rs);
         code[3] += 10;
@@ -496,7 +496,7 @@ mod tests {
 
     #[test]
     fn test_multiple_error_correction() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![4, 8, 15];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -508,7 +508,7 @@ mod tests {
 
     #[test]
     fn test_too_many_errors() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![2, 4, 6];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -524,7 +524,7 @@ mod tests {
 
     #[test]
     fn test_no_errors_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs = setup_rs2d(4, 4, 3);
         let message = vec![2, 4, 6];
         let code = encode_rs2d(&message, &rs);
         assert_eq!(code[2][2], 2);
@@ -536,33 +536,36 @@ mod tests {
 
     #[test]
     fn test_single_error_correction_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![2, 8, 3];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][1] += 10;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_multiple_error_correction_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![5, 4, 16];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][0] += 6;
         code[1][1] += 5;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_too_many_errors_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![8, 2, 3];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][0] += 6;
         code[0][1] += 5;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 }
