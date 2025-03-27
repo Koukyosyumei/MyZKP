@@ -97,7 +97,36 @@ impl Avail {
         if proof.is_row {
             verify_kzg(x, &commitment.row_commitments[row_id], &proof.proof_kzg, pk)
         } else {
-            verify_kzg(x, &commitment.row_commitments[col_id], &proof.proof_kzg, pk)
+            verify_kzg(x, &commitment.col_commitments[col_id], &proof.proof_kzg, pk)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::modules::algebra::curve::bn128::BN128;
+
+    #[test]
+    fn test_avail_no_error() {
+        let g1 = BN128::generator_g1();
+        let g2 = BN128::generator_g2();
+
+        let data = vec![1, 2, 3, 4];
+        let pk = Avail::setup(&g1, &g2, 4, 4);
+        let encoded = Avail::encode(4, 4, &data);
+        let commitment = Avail::commit(&encoded, &pk);
+
+        let z = FqOrder::from_value(5); // open at a random point
+        let proof_00_left = Avail::sample(0, 0, &z, &encoded, true, &pk);
+        assert!(Avail::verify(0, 0, &z, &commitment, &proof_00_left, &pk));
+        let proof_00_right = Avail::sample(0, 0, &z, &encoded, false, &pk);
+        assert!(Avail::verify(0, 0, &z, &commitment, &proof_00_right, &pk));
+
+        let proof_01_left = Avail::sample(0, 1, &z, &encoded, true, &pk);
+        assert!(Avail::verify(0, 1, &z, &commitment, &proof_01_left, &pk));
+        let proof_01_right = Avail::sample(0, 1, &z, &encoded, false, &pk);
+        assert!(Avail::verify(0, 1, &z, &commitment, &proof_01_right, &pk));
     }
 }
