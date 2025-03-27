@@ -39,7 +39,7 @@ impl<F: Field> ReedSolomon<F> {
     /// Compute evaluation points: [g^0, g^1, ..., g^{el - 1}]
     fn evaluation_points(&self, el: usize) -> Vec<F> {
         let mut points = Vec::with_capacity(el);
-        let one = F::one();
+        // let one = F::one();
         for i in 0..el {
             let pt = self.g.pow(i);
             points.push(pt);
@@ -73,7 +73,7 @@ impl<F: Field> ReedSolomon<F> {
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
 
-        let mut codeword = m_shifted - remainder;
+        let codeword = m_shifted - remainder;
         codeword.coef
     }
 
@@ -108,17 +108,17 @@ impl<F: Field> ReedSolomon<F> {
         let mut sigma = Polynomial {
             coef: vec![F::one()],
         };
-        let mut B = Polynomial {
+        let mut bb = Polynomial {
             coef: vec![F::one()],
         };
-        let mut L = 0;
+        let mut el = 0;
         let mut m = 1;
         let mut b = F::one();
 
         for n_iter in 0..n {
             // Compute discrepancy d = S[n_iter] + Σ₍ᵢ₌₁₎^L σᵢ S[n_iter - i]
             let mut d = syndromes[n_iter].clone();
-            for i in 1..=L {
+            for i in 1..=el {
                 if i < sigma.coef.len() {
                     d = d + sigma.coef[i].clone() * syndromes[n_iter - i].clone();
                 }
@@ -126,7 +126,7 @@ impl<F: Field> ReedSolomon<F> {
             if d == F::zero() {
                 m += 1;
             } else {
-                let T = sigma.clone();
+                let t = sigma.clone();
                 // factor = d / b
                 let factor = d.clone() / b.clone();
                 // Multiply B(x) by x^m: create x^m with coefficient 1 in degree m.
@@ -136,12 +136,12 @@ impl<F: Field> ReedSolomon<F> {
                         .chain(iter::once(F::one()))
                         .collect(),
                 };
-                let x_m_B = x_m * B.clone();
+                let x_m_b = x_m * bb.clone();
                 // sigma = sigma - factor * (x^m * B(x))
-                sigma = sigma - x_m_B * factor.clone();
-                if 2 * L <= n_iter {
-                    L = n_iter + 1 - L;
-                    B = T;
+                sigma = sigma - x_m_b * factor.clone();
+                if 2 * el <= n_iter {
+                    el = n_iter + 1 - el;
+                    bb = t;
                     b = d;
                     m = 1;
                 } else {
@@ -169,10 +169,10 @@ impl<F: Field> ReedSolomon<F> {
     fn compute_error_evaluator(&self, syndromes: &[F], sigma: &Polynomial<F>) -> Polynomial<F> {
         let t = (self.n - self.k) / 2;
         // Build syndrome polynomial S(x) = S₁ + S₂x + … + S₂ₜ x^(2t-1).
-        let S_poly = Polynomial {
+        let s_poly = Polynomial {
             coef: syndromes.to_vec(),
         };
-        let prod = sigma.clone() * S_poly;
+        let prod = sigma.clone() * s_poly;
         // Truncate the product to degree < 2t.
         let mut truncated = prod;
         if truncated.coef.len() > 2 * t {
@@ -235,16 +235,16 @@ impl<F: Field> ReedSolomon<F> {
         let mut corrected = received.to_vec();
         let eval_points = self.evaluation_points(self.n);
         for &pos in error_positions.iter() {
-            let Xi = eval_points[pos].clone();
-            let Xi_inv = Xi.clone().inverse();
-            let omega_val = omega.eval(&Xi_inv);
-            let sigma_deriv_val = sigma_deriv.eval(&Xi_inv);
+            let xi = eval_points[pos].clone();
+            let xi_inv = xi.clone().inverse();
+            let omega_val = omega.eval(&xi_inv);
+            let sigma_deriv_val = sigma_deriv.eval(&xi_inv);
             if sigma_deriv_val == F::zero() {
                 // Cannot correct if derivative evaluates to zero.
                 return None;
             }
-            // Forney’s formula: error magnitude = - (Xi * Ω(Xi⁻¹)) / σ'(Xi⁻¹)
-            let error_mag = -(Xi * omega_val) / sigma_deriv_val;
+            // Forney’s formula: error magnitude = - (xi * Ω(xi⁻¹)) / σ'(xi⁻¹)
+            let error_mag = -(xi * omega_val) / sigma_deriv_val;
             // Correct the error (assuming r = c + e, we subtract the error magnitude).
             corrected[pos] = corrected[pos].clone() - error_mag;
         }
@@ -272,7 +272,7 @@ impl<F: Field> ReedSolomon2D<F> {
     }
 
     pub fn encode(&self, data: &[F]) -> Vec<Vec<F>> {
-        let mut matrix = self.organize_data_matrix(data);
+        let matrix = self.organize_data_matrix(data);
 
         // First dimension encoding (rows)
         // - message_len x row_codeword_len
@@ -393,7 +393,7 @@ impl GF2to8 {
     }
 }
 
-pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
+pub fn setup_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
         FiniteFieldElement::<Mod2>::one(),
@@ -402,7 +402,7 @@ pub fn create_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8>
     ReedSolomon::new(codeword_len, message_len, generator)
 }
 
-pub fn create_rs2d(
+pub fn setup_rs2d(
     col_codeword_len: usize,
     row_codeword_len: usize,
     message_len: usize,
@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn test_syndrome_computation_no_error() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         let syndromes = rs.compute_syndromes(&codeword);
@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn test_no_errors() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![9, 1, 7];
         let code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -486,7 +486,7 @@ mod tests {
 
     #[test]
     fn test_single_error_correction() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![1, 2, 3];
         let mut code = encode_rs1d(&message, &rs);
         code[3] += 10;
@@ -496,7 +496,7 @@ mod tests {
 
     #[test]
     fn test_multiple_error_correction() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![4, 8, 15];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -508,7 +508,7 @@ mod tests {
 
     #[test]
     fn test_too_many_errors() {
-        let rs = create_rs(7, 3);
+        let rs = setup_rs(7, 3);
         let message = vec![2, 4, 6];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -524,7 +524,7 @@ mod tests {
 
     #[test]
     fn test_no_errors_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs = setup_rs2d(4, 4, 3);
         let message = vec![2, 4, 6];
         let code = encode_rs2d(&message, &rs);
         assert_eq!(code[2][2], 2);
@@ -536,33 +536,36 @@ mod tests {
 
     #[test]
     fn test_single_error_correction_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![2, 8, 3];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][1] += 10;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_multiple_error_correction_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![5, 4, 16];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][0] += 6;
         code[1][1] += 5;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 
     #[test]
     fn test_too_many_errors_2d() {
-        let rs = create_rs2d(4, 4, 3);
+        let rs_e = setup_rs2d(4, 4, 3);
         let message = vec![8, 2, 3];
-        let mut code = encode_rs2d(&message, &rs);
+        let mut code = encode_rs2d(&message, &rs_e);
         code[1][0] += 6;
         code[0][1] += 5;
-        let decoded = decode_rs2d(&code, &rs).expect("Decoding should succeed with no errors");
+        let rs_d = setup_rs2d(4, 4, 3);
+        let decoded = decode_rs2d(&code, &rs_d).expect("Decoding should succeed with no errors");
         assert_eq!(message, decoded);
     }
 }
