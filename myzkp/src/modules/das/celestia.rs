@@ -11,7 +11,7 @@ pub struct CommitmentCelestia {
 
 pub struct ProofCelestia {
     pub proof: Vec<Vec<u8>>,
-    pub is_left: bool,
+    pub is_row: bool,
 }
 
 pub struct Celestia;
@@ -58,9 +58,9 @@ impl Celestia {
         row_id: usize,
         col_id: usize,
         encoded: &EncodedDataCelestia,
-        is_left: bool,
+        is_row: bool,
     ) -> ProofCelestia {
-        let proof = if is_left {
+        let proof = if is_row {
             Merkle::open(col_id, &encoded[row_id])
         } else {
             Merkle::open(
@@ -72,7 +72,7 @@ impl Celestia {
             )
         };
 
-        ProofCelestia { proof, is_left }
+        ProofCelestia { proof, is_row }
     }
 
     pub fn verify(
@@ -82,7 +82,7 @@ impl Celestia {
         commitment: &CommitmentCelestia,
         proof: &ProofCelestia,
     ) -> bool {
-        if proof.is_left {
+        if proof.is_row {
             Merkle::verify(&commitment.row_roots[row_id], col_id, &proof.proof, chunk)
         } else {
             Merkle::verify(&commitment.col_roots[col_id], row_id, &proof.proof, chunk)
