@@ -393,7 +393,7 @@ impl GF2to8 {
     }
 }
 
-pub fn setup_rs(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
+pub fn setup_rs1d(codeword_len: usize, message_len: usize) -> ReedSolomon<GF2to8> {
     let coef = vec![
         FiniteFieldElement::<Mod2>::zero(),
         FiniteFieldElement::<Mod2>::one(),
@@ -460,7 +460,7 @@ mod tests {
 
     #[test]
     fn test_syndrome_computation_no_error() {
-        let rs = setup_rs(7, 3);
+        let rs = setup_rs1d(7, 3);
         let message = vec![GF2to8::from_u8(9), GF2to8::from_u8(1), GF2to8::from_u8(7)];
         let codeword = rs.encode(&message);
         let syndromes = rs.compute_syndromes(&codeword);
@@ -476,7 +476,7 @@ mod tests {
 
     #[test]
     fn test_no_errors() {
-        let rs = setup_rs(7, 3);
+        let rs = setup_rs1d(7, 3);
         let message = vec![9, 1, 7];
         let code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -486,7 +486,7 @@ mod tests {
 
     #[test]
     fn test_single_error_correction() {
-        let rs = setup_rs(7, 3);
+        let rs = setup_rs1d(7, 3);
         let message = vec![1, 2, 3];
         let mut code = encode_rs1d(&message, &rs);
         code[3] += 10;
@@ -496,7 +496,7 @@ mod tests {
 
     #[test]
     fn test_multiple_error_correction() {
-        let rs = setup_rs(7, 3);
+        let rs = setup_rs1d(7, 3);
         let message = vec![4, 8, 15];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
@@ -508,7 +508,7 @@ mod tests {
 
     #[test]
     fn test_too_many_errors() {
-        let rs = setup_rs(7, 3);
+        let rs = setup_rs1d(7, 3);
         let message = vec![2, 4, 6];
         let mut code = encode_rs1d(&message, &rs);
         assert_eq!(message, code[4..7]);
