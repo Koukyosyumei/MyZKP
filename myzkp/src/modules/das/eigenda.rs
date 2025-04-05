@@ -10,7 +10,7 @@ pub type EncodedDataEigenDA = Vec<Vec<u8>>;
 
 pub struct CommitmentEigenDA {
     pub chunk_commitments: Vec<CommitmentKZG>, // Per-chunk commitments
-    pub quorum_id: u32, // Multiple quorums supported
+    pub quorum_id: u32,                        // Multiple quorums supported
 }
 
 pub struct ProofEigenDA {
@@ -25,11 +25,17 @@ pub struct EigenDisperser {
 }
 
 impl EigenDisperser {
-    pub fn new(g1: &G1Point, g2: &G2Point, chunk_size: usize, expansion_factor: usize, quorum_count: usize) -> Self {
+    pub fn new(
+        g1: &G1Point,
+        g2: &G2Point,
+        chunk_size: usize,
+        expansion_factor: usize,
+        quorum_count: usize,
+    ) -> Self {
         let quorums = (0..quorum_count)
             .map(|_| setup_kzg(g1, g2, chunk_size)) // Standard chunk size
             .collect();
-            
+
         EigenDisperser {
             expansion_factor,
             quorums,
@@ -39,7 +45,8 @@ impl EigenDisperser {
     pub fn encode(&self, data: &[u8], chunk_size: usize) -> EncodedDataEigenDA {
         let rs = setup_rs1d(self.expansion_factor, data.len());
         let encoded = encode_rs1d(data, &rs);
-        encoded.chunks(chunk_size) // Fixed chunk size
+        encoded
+            .chunks(chunk_size) // Fixed chunk size
             .map(|c| c.to_vec())
             .collect()
     }
@@ -50,7 +57,10 @@ impl EigenDisperser {
             .iter()
             .map(|chunk| {
                 let poly = Polynomial {
-                    coef: chunk.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
+                    coef: chunk
+                        .iter()
+                        .map(|e| FqOrder::from_value(e.clone()))
+                        .collect(),
                 };
                 commit_kzg(&poly, pk)
             })
@@ -61,33 +71,32 @@ impl EigenDisperser {
             quorum_id,
         }
     }
-}
 
-pub struct EigenDA;
-impl EigenDA {
-    pub fn sample(
-        chunk_index: usize,
-        x: &FqOrder,
+    pub fn prove(
+        &self,
         encoded: &EncodedDataEigenDA,
         quorum_id: u32,
-        disperser: &EigenDisperser,
+        chunk_index: usize,
+        x: &FqOrder,
     ) -> ProofEigenDA {
-        let pk = &disperser.quorums[quorum_id as usize];
+        let pk = &self.quorums[quorum_id as usize];
         let poly = Polynomial {
             coef: encoded[chunk_index]
                 .iter()
-                .map(|e| FqOrder::from_value(e.clone()))
+                .map(|e| FqOrder::from_value(*e))
                 .collect(),
         };
         let proof_kzg = open_kzg(&poly, x, pk);
-        
         ProofEigenDA {
             proof_kzg,
             chunk_index,
             quorum_id,
         }
     }
+}
 
+pub struct EigenDA;
+impl EigenDA {
     pub fn verify(
         x: &FqOrder,
         commitment: &CommitmentEigenDA,
@@ -113,18 +122,17 @@ mod tests {
     fn test_eigenda_flow() {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        
+
         // Initialize disperser with 4.5x redundancy and 3 quorums
-        let disperser = EigenDisperser::new(&g1, &g2, 2, 9, 3); 
-        
+        let disperser = EigenDisperser::new(&g1, &g2, 2, 9, 3);
+
         let data = vec![1, 2, 3, 4];
         let encoded = disperser.encode(&data, 2);
         // assert_eq!(encoded.len(), 9); // 4.5x expansion
-        
+
         let commitment = disperser.commit(&encoded, 0); // Commit to quorum 0
-        
         let z = FqOrder::from_value(5);
-        let proof = EigenDA::sample(3, &z, &encoded, 0, &disperser);
+        let proof = disperser.prove(&encoded, 0, 3, &z);
         assert!(EigenDA::verify(&z, &commitment, &proof, &disperser));
     }
 }
