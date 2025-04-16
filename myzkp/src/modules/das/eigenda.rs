@@ -26,7 +26,7 @@ pub struct PublicParamsEigenDA {
     pub chunk_size: usize,
 }
 
-struct EigenDA;
+pub struct EigenDA;
 
 impl DataAvailabilitySystem for EigenDA {
     type EncodedData = EncodedDataEigenDA;
