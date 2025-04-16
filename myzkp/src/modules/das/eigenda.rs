@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use crate::modules::algebra::curve::bn128::BN128;
-use crate::modules::algebra::curve::bn128::{FqOrder, G1Point, G2Point};
+use crate::modules::algebra::curve::bn128::FqOrder;
 use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };

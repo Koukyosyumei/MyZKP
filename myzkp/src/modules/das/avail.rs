@@ -1,7 +1,7 @@
 use crate::modules::algebra::curve::bn128::BN128;
-use crate::modules::algebra::curve::bn128::{FqOrder, G1Point, G2Point};
+use crate::modules::algebra::curve::bn128::FqOrder;
 use crate::modules::algebra::kzg::{
-    commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
+    commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};

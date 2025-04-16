@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 pub trait DataAvailabilitySystem {
     type EncodedData;
