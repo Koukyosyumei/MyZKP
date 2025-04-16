@@ -219,6 +219,66 @@ impl<F: Field> Polynomial<F> {
         self.coef = Self::trim_trailing_zeros(&self.coef);
     }
 
+    pub fn fft_multiply<'b>(&self, other: &'b Polynomial<F>, omega: F) -> Polynomial<F> {
+        // Compute the size needed for convolution.
+        let m = self.coef.len() + other.coef.len() - 1;
+        let n = m.next_power_of_two();
+
+        // Pad the coefficient vectors.
+        let mut a = self.coef.clone();
+        a.resize(n, F::zero());
+        let mut b = other.coef.clone();
+        b.resize(n, F::zero());
+
+        // Compute FFTs.
+        Self::fft(&mut a, omega.clone());
+        Self::fft(&mut b, omega.clone());
+
+        // Pointwise multiplication.
+        let mut c: Vec<F> = (0..n).map(|i| a[i].mul_ref(&b[i])).collect();
+
+        // Compute the inverse FFT.
+        let omega_inv = omega.inverse();
+        Self::fft(&mut c, omega_inv);
+
+        // Scale the results by 1/n.
+        let n_f = F::from_value(n);
+        let n_inv = n_f.inverse();
+        for x in &mut c {
+            *x = x.mul_ref(&n_inv);
+        }
+
+        // Truncate to the correct length and trim trailing zeros.
+        c.truncate(m);
+        Polynomial {
+            coef: Self::trim_trailing_zeros(&c),
+        }
+    }
+
+    fn fft(a: &mut [F], omega: F) {
+        let n = a.len();
+        if n == 1 {
+            return;
+        }
+
+        // Split into even and odd parts.
+        let mut even: Vec<F> = (0..n / 2).map(|i| a[2 * i].clone()).collect();
+        let mut odd: Vec<F> = (0..n / 2).map(|i| a[2 * i + 1].clone()).collect();
+
+        // Recursive FFT on even and odd parts.
+        Self::fft(&mut even, omega.clone().pow(2));
+        Self::fft(&mut odd, omega.clone().pow(2));
+
+        // Combine.
+        let mut omega_i = F::one();
+        for i in 0..n / 2 {
+            let t = omega_i.mul_ref(&odd[i]);
+            a[i] = even[i].add_ref(&t);
+            a[i + n / 2] = even[i].sub_ref(&t);
+            omega_i = omega_i.mul_ref(&omega);
+        }
+    }
+
     fn mul_ref<'b>(&self, other: &'b Polynomial<F>) -> Polynomial<F> {
         if self.is_zero() || other.is_zero() {
             return Polynomial::<F>::zero();
