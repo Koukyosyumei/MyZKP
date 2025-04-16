@@ -5,6 +5,7 @@ use crate::modules::algebra::kzg::{
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{encode_rs2d, setup_rs2d};
 use crate::modules::algebra::ring::Ring;
+use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition};
 
 pub type EncodedDataAvail = Vec<Vec<u8>>;
 
