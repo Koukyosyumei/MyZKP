@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::modules::algebra::curve::bn128::BN128;
 use crate::modules::algebra::curve::bn128::{FqOrder, G1Point, G2Point};
 use crate::modules::algebra::kzg::{
@@ -6,8 +8,8 @@ use crate::modules::algebra::kzg::{
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{decode_rs1d, encode_rs1d, setup_rs1d};
 use crate::modules::algebra::ring::Ring;
-use crate::modules::das::utils::DataAvailabilitySystem;
 use crate::modules::das::utils::SamplePosition;
+use crate::modules::das::utils::{DataAvailabilitySystem, SystemMetrics, METRICS};
 
 pub struct EncodedDataEigenDA {
     pub codewords: Vec<Vec<u8>>,
@@ -51,12 +53,23 @@ impl DataAvailabilitySystem for EigenDA {
     }
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
+        let start = Instant::now();
+
         let rs = setup_rs1d(params.codeword_size, data.len());
         let encoded = encode_rs1d(data, &rs);
-        let codewords = encoded
+        let codewords: Vec<Vec<u8>> = encoded
             .chunks(params.chunk_size) // Fixed chunk size
             .map(|c| c.to_vec())
             .collect();
+
+        // Calculate total encoded size in bytes
+        let encoded_size = codewords.iter().map(|chunk| chunk.len()).sum();
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.encoding_time = start.elapsed();
+            metrics.encoded_size = encoded_size;
+        });
 
         Self::EncodedData {
             codewords: codewords,
@@ -131,6 +144,10 @@ impl DataAvailabilitySystem for EigenDA {
         let rs = setup_rs1d(params.codeword_size, encoded.data_size);
         let codeword = encoded.codewords.concat();
         decode_rs1d(&codeword, &rs).unwrap()
+    }
+
+    fn metrics() -> SystemMetrics {
+        METRICS.with(|m| m.borrow().clone())
     }
 }
 

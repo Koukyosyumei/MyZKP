@@ -1,6 +1,6 @@
 use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
-use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition};
+use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition, SystemMetrics, METRICS};
 
 pub struct EncodedDataCelestia {
     pub codewords: Vec<Vec<Vec<u8>>>,
@@ -138,6 +138,10 @@ impl DataAvailabilitySystem for Celestia {
             .collect();
 
         decode_rs2d(&reshaped, &rs).unwrap()
+    }
+
+    fn metrics() -> SystemMetrics {
+        METRICS.with(|m| m.borrow().clone())
     }
 }
 

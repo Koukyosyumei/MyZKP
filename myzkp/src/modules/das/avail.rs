@@ -6,7 +6,7 @@ use crate::modules::algebra::kzg::{
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
 use crate::modules::algebra::ring::Ring;
-use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition};
+use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition, SystemMetrics, METRICS};
 
 pub struct EncodedDataAvail {
     pub codewords: Vec<Vec<u8>>,
@@ -129,6 +129,10 @@ impl DataAvailabilitySystem for Avail {
             encoded.data_size,
         );
         decode_rs2d(&encoded.codewords, &rs).unwrap()
+    }
+
+    fn metrics() -> SystemMetrics {
+        METRICS.with(|m| m.borrow().clone())
     }
 }
 
