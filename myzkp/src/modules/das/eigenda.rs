@@ -26,6 +26,8 @@ pub struct PublicParamsEigenDA {
     pub chunk_size: usize,
 }
 
+const QUORUM_COUNT: usize = 2;
+
 pub struct EigenDA;
 
 impl DataAvailabilitySystem for EigenDA {
@@ -39,8 +41,7 @@ impl DataAvailabilitySystem for EigenDA {
 
         let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
 
-        let quorum_count = 2; // Default, could be made configurable
-        let quorums = (0..quorum_count)
+        let quorums = (0..QUORUM_COUNT)
             .map(|_| setup_kzg(&g1, &g2, chunk_size)) // Standard chunk size
             .collect();
 
