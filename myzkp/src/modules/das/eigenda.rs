@@ -132,30 +132,6 @@ impl DataAvailabilitySystem for EigenDA {
         let codeword = encoded.codewords.concat();
         decode_rs1d(&codeword, &rs).unwrap()
     }
-
-    /*
-        type EncodedData;
-        type Commitment;
-        type Proof;
-        type PublicParams;
-
-        fn setup(data_size: usize, expansion_factor: f64) -> Self::PublicParams;
-        fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData;
-        fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment;
-        fn sample(
-            position: &SamplePosition,
-            encoded: &Self::EncodedData,
-            params: &Self::PublicParams,
-        ) -> Self::Proof;
-        fn verify(
-            position: &SamplePosition,
-            commitment: &Self::Commitment,
-            proof: &Self::Proof,
-            params: &Self::PublicParams,
-        ) -> bool;
-        fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8>;
-        fn metrics() -> SystemMetrics;
-    */
 }
 
 #[cfg(test)]
