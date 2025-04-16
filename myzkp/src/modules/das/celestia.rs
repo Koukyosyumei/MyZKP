@@ -181,6 +181,15 @@ mod tests {
         };
         assert!(Celestia::verify(&position3, &encoded, &commit, &params));
 
+        let mal_data = vec![11, 12, 13, 14];
+        let mal_encoded = Celestia::encode(&mal_data, &params);
+        assert!(!Celestia::verify(
+            &position0,
+            &mal_encoded,
+            &commit,
+            &params
+        ));
+
         let reconstructed = Celestia::reconstruct(&encoded, &params);
         for i in 0..4 {
             assert_eq!(data[i], reconstructed[i]);
