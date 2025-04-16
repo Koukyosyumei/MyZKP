@@ -1,7 +1,7 @@
 use std::time::Instant;
 
-use crate::modules::algebra::curve::bn128::BN128;
 use crate::modules::algebra::curve::bn128::FqOrder;
+use crate::modules::algebra::curve::bn128::BN128;
 use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
@@ -62,8 +62,13 @@ impl DataAvailabilitySystem for EigenDA {
             .map(|c| c.to_vec())
             .collect();
 
+        let result = Self::EncodedData {
+            codewords: codewords,
+            data_size: data.len(),
+        };
+
         // Calculate total encoded size in bytes
-        let encoded_size = codewords.iter().map(|chunk| chunk.len()).sum();
+        let encoded_size = result.codewords.iter().map(|chunk| chunk.len()).sum();
         // Record metrics
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
@@ -71,13 +76,12 @@ impl DataAvailabilitySystem for EigenDA {
             metrics.encoded_size = encoded_size;
         });
 
-        Self::EncodedData {
-            codewords: codewords,
-            data_size: data.len(),
-        }
+        result
     }
 
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
+        let start = Instant::now();
+
         let quorum_id: usize = 0; // dummy
         let pk = &params.quorums[quorum_id as usize];
 
@@ -96,9 +100,11 @@ impl DataAvailabilitySystem for EigenDA {
             })
             .collect();
 
+        // Start proof time measurement
+        let proof_start = Instant::now();
+
         // dummy value
         let x = FqOrder::from_value(5);
-
         // proofs
         let chunk_proofs = encoded
             .codewords
@@ -113,12 +119,28 @@ impl DataAvailabilitySystem for EigenDA {
                 open_kzg(&poly, &x, pk)
             })
             .collect();
+        let proof_time = proof_start.elapsed();
 
-        Self::Commitment {
+        let result = Self::Commitment {
             chunk_commitments,
             chunk_proofs,
             quorum_id: quorum_id.try_into().unwrap(),
-        }
+        };
+
+        // Calculate sizes (using std::mem::size_of_val would be more accurate)
+        let commitment_size = result.chunk_commitments.len() * std::mem::size_of::<CommitmentKZG>();
+        let proof_size = result.chunk_proofs.len() * std::mem::size_of::<ProofKZG>();
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.commitment_time = start.elapsed() - proof_time; // Subtract proof time
+            metrics.proof_time = proof_time;
+            metrics.commitment_size = commitment_size;
+            metrics.proof_size = proof_size;
+        });
+
+        result
     }
 
     fn verify(
@@ -127,23 +149,42 @@ impl DataAvailabilitySystem for EigenDA {
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool {
-        let pk = &params.quorums[0];
+        let start = Instant::now();
 
+        let pk = &params.quorums[0];
         // dummy value
         let x = FqOrder::from_value(5);
 
-        verify_kzg(
+        let result = verify_kzg(
             &x,
             &commitment.chunk_commitments[position.col],
             &commitment.chunk_proofs[position.col],
             pk,
-        )
+        );
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.verification_time = start.elapsed();
+        });
+
+        result
     }
 
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
+        let start = Instant::now();
+
         let rs = setup_rs1d(params.codeword_size, encoded.data_size);
         let codeword = encoded.codewords.concat();
-        decode_rs1d(&codeword, &rs).unwrap()
+        let result = decode_rs1d(&codeword, &rs).unwrap();
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.reconstruction_time = start.elapsed();
+        });
+
+        result
     }
 
     fn metrics() -> SystemMetrics {
