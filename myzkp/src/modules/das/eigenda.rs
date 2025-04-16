@@ -38,9 +38,7 @@ impl DataAvailabilitySystem for EigenDA {
     fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-
         let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
-
         let quorums = (0..QUORUM_COUNT)
             .map(|_| setup_kzg(&g1, &g2, chunk_size)) // Standard chunk size
             .collect();
@@ -112,6 +110,7 @@ impl DataAvailabilitySystem for EigenDA {
 
     fn verify(
         position: &SamplePosition,
+        _encoded: &Self::EncodedData,
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool {
@@ -138,7 +137,6 @@ impl DataAvailabilitySystem for EigenDA {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::modules::algebra::curve::bn128::BN128;
 
     #[test]
     fn test_eigenda_flow() {
@@ -148,8 +146,12 @@ mod tests {
         let encoded = EigenDA::encode(&data, &params);
         let commit = EigenDA::commit(&encoded, &params);
 
-        let position = SamplePosition { row: 0, col: 3 };
-        let isvalid = EigenDA::verify(&position, &commit, &params);
+        let position = SamplePosition {
+            row: 0,
+            col: 3,
+            is_row: false,
+        };
+        let isvalid = EigenDA::verify(&position, &encoded, &commit, &params);
         assert!(isvalid);
 
         let reconstructed = EigenDA::reconstruct(&encoded, &params);

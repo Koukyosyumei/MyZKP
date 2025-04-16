@@ -8,6 +8,7 @@ pub trait DataAvailabilitySystem {
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment;
     fn verify(
         position: &SamplePosition,
+        encoded: &Self::EncodedData,
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool;
@@ -18,6 +19,7 @@ pub trait DataAvailabilitySystem {
 pub struct SamplePosition {
     pub row: usize,
     pub col: usize,
+    pub is_row: bool,
 }
 
 pub struct SystemMetrics {
