@@ -4,12 +4,15 @@ use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
-use crate::modules::algebra::reedsolomon::{encode_rs1d, setup_rs1d};
+use crate::modules::algebra::reedsolomon::{decode_rs1d, encode_rs1d, setup_rs1d};
 use crate::modules::algebra::ring::Ring;
 use crate::modules::das::utils::DataAvailabilitySystem;
 use crate::modules::das::utils::SamplePosition;
 
-pub type EncodedDataEigenDA = Vec<Vec<u8>>;
+pub struct EncodedDataEigenDA {
+    pub codewords: Vec<Vec<u8>>,
+    pub data_size: usize, // original data size
+}
 
 pub struct CommitmentEigenDA {
     pub chunk_commitments: Vec<CommitmentKZG>, // Per-chunk commitments
@@ -18,7 +21,7 @@ pub struct CommitmentEigenDA {
 }
 
 pub struct PublicParamsEigenDA {
-    pub codeword_length: usize,
+    pub codeword_size: usize,
     pub quorums: Vec<PublicKeyKZG>,
     pub chunk_size: usize,
 }
@@ -34,27 +37,32 @@ impl DataAvailabilitySystem for EigenDA {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
 
-        let codeword_length = (chunk_size as f64 * expansion_factor.ceil()) as usize;
+        let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
 
         let quorum_count = 2; // Default, could be made configurable
         let quorums = (0..quorum_count)
             .map(|_| setup_kzg(&g1, &g2, chunk_size)) // Standard chunk size
             .collect();
 
-        PublicParamsEigenDA {
-            codeword_length: codeword_length,
+        Self::PublicParams {
+            codeword_size: codeword_size,
             quorums: quorums,
             chunk_size: chunk_size,
         }
     }
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
-        let rs = setup_rs1d(params.codeword_length, data.len());
+        let rs = setup_rs1d(params.codeword_size, data.len());
         let encoded = encode_rs1d(data, &rs);
-        encoded
+        let codewords = encoded
             .chunks(params.chunk_size) // Fixed chunk size
             .map(|c| c.to_vec())
-            .collect()
+            .collect();
+
+        Self::EncodedData {
+            codewords: codewords,
+            data_size: data.len(),
+        }
     }
 
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
@@ -63,6 +71,7 @@ impl DataAvailabilitySystem for EigenDA {
 
         // commitments
         let chunk_commitments = encoded
+            .codewords
             .iter()
             .map(|chunk| {
                 let poly = Polynomial {
@@ -80,6 +89,7 @@ impl DataAvailabilitySystem for EigenDA {
 
         // proofs
         let chunk_proofs = encoded
+            .codewords
             .iter()
             .map(|chunk| {
                 let poly = Polynomial {
@@ -117,9 +127,11 @@ impl DataAvailabilitySystem for EigenDA {
         )
     }
 
-    //fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
-    //    todo!()
-    //}
+    fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
+        let rs = setup_rs1d(params.codeword_size, encoded.data_size);
+        let codeword = encoded.codewords.concat();
+        decode_rs1d(&codeword, &rs).unwrap()
+    }
 
     /*
         type EncodedData;
@@ -156,11 +168,16 @@ mod tests {
         let params = EigenDA::setup(2, 4.5);
 
         let data = vec![1, 2, 3, 4];
-        let encode = EigenDA::encode(&data, &params);
-        let commit = EigenDA::commit(&encode, &params);
+        let encoded = EigenDA::encode(&data, &params);
+        let commit = EigenDA::commit(&encoded, &params);
 
         let position = SamplePosition { row: 0, col: 3 };
         let isvalid = EigenDA::verify(&position, &commit, &params);
         assert!(isvalid);
+
+        let reconstructed = EigenDA::reconstruct(&encoded, &params);
+        for i in 0..4 {
+            assert_eq!(data[i], reconstructed[i]);
+        }
     }
 }

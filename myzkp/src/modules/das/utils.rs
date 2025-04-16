@@ -11,7 +11,7 @@ pub trait DataAvailabilitySystem {
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool;
-    //fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8>;
+    fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8>;
     //fn metrics() -> SystemMetrics;
 }
 
