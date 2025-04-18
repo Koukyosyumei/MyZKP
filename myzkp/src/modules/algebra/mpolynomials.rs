@@ -45,7 +45,7 @@ impl<F: Field> MPolynomial<F> {
         MPolynomial { dictionary }
     }
 
-    pub fn variables(num_variables: usize, field: &F) -> Vec<Self> {
+    pub fn variables(num_variables: usize) -> Vec<Self> {
         let mut variables = Vec::with_capacity(num_variables);
 
         for i in 0..num_variables {
@@ -129,6 +129,29 @@ impl<F: Field> MPolynomial<F> {
             }
 
             acc = acc + prod;
+        }
+
+        acc
+    }
+
+    pub fn lift(polynomial: &Polynomial<F>, variable_index: usize) -> Self {
+        if polynomial.is_zero() {
+            return MPolynomial::zero();
+        }
+
+        let coefficients = polynomial.coef.clone();
+        // Create variables x_0, x_1, ..., x_{variable_index}
+        let variables = MPolynomial::variables(variable_index + 1);
+
+        // Get the last variable (x_{variable_index})
+        let x = &variables[variable_index];
+
+        let mut acc = MPolynomial::zero();
+        for (i, coef) in coefficients.iter().enumerate() {
+            let constant_term = MPolynomial::constant(coef.clone());
+            // Multiply by coef * x^i
+            let term = &constant_term * &x.pow(i);
+            acc = &acc + &term;
         }
 
         acc
@@ -545,5 +568,35 @@ mod tests {
             result.coef[0],
             FiniteFieldElement::<ModEIP197>::from_value(5)
         );
+    }
+
+    #[test]
+    fn test_lift() {
+        // Create a univariate polynomial: 1 + 2t + 3t^2
+        let uni_poly = Polynomial {
+            coef: vec![
+                FiniteFieldElement::<ModEIP197>::from_value(1),
+                FiniteFieldElement::<ModEIP197>::from_value(2),
+                FiniteFieldElement::<ModEIP197>::from_value(3),
+            ],
+        };
+
+        // Lift to a multivariate polynomial with variable index 2
+        // This should create a polynomial in terms of x_2: 1 + 2x_2 + 3x_2^2
+        let multi_poly = MPolynomial::lift(&uni_poly, 2);
+
+        assert_eq!(multi_poly.dictionary.len(), 3);
+        assert_eq!(
+            multi_poly.dictionary[&vec![0, 0, 0]],
+            FiniteFieldElement::<ModEIP197>::from_value(1)
+        ); // Constant term
+        assert_eq!(
+            multi_poly.dictionary[&vec![0, 0, 1]],
+            FiniteFieldElement::<ModEIP197>::from_value(2)
+        ); // x_2 term
+        assert_eq!(
+            multi_poly.dictionary[&vec![0, 0, 2]],
+            FiniteFieldElement::<ModEIP197>::from_value(3)
+        ); // x_2^2 term
     }
 }
