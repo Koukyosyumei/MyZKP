@@ -25,6 +25,45 @@ pub type Trace<M> = Vec<Vec<FiniteFieldElement<M>>>;
 pub type Boundary<M> = Vec<(usize, usize, FiniteFieldElement<M>)>;
 
 impl<M: ModulusValue> Stark<M> {
+    fn transition_degree_bounds(
+        &self,
+        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+    ) -> Vec<usize> {
+        let mut point_degrees = vec![1];
+        for _ in 0..(2 * self.num_registers) {
+            point_degrees.push(self.original_trace_length + self.num_randomizers - 1);
+        }
+        transition_constraints
+            .iter()
+            .map(|a| {
+                a.dictionary
+                    .iter()
+                    .map(|(k, v)| point_degrees.iter().zip(k).map(|(r, el)| r * el).sum())
+                    .max()
+                    .unwrap_or(0)
+            })
+            .collect()
+    }
+
+    fn transition_quotient_degree_bounds(
+        &self,
+        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+    ) -> Vec<usize> {
+        self.transition_degree_bounds(transition_constraints)
+            .iter()
+            .map(|d| d - (self.original_trace_length - 1))
+            .collect()
+    }
+
+    fn max_degree(
+        &self,
+        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+    ) -> usize {
+        let binding = self.transition_quotient_degree_bounds(transition_constraints);
+        let md = binding.iter().max().unwrap();
+        (1 << (format!("{:b}", md).len() - 2)) - 1
+    }
+
     fn transition_zerofier(&self) -> Polynomial<FiniteFieldElement<M>> {
         let domain = &self.omicron_domain[0..(self.original_trace_length - 1)];
         Polynomial::from_monomials(domain)
@@ -156,6 +195,20 @@ impl<M: ModulusValue> Stark<M> {
             .collect();
 
         // commit to randomizer polynomial
-        // let randomizer_polynomial: Vec<_> =
+        let randomizer_polynomial = Polynomial {
+            coef: (0..(self.max_degree(transition_constraints) + 1))
+                .into_iter()
+                .map(|_| FiniteFieldElement::<M>::random_element(&[]))
+                .collect(),
+        };
+        let randomizer_codeword = randomizer_polynomial.eval_domain(&fri_domain);
+        let tmp: Vec<_> = randomizer_codeword
+            .iter()
+            .map(|c| bincode::serialize(c).expect("Serialization failed"))
+            .collect();
+        let randomizer_root = Merkle::commit(&tmp);
+        proof_stream.push(&vec![randomizer_root]);
+
+        // get weights for nonlinear combination
     }
 }

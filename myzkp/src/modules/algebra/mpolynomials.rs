@@ -9,7 +9,7 @@ use crate::modules::algebra::polynomial::Polynomial;
 
 #[derive(Clone, Debug)]
 pub struct MPolynomial<F: Field> {
-    dictionary: HashMap<Vec<usize>, F>,
+    pub dictionary: HashMap<Vec<usize>, F>,
 }
 
 impl<F: Field> MPolynomial<F> {
