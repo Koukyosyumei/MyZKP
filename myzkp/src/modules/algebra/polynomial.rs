@@ -65,8 +65,6 @@ use serde::{Deserialize, Serialize};
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 
-use super::field::FiniteFieldElement;
-
 /// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Polynomial<F: Field> {
