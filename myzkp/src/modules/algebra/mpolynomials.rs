@@ -2,7 +2,10 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::{Add, Mul, Neg, Sub};
 
+use num_traits::Zero;
+
 use crate::modules::algebra::field::Field;
+use crate::modules::algebra::polynomial::Polynomial;
 
 #[derive(Clone, Debug)]
 pub struct MPolynomial<F: Field> {
@@ -81,6 +84,51 @@ impl<F: Field> MPolynomial<F> {
             if bit == '1' {
                 acc = &acc * self;
             }
+        }
+
+        acc
+    }
+
+    pub fn evaluate(&self, point: &[F]) -> F {
+        let mut acc = F::zero();
+
+        for (k, v) in &self.dictionary {
+            let mut prod = v.clone();
+
+            for i in 0..k.len() {
+                // Skip if i is out of bounds in point
+                if i >= point.len() {
+                    continue;
+                }
+
+                // Calculate point[i]^k[i]
+                let mut term = F::one();
+                for _ in 0..k[i] {
+                    term = term * point[i].clone();
+                }
+
+                prod = prod * term;
+            }
+
+            acc = acc + prod;
+        }
+
+        acc
+    }
+
+    pub fn evaluate_symbolic(&self, point: &[Polynomial<F>]) -> Polynomial<F> {
+        let mut acc = Polynomial::zero();
+
+        for (k, v) in &self.dictionary {
+            let mut prod = Polynomial {
+                coef: [v.clone()].to_vec(),
+            };
+
+            for i in 0..k.len() {
+                prod = prod * (point[i].pow(k[i]));
+            }
+
+            acc = acc + prod;
         }
 
         acc
