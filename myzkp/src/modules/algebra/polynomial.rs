@@ -163,7 +163,7 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
-    pub fn scale(&self, factor: F) -> Polynomial<F> {
+    pub fn scale(&self, factor: &F) -> Polynomial<F> {
         Polynomial {
             coef: (0..self.coef.len())
                 .into_iter()

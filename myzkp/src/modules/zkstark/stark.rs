@@ -1,8 +1,9 @@
 use blake2::{digest::consts::U32, Blake2b, Digest};
-use num_traits::One;
+use num_traits::{One, Zero};
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::Merkle;
+use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
@@ -80,6 +81,7 @@ impl<M: ModulusValue> Stark<M> {
         &self,
         trace: &mut Trace<M>,
         boundary: &Boundary<M>,
+        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
         proof_stream: &mut FiatShamirTransformer,
     ) {
         // concatenate randomizers
@@ -130,5 +132,30 @@ impl<M: ModulusValue> Stark<M> {
         }
 
         // symbolically evaluate transition constraints
+        let mut point = vec![Polynomial {
+            coef: vec![
+                FiniteFieldElement::<M>::zero(),
+                FiniteFieldElement::<M>::one(),
+            ],
+        }];
+        for tp in &trace_polynomials {
+            point.push(tp.clone());
+        }
+        for tp in trace_polynomials {
+            point.push(tp.scale(&self.omicron));
+        }
+        let transition_polynomials: Vec<_> = transition_constraints
+            .iter()
+            .map(|a| a.evaluate_symbolic(&point))
+            .collect();
+
+        // divide out zerofier
+        let transition_quotients: Vec<_> = transition_polynomials
+            .iter()
+            .map(|tp| tp / &self.transition_zerofier())
+            .collect();
+
+        // commit to randomizer polynomial
+        // let randomizer_polynomial: Vec<_> =
     }
 }
