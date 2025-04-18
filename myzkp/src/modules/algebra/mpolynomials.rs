@@ -429,4 +429,121 @@ mod tests {
             FiniteFieldElement::<ModEIP197>::from_value(6)
         ); // 6
     }
+
+    #[test]
+    fn test_mpolynomial_evaluate() {
+        // Create polynomial: 2x + 3y + 1
+        let mut dict = HashMap::new();
+        dict.insert(vec![1, 0], FiniteFieldElement::<ModEIP197>::from_value(2)); // 2x
+        dict.insert(vec![0, 1], FiniteFieldElement::<ModEIP197>::from_value(3)); // 3y
+        dict.insert(vec![0, 0], FiniteFieldElement::<ModEIP197>::from_value(1)); // 1
+        let poly = MPolynomial::new(dict);
+
+        // Evaluate at point (5, 7)
+        let point = vec![
+            FiniteFieldElement::<ModEIP197>::from_value(5),
+            FiniteFieldElement::<ModEIP197>::from_value(7),
+        ];
+        let result = poly.evaluate(&point);
+
+        // Expected: 2*5 + 3*7 + 1 = 10 + 21 + 1 = 32
+        assert_eq!(result, FiniteFieldElement::<ModEIP197>::from_value(32));
+    }
+
+    #[test]
+    fn test_evaluate_with_higher_degrees() {
+        // Create polynomial: x^2 + 2xy + y^3
+        let mut dict = HashMap::new();
+        dict.insert(vec![2, 0], FiniteFieldElement::<ModEIP197>::from_value(1)); // x^2
+        dict.insert(vec![1, 1], FiniteFieldElement::<ModEIP197>::from_value(2)); // 2xy
+        dict.insert(vec![0, 3], FiniteFieldElement::<ModEIP197>::from_value(1)); // y^3
+        let poly = MPolynomial::new(dict);
+
+        // Evaluate at point (3, 2)
+        let point = vec![
+            FiniteFieldElement::<ModEIP197>::from_value(3),
+            FiniteFieldElement::<ModEIP197>::from_value(2),
+        ];
+        let result = poly.evaluate(&point);
+
+        // Expected: 3^2 + 2*3*2 + 2^3 = 9 + 12 + 8 = 29
+        assert_eq!(result, FiniteFieldElement::<ModEIP197>::from_value(29));
+    }
+
+    #[test]
+    fn test_evaluate_symbolic() {
+        // Create polynomial: 2x + 3y
+        let mut dict = HashMap::new();
+        dict.insert(vec![1, 0], FiniteFieldElement::<ModEIP197>::from_value(2)); // 2x
+        dict.insert(vec![0, 1], FiniteFieldElement::<ModEIP197>::from_value(3)); // 3y
+        let poly = MPolynomial::new(dict);
+
+        // Symbolic points: x = (t + 1), y = (t^2)
+        let point = vec![
+            Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<ModEIP197>::from_value(1),
+                    FiniteFieldElement::<ModEIP197>::from_value(1),
+                ],
+            }, // t + 1
+            Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<ModEIP197>::from_value(0),
+                    FiniteFieldElement::<ModEIP197>::from_value(0),
+                    FiniteFieldElement::<ModEIP197>::from_value(1),
+                ],
+            }, // t^2
+        ];
+
+        let result = poly.evaluate_symbolic(&point);
+
+        // Expected: 2(t + 1) + 3t^2 = 2 + 2t + 3t^2
+        assert_eq!(result.coef.len(), 3);
+        assert_eq!(
+            result.coef[0],
+            FiniteFieldElement::<ModEIP197>::from_value(2)
+        );
+        assert_eq!(
+            result.coef[1],
+            FiniteFieldElement::<ModEIP197>::from_value(2)
+        );
+        assert_eq!(
+            result.coef[2],
+            FiniteFieldElement::<ModEIP197>::from_value(3)
+        );
+    }
+
+    #[test]
+    fn test_evaluate_symbolic_constant() {
+        // Create constant polynomial: 5
+        let mut dict = HashMap::new();
+        dict.insert(vec![0, 0], FiniteFieldElement::<ModEIP197>::from_value(5));
+        let poly = MPolynomial::new(dict);
+
+        // Symbolic points: x = (t^2), y = (2t + 3)
+        let point = vec![
+            Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<ModEIP197>::from_value(0),
+                    FiniteFieldElement::<ModEIP197>::from_value(0),
+                    FiniteFieldElement::<ModEIP197>::from_value(1),
+                ],
+            }, // t^2
+            Polynomial {
+                coef: vec![
+                    FiniteFieldElement::<ModEIP197>::from_value(3),
+                    FiniteFieldElement::<ModEIP197>::from_value(2),
+                ],
+            }, // 2t + 3
+        ];
+
+        let result = poly.evaluate_symbolic(&point);
+
+        // Expected: 5 (constant)
+        assert_eq!(result.coef.len(), 1);
+        assert_eq!(
+            result.coef[0],
+            FiniteFieldElement::<ModEIP197>::from_value(5)
+        );
+    }
 }
