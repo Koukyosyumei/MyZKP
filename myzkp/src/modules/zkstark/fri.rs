@@ -70,7 +70,7 @@ pub struct FRI<M: ModulusValue> {
 pub type Codeword<F> = Vec<F>;
 
 impl<M: ModulusValue> FRI<M> {
-    fn num_rounds(&self) -> usize {
+    pub fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
         let mut num_rounds = 0;
         while codeword_length > self.expansion_factor
@@ -82,7 +82,7 @@ impl<M: ModulusValue> FRI<M> {
         num_rounds
     }
 
-    fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
+    pub fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()

@@ -65,6 +65,8 @@ use serde::{Deserialize, Serialize};
 use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 
+use super::field::FiniteFieldElement;
+
 /// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Polynomial<F: Field> {
@@ -124,6 +126,14 @@ impl<F: Field> Polynomial<F> {
         result
     }
 
+    pub fn eval_domain(&self, points: &[F]) -> Vec<F> {
+        let mut result = Vec::new();
+        for p in points {
+            result.push(self.eval(p));
+        }
+        result
+    }
+
     pub fn eval_m1(&self, point: &F) -> F {
         let mut result = F::zero();
         for coef in self.coef.iter().rev() {
@@ -153,6 +163,15 @@ impl<F: Field> Polynomial<F> {
         }
         println!("666");
         result
+    }
+
+    pub fn scale(&self, factor: F) -> Polynomial<F> {
+        Polynomial {
+            coef: (0..self.coef.len())
+                .into_iter()
+                .map(|i| (factor.pow(i)).mul_ref(&self.coef[i]))
+                .collect(),
+        }
     }
 
     /// Performs Lagrange interpolation to compute polynomials passing through given points.
