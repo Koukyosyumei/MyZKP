@@ -42,7 +42,8 @@ impl FiatShamirTransformer {
     }
 
     pub fn deserialize(bb: &SerializedObj) -> Self {
-        let objects: Vec<Vec<SerializedObj>> = bincode::deserialize(bb).expect("Deserialization failed");
+        let objects: Vec<Vec<SerializedObj>> =
+            bincode::deserialize(bb).expect("Deserialization failed");
         FiatShamirTransformer {
             objects,
             read_index: 0,

@@ -23,11 +23,12 @@ pub struct Stark<M: ModulusValue> {
 
 pub type Trace<M> = Vec<Vec<FiniteFieldElement<M>>>;
 pub type Boundary<M> = Vec<(usize, usize, FiniteFieldElement<M>)>;
+pub type TransitionConstraints<M> = Vec<MPolynomial<FiniteFieldElement<M>>>;
 
 impl<M: ModulusValue> Stark<M> {
     fn transition_degree_bounds(
         &self,
-        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+        transition_constraints: &TransitionConstraints<M>,
     ) -> Vec<usize> {
         let mut point_degrees = vec![1];
         for _ in 0..(2 * self.num_registers) {
@@ -135,7 +136,7 @@ impl<M: ModulusValue> Stark<M> {
         &self,
         trace: &mut Trace<M>,
         boundary: &Boundary<M>,
-        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+        transition_constraints: &TransitionConstraints<M>,
         proof_stream: &mut FiatShamirTransformer,
     ) -> Vec<u8> {
         // concatenate randomizers
@@ -291,5 +292,38 @@ impl<M: ModulusValue> Stark<M> {
 
         // the final proof is just the serialized stream
         proof_stream.serialize()
+    }
+
+    pub fn verify(
+        &self,
+        proof: Vec<u8>,
+        transition_constraints: &TransitionConstraints<M>,
+        boundary: &Boundary<M>,
+    ) {
+        // infer trace length from boundary conditions
+        let original_trace_length = 1 + boundary.iter().map(|(c, _, _)| c).max().unwrap();
+        let randomized_trace_length = original_trace_length + self.num_randomizers;
+
+        // deserialize with right proof stream
+        let mut proof_stream = FiatShamirTransformer::deserialize(&proof);
+
+        // get Merkle roots of boundary quotient codewords
+        let mut boundary_quotient_roots = Vec::new();
+        for _ in 0..self.num_registers {
+            boundary_quotient_roots.push(proof_stream.pull());
+        }
+
+        // get Merkle root of randomizer polynomial
+        let randomizer_root = proof_stream.pull();
+
+        // get weights for nonlinear combination
+        let weights = self.sample_weights(
+            1 + 2 * transition_constraints.len() + 2 * self.boundary_interpolants(boundary).len(),
+            proof_stream.verifier_fiat_shamir(32),
+        );
+
+        // verify low degree of combination polynomial
+        let mut polynomial_values = Vec::new();
+        let verifier_accepts = self.fri.verify(&mut proof_stream, &mut polynomial_values);
     }
 }

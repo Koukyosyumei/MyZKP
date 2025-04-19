@@ -226,7 +226,7 @@ impl<M: ModulusValue> FRI<M> {
     }
 
     pub fn verify(
-        self,
+        &self,
         proof_stream: &mut FiatShamirTransformer,
         polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
     ) -> bool {
