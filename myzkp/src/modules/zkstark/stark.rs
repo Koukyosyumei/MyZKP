@@ -407,7 +407,7 @@ impl<M: ModulusValue> Stark<M> {
                 .map(|s| transition_constraints[s].evaluate(&point))
                 .collect();
 
-            let mut counter = 0;
+            // compute nonlinear combination
             let mut terms = vec![bincode::deserialize(&randomizer[&current_index][0])
                 .expect("Deserialization failed")];
             for s in 0..(transition_constraints_values.len()) {
@@ -417,6 +417,25 @@ impl<M: ModulusValue> Stark<M> {
                 let shift = self.max_degree(transition_constraints)
                     - self.transition_quotient_degree_bounds(transition_constraints)[s];
                 terms.push(quotient * (domain_current_index.pow(shift)));
+            }
+            for s in 0..self.num_registers {
+                let tmp = &leafs[s][&current_index];
+                let bqv: FiniteFieldElement<M> =
+                    bincode::deserialize(&tmp[0]).expect("Deserialization failed");
+                terms.push(bqv.clone());
+                let shift = self.max_degree(transition_constraints)
+                    - self.boundary_quotient_degree_bounds(randomized_trace_length, boundary)[s];
+                terms.push(bqv * (domain_current_index.pow(shift)));
+            }
+            let mut combination = FiniteFieldElement::<M>::zero();
+            for j in 0..terms.len() {
+                combination = combination + (terms[j].mul_ref(&weights[j]));
+            }
+
+            // verify against combination polynomial value
+            verifier_accepts = verifier_accepts && (combination == values[i]);
+            if !verifier_accepts {
+                return false;
             }
         }
 
