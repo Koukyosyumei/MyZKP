@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+use std::hash::Hash;
+use std::thread::current;
+
 use blake2::{digest::consts::U32, Blake2b, Digest};
 use num_traits::{One, Zero};
 
@@ -16,6 +20,8 @@ pub struct Stark<M: ModulusValue> {
     pub num_randomizers: usize,
     pub num_registers: usize,
     pub original_trace_length: usize,
+    pub generator: FiniteFieldElement<M>,
+    pub omega: FiniteFieldElement<M>,
     pub omicron: FiniteFieldElement<M>,
     pub omicron_domain: Vec<FiniteFieldElement<M>>,
     pub fri: FRI<M>,
@@ -299,7 +305,7 @@ impl<M: ModulusValue> Stark<M> {
         proof: Vec<u8>,
         transition_constraints: &TransitionConstraints<M>,
         boundary: &Boundary<M>,
-    ) {
+    ) -> bool {
         // infer trace length from boundary conditions
         let original_trace_length = 1 + boundary.iter().map(|(c, _, _)| c).max().unwrap();
         let randomized_trace_length = original_trace_length + self.num_randomizers;
@@ -324,6 +330,86 @@ impl<M: ModulusValue> Stark<M> {
 
         // verify low degree of combination polynomial
         let mut polynomial_values = Vec::new();
-        let verifier_accepts = self.fri.verify(&mut proof_stream, &mut polynomial_values);
+        let mut verifier_accepts = self.fri.verify(&mut proof_stream, &mut polynomial_values);
+        polynomial_values.sort_by_key(|iv| iv.0);
+        if !verifier_accepts {
+            return false;
+        }
+
+        let indices: Vec<_> = polynomial_values.iter().map(|(i, _)| i.clone()).collect();
+        let values: Vec<_> = polynomial_values.iter().map(|(_, v)| v.clone()).collect();
+
+        // read and verify leafs, which are elements of boundary quotient codewords
+        let mut duplicated_indices = indices.clone();
+        for i in &indices {
+            duplicated_indices.push((i + self.expansion_factor) % self.fri.domain_length);
+        }
+        let mut leafs = Vec::new();
+        for r in 0..boundary_quotient_roots.len() {
+            let mut tmp = HashMap::new();
+            for i in &duplicated_indices {
+                tmp.insert(i, proof_stream.pull());
+                let path = proof_stream.pull();
+                let verifier_accepts = verifier_accepts
+                    && Merkle::verify(&boundary_quotient_roots[r][0], *i, &path, &tmp[&i][0]);
+                if !verifier_accepts {
+                    return false;
+                }
+            }
+            leafs.push(tmp);
+        }
+
+        // read and verify randomizer leafs
+        let mut randomizer = HashMap::new();
+        for i in &indices {
+            randomizer.insert(i, proof_stream.pull());
+            let path = proof_stream.pull();
+            verifier_accepts = verifier_accepts
+                && Merkle::verify(&randomizer_root[0], *i, &path, &randomizer[&i][0]);
+        }
+
+        // verify leafs of combination polynomial
+        for i in 0..indices.len() {
+            let current_index = indices[i];
+
+            // get trace values by applying a correction to the boundary quotient values (which are the leafs)
+            let domain_current_index = self.generator.clone() * (self.omega.pow(current_index));
+            let next_index = (current_index + self.expansion_factor) % self.fri.domain_length;
+            let domain_next_index = self.generator.clone() * (self.omega.pow(next_index));
+            let mut current_trace: Vec<_> = (0..self.num_registers)
+                .into_iter()
+                .map(|_| FiniteFieldElement::<M>::zero())
+                .collect();
+            let mut next_trace: Vec<_> = (0..self.num_registers)
+                .into_iter()
+                .map(|_| FiniteFieldElement::<M>::zero())
+                .collect();
+            for s in 0..self.num_registers {
+                let zerofier = self.boundary_zerofiers(boundary)[s].clone();
+                let interpolant = self.boundary_interpolants(boundary)[s].clone();
+                let tmp_cur: FiniteFieldElement<M> =
+                    bincode::deserialize(&leafs[s][&current_index][0])
+                        .expect("Deserialization failed");
+                let tmp_next: FiniteFieldElement<M> =
+                    bincode::deserialize(&leafs[s][&next_index][0])
+                        .expect("Deserialization failed");
+                current_trace[s] = tmp_cur * zerofier.eval(&domain_current_index)
+                    + interpolant.eval(&domain_current_index);
+                next_trace[s] = tmp_next * zerofier.eval(&domain_next_index)
+                    + interpolant.eval(&domain_next_index);
+            }
+
+            let mut point = vec![domain_current_index];
+            point.append(&mut current_trace);
+            point.append(&mut next_trace);
+            let transition_constraints_values = (0..transition_constraints.len())
+                .into_iter()
+                .map(|s| transition_constraints[s].evaluate(&point));
+
+            let mut counter = 0;
+            let mut terms = vec![randomizer[&current_index].clone()];
+        }
+
+        verifier_accepts
     }
 }
