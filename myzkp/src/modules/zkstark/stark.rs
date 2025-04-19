@@ -399,15 +399,25 @@ impl<M: ModulusValue> Stark<M> {
                     + interpolant.eval(&domain_next_index);
             }
 
-            let mut point = vec![domain_current_index];
+            let mut point = vec![domain_current_index.clone()];
             point.append(&mut current_trace);
             point.append(&mut next_trace);
-            let transition_constraints_values = (0..transition_constraints.len())
+            let transition_constraints_values: Vec<_> = (0..transition_constraints.len())
                 .into_iter()
-                .map(|s| transition_constraints[s].evaluate(&point));
+                .map(|s| transition_constraints[s].evaluate(&point))
+                .collect();
 
             let mut counter = 0;
-            let mut terms = vec![randomizer[&current_index].clone()];
+            let mut terms = vec![bincode::deserialize(&randomizer[&current_index][0])
+                .expect("Deserialization failed")];
+            for s in 0..(transition_constraints_values.len()) {
+                let tcv = transition_constraints_values[s].clone();
+                let quotient = tcv / self.transition_zerofier().eval(&domain_current_index);
+                terms.push(quotient.clone());
+                let shift = self.max_degree(transition_constraints)
+                    - self.transition_quotient_degree_bounds(transition_constraints)[s];
+                terms.push(quotient * (domain_current_index.pow(shift)));
+            }
         }
 
         verifier_accepts
