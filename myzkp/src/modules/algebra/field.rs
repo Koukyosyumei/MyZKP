@@ -127,6 +127,14 @@ impl<M: ModulusValue> FiniteFieldElement<M> {
         }
         h * self == identity
     }
+
+    pub fn sample(byte_array: &[u8]) -> Self {
+        let mut acc: usize = 0;
+        for &b in byte_array {
+            acc = (acc << 8) ^ (b as usize);
+        }
+        Self::from_value(acc)
+    }
 }
 
 impl<M: ModulusValue> Zero for FiniteFieldElement<M> {

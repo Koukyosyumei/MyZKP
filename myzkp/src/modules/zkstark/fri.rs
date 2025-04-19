@@ -7,14 +7,6 @@ use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 
-fn sample<M: ModulusValue>(byte_array: &[u8]) -> FiniteFieldElement<M> {
-    let mut acc: usize = 0;
-    for &b in byte_array {
-        acc = (acc << 8) ^ (b as usize);
-    }
-    FiniteFieldElement::<M>::from_value(acc)
-}
-
 fn sample_index(byte_array: &[u8], size: usize) -> usize {
     let mut acc: usize = 0;
     for &b in byte_array {
@@ -201,7 +193,7 @@ impl<M: ModulusValue> FRI<M> {
             }
 
             // get challenge
-            let alpha: FiniteFieldElement<M> = sample(&proof_stream.prover_fiat_shamir(32));
+            let alpha = FiniteFieldElement::<M>::sample(&proof_stream.prover_fiat_shamir(32));
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -246,7 +238,9 @@ impl<M: ModulusValue> FRI<M> {
         let mut alphas: Vec<FiniteFieldElement<M>> = Vec::new();
         for r in 0..self.num_rounds() {
             roots.push(proof_stream.pull().first().unwrap().clone());
-            alphas.push(sample(&proof_stream.verifier_fiat_shamir(32)));
+            alphas.push(FiniteFieldElement::<M>::sample(
+                &proof_stream.verifier_fiat_shamir(32),
+            ));
         }
 
         // extract last codeword

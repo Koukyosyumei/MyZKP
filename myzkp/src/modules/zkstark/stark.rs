@@ -116,13 +116,28 @@ impl<M: ModulusValue> Stark<M> {
             .collect()
     }
 
+    fn sample_weights(&self, number: usize, randomness: Vec<u8>) -> Vec<FiniteFieldElement<M>> {
+        let mut result = Vec::new();
+        for i in 0..number {
+            let mut tmp_r = randomness.clone();
+            let mut tmp_i: Vec<u8> = i.to_le_bytes().to_vec();
+            tmp_r.append(&mut tmp_i);
+
+            let mut hasher = Blake2b::<U32>::new();
+            hasher.update(tmp_r);
+            let hash_result = hasher.finalize();
+            result.push(FiniteFieldElement::<M>::sample(&hash_result));
+        }
+        result
+    }
+
     pub fn prove(
         &self,
         trace: &mut Trace<M>,
         boundary: &Boundary<M>,
         transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
         proof_stream: &mut FiatShamirTransformer,
-    ) {
+    ) -> Vec<u8> {
         // concatenate randomizers
         for _ in 0..self.num_randomizers {
             trace.push(
@@ -210,5 +225,71 @@ impl<M: ModulusValue> Stark<M> {
         proof_stream.push(&vec![randomizer_root]);
 
         // get weights for nonlinear combination
+        let weights = self.sample_weights(
+            1 + 2 * transition_quotients.len() + 2 * boundary_quotients.len(),
+            proof_stream.prover_fiat_shamir(32),
+        );
+
+        // compute terms of nonlinear combination polynomial
+        let x = Polynomial {
+            coef: vec![
+                FiniteFieldElement::<M>::zero(),
+                FiniteFieldElement::<M>::one(),
+            ],
+        };
+        let mut terms = vec![randomizer_polynomial];
+        for i in 0..transition_quotients.len() {
+            terms.push(transition_quotients[i].clone());
+            let shift = self.max_degree(transition_constraints)
+                - self.transition_quotient_degree_bounds(transition_constraints)[i];
+            terms.push(x.pow(shift) * transition_quotients[i].clone());
+        }
+        for i in 0..self.num_registers {
+            terms.push(boundary_quotients[i].clone());
+            let shift = self.max_degree(transition_constraints)
+                - self.boundary_quotient_degree_bounds(trace.len(), boundary)[i];
+            terms.push(x.pow(shift) * boundary_quotients[i].clone());
+        }
+
+        // take weighted sum
+        let mut combination = Polynomial::<FiniteFieldElement<M>>::zero();
+        for i in 0..terms.len() {
+            let tmp = Polynomial {
+                coef: vec![weights[i].clone()],
+            };
+            combination = combination + tmp * terms[i].clone();
+        }
+
+        // compute matching codeword
+        let combined_codeword = combination.eval_domain(&fri_domain);
+
+        // prove low degree of combination polynomial
+        let mut indices = self.fri.prove(&combined_codeword, proof_stream);
+        indices.sort();
+        let mut duplicated_indices = indices.clone();
+        for i in &indices {
+            duplicated_indices.push((i + self.expansion_factor) % self.fri.domain_length);
+        }
+
+        // open indicated positions in the boundary quotient codewords
+        for bqc in boundary_quotient_codewords {
+            for i in &duplicated_indices {
+                let tmp = bincode::serialize(&bqc[*i]).expect("Serialization failed");
+                proof_stream.push(&vec![tmp.clone()]);
+                let path = Merkle::open(*i, &vec![tmp]);
+                proof_stream.push(&path);
+            }
+        }
+
+        // as well as in the randomizer
+        for i in &indices {
+            let tmp = bincode::serialize(&randomizer_codeword[*i]).expect("Serialization failed");
+            proof_stream.push(&vec![tmp.clone()]);
+            let path = Merkle::open(*i, &vec![tmp]);
+            proof_stream.push(&path);
+        }
+
+        // the final proof is just the serialized stream
+        proof_stream.serialize()
     }
 }
