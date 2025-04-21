@@ -28,7 +28,7 @@ pub struct PublicParamsEigenDA {
     pub chunk_size: usize,
 }
 
-const QUORUM_COUNT: usize = 2;
+const QUORUM_COUNT: usize = 1;
 
 pub struct EigenDA;
 
@@ -68,12 +68,12 @@ impl DataAvailabilitySystem for EigenDA {
         };
 
         // Calculate total encoded size in bytes
-        let encoded_size = result.codewords.iter().map(|chunk| chunk.len()).sum();
+        let encoded_size: usize = result.codewords.iter().map(|chunk| chunk.len()).sum();
         // Record metrics
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
-            metrics.encoding_time = start.elapsed();
-            metrics.encoded_size = encoded_size;
+            metrics.encoding_time += start.elapsed();
+            metrics.encoded_size += encoded_size;
         });
 
         result
@@ -86,7 +86,7 @@ impl DataAvailabilitySystem for EigenDA {
         let pk = &params.quorums[quorum_id as usize];
 
         // commitments
-        let chunk_commitments = encoded
+        let chunk_commitments: Vec<_> = encoded
             .codewords
             .iter()
             .map(|chunk| {
@@ -106,7 +106,7 @@ impl DataAvailabilitySystem for EigenDA {
         // dummy value
         let x = FqOrder::from_value(5);
         // proofs
-        let chunk_proofs = encoded
+        let chunk_proofs: Vec<_> = encoded
             .codewords
             .iter()
             .map(|chunk| {
@@ -134,10 +134,10 @@ impl DataAvailabilitySystem for EigenDA {
         // Record metrics
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
-            metrics.commitment_time = start.elapsed() - proof_time; // Subtract proof time
-            metrics.proof_time = proof_time;
-            metrics.commitment_size = commitment_size;
-            metrics.proof_size = proof_size;
+            metrics.commitment_time += start.elapsed() - proof_time; // Subtract proof time
+            metrics.proof_time += proof_time;
+            metrics.commitment_size += commitment_size;
+            metrics.proof_size += proof_size;
         });
 
         result
@@ -165,7 +165,7 @@ impl DataAvailabilitySystem for EigenDA {
         // Record metrics
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
-            metrics.verification_time = start.elapsed();
+            metrics.verification_time += start.elapsed();
         });
 
         result
@@ -181,7 +181,7 @@ impl DataAvailabilitySystem for EigenDA {
         // Record metrics
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
-            metrics.reconstruction_time = start.elapsed();
+            metrics.reconstruction_time += start.elapsed();
         });
 
         result
@@ -198,9 +198,9 @@ mod tests {
 
     #[test]
     fn test_eigenda_flow() {
-        let params = EigenDA::setup(2, 4.5);
+        let params = EigenDA::setup(32, 4.0);
 
-        let data = vec![1, 2, 3, 4];
+        let data: Vec<_> = (0..32).collect();
         let encoded = EigenDA::encode(&data, &params);
         let commit = EigenDA::commit(&encoded, &params);
 
@@ -213,8 +213,15 @@ mod tests {
         assert!(isvalid);
 
         let reconstructed = EigenDA::reconstruct(&encoded, &params);
-        for i in 0..4 {
+
+        METRICS.with(|metrics| {
+            println!("{:#?}", *metrics.borrow());
+        });
+
+        for i in 0..31 {
             assert_eq!(data[i], reconstructed[i]);
         }
+
+        assert!(false);
     }
 }

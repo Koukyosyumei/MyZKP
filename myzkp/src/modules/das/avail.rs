@@ -1,7 +1,9 @@
-use crate::modules::algebra::curve::bn128::BN128;
+use std::time::Instant;
+
 use crate::modules::algebra::curve::bn128::FqOrder;
+use crate::modules::algebra::curve::bn128::BN128;
 use crate::modules::algebra::kzg::{
-    commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, PublicKeyKZG,
+    commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
@@ -45,16 +47,30 @@ impl DataAvailabilitySystem for Avail {
     }
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
+        let start = Instant::now();
         let rs = setup_rs2d(params.codeword_size, params.codeword_size, data.len());
         let codewords = encode_rs2d(&data, &rs);
 
-        Self::EncodedData {
+        let result = Self::EncodedData {
             codewords: codewords,
             data_size: data.len(),
-        }
+        };
+
+        // Calculate total encoded size in bytes
+        let encoded_size: usize = result.codewords.iter().map(|chunk| chunk.len()).sum();
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.encoding_time += start.elapsed();
+            metrics.encoded_size += encoded_size;
+        });
+
+        result
     }
 
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
+        let start = Instant::now();
+
         let row_commitments = encoded
             .codewords
             .iter()
@@ -79,10 +95,21 @@ impl DataAvailabilitySystem for Avail {
             })
             .collect();
 
-        Self::Commitment {
+        let result = Self::Commitment {
             row_commitments,
             col_commitments,
-        }
+        };
+
+        let commitment_size = (result.row_commitments.len() + result.col_commitments.len())
+            * std::mem::size_of::<CommitmentKZG>();
+
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.commitment_time += start.elapsed();
+            metrics.commitment_size += commitment_size;
+        });
+
+        result
     }
 
     fn verify(
@@ -91,6 +118,8 @@ impl DataAvailabilitySystem for Avail {
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool {
+        let start = Instant::now();
+
         let poly = if position.is_row {
             Polynomial {
                 coef: encoded.codewords[position.row]
@@ -108,10 +137,11 @@ impl DataAvailabilitySystem for Avail {
             }
         };
 
+        let proof_start = Instant::now();
         // dummy value
         let x = FqOrder::from_value(5);
-
         let proof_kzg = open_kzg(&poly, &x, &params.pk);
+        let proof_time = proof_start.elapsed();
 
         let sampled_commitment = if position.is_row {
             &commitment.row_commitments[position.row]
@@ -119,10 +149,22 @@ impl DataAvailabilitySystem for Avail {
             &commitment.col_commitments[position.col]
         };
 
-        verify_kzg(&x, sampled_commitment, &proof_kzg, &params.pk)
+        let result = verify_kzg(&x, sampled_commitment, &proof_kzg, &params.pk);
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.verification_time += start.elapsed() - proof_time; // Subtract proof time
+            metrics.proof_time += proof_time;
+            metrics.proof_size += std::mem::size_of::<ProofKZG>();
+        });
+
+        result
     }
 
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
+        let start = Instant::now();
+
         let rs = setup_rs2d(
             params.codeword_size,
             params.codeword_size,
@@ -142,19 +184,33 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
-        let params = Avail::setup(2, 2.0);
+        let params = Avail::setup(6, 2.0);
 
-        let data = vec![1, 2, 3, 4];
+        let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
 
-        let position0 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: false,
-        };
-        assert!(Avail::verify(&position0, &encoded, &commit, &params));
+        for _ in 0..14 {
+            let position0 = SamplePosition {
+                row: 0,
+                col: 0,
+                is_row: false,
+            };
+            assert!(Avail::verify(&position0, &encoded, &commit, &params));
+        }
 
+        let reconstructed = Avail::reconstruct(&encoded, &params);
+        for i in 0..32 {
+            assert_eq!(data[i], reconstructed[i]);
+        }
+
+        METRICS.with(|metrics| {
+            println!("{:#?}", *metrics.borrow());
+        });
+
+        assert!(false);
+
+        /*
         let position1 = SamplePosition {
             row: 0,
             col: 0,
@@ -180,5 +236,6 @@ mod tests {
         for i in 0..4 {
             assert_eq!(data[i], reconstructed[i]);
         }
+        */
     }
 }

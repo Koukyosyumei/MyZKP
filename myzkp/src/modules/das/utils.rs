@@ -25,6 +25,7 @@ pub struct SamplePosition {
     pub is_row: bool,
 }
 
+#[derive(Debug)]
 pub struct SystemMetrics {
     pub encoding_time: std::time::Duration,
     pub commitment_time: std::time::Duration,
