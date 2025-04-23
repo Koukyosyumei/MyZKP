@@ -34,3 +34,24 @@ Tha magic is that those three points lie on a straight line. We can see it by ap
 \begin{align*}
 y = f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \omega^{\frac{N}{2} + i}} + f(\omega^{\frac{N}{2} + i}) \cdot \frac{x - \omega^{i}}{\omega^{\frac{N}{2} + i} - \omega^{i}}
 \end{align*}
+
+FRI leverage thoese relationship. Key observation from the above is as follows:
+
+- \\(f^{*}(W^{2i})\\) is essentiaally a function of \\(f(\omega^{i})\\) and \\(f(\omega^{\frac{N}{2} + i})\\)
+- While the degree of \\(f(X) = f_E{X^2} + f_O(X^2)\\) is \\(d\\), the degree of \\(f^{*}(X)\\) is \\(\frac{d}{2}\\), which is half of \\(f(X)\\).
+
+Let's first see the overview procedures of FRI:
+
+- The prover first computes codewords; \\(\{f(\omega^{i})\}^{N - 1}_{i=0}\\), \\(\{f_E(w^{2i})\}^{\frac{N}{2} - 1}_{i=0}\\), \\(\{f_O(w^{2i})\}^{\frac{N}{2} - 1}_{i=0}\\), and  \\(\{f^{*}(w^{2i})\}^{\frac{N}{2} - 1}_{i=0}\\).
+- The prover submits Merkle roots of thoese codewords, respectively.
+- The verifier randomly samples an index \\(i \rightarrow \{0, \dots, \frac{N}{2} - 1\}\\).
+- The prover sends \\((f(\omega^{i}, f(\omega^{\frac{N}{2}} + i), f^{*}(\omega^{2i})))\\) along with their Merkle authentication paths.
+- The verifier checks the submitted Merkle authentication paths.
+- The verifier executes the colinearlity check.
+
+After those procedures, the verifier can conclude that :
+
+- the prover has \\(N\\) codewords corresponding to \\(f\\)
+- the prover has \\(N/2 - 1\\) codewords corresponding to \\(f^{*}\\) whose degree is half of \\(f\\)
+
+If \\(f\\)'s degree is actually equal to or less than \\(d\\), repeating the above process should stop in \\(log2 (d)\\) steps. If not, the verifier can conclude that \\(f\\)'s degree is higher than \\(d\\).
