@@ -184,16 +184,19 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
+        // 6 * 6 to store 32 samples
+        // 2x encoding
+        // 12 * 12 -> 7 * 7 = 49以上欠損があるとだめ
         let params = Avail::setup(6, 2.0);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
 
-        for _ in 0..14 {
+        for i in 0..50 {
             let position0 = SamplePosition {
-                row: 0,
-                col: 0,
+                row: i / 12,
+                col: i % 12,
                 is_row: false,
             };
             assert!(Avail::verify(&position0, &encoded, &commit, &params));
