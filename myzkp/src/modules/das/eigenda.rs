@@ -23,7 +23,7 @@ pub struct CommitmentEigenDA {
 }
 
 pub struct PublicParamsEigenDA {
-    pub codeword_size: usize,
+    pub expansion_factor: f64,
     pub quorums: Vec<PublicKeyKZG>,
     pub chunk_size: usize,
 }
@@ -40,13 +40,12 @@ impl DataAvailabilitySystem for EigenDA {
     fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
         let quorums = (0..QUORUM_COUNT)
             .map(|_| setup_kzg(&g1, &g2, chunk_size)) // Standard chunk size
             .collect();
 
         Self::PublicParams {
-            codeword_size: codeword_size,
+            expansion_factor: expansion_factor,
             quorums: quorums,
             chunk_size: chunk_size,
         }
@@ -55,7 +54,8 @@ impl DataAvailabilitySystem for EigenDA {
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
         let start = Instant::now();
 
-        let rs = setup_rs1d(params.codeword_size, data.len());
+        let codeword_size = (data.len() as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, data.len());
         let encoded = encode_rs1d(data, &rs);
         let codewords: Vec<Vec<u8>> = encoded
             .chunks(params.chunk_size) // Fixed chunk size
@@ -174,7 +174,8 @@ impl DataAvailabilitySystem for EigenDA {
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
         let start = Instant::now();
 
-        let rs = setup_rs1d(params.codeword_size, encoded.data_size);
+        let codeword_size = (encoded.data_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, encoded.data_size);
         let codeword = encoded.codewords.concat();
         let result = decode_rs1d(&codeword, &rs).unwrap();
 
@@ -198,21 +199,47 @@ mod tests {
 
     #[test]
     fn test_eigenda_flow() {
-        let params = EigenDA::setup(32, 4.0);
+        /*
+        data_size = 32
+        -> 4.0x 1d RS encoding
+        encoded_size = 128
+        -> chunk = encoded_size / chunk_size = 8 (here, we use chunk_size = 16)
+        the operator needs > 4 chunks to reconstruct
+
+         */
+        let params = EigenDA::setup(16, 4.0);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = EigenDA::encode(&data, &params);
         let commit = EigenDA::commit(&encoded, &params);
 
-        let position = SamplePosition {
-            row: 0,
-            col: 3,
-            is_row: false,
-        };
-        let isvalid = EigenDA::verify(&position, &encoded, &commit, &params);
-        assert!(isvalid);
+        assert_eq!(encoded.codewords.len(), 8);
+        assert_eq!(commit.chunk_commitments.len(), 8);
+        assert_eq!(commit.chunk_proofs.len(), 8);
 
-        let reconstructed = EigenDA::reconstruct(&encoded, &params);
+        for i in 0..5 {
+            let position = SamplePosition {
+                row: 0,
+                col: i,
+                is_row: false,
+            };
+            let isvalid = EigenDA::verify(&position, &encoded, &commit, &params);
+            assert!(isvalid);
+        }
+
+        let mut received_codewords = (0..encoded.codewords.len())
+            .map(|j| (0..encoded.codewords[j].len()).map(|_| 0).collect())
+            .collect::<Vec<_>>();
+        for i in 0..5 {
+            received_codewords[i] = encoded.codewords[i].clone();
+        }
+        let received_encoded = EncodedDataEigenDA {
+            codewords: received_codewords,
+            data_size: encoded.data_size,
+        };
+        assert_eq!(received_encoded.codewords.len(), 8);
+
+        let reconstructed = EigenDA::reconstruct(&received_encoded, &params);
 
         METRICS.with(|metrics| {
             println!("{:#?}", *metrics.borrow());
