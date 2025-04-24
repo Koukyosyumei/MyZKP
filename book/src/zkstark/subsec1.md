@@ -50,7 +50,7 @@ y &= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \omega
   &= \frac{1}{2} \left( (1 + x \omega^{-i}) f(\omega^{i}) + (1 - x \omega^{-i}) f(\omega^{\frac{N}{2} + i}) \right)
 \end{align*}
 
-## FRI Protocol
+## FRI Protocol (Interactive)
 
 The FRI protocol proceeds in rounds:
 
@@ -61,7 +61,7 @@ The FRI protocol proceeds in rounds:
    - The prover commits to these codewords by sending their Merkle roots to the verifier. The prover cannot change codewords after this commitment.
   
 2. **Interactive Query Phase**
-   - The verifier randomly samples an index \\(i \rightarrow \{0, \dots, \frac{N}{2} - 1\}\\).
+   - The verifier randomly samples an index \\(i \leftarrow \\{0, \dots, \frac{N}{2} - 1\\}\\).
    - The prover reveals the values \\(f(\omega^{i})\\), \\(f(\omega^{\frac{N}{2} + i})\\), and \\(f^{*}(\omega^{2i})\\) along with their Merkle authentication paths.
    - The verifier checks the Merkle paths to ensure the revealed values are consistent with the previously sent Merkle roots.
    - The verifier performs the collinearity check: verifies if the point \\((\alpha, f^{*}(\omega^{2i}))\\) lies on the line defined by \\((\omega^{i}, f(\omega^{i}))\\) and \\((\omega^{\frac{N}{2} + i}, f(\omega^{\frac{N}{2} + i}))\\).
@@ -70,3 +70,7 @@ The FRI protocol proceeds in rounds:
    - If the collinearity check passes, the verifier is convinced that the folded polynomial \\(f^{\*}(X)\\) was correctly derived. The protocol then repeats with \\(f^{\*}(X)\\) and the subgroup \\(D^2\\). The size of the subgroup and the effective degree of the polynomial are roughly halved in each round.
 
 This process continues for approximately \\(\log_2{d}\\) rounds. At the final round, the remaining polynomial has a very low degree (can be a constant function). The verifier might directly query all the remaining evaluation points to verify the degree bound.
+
+## FRI Protocol (Non-Interactive)
+
+TBD

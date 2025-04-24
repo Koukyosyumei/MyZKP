@@ -214,7 +214,7 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 &amp;= f(\omega^{i}) \cdot \frac{x + \omega^{i}}{\omega^{i} + \omega^{i}} + f(\omega^{\frac{N}{2} + i}) \cdot \frac{x - \omega^{i}}{-\omega^{i} - \omega^{i}} \\
 &amp;= \frac{1}{2} \left( (1 + x \omega^{-i}) f(\omega^{i}) + (1 - x \omega^{-i}) f(\omega^{\frac{N}{2} + i}) \right)
 \end{align*}</p>
-<h2 id="fri-protocol"><a class="header" href="#fri-protocol">FRI Protocol</a></h2>
+<h2 id="fri-protocol-interactive"><a class="header" href="#fri-protocol-interactive">FRI Protocol (Interactive)</a></h2>
 <p>The FRI protocol proceeds in rounds:</p>
 <ol>
 <li>
@@ -229,7 +229,7 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 <li>
 <p><strong>Interactive Query Phase</strong></p>
 <ul>
-<li>The verifier randomly samples an index \(i \rightarrow {0, \dots, \frac{N}{2} - 1}\).</li>
+<li>The verifier randomly samples an index \(i \leftarrow \{0, \dots, \frac{N}{2} - 1\}\).</li>
 <li>The prover reveals the values \(f(\omega^{i})\), \(f(\omega^{\frac{N}{2} + i})\), and \(f^{*}(\omega^{2i})\) along with their Merkle authentication paths.</li>
 <li>The verifier checks the Merkle paths to ensure the revealed values are consistent with the previously sent Merkle roots.</li>
 <li>The verifier performs the collinearity check: verifies if the point \((\alpha, f^{*}(\omega^{2i}))\) lies on the line defined by \((\omega^{i}, f(\omega^{i}))\) and \((\omega^{\frac{N}{2} + i}, f(\omega^{\frac{N}{2} + i}))\).</li>
@@ -243,6 +243,8 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 </li>
 </ol>
 <p>This process continues for approximately \(\log_2{d}\) rounds. At the final round, the remaining polynomial has a very low degree (can be a constant function). The verifier might directly query all the remaining evaluation points to verify the degree bound.</p>
+<h2 id="fri-protocol-non-interactive"><a class="header" href="#fri-protocol-non-interactive">FRI Protocol (Non-Interactive)</a></h2>
+<p>TBD</p>
 
                     </main>
 
