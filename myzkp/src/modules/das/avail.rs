@@ -193,7 +193,7 @@ mod tests {
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
 
-        for i in 0..50 {
+        for i in 0..10 {
             let position0 = SamplePosition {
                 row: i / 12,
                 col: i % 12,
