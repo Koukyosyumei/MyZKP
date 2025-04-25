@@ -83,5 +83,8 @@ mod tests {
 
         let is_valid = Merkle::verify(&root, index, &proof, &leafs[index]);
         assert!(is_valid);
+
+        let is_not_valid = Merkle::verify(&root, index, &proof, &leafs[index + 1]);
+        assert!(!is_not_valid);
     }
 }

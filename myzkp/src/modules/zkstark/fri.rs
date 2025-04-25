@@ -1,6 +1,18 @@
-use blake2::{digest::consts::U32, Blake2b, Digest};
-use num_traits::One;
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Shl, Shr, Sub, SubAssign};
+use std::str::FromStr;
 
+use num_bigint::BigInt;
+use num_bigint::ToBigInt;
+use num_traits::{One, Zero};
+use serde::{Deserialize, Serialize};
+
+use blake2::{digest::consts::U32, Blake2b, Digest};
+use lazy_static::lazy_static;
+use num_bigint::RandBigInt;
+use num_traits::Signed;
+use paste::paste;
+
+use crate::define_myzkp_modulus_type;
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::polynomial::Polynomial;
@@ -93,6 +105,10 @@ impl<M: ModulusValue> FRI<M> {
         // commit phase
         let codewords = self.commit(codeword, proof_stream);
 
+        for c in &codewords {
+            println!("c-len: {}", c.len());
+        }
+
         // get indices
         let top_level_indices = sample_indices(
             &proof_stream.prover_fiat_shamir(32),
@@ -176,6 +192,8 @@ impl<M: ModulusValue> FRI<M> {
         let mut codeword = initial_codeword.clone();
         let mut codewords = Vec::new();
 
+        println!("a: {}", self.num_rounds());
+
         for r in 0..self.num_rounds() {
             // compute and send Merkle root
             let root = Merkle::commit(
@@ -222,6 +240,7 @@ impl<M: ModulusValue> FRI<M> {
 
         // collect last codeword too
         codewords.push(codeword);
+        println!("b - {}", codewords.len());
         codewords
     }
 
@@ -385,5 +404,117 @@ impl<M: ModulusValue> FRI<M> {
         }
 
         true
+    }
+}
+
+define_myzkp_modulus_type!(Mod128, "270497897142230380135924736767050121217");
+
+pub fn get_nth_root_of_Mod128(n: &BigInt) -> FiniteFieldElement<Mod128> {
+    let one = BigInt::one();
+    let shift_119 = one.clone().shl(119u32);
+    // let expected_p = &one.clone() + &BigInt::from(407u32) * &shift_119;
+
+    //assert_eq!(self.p, expected_p, "Field is not the expected one");
+
+    // Check that n <= 2^119 and n is a power of two
+    assert!(
+        n <= &shift_119 && (n & (n - &one)).is_zero(),
+        "Field does not have nth root of unity where n > 2^119 or not power of two."
+    );
+
+    let mut root = FiniteFieldElement::<Mod128>::from_value(
+        BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
+    );
+    let mut order = shift_119.clone();
+
+    while order != *n {
+        root = &root * &root; // or root = &root * &root;
+        order = order.shr(1u32);
+    }
+
+    root
+}
+
+pub fn compute_log_codeword_length(initial_codeword_length: usize) -> usize {
+    let mut codeword_length = initial_codeword_length;
+    let mut log_codeword_length = 0;
+
+    while codeword_length > 1 {
+        codeword_length /= 2;
+        log_codeword_length += 1;
+    }
+
+    log_codeword_length
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::modules::algebra::field::FiniteFieldElement;
+
+    // 1 + 407 * (1 << 119)
+
+    #[test]
+    fn test_fri() {
+        let offset: usize = 0;
+        let degree: usize = 63;
+        let expansion_factor: usize = 4;
+        let num_colinearity_tests: usize = 17;
+        let initial_codeword_length = (degree + 1) * expansion_factor;
+
+        let log_codeword_length = compute_log_codeword_length(initial_codeword_length);
+        assert_eq!(1 << log_codeword_length, initial_codeword_length);
+
+        let omega = get_nth_root_of_Mod128(&BigInt::from(initial_codeword_length));
+        assert!(omega.pow(1 << log_codeword_length).is_one());
+        assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
+
+        let fri = FRI {
+            offset: FiniteFieldElement::<Mod128>::from_value(offset),
+            omega: omega,
+            domain_length: initial_codeword_length,
+            expansion_factor: expansion_factor,
+            num_colinearity_tests: num_colinearity_tests,
+        };
+
+        let polynomial = Polynomial {
+            coef: (0..degree + 1)
+                .map(|i| FiniteFieldElement::<Mod128>::from_value(i))
+                .collect(),
+        };
+        let domain = fri.eval_domain();
+        let mut codeword = polynomial.eval_domain(&domain);
+
+        let mut proof_stream = FiatShamirTransformer::new();
+        fri.prove(&codeword, &mut proof_stream);
+        let mut points = Vec::new();
+        let result = fri.verify(&mut proof_stream, &mut points);
+        assert!(result);
+
+        for i in 0..(degree / 3) {
+            codeword[i] = FiniteFieldElement::<Mod128>::zero();
+        }
+
+        let mut proof_stream_second = FiatShamirTransformer::new();
+        fri.prove(&codeword, &mut proof_stream_second);
+        let mut points_second = Vec::new();
+        let result_second = fri.verify(&mut proof_stream_second, &mut points_second);
+        assert!(!result_second);
+
+        /*
+        let poly = Polynomial {
+            coef: vec![
+                FiniteFieldElement::<Mod128>::from_value(1_i32),
+                FiniteFieldElement::<Mod128>::from_value(2_i32),
+                FiniteFieldElement::<Mod128>::from_value(3_i32),
+                FiniteFieldElement::<Mod128>::from_value(4_i32),
+                FiniteFieldElement::<Mod128>::from_value(5_i32),
+                FiniteFieldElement::<Mod128>::from_value(6_i32),
+            ],
+        };
+        */
+
+        //let fri_domain = fri.eval_domain();
     }
 }

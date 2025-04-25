@@ -314,6 +314,9 @@ impl<F: Field> Polynomial<F> {
 
         let mut remainder_coeffs = Self::trim_trailing_zeros(&self.coef);
         let divisor_coeffs = Self::trim_trailing_zeros(&other.coef);
+        if divisor_coeffs.len().is_zero() {
+            return (Polynomial::zero(), self.clone());
+        }
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
