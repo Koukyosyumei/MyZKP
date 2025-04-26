@@ -6,12 +6,12 @@ use blake2::{digest::consts::U32, Blake2b, Digest};
 use num_traits::{One, Zero};
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
-use crate::modules::algebra::merkle::Merkle;
+use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
-use crate::modules::zkstark::fri::FRI;
+use crate::modules::zkstark::fri::{FriProof, FRI};
 
 pub struct Stark<M: ModulusValue> {
     pub expansion_factor: usize,
@@ -30,6 +30,15 @@ pub struct Stark<M: ModulusValue> {
 pub type Trace<M> = Vec<Vec<FiniteFieldElement<M>>>;
 pub type Boundary<M> = Vec<(usize, usize, FiniteFieldElement<M>)>;
 pub type TransitionConstraints<M> = Vec<MPolynomial<FiniteFieldElement<M>>>;
+pub struct StarkProof<M: ModulusValue> {
+    pub fri_proof: FriProof<M>,
+    pub bqc_roots: Vec<MerkleRoot>,
+    pub bqc_points: Vec<FiniteFieldElement<M>>,
+    pub bqc_paths: Vec<MerklePath>,
+    pub rdc_root: MerkleRoot,
+    pub rdc_points: Vec<FiniteFieldElement<M>>,
+    pub rdc_paths: Vec<MerklePath>,
+}
 
 impl<M: ModulusValue> Stark<M> {
     fn transition_degree_bounds(
@@ -143,8 +152,9 @@ impl<M: ModulusValue> Stark<M> {
         trace: &mut Trace<M>,
         boundary: &Boundary<M>,
         transition_constraints: &TransitionConstraints<M>,
-        proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<u8> {
+    ) -> StarkProof<M> {
+        let mut proof_stream = FiatShamirTransformer::new();
+
         // concatenate randomizers
         for _ in 0..self.num_randomizers {
             trace.push(
@@ -181,7 +191,7 @@ impl<M: ModulusValue> Stark<M> {
         // commit to boundary quotients
         let fri_domain = self.fri.eval_domain();
         let mut boundary_quotient_codewords = Vec::new();
-        //let mut boundary_quotient_Merkle_roots = Vec::new();
+        let mut bqc_roots = Vec::new();
         for s in 0..self.num_registers {
             boundary_quotient_codewords.push(boundary_quotients[s].eval_domain(&fri_domain));
             let tmp: Vec<_> = boundary_quotient_codewords[s]
@@ -189,6 +199,7 @@ impl<M: ModulusValue> Stark<M> {
                 .map(|c| bincode::serialize(c).expect("Serialization failed"))
                 .collect();
             let merkle_root = Merkle::commit(&tmp);
+            bqc_roots.push(merkle_root.clone());
             proof_stream.push(&vec![merkle_root]);
         }
 
@@ -229,7 +240,7 @@ impl<M: ModulusValue> Stark<M> {
             .map(|c| bincode::serialize(c).expect("Serialization failed"))
             .collect();
         let randomizer_root = Merkle::commit(&tmp);
-        proof_stream.push(&vec![randomizer_root]);
+        proof_stream.push(&vec![randomizer_root.clone()]);
 
         // get weights for nonlinear combination
         let weights = self.sample_weights(
@@ -271,66 +282,75 @@ impl<M: ModulusValue> Stark<M> {
         let combined_codeword = combination.eval_domain(&fri_domain);
 
         // prove low degree of combination polynomial
-        let mut indices = self.fri.prove(&combined_codeword, proof_stream);
-        indices.sort();
-        let mut duplicated_indices = indices.clone();
-        for i in &indices {
+        let mut fri_proof = self.fri.prove(&combined_codeword);
+        fri_proof.top_level_indices.sort();
+        let mut duplicated_indices = fri_proof.top_level_indices.clone();
+        for i in &fri_proof.top_level_indices {
             duplicated_indices.push((i + self.expansion_factor) % self.fri.domain_length);
         }
 
         // open indicated positions in the boundary quotient codewords
+        let mut bqc_points = Vec::new();
+        let mut bqc_paths = Vec::new();
         for bqc in boundary_quotient_codewords {
             for i in &duplicated_indices {
                 let tmp = bincode::serialize(&bqc[*i]).expect("Serialization failed");
-                proof_stream.push(&vec![tmp.clone()]);
-                let path = Merkle::open(*i, &vec![tmp]);
-                proof_stream.push(&path);
+                bqc_points.push(bqc[*i].clone());
+                bqc_paths.push(Merkle::open(*i, &vec![tmp]));
             }
         }
 
         // as well as in the randomizer
-        for i in &indices {
+        let mut rdc_points = Vec::new();
+        let mut rdc_paths = Vec::new();
+        for i in &fri_proof.top_level_indices {
             let tmp = bincode::serialize(&randomizer_codeword[*i]).expect("Serialization failed");
-            proof_stream.push(&vec![tmp.clone()]);
-            let path = Merkle::open(*i, &vec![tmp]);
-            proof_stream.push(&path);
+            rdc_points.push(randomizer_codeword[*i].clone());
+            rdc_paths.push(Merkle::open(*i, &vec![tmp]));
         }
 
-        // the final proof is just the serialized stream
-        proof_stream.serialize()
+        StarkProof {
+            fri_proof: fri_proof,
+            bqc_roots: bqc_roots,
+            bqc_points: bqc_points,
+            bqc_paths: bqc_paths,
+            rdc_root: randomizer_root,
+            rdc_points: rdc_points,
+            rdc_paths: rdc_paths,
+        }
     }
 
     pub fn verify(
         &self,
-        proof: Vec<u8>,
+        proof: &StarkProof<M>,
         transition_constraints: &TransitionConstraints<M>,
         boundary: &Boundary<M>,
     ) -> bool {
+        let mut proof_stream = FiatShamirTransformer::new();
+
         // infer trace length from boundary conditions
         let original_trace_length = 1 + boundary.iter().map(|(c, _, _)| c).max().unwrap();
         let randomized_trace_length = original_trace_length + self.num_randomizers;
 
-        // deserialize with right proof stream
-        let mut proof_stream = FiatShamirTransformer::deserialize(&proof);
-
         // get Merkle roots of boundary quotient codewords
-        let mut boundary_quotient_roots = Vec::new();
-        for _ in 0..self.num_registers {
-            boundary_quotient_roots.push(proof_stream.pull());
+        let boundary_quotient_roots = &proof.bqc_roots;
+        for bqr in boundary_quotient_roots {
+            proof_stream.push(&vec![bqr.clone()]);
         }
 
         // get Merkle root of randomizer polynomial
-        let randomizer_root = proof_stream.pull();
+        let randomizer_root = &proof.rdc_root;
+        proof_stream.push(&vec![randomizer_root.clone()]);
 
         // get weights for nonlinear combination
         let weights = self.sample_weights(
             1 + 2 * transition_constraints.len() + 2 * self.boundary_interpolants(boundary).len(),
-            proof_stream.verifier_fiat_shamir(32),
+            proof_stream.prover_fiat_shamir(32),
         );
 
         // verify low degree of combination polynomial
         let mut polynomial_values = Vec::new();
-        let mut verifier_accepts = self.fri.verify(&mut proof_stream, &mut polynomial_values);
+        let mut verifier_accepts = self.fri.verify(&proof.fri_proof, &mut polynomial_values);
         polynomial_values.sort_by_key(|iv| iv.0);
         if !verifier_accepts {
             return false;
@@ -348,10 +368,13 @@ impl<M: ModulusValue> Stark<M> {
         for r in 0..boundary_quotient_roots.len() {
             let mut tmp = HashMap::new();
             for i in &duplicated_indices {
-                tmp.insert(i, proof_stream.pull());
-                let path = proof_stream.pull();
+                tmp.insert(
+                    i,
+                    bincode::serialize(&proof.bqc_points[r]).expect("Serialization failed"),
+                );
+                let path = &proof.bqc_paths[r];
                 let verifier_accepts = verifier_accepts
-                    && Merkle::verify(&boundary_quotient_roots[r][0], *i, &path, &tmp[&i][0]);
+                    && Merkle::verify(&boundary_quotient_roots[r], *i, &path, &tmp[&i]);
                 if !verifier_accepts {
                     return false;
                 }
@@ -362,10 +385,13 @@ impl<M: ModulusValue> Stark<M> {
         // read and verify randomizer leafs
         let mut randomizer = HashMap::new();
         for i in &indices {
-            randomizer.insert(i, proof_stream.pull());
-            let path = proof_stream.pull();
-            verifier_accepts = verifier_accepts
-                && Merkle::verify(&randomizer_root[0], *i, &path, &randomizer[&i][0]);
+            randomizer.insert(
+                i,
+                bincode::serialize(&proof.rdc_points[*i]).expect("Serialization failed"),
+            );
+            let path = &proof.rdc_paths[*i];
+            verifier_accepts =
+                verifier_accepts && Merkle::verify(&randomizer_root, *i, &path, &randomizer[&i]);
         }
 
         // verify leafs of combination polynomial
@@ -388,11 +414,10 @@ impl<M: ModulusValue> Stark<M> {
                 let zerofier = self.boundary_zerofiers(boundary)[s].clone();
                 let interpolant = self.boundary_interpolants(boundary)[s].clone();
                 let tmp_cur: FiniteFieldElement<M> =
-                    bincode::deserialize(&leafs[s][&current_index][0])
+                    bincode::deserialize(&leafs[s][&current_index])
                         .expect("Deserialization failed");
                 let tmp_next: FiniteFieldElement<M> =
-                    bincode::deserialize(&leafs[s][&next_index][0])
-                        .expect("Deserialization failed");
+                    bincode::deserialize(&leafs[s][&next_index]).expect("Deserialization failed");
                 current_trace[s] = tmp_cur * zerofier.eval(&domain_current_index)
                     + interpolant.eval(&domain_current_index);
                 next_trace[s] = tmp_next * zerofier.eval(&domain_next_index)
@@ -408,8 +433,9 @@ impl<M: ModulusValue> Stark<M> {
                 .collect();
 
             // compute nonlinear combination
-            let mut terms = vec![bincode::deserialize(&randomizer[&current_index][0])
-                .expect("Deserialization failed")];
+            let mut terms =
+                vec![bincode::deserialize(&randomizer[&current_index])
+                    .expect("Deserialization failed")];
             for s in 0..(transition_constraints_values.len()) {
                 let tcv = transition_constraints_values[s].clone();
                 let quotient = tcv / self.transition_zerofier().eval(&domain_current_index);
@@ -421,7 +447,7 @@ impl<M: ModulusValue> Stark<M> {
             for s in 0..self.num_registers {
                 let tmp = &leafs[s][&current_index];
                 let bqv: FiniteFieldElement<M> =
-                    bincode::deserialize(&tmp[0]).expect("Deserialization failed");
+                    bincode::deserialize(&tmp).expect("Deserialization failed");
                 terms.push(bqv.clone());
                 let shift = self.max_degree(transition_constraints)
                     - self.boundary_quotient_degree_bounds(randomized_trace_length, boundary)[s];

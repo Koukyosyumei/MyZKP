@@ -70,6 +70,7 @@ pub struct FRI<M: ModulusValue> {
 pub type Codeword<F> = Vec<F>;
 
 pub struct FriProof<M: ModulusValue> {
+    pub top_level_indices: Vec<usize>,
     pub last_codeword: Vec<FiniteFieldElement<M>>,
     pub merkle_roots: Vec<MerkleRoot>,
     pub revealed_layers: Vec<FriQueryLayer<M>>,
@@ -132,6 +133,7 @@ impl<M: ModulusValue> FRI<M> {
         }
 
         FriProof {
+            top_level_indices: top_level_indices,
             last_codeword: codewords.last().unwrap().to_vec(),
             merkle_roots: roots,
             revealed_layers: revealed_items,
