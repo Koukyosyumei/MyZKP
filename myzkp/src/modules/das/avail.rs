@@ -163,7 +163,7 @@ impl DataAvailabilitySystem for Avail {
     }
 
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
-        let start = Instant::now();
+        let _start = Instant::now();
 
         let rs = setup_rs2d(
             params.codeword_size,
