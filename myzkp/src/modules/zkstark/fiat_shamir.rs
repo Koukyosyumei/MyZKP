@@ -1,13 +1,10 @@
 use bincode;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sha3::{
     digest::{ExtendableOutput, Update, XofReader},
     Shake256,
 };
 
-use crate::modules::algebra::field::Field;
-use crate::modules::algebra::merkle::Merkle;
-use crate::modules::algebra::polynomial::Polynomial;
 
 pub type SerializedObj = Vec<u8>;
 

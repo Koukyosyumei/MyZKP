@@ -73,7 +73,7 @@ impl<F: Field> ReedSolomon<F> {
         let g = self.generator_polynomial();
         let remainder = &m_shifted % &g;
 
-        let mut codeword = m_shifted - remainder;
+        let codeword = m_shifted - remainder;
         codeword.coef
     }
 
@@ -272,7 +272,7 @@ impl<F: Field> ReedSolomon2D<F> {
     }
 
     pub fn encode(&self, data: &[F]) -> Vec<Vec<F>> {
-        let mut matrix = self.organize_data_matrix(data);
+        let matrix = self.organize_data_matrix(data);
 
         // First dimension encoding (rows)
         // - message_len x row_codeword_len
