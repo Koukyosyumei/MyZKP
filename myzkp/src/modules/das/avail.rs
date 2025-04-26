@@ -206,39 +206,5 @@ mod tests {
         for i in 0..32 {
             assert_eq!(data[i], reconstructed[i]);
         }
-
-        METRICS.with(|metrics| {
-            println!("{:#?}", *metrics.borrow());
-        });
-
-        assert!(false);
-
-        /*
-        let position1 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: true,
-        };
-        assert!(Avail::verify(&position1, &encoded, &commit, &params));
-
-        let position2 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: false,
-        };
-        assert!(Avail::verify(&position2, &encoded, &commit, &params));
-
-        let position3 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: true,
-        };
-        assert!(Avail::verify(&position3, &encoded, &commit, &params));
-
-        let reconstructed = Avail::reconstruct(&encoded, &params);
-        for i in 0..4 {
-            assert_eq!(data[i], reconstructed[i]);
-        }
-        */
     }
 }
