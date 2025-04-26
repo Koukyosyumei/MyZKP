@@ -14,7 +14,7 @@ use paste::paste;
 
 use crate::define_myzkp_modulus_type;
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
-use crate::modules::algebra::merkle::Merkle;
+use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
@@ -73,6 +73,18 @@ pub struct FRI<M: ModulusValue> {
 
 pub type Codeword<F> = Vec<F>;
 
+pub struct FriProof<M: ModulusValue> {
+    pub last_codeword: Vec<FiniteFieldElement<M>>,
+    pub merkle_roots: Vec<MerkleRoot>,
+    pub revealed_layers: Vec<FriQueryLayer<M>>,
+}
+
+pub struct FriQueryLayer<M: ModulusValue> {
+    pub a: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
+    pub b: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
+    pub c: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
+}
+
 impl<M: ModulusValue> FRI<M> {
     pub fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
@@ -94,20 +106,15 @@ impl<M: ModulusValue> FRI<M> {
 
     pub fn prove(
         &self,
-        codeword: &Codeword<FiniteFieldElement<M>>,
+        initial_codeword: &Codeword<FiniteFieldElement<M>>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<usize> {
+    ) -> FriProof<M> {
         assert!(
-            self.domain_length == codeword.len(),
+            self.domain_length == initial_codeword.len(),
             "initial codeword length does not match length of inital codeword"
         );
 
-        // commit phase
-        let codewords = self.commit(codeword, proof_stream);
-
-        for c in &codewords {
-            println!("c-len: {}", c.len());
-        }
+        let (codewords, roots) = self.commit(initial_codeword, proof_stream);
 
         // get indices
         let top_level_indices = sample_indices(
@@ -119,71 +126,29 @@ impl<M: ModulusValue> FRI<M> {
         let mut indices = top_level_indices.clone();
 
         // query phase
+        let mut revealed_items = Vec::new();
         for i in 0..(codewords.len() - 1) {
             indices = indices
                 .into_iter()
                 .map(|idx| idx % (codewords[i].len() / 2))
                 .collect::<Vec<_>>()
                 .clone();
-            self.query(&codewords[i], &codewords[i + 1], &indices, proof_stream);
+            let tmp = self.reveal(&codewords[i], &codewords[i + 1], &indices);
+            revealed_items.push(tmp);
         }
 
-        top_level_indices
-    }
-
-    pub fn query(
-        &self,
-        cur_codeword: &Codeword<FiniteFieldElement<M>>,
-        next_codeword: &Codeword<FiniteFieldElement<M>>,
-        c_indices: &Vec<usize>,
-        proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<usize> {
-        let a_indices = c_indices.clone();
-        let b_indices = c_indices
-            .into_iter()
-            .map(|idx| idx + cur_codeword.len() / 2)
-            .collect::<Vec<_>>();
-
-        // reveal leafs
-        for s in 0..self.num_colinearity_tests {
-            let obj = vec![
-                bincode::serialize(&cur_codeword[a_indices[s]]).expect("Serialization failed"),
-                bincode::serialize(&cur_codeword[b_indices[s]]).expect("Serialization failed"),
-                bincode::serialize(&next_codeword[c_indices[s]]).expect("Serialization failed"),
-            ];
-            proof_stream.push(&obj);
+        FriProof {
+            last_codeword: codewords.last().unwrap().to_vec(),
+            merkle_roots: roots,
+            revealed_layers: revealed_items,
         }
-
-        let serialized_cur_codeword = cur_codeword
-            .into_iter()
-            .map(|c| bincode::serialize(&c).expect("Serialization failed"))
-            .collect::<Vec<_>>();
-        let serialized_next_codeword = next_codeword
-            .into_iter()
-            .map(|c| bincode::serialize(&c).expect("Serialization failed"))
-            .collect::<Vec<_>>();
-
-        // reveal authentication paths
-        for s in 0..self.num_colinearity_tests {
-            let path_a = Merkle::open(a_indices[s], &serialized_cur_codeword);
-            let path_b = Merkle::open(b_indices[s], &serialized_cur_codeword);
-            let path_c = Merkle::open(c_indices[s], &serialized_next_codeword);
-            proof_stream.push(&path_a);
-            proof_stream.push(&path_b);
-            proof_stream.push(&path_c);
-        }
-
-        let mut result = a_indices.clone();
-        let mut tmp = b_indices.clone();
-        result.append(&mut tmp);
-        result
     }
 
     pub fn commit(
         &self,
         initial_codeword: &Codeword<FiniteFieldElement<M>>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> Vec<Codeword<FiniteFieldElement<M>>> {
+    ) -> (Vec<Codeword<FiniteFieldElement<M>>>, Vec<MerkleRoot>) {
         let one = FiniteFieldElement::<M>::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
@@ -193,6 +158,7 @@ impl<M: ModulusValue> FRI<M> {
         let mut codewords = Vec::new();
 
         println!("a: {}", self.num_rounds());
+        let mut roots = Vec::new();
 
         for r in 0..self.num_rounds() {
             // compute and send Merkle root
@@ -203,6 +169,7 @@ impl<M: ModulusValue> FRI<M> {
                     .map(|c| bincode::serialize(&c).expect("Serialization failed"))
                     .collect::<Vec<_>>(),
             );
+            roots.push(root.clone());
             proof_stream.push(&vec![root]);
 
             // prepare next round, if necessary
@@ -212,6 +179,7 @@ impl<M: ModulusValue> FRI<M> {
 
             // get challenge
             let alpha = FiniteFieldElement::<M>::sample(&proof_stream.prover_fiat_shamir(32));
+            println!("alpha: {}", alpha);
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -220,10 +188,10 @@ impl<M: ModulusValue> FRI<M> {
             codeword = (0..(codeword.len() / 2))
                 .map(|i| {
                     two_inverse.clone()
-                        * (one.clone() + alpha.clone() / (offset.clone() * (omega.pow(i))))
-                        * codeword[i].clone()
-                        + (one.clone() - alpha.clone() / (offset.clone() * (omega.pow(i))))
-                            * codeword[codeword.len() / 2 + i].clone()
+                        * ((one.add_ref(&alpha) / (offset.mul_ref(&omega.pow(i))))
+                            .mul_ref(&codeword[i])
+                            + (one.sub_ref(&alpha) / (offset.mul_ref(&omega.pow(i))))
+                                .mul_ref(&codeword[codeword.len() / 2 + i]))
                 })
                 .collect();
             omega = omega.clone() * omega.clone();
@@ -241,11 +209,61 @@ impl<M: ModulusValue> FRI<M> {
         // collect last codeword too
         codewords.push(codeword);
         println!("b - {}", codewords.len());
-        codewords
+
+        (codewords, roots)
+    }
+
+    pub fn reveal(
+        &self,
+        cur_codeword: &Codeword<FiniteFieldElement<M>>,
+        next_codeword: &Codeword<FiniteFieldElement<M>>,
+        c_indices: &Vec<usize>,
+    ) -> FriQueryLayer<M> {
+        let a_indices = c_indices.clone();
+        let b_indices = c_indices
+            .into_iter()
+            .map(|idx| idx + cur_codeword.len() / 2)
+            .collect::<Vec<_>>();
+
+        let revealed_codewords_a = (0..self.num_colinearity_tests)
+            .map(|s| cur_codeword[a_indices[s]].clone())
+            .collect();
+        let revealed_codewords_b = (0..self.num_colinearity_tests)
+            .map(|s| cur_codeword[b_indices[s]].clone())
+            .collect();
+        let revealed_codewords_c = (0..self.num_colinearity_tests)
+            .map(|s| next_codeword[c_indices[s]].clone())
+            .collect();
+
+        let serialized_cur_codeword = cur_codeword
+            .into_iter()
+            .map(|c| bincode::serialize(&c).expect("Serialization failed"))
+            .collect::<Vec<_>>();
+        let serialized_next_codeword = next_codeword
+            .into_iter()
+            .map(|c| bincode::serialize(&c).expect("Serialization failed"))
+            .collect::<Vec<_>>();
+
+        let revealed_paths_a = (0..self.num_colinearity_tests)
+            .map(|s| Merkle::open(a_indices[s], &serialized_cur_codeword))
+            .collect();
+        let revealed_paths_b = (0..self.num_colinearity_tests)
+            .map(|s| Merkle::open(b_indices[s], &serialized_cur_codeword))
+            .collect();
+        let revealed_paths_c = (0..self.num_colinearity_tests)
+            .map(|s| Merkle::open(c_indices[s], &serialized_next_codeword))
+            .collect();
+
+        FriQueryLayer {
+            a: (revealed_codewords_a, revealed_paths_a),
+            b: (revealed_codewords_b, revealed_paths_b),
+            c: (revealed_codewords_c, revealed_paths_c),
+        }
     }
 
     pub fn verify(
         &self,
+        proof: &FriProof<M>,
         proof_stream: &mut FiatShamirTransformer,
         polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
     ) -> bool {
@@ -253,29 +271,29 @@ impl<M: ModulusValue> FRI<M> {
         let mut offset = self.offset.clone();
 
         // extract all roots and alphas
-        let mut roots = Vec::new();
         let mut alphas: Vec<FiniteFieldElement<M>> = Vec::new();
-        for r in 0..self.num_rounds() {
-            roots.push(proof_stream.pull().first().unwrap().clone());
+        for r in &proof.merkle_roots {
+            proof_stream.push(&vec![r.to_vec()]);
             alphas.push(FiniteFieldElement::<M>::sample(
-                &proof_stream.verifier_fiat_shamir(32),
+                &proof_stream.prover_fiat_shamir(32),
             ));
         }
 
         // extract last codeword
-        let last_codeword = proof_stream.pull();
-        let deserialized_last_codeword: Vec<FiniteFieldElement<M>> = last_codeword
-            .iter()
-            .map(|c| bincode::deserialize(&c).expect("Deserialization failed"))
+        let serialized_last_codeword = proof
+            .last_codeword
+            .clone()
+            .into_iter()
+            .map(|c| bincode::serialize(&c).expect("Serialization failed"))
             .collect::<Vec<_>>();
 
         // check if it matches the given root
-        if **roots.last().unwrap() != Merkle::commit(&last_codeword) {
+        if **proof.merkle_roots.last().unwrap() != Merkle::commit(&serialized_last_codeword) {
             return false;
         }
 
         // check if it is low degree
-        let degree = (last_codeword.len() / self.expansion_factor) - 1;
+        let degree = (proof.last_codeword.len() / self.expansion_factor) - 1;
         let mut last_omega = omega.clone();
         let mut last_offset = offset.clone();
         for r in 0..(self.num_rounds() - 1) {
@@ -285,23 +303,21 @@ impl<M: ModulusValue> FRI<M> {
 
         // assert that last_omega has the right order
         assert!(
-            last_omega.inverse() == last_omega.pow(last_codeword.len() - 1),
+            last_omega.inverse() == last_omega.pow(proof.last_codeword.len() - 1),
             "omega does not have right order"
         );
 
         // compute interpolant
-        let last_domain = (0..last_codeword.len())
+        let last_domain = (0..proof.last_codeword.len())
             .into_iter()
             .map(|i| last_offset.clone() * (last_omega.pow(i)))
             .collect::<Vec<_>>();
-        let poly = Polynomial::<FiniteFieldElement<M>>::interpolate(
-            &last_domain,
-            &deserialized_last_codeword,
-        );
+        let poly =
+            Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &proof.last_codeword);
 
-        for i in 0..last_codeword.len() {
+        for i in 0..proof.last_codeword.len() {
             assert!(
-                poly.eval(&last_domain[i]) == deserialized_last_codeword[i],
+                poly.eval(&last_domain[i]) == proof.last_codeword[i],
                 "re-evaluated codeword does not match original!"
             );
         }
@@ -335,13 +351,9 @@ impl<M: ModulusValue> FRI<M> {
             let mut bb = Vec::<FiniteFieldElement<M>>::new();
             let mut cc = Vec::<FiniteFieldElement<M>>::new();
             for s in 0..self.num_colinearity_tests {
-                let abc = proof_stream.pull();
-                let ay: FiniteFieldElement<M> =
-                    bincode::deserialize(&abc[0]).expect("Deserialization failed");
-                let by: FiniteFieldElement<M> =
-                    bincode::deserialize(&abc[1]).expect("Deserialization failed");
-                let cy: FiniteFieldElement<M> =
-                    bincode::deserialize(&abc[2]).expect("Deserialization failed");
+                let ay: FiniteFieldElement<M> = proof.revealed_layers[r].a.0[s].clone();
+                let by: FiniteFieldElement<M> = proof.revealed_layers[r].b.0[s].clone();
+                let cy: FiniteFieldElement<M> = proof.revealed_layers[r].c.0[s].clone();
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
@@ -367,9 +379,9 @@ impl<M: ModulusValue> FRI<M> {
 
             // verify authentication paths
             for i in 0..self.num_colinearity_tests {
-                let path_aa = proof_stream.pull();
+                let path_aa = proof.revealed_layers[r].a.1[i].clone();
                 if !Merkle::verify(
-                    &roots[r],
+                    &proof.merkle_roots[r],
                     a_indices[i],
                     &path_aa,
                     &bincode::serialize(&aa[i]).expect("Serialization failed"),
@@ -377,9 +389,9 @@ impl<M: ModulusValue> FRI<M> {
                     println!("merkle authentication path verification fails for aa");
                     return false;
                 }
-                let path_bb = proof_stream.pull();
+                let path_bb = proof.revealed_layers[r].b.1[i].clone();
                 if !Merkle::verify(
-                    &roots[r],
+                    &proof.merkle_roots[r],
                     b_indices[i],
                     &path_bb,
                     &bincode::serialize(&bb[i]).expect("Serialization failed"),
@@ -387,9 +399,9 @@ impl<M: ModulusValue> FRI<M> {
                     println!("merkle authentication path verification fails for bb");
                     return false;
                 }
-                let path_cc = proof_stream.pull();
+                let path_cc = proof.revealed_layers[r].c.1[i].clone();
                 if !Merkle::verify(
-                    &roots[r + 1],
+                    &proof.merkle_roots[r + 1],
                     c_indices[i],
                     &path_cc,
                     &bincode::serialize(&cc[i]).expect("Serialization failed"),
@@ -486,35 +498,22 @@ mod tests {
         let domain = fri.eval_domain();
         let mut codeword = polynomial.eval_domain(&domain);
 
-        let mut proof_stream = FiatShamirTransformer::new();
-        fri.prove(&codeword, &mut proof_stream);
+        let mut proof_stream_p = FiatShamirTransformer::new();
+        let proof = fri.prove(&codeword, &mut proof_stream_p);
+
         let mut points = Vec::new();
-        let result = fri.verify(&mut proof_stream, &mut points);
+        let mut proof_stream_v = FiatShamirTransformer::new();
+        let result = fri.verify(&proof, &mut proof_stream_v, &mut points);
         assert!(result);
 
         for i in 0..(degree / 3) {
-            codeword[i] = FiniteFieldElement::<Mod128>::zero();
+            codeword[i] = FiniteFieldElement::<Mod128>::one();
         }
 
         let mut proof_stream_second = FiatShamirTransformer::new();
-        fri.prove(&codeword, &mut proof_stream_second);
+        let proof = fri.prove(&codeword, &mut proof_stream_second);
         let mut points_second = Vec::new();
-        let result_second = fri.verify(&mut proof_stream_second, &mut points_second);
+        let result_second = fri.verify(&proof, &mut proof_stream_second, &mut points_second);
         assert!(!result_second);
-
-        /*
-        let poly = Polynomial {
-            coef: vec![
-                FiniteFieldElement::<Mod128>::from_value(1_i32),
-                FiniteFieldElement::<Mod128>::from_value(2_i32),
-                FiniteFieldElement::<Mod128>::from_value(3_i32),
-                FiniteFieldElement::<Mod128>::from_value(4_i32),
-                FiniteFieldElement::<Mod128>::from_value(5_i32),
-                FiniteFieldElement::<Mod128>::from_value(6_i32),
-            ],
-        };
-        */
-
-        //let fri_domain = fri.eval_domain();
     }
 }

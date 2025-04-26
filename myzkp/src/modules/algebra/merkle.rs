@@ -1,6 +1,8 @@
 use blake2::{Blake2b, Digest};
 
 pub struct Merkle;
+pub type MerkleRoot = Vec<u8>;
+pub type MerklePath = Vec<Vec<u8>>;
 
 impl Merkle {
     fn hash(data: &[u8]) -> Vec<u8> {
@@ -10,7 +12,7 @@ impl Merkle {
     }
 
     // Computes the Merkle root of a given array.
-    pub fn commit(leafs: &[Vec<u8>]) -> Vec<u8> {
+    pub fn commit(leafs: &[Vec<u8>]) -> MerkleRoot {
         // assert!(leafs.len().is_power_of_two())
         if leafs.len() == 1 {
             return leafs[0].clone();
@@ -23,7 +25,7 @@ impl Merkle {
     }
 
     // Computes the authentication path of an indicated leaf in the Merkle tree.
-    pub fn open(index: usize, leafs: &[Vec<u8>]) -> Vec<Vec<u8>> {
+    pub fn open(index: usize, leafs: &[Vec<u8>]) -> MerklePath {
         // assert!(leafs.len().is_power_of_two())
         // assert!(index < leafs.len())
 
@@ -44,7 +46,7 @@ impl Merkle {
     }
 
     // Verifies that a given leaf is an element of the committed vector at the given index.
-    pub fn verify(root: &[u8], index: usize, path: &[Vec<u8>], leaf: &[u8]) -> bool {
+    pub fn verify(root: &MerkleRoot, index: usize, path: &[Vec<u8>], leaf: &[u8]) -> bool {
         // assert!(index < (1 << path.len()))
 
         if path.len() == 1 {
