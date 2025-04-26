@@ -95,7 +95,6 @@ impl<M: ModulusValue> FRI<M> {
     }
 
     pub fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
-        println!("6666 -- {}", self.offset.clone() * (self.omega.pow(0)));
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()
@@ -111,13 +110,6 @@ impl<M: ModulusValue> FRI<M> {
 
         let (codewords, roots) = self.commit(initial_codeword, &mut proof_stream);
 
-        println!(
-            "{} {} {}",
-            proof_stream.prover_fiat_shamir(32)[0],
-            codewords[1].len(),
-            codewords.last().unwrap().len()
-        );
-
         // get indices
         let top_level_indices = sample_indices(
             &proof_stream.prover_fiat_shamir(32),
@@ -125,9 +117,6 @@ impl<M: ModulusValue> FRI<M> {
             codewords.last().unwrap().len(),
             self.num_colinearity_tests,
         );
-        for i in &top_level_indices {
-            println!("i: {}", i);
-        }
         let mut indices = top_level_indices.clone();
 
         // query phase
@@ -162,11 +151,8 @@ impl<M: ModulusValue> FRI<M> {
         let mut codeword = initial_codeword.clone();
         let mut codewords = Vec::new();
 
-        println!("a: {}", self.num_rounds());
         let mut roots = Vec::new();
-
         for r in 0..self.num_rounds() {
-            println!("a - {} - {}", r, codeword.len());
             // compute and send Merkle root
             let root = Merkle::commit(
                 &codeword
@@ -185,16 +171,11 @@ impl<M: ModulusValue> FRI<M> {
 
             // get challenge
             let alpha = FiniteFieldElement::<M>::sample(&proof_stream.prover_fiat_shamir(32));
-            //let alpha = FiniteFieldElement::<M>::from_value(
-            //    BigInt::from_str("219386054329192563069004173917168341123").unwrap(),
-            //);
-            println!("alpha: {}", alpha);
 
             // collect codeword
             codewords.push(codeword.clone());
 
             // split and fold
-            println!("s[0]: {}, s[1]: {}", codeword[0], codeword[1]);
             codeword = (0..(codeword.len() / 2))
                 .map(|i| {
                     two_inverse
@@ -207,7 +188,6 @@ impl<M: ModulusValue> FRI<M> {
                         .sanitize()
                 })
                 .collect();
-            println!("d[0]: {}, d[1]: {}", codeword[0], codeword[1]);
             omega = omega.clone() * omega.clone();
             offset = offset.clone() * offset.clone();
         }
@@ -219,9 +199,6 @@ impl<M: ModulusValue> FRI<M> {
             .map(|c| bincode::serialize(&c).expect("Serialization failed"))
             .collect::<Vec<_>>();
         proof_stream.push(&serialized_codeword);
-
-        // collect last codeword too
-        println!("b - {}", codeword.len());
         codewords.push(codeword);
 
         (codewords, roots)
@@ -292,11 +269,6 @@ impl<M: ModulusValue> FRI<M> {
             alphas.push(FiniteFieldElement::<M>::sample(
                 &proof_stream.prover_fiat_shamir(32),
             ));
-            //let alpha = FiniteFieldElement::<M>::from_value(
-            //    BigInt::from_str("219386054329192563069004173917168341123").unwrap(),
-            //);
-            //alphas.push(alpha);
-            println!("alph: {}", alphas.last().unwrap());
         }
 
         // extract last codeword
@@ -329,12 +301,10 @@ impl<M: ModulusValue> FRI<M> {
         );
 
         // compute interpolant
-        println!("lllllll {} = {}", last_offset.clone(), last_omega.clone());
         let last_domain = (0..proof.last_codeword.len())
             .into_iter()
             .map(|i| last_offset.clone() * (last_omega.pow(i)))
             .collect::<Vec<_>>();
-        println!("aaa: {}", last_domain.len());
         let poly =
             Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &proof.last_codeword);
 
@@ -344,31 +314,17 @@ impl<M: ModulusValue> FRI<M> {
                 "re-evaluated codeword does not match original!"
             );
         }
-        println!("degree: {}", poly.degree());
 
         if poly.degree() > degree.try_into().unwrap() {
-            println!("last codeword does not correspond to polynomial of low enough degree");
-            println!("observed degree: {}", poly.degree());
-            println!("but should be: {}", degree);
             return false;
         }
 
-        println!(
-            "{} {} {}",
-            proof_stream.prover_fiat_shamir(32)[0],
-            self.domain_length >> 1,
-            self.domain_length >> (self.num_rounds() - 1)
-        );
         let top_level_indices = sample_indices(
             &proof_stream.prover_fiat_shamir(32),
             self.domain_length >> 1,
             self.domain_length >> (self.num_rounds() - 1),
             self.num_colinearity_tests,
         );
-
-        for i in &top_level_indices {
-            println!("i: {}", i);
-        }
 
         for r in 0..(self.num_rounds() - 1) {
             let c_indices = top_level_indices
@@ -391,7 +347,6 @@ impl<M: ModulusValue> FRI<M> {
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
-                println!("67: {}, {}, {}", ay, by, cy);
 
                 if r == 0 {
                     polynomial_values.push((a_indices[s], ay.clone()));
@@ -407,9 +362,7 @@ impl<M: ModulusValue> FRI<M> {
                     &[ax.clone(), bx.clone(), cx.clone()],
                     &[ay.clone(), by.clone(), cy.clone()],
                 );
-                println!("45: {}, {}, {}", ax, bx, cx);
                 if p.degree() > 1 {
-                    println!("123aaa: {}", p.degree());
                     return false;
                 }
             }
@@ -456,9 +409,9 @@ impl<M: ModulusValue> FRI<M> {
     }
 }
 
-define_myzkp_modulus_type!(Mod128, "270497897142230380135924736767050121217");
+define_myzkp_modulus_type!(M128, "270497897142230380135924736767050121217");
 
-pub fn get_nth_root_of_Mod128(n: &BigInt) -> FiniteFieldElement<Mod128> {
+pub fn get_nth_root_of_m128(n: &BigInt) -> FiniteFieldElement<M128> {
     let one = BigInt::one();
     let shift_119 = one.clone().shl(119u32);
     // let expected_p = &one.clone() + &BigInt::from(407u32) * &shift_119;
@@ -471,7 +424,7 @@ pub fn get_nth_root_of_Mod128(n: &BigInt) -> FiniteFieldElement<Mod128> {
         "Field does not have nth root of unity where n > 2^119 or not power of two."
     );
 
-    let mut root = FiniteFieldElement::<Mod128>::from_value(
+    let mut root = FiniteFieldElement::<M128>::from_value(
         BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
     );
     let mut order = shift_119.clone();
@@ -506,7 +459,6 @@ mod tests {
 
     #[test]
     fn test_fri() {
-        let offset: usize = 1;
         let degree: usize = 63;
         let expansion_factor: usize = 4;
         let num_colinearity_tests: usize = 17;
@@ -515,11 +467,10 @@ mod tests {
         let log_codeword_length = compute_log_codeword_length(initial_codeword_length);
         assert_eq!(1 << log_codeword_length, initial_codeword_length);
 
-        let generator = FiniteFieldElement::<Mod128>::from_value(
+        let generator = FiniteFieldElement::<M128>::from_value(
             BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
         );
-        let omega = get_nth_root_of_Mod128(&BigInt::from(initial_codeword_length));
-        println!("oemga: {}", omega);
+        let omega = get_nth_root_of_m128(&BigInt::from(initial_codeword_length));
         assert!(omega.pow(1 << log_codeword_length).is_one());
         assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
 
@@ -533,16 +484,12 @@ mod tests {
 
         let polynomial = Polynomial {
             coef: (0..degree + 1)
-                .map(|i| FiniteFieldElement::<Mod128>::from_value(i))
+                .map(|i| FiniteFieldElement::<M128>::from_value(i))
                 .collect(),
         };
-        // let domain = fri.eval_domain();
-        let domain: Vec<_> = (0..initial_codeword_length).map(|i| omega.pow(i)).collect();
-        println!("{} - {} - {}", domain[0], domain[1], domain[2]);
-        println!("{}", domain.last().unwrap());
-        let mut codeword = polynomial.eval_domain(&domain);
-        println!("{} - {} - {}", codeword[0], codeword[1], codeword[2]);
 
+        let domain: Vec<_> = (0..initial_codeword_length).map(|i| omega.pow(i)).collect();
+        let mut codeword = polynomial.eval_domain(&domain);
         let proof = fri.prove(&codeword);
 
         let mut points = Vec::new();
@@ -550,9 +497,8 @@ mod tests {
         assert!(result);
 
         for i in 0..(degree / 3) {
-            codeword[i] = FiniteFieldElement::<Mod128>::one();
+            codeword[i] = FiniteFieldElement::<M128>::one();
         }
-
         let proof = fri.prove(&codeword);
         let mut points_second = Vec::new();
         let result_second = fri.verify(&proof, &mut points_second);
