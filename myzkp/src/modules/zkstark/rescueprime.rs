@@ -29,7 +29,7 @@ pub struct RescuePrime<M: ModulusValue> {
 }
 
 impl<M: ModulusValue> RescuePrime<M> {
-    pub fn hash(&self, input_element: &FiniteFieldElement<M>) {
+    pub fn hash(&self, input_element: &FiniteFieldElement<M>) -> FiniteFieldElement<M> {
         // absorb
         let mut state = vec![input_element.clone()];
         for _ in 0..(self.m - 1) {
@@ -57,6 +57,28 @@ impl<M: ModulusValue> RescuePrime<M> {
             for i in 0..self.m {
                 state[i] = temp[i].clone() + self.round_constants[2 * r * self.m + i].clone();
             }
+
+            // backward half-round
+            // s-box
+            for i in 0..self.m {
+                state[i] = state[i].pow(self.alphainv);
+            }
+            let mut temp: Vec<_> = (0..self.m)
+                .into_iter()
+                .map(|_| FiniteFieldElement::<M>::zero())
+                .collect();
+            for i in 0..self.m {
+                for j in 0..self.m {
+                    temp[i] = temp[i].clone() + self.mds[i][j].clone() * state[j].clone();
+                }
+            }
+            // constants
+            for i in 0..self.m {
+                state[i] =
+                    temp[i].clone() + self.round_constants[2 * r * self.m + self.m + i].clone();
+            }
         }
+
+        state[0].clone()
     }
 }
