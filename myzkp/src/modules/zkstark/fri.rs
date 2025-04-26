@@ -1,13 +1,12 @@
 use std::ops::{Shl, Shr};
 use std::str::FromStr;
 
-use num_bigint::BigInt;
-use num_traits::{One, Zero};
-use serde::{Deserialize, Serialize};
-
 use blake2::{digest::consts::U32, Blake2b, Digest};
 use lazy_static::lazy_static;
+use num_bigint::BigInt;
+use num_traits::{One, Zero};
 use paste::paste;
+use serde::{Deserialize, Serialize};
 
 use crate::define_myzkp_modulus_type;
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
@@ -101,17 +100,15 @@ impl<M: ModulusValue> FRI<M> {
             .collect()
     }
 
-    pub fn prove(
-        &self,
-        initial_codeword: &Codeword<FiniteFieldElement<M>>,
-        proof_stream: &mut FiatShamirTransformer,
-    ) -> FriProof<M> {
+    pub fn prove(&self, initial_codeword: &Codeword<FiniteFieldElement<M>>) -> FriProof<M> {
+        let mut proof_stream = FiatShamirTransformer::new();
+
         assert!(
             self.domain_length == initial_codeword.len(),
             "initial codeword length does not match length of inital codeword"
         );
 
-        let (codewords, roots) = self.commit(initial_codeword, proof_stream);
+        let (codewords, roots) = self.commit(initial_codeword, &mut proof_stream);
 
         // get indices
         let top_level_indices = sample_indices(
@@ -261,9 +258,10 @@ impl<M: ModulusValue> FRI<M> {
     pub fn verify(
         &self,
         proof: &FriProof<M>,
-        proof_stream: &mut FiatShamirTransformer,
         polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
     ) -> bool {
+        let mut proof_stream = FiatShamirTransformer::new();
+
         let mut omega = self.omega.clone();
         let mut offset = self.offset.clone();
 
@@ -466,7 +464,7 @@ mod tests {
 
     #[test]
     fn test_fri() {
-        let offset: usize = 0;
+        let offset: usize = 1;
         let degree: usize = 63;
         let expansion_factor: usize = 4;
         let num_colinearity_tests: usize = 17;
@@ -495,22 +493,19 @@ mod tests {
         let domain = fri.eval_domain();
         let mut codeword = polynomial.eval_domain(&domain);
 
-        let mut proof_stream_p = FiatShamirTransformer::new();
-        let proof = fri.prove(&codeword, &mut proof_stream_p);
+        let proof = fri.prove(&codeword);
 
         let mut points = Vec::new();
-        let mut proof_stream_v = FiatShamirTransformer::new();
-        let result = fri.verify(&proof, &mut proof_stream_v, &mut points);
+        let result = fri.verify(&proof, &mut points);
         assert!(result);
 
         for i in 0..(degree / 3) {
             codeword[i] = FiniteFieldElement::<Mod128>::one();
         }
 
-        let mut proof_stream_second = FiatShamirTransformer::new();
-        let proof = fri.prove(&codeword, &mut proof_stream_second);
+        let proof = fri.prove(&codeword);
         let mut points_second = Vec::new();
-        let result_second = fri.verify(&proof, &mut proof_stream_second, &mut points_second);
+        let result_second = fri.verify(&proof, &mut points_second);
         assert!(!result_second);
     }
 }
