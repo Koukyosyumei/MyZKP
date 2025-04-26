@@ -118,8 +118,10 @@ impl<F: Field> Polynomial<F> {
     /// Evaluate the polynomial at a given point.
     pub fn eval(&self, point: &F) -> F {
         let mut result = F::zero();
-        for coef in self.coef.iter().rev() {
-            result = result.mul_ref(&point) + coef;
+        let mut tp = F::one();
+        for coef in self.coef.iter() {
+            result += tp.mul_ref(coef);
+            tp = tp.mul_ref(point);
         }
         result
     }

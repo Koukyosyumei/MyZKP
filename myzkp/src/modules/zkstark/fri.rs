@@ -95,6 +95,7 @@ impl<M: ModulusValue> FRI<M> {
     }
 
     pub fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
+        println!("6666 -- {}", self.offset.clone() * (self.omega.pow(0)));
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()
@@ -110,6 +111,13 @@ impl<M: ModulusValue> FRI<M> {
 
         let (codewords, roots) = self.commit(initial_codeword, &mut proof_stream);
 
+        println!(
+            "{} {} {}",
+            proof_stream.prover_fiat_shamir(32)[0],
+            codewords[1].len(),
+            codewords.last().unwrap().len()
+        );
+
         // get indices
         let top_level_indices = sample_indices(
             &proof_stream.prover_fiat_shamir(32),
@@ -117,6 +125,9 @@ impl<M: ModulusValue> FRI<M> {
             codewords.last().unwrap().len(),
             self.num_colinearity_tests,
         );
+        for i in &top_level_indices {
+            println!("i: {}", i);
+        }
         let mut indices = top_level_indices.clone();
 
         // query phase
@@ -155,6 +166,7 @@ impl<M: ModulusValue> FRI<M> {
         let mut roots = Vec::new();
 
         for r in 0..self.num_rounds() {
+            println!("a - {} - {}", r, codeword.len());
             // compute and send Merkle root
             let root = Merkle::commit(
                 &codeword
@@ -173,21 +185,29 @@ impl<M: ModulusValue> FRI<M> {
 
             // get challenge
             let alpha = FiniteFieldElement::<M>::sample(&proof_stream.prover_fiat_shamir(32));
+            //let alpha = FiniteFieldElement::<M>::from_value(
+            //    BigInt::from_str("219386054329192563069004173917168341123").unwrap(),
+            //);
             println!("alpha: {}", alpha);
 
             // collect codeword
             codewords.push(codeword.clone());
 
             // split and fold
+            println!("s[0]: {}, s[1]: {}", codeword[0], codeword[1]);
             codeword = (0..(codeword.len() / 2))
                 .map(|i| {
-                    two_inverse.clone()
-                        * ((one.add_ref(&alpha) / (offset.mul_ref(&omega.pow(i))))
-                            .mul_ref(&codeword[i])
-                            + (one.sub_ref(&alpha) / (offset.mul_ref(&omega.pow(i))))
-                                .mul_ref(&codeword[codeword.len() / 2 + i]))
+                    two_inverse
+                        .mul_ref(
+                            &((one.add_ref(&(alpha.div_ref(&offset.mul_ref(&omega.pow(i))))))
+                                .mul_ref(&codeword[i])
+                                + (one.sub_ref(&(alpha.div_ref(&offset.mul_ref(&omega.pow(i))))))
+                                    .mul_ref(&codeword[codeword.len() / 2 + i])),
+                        )
+                        .sanitize()
                 })
                 .collect();
+            println!("d[0]: {}, d[1]: {}", codeword[0], codeword[1]);
             omega = omega.clone() * omega.clone();
             offset = offset.clone() * offset.clone();
         }
@@ -201,8 +221,8 @@ impl<M: ModulusValue> FRI<M> {
         proof_stream.push(&serialized_codeword);
 
         // collect last codeword too
+        println!("b - {}", codeword.len());
         codewords.push(codeword);
-        println!("b - {}", codewords.len());
 
         (codewords, roots)
     }
@@ -272,6 +292,11 @@ impl<M: ModulusValue> FRI<M> {
             alphas.push(FiniteFieldElement::<M>::sample(
                 &proof_stream.prover_fiat_shamir(32),
             ));
+            //let alpha = FiniteFieldElement::<M>::from_value(
+            //    BigInt::from_str("219386054329192563069004173917168341123").unwrap(),
+            //);
+            //alphas.push(alpha);
+            println!("alph: {}", alphas.last().unwrap());
         }
 
         // extract last codeword
@@ -281,6 +306,7 @@ impl<M: ModulusValue> FRI<M> {
             .into_iter()
             .map(|c| bincode::serialize(&c).expect("Serialization failed"))
             .collect::<Vec<_>>();
+        proof_stream.push(&serialized_last_codeword);
 
         // check if it matches the given root
         if **proof.merkle_roots.last().unwrap() != Merkle::commit(&serialized_last_codeword) {
@@ -303,10 +329,12 @@ impl<M: ModulusValue> FRI<M> {
         );
 
         // compute interpolant
+        println!("lllllll {} = {}", last_offset.clone(), last_omega.clone());
         let last_domain = (0..proof.last_codeword.len())
             .into_iter()
             .map(|i| last_offset.clone() * (last_omega.pow(i)))
             .collect::<Vec<_>>();
+        println!("aaa: {}", last_domain.len());
         let poly =
             Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &proof.last_codeword);
 
@@ -316,6 +344,7 @@ impl<M: ModulusValue> FRI<M> {
                 "re-evaluated codeword does not match original!"
             );
         }
+        println!("degree: {}", poly.degree());
 
         if poly.degree() > degree.try_into().unwrap() {
             println!("last codeword does not correspond to polynomial of low enough degree");
@@ -324,12 +353,22 @@ impl<M: ModulusValue> FRI<M> {
             return false;
         }
 
+        println!(
+            "{} {} {}",
+            proof_stream.prover_fiat_shamir(32)[0],
+            self.domain_length >> 1,
+            self.domain_length >> (self.num_rounds() - 1)
+        );
         let top_level_indices = sample_indices(
-            &proof_stream.verifier_fiat_shamir(32),
+            &proof_stream.prover_fiat_shamir(32),
             self.domain_length >> 1,
             self.domain_length >> (self.num_rounds() - 1),
             self.num_colinearity_tests,
         );
+
+        for i in &top_level_indices {
+            println!("i: {}", i);
+        }
 
         for r in 0..(self.num_rounds() - 1) {
             let c_indices = top_level_indices
@@ -352,6 +391,7 @@ impl<M: ModulusValue> FRI<M> {
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
+                println!("67: {}, {}, {}", ay, by, cy);
 
                 if r == 0 {
                     polynomial_values.push((a_indices[s], ay.clone()));
@@ -367,7 +407,9 @@ impl<M: ModulusValue> FRI<M> {
                     &[ax.clone(), bx.clone(), cx.clone()],
                     &[ay.clone(), by.clone(), cy.clone()],
                 );
+                println!("45: {}, {}, {}", ax, bx, cx);
                 if p.degree() > 1 {
+                    println!("123aaa: {}", p.degree());
                     return false;
                 }
             }
@@ -473,13 +515,17 @@ mod tests {
         let log_codeword_length = compute_log_codeword_length(initial_codeword_length);
         assert_eq!(1 << log_codeword_length, initial_codeword_length);
 
+        let generator = FiniteFieldElement::<Mod128>::from_value(
+            BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
+        );
         let omega = get_nth_root_of_Mod128(&BigInt::from(initial_codeword_length));
+        println!("oemga: {}", omega);
         assert!(omega.pow(1 << log_codeword_length).is_one());
         assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
 
         let fri = FRI {
-            offset: FiniteFieldElement::<Mod128>::from_value(offset),
-            omega: omega,
+            offset: generator,
+            omega: omega.clone(),
             domain_length: initial_codeword_length,
             expansion_factor: expansion_factor,
             num_colinearity_tests: num_colinearity_tests,
@@ -490,8 +536,12 @@ mod tests {
                 .map(|i| FiniteFieldElement::<Mod128>::from_value(i))
                 .collect(),
         };
-        let domain = fri.eval_domain();
+        // let domain = fri.eval_domain();
+        let domain: Vec<_> = (0..initial_codeword_length).map(|i| omega.pow(i)).collect();
+        println!("{} - {} - {}", domain[0], domain[1], domain[2]);
+        println!("{}", domain.last().unwrap());
         let mut codeword = polynomial.eval_domain(&domain);
+        println!("{} - {} - {}", codeword[0], codeword[1], codeword[2]);
 
         let proof = fri.prove(&codeword);
 
