@@ -15,8 +15,8 @@ fn main() {
     }
     let target = &args[1];
 
-    let data_size = 64;
-    let sqrt_data_size = 8;
+    let data_size = 256;
+    let sqrt_data_size = 16;
     let num_sampling = data_size * sqrt_data_size / 10;
     let data: Vec<_> = (0..63).collect();
 
