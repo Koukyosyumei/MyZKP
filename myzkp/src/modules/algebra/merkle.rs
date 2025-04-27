@@ -1,10 +1,10 @@
-use blake2::{Blake2b, Digest};
+use sha2::{Digest, Sha256};
 
 pub struct Merkle;
 
 impl Merkle {
     fn hash(data: &[u8]) -> Vec<u8> {
-        let mut hasher = Blake2b::<blake2::digest::consts::U64>::new();
+        let mut hasher = Sha256::new();
         hasher.update(data);
         hasher.finalize().to_vec()
     }
