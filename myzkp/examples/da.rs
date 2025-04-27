@@ -1,4 +1,4 @@
-use std::env;
+use std::{cmp::min, env};
 
 use myzkp::modules::das::{
     avail::Avail,
@@ -19,7 +19,6 @@ fn main() {
     let sqrt_data_sizes: Vec<usize> = vec![4, 8, 16, 32];
 
     for (data_size, sqrt_data_size) in data_sizes.iter().zip(sqrt_data_sizes.iter()) {
-        let num_sampling = data_size * sqrt_data_size / 10;
         let data: Vec<u8> = (0..*data_size).map(|i| (i % 256) as u8).collect();
 
         match target.as_str() {
@@ -52,11 +51,15 @@ fn main() {
             "celestia" => {
                 println!("# Celestia");
                 let expansion_factor = 2;
+                let base_num_sampling = 15;
 
                 let params = Celestia::setup(*sqrt_data_size, expansion_factor as f64);
                 let encoded = Celestia::encode(&data, &params);
                 let commit = Celestia::commit(&encoded, &params);
-                for i in 0..num_sampling {
+                for i in 0..min(
+                    (sqrt_data_size * expansion_factor).pow(2),
+                    base_num_sampling,
+                ) {
                     let position = SamplePosition {
                         row: i / (sqrt_data_size * expansion_factor),
                         col: i % (sqrt_data_size * expansion_factor),
@@ -72,14 +75,16 @@ fn main() {
             "avail" => {
                 println!("# Avail");
                 let expansion_factor = 2;
+                let chunk_size = 32;
+                let base_num_sampling = 8;
 
-                let params = Avail::setup(*sqrt_data_size, expansion_factor as f64);
+                let params = Avail::setup(chunk_size, expansion_factor as f64);
                 let encoded = Avail::encode(&data, &params);
                 let commit = Avail::commit(&encoded, &params);
-                for i in 0..num_sampling {
+                for i in 0..min(data_size * expansion_factor / chunk_size, base_num_sampling) {
                     let position0 = SamplePosition {
-                        row: i / (sqrt_data_size * expansion_factor),
-                        col: i % (sqrt_data_size * expansion_factor),
+                        row: 0,
+                        col: i,
                         is_row: false,
                     };
                     assert!(Avail::verify(&position0, &encoded, &commit, &params));

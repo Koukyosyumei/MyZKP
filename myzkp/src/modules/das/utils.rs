@@ -6,7 +6,7 @@ pub trait DataAvailabilitySystem {
     type Commitment;
     type PublicParams;
 
-    fn setup(data_size: usize, expansion_factor: f64) -> Self::PublicParams;
+    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams;
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData;
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment;
     fn verify(

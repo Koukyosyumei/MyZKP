@@ -6,7 +6,7 @@ use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
-use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
+use crate::modules::algebra::reedsolomon::{decode_rs1d, encode_rs1d, setup_rs1d};
 use crate::modules::algebra::ring::Ring;
 use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition, SystemMetrics, METRICS};
 
@@ -16,14 +16,13 @@ pub struct EncodedDataAvail {
 }
 
 pub struct CommitmentAvail {
-    pub row_commitments: Vec<CommitmentKZG>,
-    pub col_commitments: Vec<CommitmentKZG>,
+    pub commitments: Vec<CommitmentKZG>,
 }
 
 pub struct PublicParamsAvail {
-    pub codeword_size: usize, // the expanded side length
+    pub expansion_factor: f64,
     pub pk: PublicKeyKZG,
-    pub chunk_size: usize, // the side length when reshaping the original into a 2D array
+    pub chunk_size: usize,
 }
 
 pub struct Avail;
@@ -40,7 +39,7 @@ impl DataAvailabilitySystem for Avail {
         let pk = setup_kzg(&g1, &g2, codeword_size);
 
         Self::PublicParams {
-            codeword_size: codeword_size,
+            expansion_factor: expansion_factor,
             pk: pk,
             chunk_size: chunk_size,
         }
@@ -48,8 +47,14 @@ impl DataAvailabilitySystem for Avail {
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
         let start = Instant::now();
-        let rs = setup_rs2d(params.codeword_size, params.codeword_size, data.len());
-        let codewords = encode_rs2d(&data, &rs);
+
+        let codeword_size = (data.len() as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, data.len());
+        let encoded = encode_rs1d(&data, &rs);
+        let codewords: Vec<Vec<u8>> = encoded
+            .chunks(params.chunk_size) // Fixed chunk size
+            .map(|c| c.to_vec())
+            .collect();
 
         let result = Self::EncodedData {
             codewords: codewords,
@@ -71,7 +76,7 @@ impl DataAvailabilitySystem for Avail {
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
         let start = Instant::now();
 
-        let row_commitments = encoded
+        let commitments = encoded
             .codewords
             .iter()
             .map(|row| {
@@ -82,26 +87,9 @@ impl DataAvailabilitySystem for Avail {
             })
             .collect();
 
-        let col_commitments = (0..encoded.codewords[0].len())
-            .map(|i| {
-                let col_poly = Polynomial {
-                    coef: encoded
-                        .codewords
-                        .iter()
-                        .map(|row| FqOrder::from_value(row[i].clone()))
-                        .collect(),
-                };
-                commit_kzg(&col_poly, &params.pk)
-            })
-            .collect();
+        let result = Self::Commitment { commitments };
 
-        let result = Self::Commitment {
-            row_commitments,
-            col_commitments,
-        };
-
-        let commitment_size = (result.row_commitments.len() + result.col_commitments.len())
-            * std::mem::size_of::<CommitmentKZG>();
+        let commitment_size = result.commitments.len() * std::mem::size_of::<CommitmentKZG>();
 
         METRICS.with(|m| {
             let mut metrics = m.borrow_mut();
@@ -120,21 +108,11 @@ impl DataAvailabilitySystem for Avail {
     ) -> bool {
         let start = Instant::now();
 
-        let poly = if position.is_row {
-            Polynomial {
-                coef: encoded.codewords[position.row]
-                    .iter()
-                    .map(|e| FqOrder::from_value(e.clone()))
-                    .collect(),
-            }
-        } else {
-            Polynomial {
-                coef: encoded
-                    .codewords
-                    .iter()
-                    .map(|r| FqOrder::from_value(r[position.col].clone()))
-                    .collect(),
-            }
+        let poly = Polynomial {
+            coef: encoded.codewords[position.col]
+                .iter()
+                .map(|r| FqOrder::from_value(r.clone()))
+                .collect(),
         };
 
         let proof_start = Instant::now();
@@ -143,11 +121,7 @@ impl DataAvailabilitySystem for Avail {
         let proof_kzg = open_kzg(&poly, &x, &params.pk);
         let proof_time = proof_start.elapsed();
 
-        let sampled_commitment = if position.is_row {
-            &commitment.row_commitments[position.row]
-        } else {
-            &commitment.col_commitments[position.col]
-        };
+        let sampled_commitment = &commitment.commitments[position.col];
 
         let result = verify_kzg(&x, sampled_commitment, &proof_kzg, &params.pk);
 
@@ -165,12 +139,10 @@ impl DataAvailabilitySystem for Avail {
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
         let _start = Instant::now();
 
-        let rs = setup_rs2d(
-            params.codeword_size,
-            params.codeword_size,
-            encoded.data_size,
-        );
-        decode_rs2d(&encoded.codewords, &rs).unwrap()
+        let codeword_size = (encoded.data_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, encoded.data_size);
+        let codeword = encoded.codewords.concat();
+        decode_rs1d(&codeword, &rs).unwrap()
     }
 
     fn metrics() -> SystemMetrics {
@@ -187,15 +159,15 @@ mod tests {
         // 6 * 6 to store 32 samples
         // 2x encoding
         // 12 * 12 -> 7 * 7 = 49以上欠損があるとだめ
-        let params = Avail::setup(6, 2.0);
+        let params = Avail::setup(16, 2.0);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
 
-        for i in 0..10 {
+        for i in 0..3 {
             let position0 = SamplePosition {
-                row: i / 12,
+                row: 0,
                 col: i % 12,
                 is_row: false,
             };
