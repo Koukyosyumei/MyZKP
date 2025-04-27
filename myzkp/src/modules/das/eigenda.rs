@@ -233,14 +233,8 @@ mod tests {
 
         let reconstructed = EigenDA::reconstruct(&received_encoded, &params);
 
-        METRICS.with(|metrics| {
-            println!("{:#?}", *metrics.borrow());
-        });
-
         for i in 0..31 {
             assert_eq!(data[i], reconstructed[i]);
         }
-
-        assert!(false);
     }
 }
