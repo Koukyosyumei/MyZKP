@@ -15,80 +15,84 @@ fn main() {
     }
     let target = &args[1];
 
-    let data_size = 256;
-    let sqrt_data_size = 16;
-    let num_sampling = data_size * sqrt_data_size / 10;
-    let data: Vec<_> = (0..63).collect();
+    let data_sizes: Vec<usize> = vec![16, 64, 256, 1024];
+    let sqrt_data_sizes: Vec<usize> = vec![4, 8, 16, 32];
 
-    match target.as_str() {
-        "eigenda" => {
-            println!("# EigenDA");
-            let chunk_size = 16;
-            let expansion_factor = 4.0;
+    for (data_size, sqrt_data_size) in data_sizes.iter().zip(sqrt_data_sizes.iter()) {
+        let num_sampling = data_size * sqrt_data_size / 10;
+        let data: Vec<u8> = (0..*data_size).map(|i| (i % 256) as u8).collect();
 
-            let params = EigenDA::setup(chunk_size, expansion_factor);
-            let encoded = EigenDA::encode(&data, &params);
-            let commit = EigenDA::commit(&encoded, &params);
+        match target.as_str() {
+            "eigenda" => {
+                println!("# EigenDA");
+                let num_operators = 8;
+                let num_verification = 5;
+                let expansion_factor = 4.0;
+                let chunk_size =
+                    ((*data_size as f64) * expansion_factor / num_operators as f64) as usize;
 
-            let num_verification =
-                (data_size as f64 * expansion_factor).ceil() as usize / data_size + 1;
-            for i in 0..(num_verification) {
-                let position = SamplePosition {
-                    row: 0,
-                    col: i,
-                    is_row: false,
-                };
-                let isvalid = EigenDA::verify(&position, &encoded, &commit, &params);
-                assert!(isvalid);
+                let params = EigenDA::setup(chunk_size, expansion_factor);
+                let encoded = EigenDA::encode(&data, &params);
+                let commit = EigenDA::commit(&encoded, &params);
+
+                for i in 0..(num_verification) {
+                    let position = SamplePosition {
+                        row: 0,
+                        col: i,
+                        is_row: false,
+                    };
+                    let isvalid = EigenDA::verify(&position, &encoded, &commit, &params);
+                    assert!(isvalid);
+                }
+                METRICS.with(|metrics| {
+                    println!("{:#?}", *metrics.borrow());
+                });
+                reset_metrics();
             }
-            METRICS.with(|metrics| {
-                println!("{:#?}", *metrics.borrow());
-            });
-            reset_metrics();
-        }
-        "celestia" => {
-            println!("# Celestia");
-            let expansion_factor = 2;
+            "celestia" => {
+                println!("# Celestia");
+                let expansion_factor = 2;
 
-            let params = Celestia::setup(sqrt_data_size, expansion_factor as f64);
-            let encoded = Celestia::encode(&data, &params);
-            let commit = Celestia::commit(&encoded, &params);
-            for i in 0..num_sampling {
-                let position = SamplePosition {
-                    row: i / (sqrt_data_size * expansion_factor),
-                    col: i % (sqrt_data_size * expansion_factor),
-                    is_row: false,
-                };
-                assert!(Celestia::verify(&position, &encoded, &commit, &params));
+                let params = Celestia::setup(*sqrt_data_size, expansion_factor as f64);
+                let encoded = Celestia::encode(&data, &params);
+                let commit = Celestia::commit(&encoded, &params);
+                for i in 0..num_sampling {
+                    let position = SamplePosition {
+                        row: i / (sqrt_data_size * expansion_factor),
+                        col: i % (sqrt_data_size * expansion_factor),
+                        is_row: false,
+                    };
+                    assert!(Celestia::verify(&position, &encoded, &commit, &params));
+                }
+                METRICS.with(|metrics| {
+                    println!("{:#?}", *metrics.borrow());
+                });
+                reset_metrics();
             }
-            METRICS.with(|metrics| {
-                println!("{:#?}", *metrics.borrow());
-            });
-            reset_metrics();
-        }
-        "avail" => {
-            println!("# Avail");
-            let expansion_factor = 2;
+            "avail" => {
+                println!("# Avail");
+                let expansion_factor = 2;
 
-            let params = Avail::setup(sqrt_data_size, expansion_factor as f64);
-            let encoded = Avail::encode(&data, &params);
-            let commit = Avail::commit(&encoded, &params);
-            for i in 0..num_sampling {
-                let position0 = SamplePosition {
-                    row: i / (sqrt_data_size * expansion_factor),
-                    col: i % (sqrt_data_size * expansion_factor),
-                    is_row: false,
-                };
-                assert!(Avail::verify(&position0, &encoded, &commit, &params));
+                let params = Avail::setup(*sqrt_data_size, expansion_factor as f64);
+                let encoded = Avail::encode(&data, &params);
+                let commit = Avail::commit(&encoded, &params);
+                for i in 0..num_sampling {
+                    let position0 = SamplePosition {
+                        row: i / (sqrt_data_size * expansion_factor),
+                        col: i % (sqrt_data_size * expansion_factor),
+                        is_row: false,
+                    };
+                    assert!(Avail::verify(&position0, &encoded, &commit, &params));
+                }
+                METRICS.with(|metrics| {
+                    println!("{:#?}", *metrics.borrow());
+                });
             }
-            METRICS.with(|metrics| {
-                println!("{:#?}", *metrics.borrow());
-            });
-        }
-        _ => {
-            eprintln!("Unknown target: {}", target);
-            eprintln!("Usage: {} [eigenda | celestia | avail]", args[0]);
-            std::process::exit(1);
+            _ => {
+                eprintln!("Unknown target: {}", target);
+                eprintln!("Usage: {} [eigenda | celestia | avail]", args[0]);
+                std::process::exit(1);
+            }
         }
     }
 }
