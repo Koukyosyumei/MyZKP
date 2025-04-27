@@ -156,9 +156,6 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
-        // 6 * 6 to store 32 samples
-        // 2x encoding
-        // 12 * 12 -> 7 * 7 = 49以上欠損があるとだめ
         let params = Avail::setup(16, 2.0);
 
         let data: Vec<_> = (0..32).collect();

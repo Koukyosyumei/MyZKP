@@ -199,14 +199,6 @@ mod tests {
 
     #[test]
     fn test_eigenda_flow() {
-        /*
-        data_size = 32
-        -> 4.0x 1d RS encoding
-        encoded_size = 128
-        -> chunk = encoded_size / chunk_size = 8 (here, we use chunk_size = 16)
-        the operator needs >= 5 chunks to reconstruct
-
-         */
         let params = EigenDA::setup(16, 4.0);
 
         let data: Vec<_> = (0..32).collect();
