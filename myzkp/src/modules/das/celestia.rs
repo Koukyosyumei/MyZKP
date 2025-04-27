@@ -31,7 +31,7 @@ impl DataAvailabilitySystem for Celestia {
     type Commitment = CommitmentCelestia;
     type PublicParams = PublicParamsCelestia;
 
-    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
+    fn setup(chunk_size: usize, expansion_factor: f64, _data_size: usize) -> Self::PublicParams {
         let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
 
         Self::PublicParams {
@@ -195,9 +195,9 @@ mod tests {
 
     #[test]
     fn test_celestia() {
-        let params = Celestia::setup(8, 2.0);
+        let params = Celestia::setup(8, 2.0, 64);
 
-        let data: Vec<_> = (0..63).collect();
+        let data: Vec<_> = (0..64).collect();
         let encoded = Celestia::encode(&data, &params);
         let commit = Celestia::commit(&encoded, &params);
 
@@ -215,7 +215,7 @@ mod tests {
             assert_eq!(data[i], reconstructed[i]);
         }
 
-        let mal_data: Vec<_> = (1..64).collect();
+        let mal_data: Vec<_> = (1..65).collect();
         let mal_encoded = Celestia::encode(&mal_data, &params);
         let mal_position = SamplePosition {
             row: 0,

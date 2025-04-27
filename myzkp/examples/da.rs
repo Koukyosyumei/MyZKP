@@ -30,7 +30,7 @@ fn main() {
                 let chunk_size =
                     ((*data_size as f64) * expansion_factor / num_operators as f64) as usize;
 
-                let params = EigenDA::setup(chunk_size, expansion_factor);
+                let params = EigenDA::setup(chunk_size, expansion_factor, *data_size);
                 let encoded = EigenDA::encode(&data, &params);
                 let commit = EigenDA::commit(&encoded, &params);
 
@@ -53,7 +53,7 @@ fn main() {
                 let expansion_factor = 2;
                 let base_num_sampling = 15;
 
-                let params = Celestia::setup(*sqrt_data_size, expansion_factor as f64);
+                let params = Celestia::setup(*sqrt_data_size, expansion_factor as f64, *data_size);
                 let encoded = Celestia::encode(&data, &params);
                 let commit = Celestia::commit(&encoded, &params);
                 for i in 0..min(
@@ -75,13 +75,13 @@ fn main() {
             "avail" => {
                 println!("# Avail");
                 let expansion_factor = 2;
-                let chunk_size = 32;
+                let chunk_size = 8;
                 let base_num_sampling = 8;
 
-                let params = Avail::setup(chunk_size, expansion_factor as f64);
+                let params = Avail::setup(chunk_size, expansion_factor as f64, *data_size);
                 let encoded = Avail::encode(&data, &params);
                 let commit = Avail::commit(&encoded, &params);
-                for i in 0..min(data_size * expansion_factor / chunk_size, base_num_sampling) {
+                for i in 0..min(chunk_size * expansion_factor as usize, base_num_sampling) {
                     let position0 = SamplePosition {
                         row: 0,
                         col: i,

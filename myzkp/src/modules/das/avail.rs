@@ -32,11 +32,14 @@ impl DataAvailabilitySystem for Avail {
     type Commitment = CommitmentAvail;
     type PublicParams = PublicParamsAvail;
 
-    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
+    fn setup(chunk_size: usize, expansion_factor: f64, data_size: usize) -> Self::PublicParams {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
-        let pk = setup_kzg(&g1, &g2, codeword_size);
+        let pk = setup_kzg(
+            &g1,
+            &g2,
+            (data_size as f64 / chunk_size as f64).ceil() as usize,
+        );
 
         Self::PublicParams {
             expansion_factor: expansion_factor,
@@ -80,12 +83,14 @@ impl DataAvailabilitySystem for Avail {
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
         let start = Instant::now();
 
-        let commitments = encoded
-            .codewords
-            .iter()
-            .map(|c| {
+        let commitments = (0..params.chunk_size)
+            .map(|i| {
                 let poly = Polynomial {
-                    coef: c.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
+                    coef: encoded
+                        .codewords
+                        .iter()
+                        .map(|chunk| FqOrder::from_value(chunk[i].clone()))
+                        .collect(),
                 };
                 commit_kzg(&poly, &params.pk)
             })
@@ -113,9 +118,10 @@ impl DataAvailabilitySystem for Avail {
         let start = Instant::now();
 
         let poly = Polynomial {
-            coef: encoded.codewords[position.col]
+            coef: encoded
+                .codewords
                 .iter()
-                .map(|r| FqOrder::from_value(r.clone()))
+                .map(|r| FqOrder::from_value(r[position.col].clone()))
                 .collect(),
         };
 
@@ -167,11 +173,13 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
-        let params = Avail::setup(8, 2.0);
+        let chunk_size = 8;
+        let params = Avail::setup(chunk_size, 2.0, 32);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
+        assert_eq!(commit.commitments.len(), chunk_size);
 
         for i in 0..3 {
             let position0 = SamplePosition {

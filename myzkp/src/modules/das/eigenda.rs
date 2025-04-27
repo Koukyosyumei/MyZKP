@@ -37,7 +37,7 @@ impl DataAvailabilitySystem for EigenDA {
     type Commitment = CommitmentEigenDA;
     type PublicParams = PublicParamsEigenDA;
 
-    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
+    fn setup(chunk_size: usize, expansion_factor: f64, _data_size: usize) -> Self::PublicParams {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
         let quorums = (0..QUORUM_COUNT)
@@ -199,7 +199,7 @@ mod tests {
 
     #[test]
     fn test_eigenda_flow() {
-        let params = EigenDA::setup(16, 4.0);
+        let params = EigenDA::setup(16, 4.0, 32);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = EigenDA::encode(&data, &params);
