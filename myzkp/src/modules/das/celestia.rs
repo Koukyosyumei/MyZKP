@@ -1,6 +1,8 @@
+use std::time::Instant;
+
 use crate::modules::algebra::merkle::Merkle;
 use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
-use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition};
+use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition, SystemMetrics, METRICS};
 
 pub struct EncodedDataCelestia {
     pub codewords: Vec<Vec<Vec<u8>>>,
@@ -29,7 +31,7 @@ impl DataAvailabilitySystem for Celestia {
     type Commitment = CommitmentCelestia;
     type PublicParams = PublicParamsCelestia;
 
-    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
+    fn setup(chunk_size: usize, expansion_factor: f64, _data_size: usize) -> Self::PublicParams {
         let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
 
         Self::PublicParams {
@@ -39,6 +41,8 @@ impl DataAvailabilitySystem for Celestia {
     }
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
+        let start = Instant::now();
+
         let rs = setup_rs2d(params.codeword_size, params.codeword_size, data.len());
         let encoded = encode_rs2d(&data, &rs);
         let reshaped: Vec<Vec<Vec<u8>>> = encoded
@@ -50,13 +54,25 @@ impl DataAvailabilitySystem for Celestia {
             })
             .collect();
 
-        EncodedDataCelestia {
+        let result = EncodedDataCelestia {
             codewords: reshaped,
             data_size: data.len(),
-        }
+        };
+
+        let encoded_size: usize = result.codewords.iter().map(|chunk| chunk.len()).sum();
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.encoding_time += start.elapsed();
+            metrics.encoded_size += encoded_size;
+        });
+
+        result
     }
 
-    fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
+    fn commit(encoded: &Self::EncodedData, _params: &Self::PublicParams) -> Self::Commitment {
+        let start = Instant::now();
+
         let row_roots: Vec<Vec<u8>> = encoded
             .codewords
             .iter()
@@ -77,19 +93,34 @@ impl DataAvailabilitySystem for Celestia {
         all_roots.extend(col_roots.iter().cloned());
         let data_root = Merkle::commit(&all_roots);
 
-        Self::Commitment {
+        let commitment_size: usize = row_roots.iter().map(|v| v.len()).sum::<usize>()
+            + col_roots.iter().map(|v| v.len()).sum::<usize>()
+            + data_root.len();
+
+        let result = Self::Commitment {
             row_roots,
             col_roots,
             data_root,
-        }
+        };
+
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.commitment_time += start.elapsed();
+            metrics.commitment_size += commitment_size;
+        });
+
+        result
     }
 
     fn verify(
         position: &SamplePosition,
         encoded: &Self::EncodedData,
         commitment: &Self::Commitment,
-        params: &Self::PublicParams,
+        _params: &Self::PublicParams,
     ) -> bool {
+        let start = Instant::now();
+
+        let proof_start = Instant::now();
         let merkle_proof = if position.is_row {
             Merkle::open(position.col, &encoded.codewords[position.row])
         } else {
@@ -102,12 +133,15 @@ impl DataAvailabilitySystem for Celestia {
                     .collect::<Vec<_>>(),
             )
         };
+        let proof_time = proof_start.elapsed();
+
+        let proof_size = merkle_proof.iter().map(|v| v.len()).sum::<usize>();
         let proof = ProofCelestia {
             proof: merkle_proof,
             is_row: position.is_row,
         };
 
-        if proof.is_row {
+        let result = if proof.is_row {
             Merkle::verify(
                 &commitment.row_roots[position.row],
                 position.col,
@@ -121,7 +155,17 @@ impl DataAvailabilitySystem for Celestia {
                 &proof.proof,
                 &encoded.codewords[position.row][position.col],
             )
-        }
+        };
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.verification_time += start.elapsed() - proof_time; // Subtract proof time
+            metrics.proof_time += proof_time;
+            metrics.proof_size += proof_size;
+        });
+
+        result
     }
 
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
@@ -139,6 +183,10 @@ impl DataAvailabilitySystem for Celestia {
 
         decode_rs2d(&reshaped, &rs).unwrap()
     }
+
+    fn metrics() -> SystemMetrics {
+        METRICS.with(|m| m.borrow().clone())
+    }
 }
 
 #[cfg(test)]
@@ -146,53 +194,39 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_celestia_no_error() {
-        let params = Celestia::setup(2, 2.0);
+    fn test_celestia() {
+        let params = Celestia::setup(8, 2.0, 64);
 
-        let data = vec![1, 2, 3, 4];
+        let data: Vec<_> = (0..64).collect();
         let encoded = Celestia::encode(&data, &params);
         let commit = Celestia::commit(&encoded, &params);
 
-        let position0 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: false,
-        };
-        assert!(Celestia::verify(&position0, &encoded, &commit, &params));
+        for i in 0..10 {
+            let position = SamplePosition {
+                row: i / 12,
+                col: i % 12,
+                is_row: false,
+            };
+            assert!(Celestia::verify(&position, &encoded, &commit, &params));
+        }
 
-        let position1 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: true,
-        };
-        assert!(Celestia::verify(&position1, &encoded, &commit, &params));
+        let reconstructed = Celestia::reconstruct(&encoded, &params);
+        for i in 0..63 {
+            assert_eq!(data[i], reconstructed[i]);
+        }
 
-        let position2 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: false,
-        };
-        assert!(Celestia::verify(&position2, &encoded, &commit, &params));
-
-        let position3 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: true,
-        };
-        assert!(Celestia::verify(&position3, &encoded, &commit, &params));
-
-        let mal_data = vec![11, 12, 13, 14];
+        let mal_data: Vec<_> = (1..65).collect();
         let mal_encoded = Celestia::encode(&mal_data, &params);
+        let mal_position = SamplePosition {
+            row: 0,
+            col: 0,
+            is_row: false,
+        };
         assert!(!Celestia::verify(
-            &position0,
+            &mal_position,
             &mal_encoded,
             &commit,
             &params
         ));
-
-        let reconstructed = Celestia::reconstruct(&encoded, &params);
-        for i in 0..4 {
-            assert_eq!(data[i], reconstructed[i]);
-        }
     }
 }

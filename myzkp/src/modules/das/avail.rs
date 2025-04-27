@@ -1,12 +1,14 @@
+use std::time::Instant;
+
+use crate::modules::algebra::curve::bn128::FqOrder;
 use crate::modules::algebra::curve::bn128::BN128;
-use crate::modules::algebra::curve::bn128::{FqOrder, G1Point, G2Point};
 use crate::modules::algebra::kzg::{
     commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
-use crate::modules::algebra::reedsolomon::{decode_rs2d, encode_rs2d, setup_rs2d};
+use crate::modules::algebra::reedsolomon::{decode_rs1d, encode_rs1d, setup_rs1d};
 use crate::modules::algebra::ring::Ring;
-use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition};
+use crate::modules::das::utils::{DataAvailabilitySystem, SamplePosition, SystemMetrics, METRICS};
 
 pub struct EncodedDataAvail {
     pub codewords: Vec<Vec<u8>>,
@@ -14,14 +16,13 @@ pub struct EncodedDataAvail {
 }
 
 pub struct CommitmentAvail {
-    pub row_commitments: Vec<CommitmentKZG>,
-    pub col_commitments: Vec<CommitmentKZG>,
+    pub commitments: Vec<CommitmentKZG>,
 }
 
 pub struct PublicParamsAvail {
-    pub codeword_size: usize, // the expanded side length
+    pub expansion_factor: f64,
     pub pk: PublicKeyKZG,
-    pub chunk_size: usize, // the side length when reshaping the original into a 2D array
+    pub chunk_size: usize,
 }
 
 pub struct Avail;
@@ -31,58 +32,81 @@ impl DataAvailabilitySystem for Avail {
     type Commitment = CommitmentAvail;
     type PublicParams = PublicParamsAvail;
 
-    fn setup(chunk_size: usize, expansion_factor: f64) -> Self::PublicParams {
+    fn setup(chunk_size: usize, expansion_factor: f64, data_size: usize) -> Self::PublicParams {
         let g1 = BN128::generator_g1();
         let g2 = BN128::generator_g2();
-        let codeword_size = (chunk_size as f64 * expansion_factor.ceil()) as usize;
-        let pk = setup_kzg(&g1, &g2, codeword_size);
+        let pk = setup_kzg(
+            &g1,
+            &g2,
+            (data_size as f64 / chunk_size as f64).ceil() as usize,
+        );
 
         Self::PublicParams {
-            codeword_size: codeword_size,
+            expansion_factor: expansion_factor,
             pk: pk,
             chunk_size: chunk_size,
         }
     }
 
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
-        let rs = setup_rs2d(params.codeword_size, params.codeword_size, data.len());
-        let codewords = encode_rs2d(&data, &rs);
+        let start = Instant::now();
 
-        Self::EncodedData {
+        let codeword_size = (params.chunk_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, params.chunk_size);
+
+        let codewords: Vec<Vec<u8>> = data
+            .chunks(params.chunk_size)
+            .map(|c| {
+                let mut padded = c.to_vec().clone();
+                padded.resize(params.chunk_size, 0);
+                encode_rs1d(&padded, &rs)
+            })
+            .collect();
+
+        let result = Self::EncodedData {
             codewords: codewords,
             data_size: data.len(),
-        }
+        };
+
+        // Calculate total encoded size in bytes
+        let encoded_size: usize = result.codewords.iter().map(|chunk| chunk.len()).sum();
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.encoding_time += start.elapsed();
+            metrics.encoded_size += encoded_size;
+        });
+
+        result
     }
 
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
-        let row_commitments = encoded
-            .codewords
-            .iter()
-            .map(|row| {
+        let start = Instant::now();
+
+        let commitments = (0..params.chunk_size)
+            .map(|i| {
                 let poly = Polynomial {
-                    coef: row.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
+                    coef: encoded
+                        .codewords
+                        .iter()
+                        .map(|chunk| FqOrder::from_value(chunk[i].clone()))
+                        .collect(),
                 };
                 commit_kzg(&poly, &params.pk)
             })
             .collect();
 
-        let col_commitments = (0..encoded.codewords[0].len())
-            .map(|i| {
-                let col_poly = Polynomial {
-                    coef: encoded
-                        .codewords
-                        .iter()
-                        .map(|row| FqOrder::from_value(row[i].clone()))
-                        .collect(),
-                };
-                commit_kzg(&col_poly, &params.pk)
-            })
-            .collect();
+        let result = Self::Commitment { commitments };
 
-        Self::Commitment {
-            row_commitments,
-            col_commitments,
-        }
+        let commitment_size = result.commitments.len() * std::mem::size_of::<CommitmentKZG>();
+
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.commitment_time += start.elapsed();
+            metrics.commitment_size += commitment_size;
+        });
+
+        result
     }
 
     fn verify(
@@ -91,44 +115,55 @@ impl DataAvailabilitySystem for Avail {
         commitment: &Self::Commitment,
         params: &Self::PublicParams,
     ) -> bool {
-        let poly = if position.is_row {
-            Polynomial {
-                coef: encoded.codewords[position.row]
-                    .iter()
-                    .map(|e| FqOrder::from_value(e.clone()))
-                    .collect(),
-            }
-        } else {
-            Polynomial {
-                coef: encoded
-                    .codewords
-                    .iter()
-                    .map(|r| FqOrder::from_value(r[position.col].clone()))
-                    .collect(),
-            }
+        let start = Instant::now();
+
+        let poly = Polynomial {
+            coef: encoded
+                .codewords
+                .iter()
+                .map(|r| FqOrder::from_value(r[position.col].clone()))
+                .collect(),
         };
 
+        let proof_start = Instant::now();
         // dummy value
         let x = FqOrder::from_value(5);
-
         let proof_kzg = open_kzg(&poly, &x, &params.pk);
+        let proof_time = proof_start.elapsed();
 
-        let sampled_commitment = if position.is_row {
-            &commitment.row_commitments[position.row]
-        } else {
-            &commitment.col_commitments[position.col]
-        };
+        let sampled_commitment = &commitment.commitments[position.col];
 
-        verify_kzg(&x, sampled_commitment, &proof_kzg, &params.pk)
+        let result = verify_kzg(&x, sampled_commitment, &proof_kzg, &params.pk);
+
+        // Record metrics
+        METRICS.with(|m| {
+            let mut metrics = m.borrow_mut();
+            metrics.verification_time += start.elapsed() - proof_time; // Subtract proof time
+            metrics.proof_time += proof_time;
+            metrics.proof_size += std::mem::size_of::<ProofKZG>();
+        });
+
+        result
     }
 
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
-        let rs = setup_rs2d(
-            params.codeword_size,
-            params.codeword_size,
-            encoded.data_size,
-        );
-        decode_rs2d(&encoded.codewords, &rs).unwrap()
+        let _start = Instant::now();
+
+        let codeword_size = (params.chunk_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, params.chunk_size);
+
+        let decodeds: Vec<_> = encoded
+            .codewords
+            .iter()
+            .map(|c| decode_rs1d(&c, &rs).unwrap())
+            .collect();
+        let mut concatenated = decodeds.concat();
+        concatenated.resize(encoded.data_size, 0);
+        concatenated
+    }
+
+    fn metrics() -> SystemMetrics {
+        METRICS.with(|m| m.borrow().clone())
     }
 }
 
@@ -138,42 +173,25 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
-        let params = Avail::setup(2, 2.0);
+        let chunk_size = 8;
+        let params = Avail::setup(chunk_size, 2.0, 32);
 
-        let data = vec![1, 2, 3, 4];
+        let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
+        assert_eq!(commit.commitments.len(), chunk_size);
 
-        let position0 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: false,
-        };
-        assert!(Avail::verify(&position0, &encoded, &commit, &params));
-
-        let position1 = SamplePosition {
-            row: 0,
-            col: 0,
-            is_row: true,
-        };
-        assert!(Avail::verify(&position1, &encoded, &commit, &params));
-
-        let position2 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: false,
-        };
-        assert!(Avail::verify(&position2, &encoded, &commit, &params));
-
-        let position3 = SamplePosition {
-            row: 0,
-            col: 1,
-            is_row: true,
-        };
-        assert!(Avail::verify(&position3, &encoded, &commit, &params));
+        for i in 0..3 {
+            let position0 = SamplePosition {
+                row: 0,
+                col: i % 12,
+                is_row: false,
+            };
+            assert!(Avail::verify(&position0, &encoded, &commit, &params));
+        }
 
         let reconstructed = Avail::reconstruct(&encoded, &params);
-        for i in 0..4 {
+        for i in 0..32 {
             assert_eq!(data[i], reconstructed[i]);
         }
     }

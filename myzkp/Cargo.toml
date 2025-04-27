@@ -15,5 +15,11 @@ blake2 = "0.10.6"
 [profile.test]
 opt-level = 3
 
+[profile.dev]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
 [profile.release] 
 debug = false
