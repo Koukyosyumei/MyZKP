@@ -48,12 +48,16 @@ impl DataAvailabilitySystem for Avail {
     fn encode(data: &[u8], params: &Self::PublicParams) -> Self::EncodedData {
         let start = Instant::now();
 
-        let codeword_size = (data.len() as f64 * params.expansion_factor.ceil()) as usize;
-        let rs = setup_rs1d(codeword_size, data.len());
-        let encoded = encode_rs1d(&data, &rs);
-        let codewords: Vec<Vec<u8>> = encoded
-            .chunks(params.chunk_size) // Fixed chunk size
-            .map(|c| c.to_vec())
+        let codeword_size = (params.chunk_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, params.chunk_size);
+
+        let codewords: Vec<Vec<u8>> = data
+            .chunks(params.chunk_size)
+            .map(|c| {
+                let mut padded = c.to_vec().clone();
+                padded.resize(params.chunk_size, 0);
+                encode_rs1d(&padded, &rs)
+            })
             .collect();
 
         let result = Self::EncodedData {
@@ -79,9 +83,9 @@ impl DataAvailabilitySystem for Avail {
         let commitments = encoded
             .codewords
             .iter()
-            .map(|row| {
+            .map(|c| {
                 let poly = Polynomial {
-                    coef: row.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
+                    coef: c.iter().map(|e| FqOrder::from_value(e.clone())).collect(),
                 };
                 commit_kzg(&poly, &params.pk)
             })
@@ -139,10 +143,17 @@ impl DataAvailabilitySystem for Avail {
     fn reconstruct(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Vec<u8> {
         let _start = Instant::now();
 
-        let codeword_size = (encoded.data_size as f64 * params.expansion_factor.ceil()) as usize;
-        let rs = setup_rs1d(codeword_size, encoded.data_size);
-        let codeword = encoded.codewords.concat();
-        decode_rs1d(&codeword, &rs).unwrap()
+        let codeword_size = (params.chunk_size as f64 * params.expansion_factor.ceil()) as usize;
+        let rs = setup_rs1d(codeword_size, params.chunk_size);
+
+        let decodeds: Vec<_> = encoded
+            .codewords
+            .iter()
+            .map(|c| decode_rs1d(&c, &rs).unwrap())
+            .collect();
+        let mut concatenated = decodeds.concat();
+        concatenated.resize(encoded.data_size, 0);
+        concatenated
     }
 
     fn metrics() -> SystemMetrics {
@@ -156,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_avail_no_error() {
-        let params = Avail::setup(16, 2.0);
+        let params = Avail::setup(8, 2.0);
 
         let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
