@@ -83,7 +83,8 @@ impl DataAvailabilitySystem for Avail {
     fn commit(encoded: &Self::EncodedData, params: &Self::PublicParams) -> Self::Commitment {
         let start = Instant::now();
 
-        let commitments = (0..params.chunk_size)
+        let codeword_size = (params.chunk_size as f64 * params.expansion_factor.ceil()) as usize;
+        let commitments = (0..codeword_size)
             .map(|i| {
                 let poly = Polynomial {
                     coef: encoded
