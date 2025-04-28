@@ -92,6 +92,7 @@ fn main() {
                 METRICS.with(|metrics| {
                     println!("{:#?}", *metrics.borrow());
                 });
+                reset_metrics();
             }
             _ => {
                 eprintln!("Unknown target: {}", target);
