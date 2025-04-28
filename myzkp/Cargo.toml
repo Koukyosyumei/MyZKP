@@ -11,6 +11,7 @@ lazy_static = "1.4.0"
 paste = "1.0.15"
 serde = { version = "1.0.27", features = ["derive"] }
 blake2 = "0.10.6"
+sha2 = "0.10.8"
 
 [profile.test]
 opt-level = 3
