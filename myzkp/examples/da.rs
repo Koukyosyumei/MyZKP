@@ -51,7 +51,7 @@ fn main() {
             "celestia" => {
                 println!("# Celestia");
                 let expansion_factor = 2;
-                let base_num_sampling = 15;
+                let base_num_sampling = 16;
 
                 let params = Celestia::setup(*sqrt_data_size, expansion_factor as f64, *data_size);
                 let encoded = Celestia::encode(&data, &params);
