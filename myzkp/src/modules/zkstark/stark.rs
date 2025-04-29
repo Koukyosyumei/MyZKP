@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::str::FromStr;
 use std::thread::current;
 
 use blake2::{digest::consts::U32, Blake2b, Digest};
+use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
@@ -12,6 +14,8 @@ use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::modules::zkstark::fri::{FriProof, FRI};
+
+use super::fri::{get_nth_root_of_m128, M128};
 
 pub struct Stark<M: ModulusValue> {
     pub expansion_factor: usize,
@@ -258,6 +262,11 @@ impl<M: ModulusValue> Stark<M> {
         let mut terms = vec![randomizer_polynomial];
         for i in 0..transition_quotients.len() {
             terms.push(transition_quotients[i].clone());
+            println!(
+                "a: {} {}",
+                self.max_degree(transition_constraints),
+                self.transition_quotient_degree_bounds(transition_constraints)[i]
+            );
             let shift = self.max_degree(transition_constraints)
                 - self.transition_quotient_degree_bounds(transition_constraints)[i];
             terms.push(x.pow(shift) * transition_quotients[i].clone());
@@ -466,5 +475,98 @@ impl<M: ModulusValue> Stark<M> {
         }
 
         verifier_accepts
+    }
+}
+
+pub fn initialize_stark_m128(
+    expansion_factor: usize,
+    num_colinearity_checks: usize,
+    security_level: usize,
+    num_registers: usize,
+    num_cycles: usize,
+    transition_constraints_degree: usize,
+) -> Stark<M128> {
+    let generator = FiniteFieldElement::<M128>::from_value(
+        BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
+    );
+    let num_randomizers = 4 * num_colinearity_checks;
+    let randomized_trace_length = num_cycles + num_randomizers;
+    let omicron_domain_length = 1
+        << (usize::BITS as usize
+            - (randomized_trace_length * transition_constraints_degree).leading_zeros() as usize);
+    let fri_domain_length = omicron_domain_length * expansion_factor;
+    let omega = get_nth_root_of_m128(&BigInt::from(fri_domain_length));
+    let omicron = get_nth_root_of_m128(&BigInt::from(omicron_domain_length));
+    let omicron_domain: Vec<_> = (0..omicron_domain_length).map(|i| omicron.pow(i)).collect();
+    let fri = FRI {
+        offset: generator.clone(),
+        omega: omega.clone(),
+        domain_length: fri_domain_length,
+        expansion_factor: expansion_factor,
+        num_colinearity_tests: num_colinearity_checks,
+    };
+
+    Stark::<M128> {
+        expansion_factor: expansion_factor,
+        num_colinearity_checks: num_colinearity_checks,
+        security_level: security_level,
+        num_randomizers: num_randomizers,
+        num_registers: num_registers,
+        original_trace_length: num_cycles,
+        generator: generator,
+        omega: omega,
+        omicron: omicron,
+        omicron_domain: omicron_domain,
+        fri: fri,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use num_bigint::BigInt;
+
+    use super::*;
+
+    use crate::modules::{
+        algebra::field::FiniteFieldElement,
+        zkstark::{fri::M128, rescueprime::RescuePrime},
+    };
+
+    // 1 + 407 * (1 << 119)
+
+    #[test]
+    fn test_stark() {
+        let expansion_factor = 4;
+        let num_colinearity_checks = 2;
+        let security_level = 2;
+
+        let rp = RescuePrime::new();
+        let mut output_element =
+            FiniteFieldElement::<M128>::from_value(BigInt::from_str("123456789").unwrap());
+
+        for trial in 0..1 {
+            let input_element = output_element.clone();
+            output_element = rp.hash(&input_element);
+            let num_cycles = rp.n + 1;
+            let state_width = rp.m;
+
+            let stark = initialize_stark_m128(
+                expansion_factor,
+                num_colinearity_checks,
+                security_level,
+                state_width,
+                num_cycles,
+                2,
+            );
+
+            let mut trace = rp.trace(&input_element);
+            let air = rp.transition_constraints(&stark.omicron);
+            let boundary = rp.boundary_constraints(&output_element);
+            let proof = stark.prove(&mut trace, &boundary, &air);
+            let result = stark.verify(&proof, &air, &boundary);
+            assert!(result);
+        }
     }
 }
