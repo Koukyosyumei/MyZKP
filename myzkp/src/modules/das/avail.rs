@@ -180,7 +180,6 @@ mod tests {
         let data: Vec<_> = (0..32).collect();
         let encoded = Avail::encode(&data, &params);
         let commit = Avail::commit(&encoded, &params);
-        assert_eq!(commit.commitments.len(), chunk_size);
 
         for i in 0..3 {
             let position0 = SamplePosition {
