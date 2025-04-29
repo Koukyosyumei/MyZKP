@@ -14,6 +14,8 @@ use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::modules::zkstark::fri::FRI;
 use crate::modules::zkstark::stark::{Boundary, Stark, TransitionConstraints};
 
+use super::stark::Trace;
+
 pub struct RescuePrime<M: ModulusValue> {
     pub p: usize,
     pub field: FiniteFieldElement<M>,
@@ -154,5 +156,64 @@ impl<M: ModulusValue> RescuePrime<M> {
         constraints.push((0, 1, FiniteFieldElement::<M>::zero()));
         constraints.push((self.n, 0, output_element));
         constraints
+    }
+
+    pub fn trace(&self, input_element: &FiniteFieldElement<M>) -> Trace<M> {
+        let mut state = vec![input_element.clone()];
+        for _ in 0..(self.m - 1) {
+            state.push(FiniteFieldElement::<M>::zero());
+        }
+
+        let mut trace = vec![state.clone()];
+
+        // permutation
+        for r in 0..self.n {
+            // forward half-round
+            // s-box
+            for i in 0..(self.m) {
+                state[i] = state[i].pow(self.alpha);
+            }
+
+            // matrix
+            let mut temp: Vec<_> = (0..self.m)
+                .map(|_| FiniteFieldElement::<M>::zero())
+                .collect();
+            for i in 0..self.m {
+                for j in 0..self.m {
+                    temp[i] = temp[i].add_ref(&(&self.mds[i][j] * &state[j]));
+                }
+            }
+
+            // constants
+            state = (0..self.m)
+                .map(|i| temp[i].add_ref(&self.round_constants[2 * r * self.m + i]))
+                .collect();
+
+            // backward half-round
+            // s-box
+            for i in 0..self.m {
+                state[i] = state[i].pow(self.alphainv);
+            }
+
+            // matrix
+            temp = (0..self.m)
+                .map(|_| FiniteFieldElement::<M>::zero())
+                .collect();
+            for i in 0..self.m {
+                for j in 0..self.m {
+                    temp[i] = temp[i].add_ref(&(&self.mds[i][j] * &state[j]));
+                }
+            }
+
+            // constants
+            state = (0..self.m)
+                .map(|i| temp[i].add_ref(&self.round_constants[2 * r * self.m + self.m + i]))
+                .collect();
+
+            // record state at this point
+            trace.push(state.clone());
+        }
+
+        trace
     }
 }
