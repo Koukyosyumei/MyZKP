@@ -490,7 +490,7 @@ impl RescuePrime {
 
     pub fn transition_constraints(
         &self,
-        omicron: FiniteFieldElement<M128>,
+        omicron: &FiniteFieldElement<M128>,
     ) -> TransitionConstraints<M128> {
         let (first_step_constants, second_step_constants) =
             self.round_constants_polynomials(&omicron);
@@ -523,10 +523,13 @@ impl RescuePrime {
         air
     }
 
-    pub fn boundary_constraints(&self, output_element: FiniteFieldElement<M128>) -> Boundary<M128> {
+    pub fn boundary_constraints(
+        &self,
+        output_element: &FiniteFieldElement<M128>,
+    ) -> Boundary<M128> {
         let mut constraints = Vec::new();
         constraints.push((0, 1, FiniteFieldElement::<M128>::zero()));
-        constraints.push((self.n, 0, output_element));
+        constraints.push((self.n, 0, output_element.clone()));
         constraints
     }
 
@@ -594,7 +597,7 @@ impl RescuePrime {
 mod tests {
     use super::*;
 
-    use crate::modules::algebra::field::FiniteFieldElement;
+    use crate::modules::{algebra::field::FiniteFieldElement, zkstark::fri::get_nth_root_of_m128};
 
     // 1 + 407 * (1 << 119)
 
@@ -626,5 +629,29 @@ mod tests {
         let trace = rp.trace(&a);
         assert_eq!(trace[0][0], a);
         assert_eq!(trace.last().unwrap()[0], b);
+
+        let boundary_constraints = rp.boundary_constraints(&b);
+        for (cycle, element, value) in boundary_constraints {
+            assert_eq!(trace[cycle][element], value);
+        }
+
+        let omicron = get_nth_root_of_m128(
+            &BigInt::from_str("664613997892457936451903530140172288").unwrap(),
+        );
+        let transition_constraints = rp.transition_constraints(&omicron);
+        let (first_step_constants, second_step_constants) =
+            rp.round_constants_polynomials(&omicron);
+        for o in 0..(trace.len() - 1) {
+            for air_poly in &transition_constraints {
+                let point = vec![
+                    omicron.pow(o),
+                    trace[o][0].clone(),
+                    trace[o][1].clone(),
+                    trace[o + 1][0].clone(),
+                    trace[o + 1][1].clone(),
+                ];
+                assert!(air_poly.evaluate(&point).is_zero());
+            }
+        }
     }
 }
