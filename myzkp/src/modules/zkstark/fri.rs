@@ -353,7 +353,7 @@ impl<M: ModulusValue> FRI<M> {
                 if r == 0 {
                     polynomial_values.push((a_indices[s], ay.clone()));
                     polynomial_values.push((b_indices[s], by.clone()));
-                    polynomial_values.push((c_indices[s], cy.clone()));
+                    //polynomial_values.push((c_indices[s], cy.clone()));
                 }
 
                 // colinearity check
@@ -497,6 +497,9 @@ mod tests {
         let mut points = Vec::new();
         let result = fri.verify(&proof, &mut points);
         assert!(result);
+        for (x, y) in &points {
+            assert_eq!(polynomial.eval(&omega.pow(*x)), y.clone());
+        }
 
         for i in 0..(degree / 3) {
             codeword[i] = FiniteFieldElement::<M128>::one();

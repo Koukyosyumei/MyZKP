@@ -292,6 +292,10 @@ impl<M: ModulusValue> Stark<M> {
         for i in &fri_proof.top_level_indices {
             duplicated_indices.push((i + self.expansion_factor) % self.fri.domain_length);
         }
+        for i in duplicated_indices.clone() {
+            duplicated_indices.push((i + (self.fri.domain_length / 2)) % self.fri.domain_length);
+        }
+        duplicated_indices.sort();
 
         // open indicated positions in the boundary quotient codewords
         let mut bqc_points = Vec::new();
@@ -314,7 +318,7 @@ impl<M: ModulusValue> Stark<M> {
             .iter()
             .map(|b| bincode::serialize(&b).expect("Serialization failed"))
             .collect();
-        for i in &fri_proof.top_level_indices {
+        for i in &duplicated_indices {
             rdc_points.push(randomizer_codeword[*i].clone());
             rdc_paths.push(Merkle::open(*i, &serialized_randomizer_codeword));
         }
@@ -374,32 +378,36 @@ impl<M: ModulusValue> Stark<M> {
         for i in &indices {
             duplicated_indices.push((i + self.expansion_factor) % self.fri.domain_length);
         }
+        duplicated_indices.sort();
+
         let mut leafs = Vec::new();
+        let mut ctr = 0;
         for r in 0..boundary_quotient_roots.len() {
-            let mut tmp = HashMap::new();
+            let mut tmp: HashMap<&usize, Vec<u8>> = HashMap::new();
             for i in &duplicated_indices {
                 tmp.insert(
                     i,
-                    bincode::serialize(&proof.bqc_points[r]).expect("Serialization failed"),
+                    bincode::serialize(&proof.bqc_points[ctr]).expect("Serialization failed"),
                 );
-                let path = &proof.bqc_paths[r];
+                let path = &proof.bqc_paths[ctr];
                 let verifier_accepts = verifier_accepts
                     && Merkle::verify(&boundary_quotient_roots[r], *i, &path, &tmp[&i]);
                 if !verifier_accepts {
                     return false;
                 }
+                ctr += 1;
             }
             leafs.push(tmp);
         }
 
         // read and verify randomizer leafs
         let mut randomizer = HashMap::new();
-        for i in &indices {
+        for (ctr, i) in duplicated_indices.iter().enumerate() {
             randomizer.insert(
                 i,
-                bincode::serialize(&proof.rdc_points[*i]).expect("Serialization failed"),
+                bincode::serialize(&proof.rdc_points[ctr]).expect("Serialization failed"),
             );
-            let path = &proof.rdc_paths[*i];
+            let path = &proof.rdc_paths[ctr];
             verifier_accepts =
                 verifier_accepts && Merkle::verify(&randomizer_root, *i, &path, &randomizer[&i]);
         }
@@ -547,7 +555,7 @@ mod tests {
         let mut output_element =
             FiniteFieldElement::<M128>::from_value(BigInt::from_str("123456789").unwrap());
 
-        for trial in 0..1 {
+        for _ in 0..10 {
             let input_element = output_element.clone();
             output_element = rp.hash(&input_element);
             let num_cycles = rp.n + 1;
@@ -568,6 +576,12 @@ mod tests {
             let proof = stark.prove(&mut trace, &boundary, &air);
             let result = stark.verify(&proof, &air, &boundary);
             assert!(result);
+
+            let false_output_element = output_element.clone() + FiniteFieldElement::<M128>::one();
+            let false_boundary = rp.boundary_constraints(&false_output_element);
+            let false_proof = stark.prove(&mut trace, &false_boundary, &air);
+            let false_result = stark.verify(&false_proof, &air, &boundary);
+            assert!(!false_result);
         }
     }
 }
