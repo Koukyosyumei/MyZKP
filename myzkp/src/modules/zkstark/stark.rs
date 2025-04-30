@@ -81,7 +81,7 @@ impl<M: ModulusValue> Stark<M> {
     ) -> usize {
         let binding = self.transition_quotient_degree_bounds(transition_constraints);
         let md = binding.iter().max().unwrap();
-        (1 << (format!("{:b}", md).len() - 2)) - 1
+        (1 << (format!("{:b}", md).len())) - 1
     }
 
     fn transition_zerofier(&self) -> Polynomial<FiniteFieldElement<M>> {
@@ -262,11 +262,6 @@ impl<M: ModulusValue> Stark<M> {
         let mut terms = vec![randomizer_polynomial];
         for i in 0..transition_quotients.len() {
             terms.push(transition_quotients[i].clone());
-            println!(
-                "a: {} {}",
-                self.max_degree(transition_constraints),
-                self.transition_quotient_degree_bounds(transition_constraints)[i]
-            );
             let shift = self.max_degree(transition_constraints)
                 - self.transition_quotient_degree_bounds(transition_constraints)[i];
             terms.push(x.pow(shift) * transition_quotients[i].clone());
@@ -302,20 +297,26 @@ impl<M: ModulusValue> Stark<M> {
         let mut bqc_points = Vec::new();
         let mut bqc_paths = Vec::new();
         for bqc in boundary_quotient_codewords {
+            let serialized_bqc: Vec<_> = bqc
+                .iter()
+                .map(|b| bincode::serialize(&b).expect("Serialization failed"))
+                .collect();
             for i in &duplicated_indices {
-                let tmp = bincode::serialize(&bqc[*i]).expect("Serialization failed");
                 bqc_points.push(bqc[*i].clone());
-                bqc_paths.push(Merkle::open(*i, &vec![tmp]));
+                bqc_paths.push(Merkle::open(*i, &serialized_bqc));
             }
         }
 
         // as well as in the randomizer
         let mut rdc_points = Vec::new();
         let mut rdc_paths = Vec::new();
+        let serialized_randomizer_codeword: Vec<_> = randomizer_codeword
+            .iter()
+            .map(|b| bincode::serialize(&b).expect("Serialization failed"))
+            .collect();
         for i in &fri_proof.top_level_indices {
-            let tmp = bincode::serialize(&randomizer_codeword[*i]).expect("Serialization failed");
             rdc_points.push(randomizer_codeword[*i].clone());
-            rdc_paths.push(Merkle::open(*i, &vec![tmp]));
+            rdc_paths.push(Merkle::open(*i, &serialized_randomizer_codeword));
         }
 
         StarkProof {
