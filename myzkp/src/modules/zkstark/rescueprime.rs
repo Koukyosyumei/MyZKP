@@ -1,20 +1,15 @@
-use std::collections::HashMap;
-use std::hash::Hash;
 use std::str::FromStr;
-use std::thread::current;
 
-use blake2::{digest::consts::U32, Blake2b, Digest};
+use blake2::Digest;
 use num_bigint::BigInt;
-use num_traits::{zero, One, Zero};
+use num_traits::Zero;
 
-use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
-use crate::modules::algebra::merkle::Merkle;
+use crate::modules::algebra::field::FiniteFieldElement;
 use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
-use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::modules::zkstark::fri::M128;
-use crate::modules::zkstark::stark::{Boundary, Stark, TransitionConstraints};
+use crate::modules::zkstark::stark::{Boundary, TransitionConstraints};
 
 use super::stark::Trace;
 

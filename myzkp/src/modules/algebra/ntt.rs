@@ -1,18 +1,6 @@
-use lazy_static::lazy_static;
-use num_bigint::BigInt;
-use num_traits::{zero, One, Zero};
-use paste::paste;
-use serde::de::value;
-use serde::{Deserialize, Serialize};
-use std::iter;
-use std::ops::Div;
-use std::str::FromStr;
+use num_traits::{One, Zero};
 
-use crate::define_extension_field;
-use crate::define_myzkp_modulus_type;
 
-use crate::modules::algebra::efield::ExtendedFieldElement;
-use crate::modules::algebra::efield::IrreduciblePoly;
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::field::FiniteFieldElement;
 use crate::modules::algebra::field::ModulusValue;
