@@ -331,3 +331,44 @@ pub fn fast_coset_divide<M: ModulusValue>(
 
     scaled_quotient.scale(&offset.inverse())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::primitive;
+
+    use super::*;
+
+    use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};
+
+    // 1 + 407 * (1 << 119)
+
+    #[test]
+    fn test_ntt() {
+        let logn = 8;
+        let n = 1 << logn;
+        let primitive_root = get_nth_root_of_m128(&BigInt::from(n));
+
+        let coef: Vec<FiniteFieldElement<M128>> = (0..n)
+            .into_iter()
+            .map(|i| FiniteFieldElement::<M128>::from_value(i + 1))
+            .collect();
+        let poly = Polynomial { coef: coef.clone() };
+
+        let values = ntt(&primitive_root, &coef);
+        let values_again = poly.eval_domain(
+            &(0..values.len())
+                .map(|i| primitive_root.pow(i))
+                .collect::<Vec<_>>(),
+        );
+        assert_eq!(values.len(), values_again.len());
+        for i in 0..values.len() {
+            assert_eq!(values[i], values_again[i]);
+        }
+
+        let coef_again = intt(&primitive_root, &values);
+        assert_eq!(coef.len(), coef_again.len());
+        for i in 0..coef.len() {
+            assert_eq!(coef[i], coef_again[i]);
+        }
+    }
+}
