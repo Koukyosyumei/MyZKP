@@ -1,0 +1,333 @@
+use lazy_static::lazy_static;
+use num_bigint::BigInt;
+use num_traits::{zero, One, Zero};
+use paste::paste;
+use serde::de::value;
+use serde::{Deserialize, Serialize};
+use std::iter;
+use std::ops::Div;
+use std::str::FromStr;
+
+use crate::define_extension_field;
+use crate::define_myzkp_modulus_type;
+
+use crate::modules::algebra::efield::ExtendedFieldElement;
+use crate::modules::algebra::efield::IrreduciblePoly;
+use crate::modules::algebra::field::Field;
+use crate::modules::algebra::field::FiniteFieldElement;
+use crate::modules::algebra::field::ModulusValue;
+use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
+
+pub fn ntt<M: ModulusValue>(
+    primitive_root: &FiniteFieldElement<M>,
+    values: &Vec<FiniteFieldElement<M>>,
+) -> Vec<FiniteFieldElement<M>> {
+    assert!(
+        values.len() & (values.len() - 1) == 0,
+        "cannot compute ntt of non-power-of-two sequence"
+    );
+    if values.len() <= 1 {
+        return values.to_vec();
+    }
+
+    assert!(
+        primitive_root.pow(values.len()).is_one(),
+        "primitive root must be nth root of unity, where n is len(values)"
+    );
+    assert!(
+        !primitive_root.pow(values.len() / 2).is_one(),
+        "primitive root is not primitive nth root of unity, where n is len(values)"
+    );
+
+    let half = values.len() / 2;
+    let odds = ntt(
+        &primitive_root.pow(2),
+        &values
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| index % 2 == 1)
+            .map(|(_, &ref value)| value.clone())
+            .collect(),
+    );
+    let evens = ntt(
+        &primitive_root.pow(2),
+        &values
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| index % 2 == 0)
+            .map(|(_, &ref value)| value.clone())
+            .collect(),
+    );
+
+    (0..values.len())
+        .map(|i| evens[i % half].add_ref(&((primitive_root.pow(i)) * &odds[i % half])))
+        .collect()
+}
+
+pub fn intt<M: ModulusValue>(
+    primitive_root: &FiniteFieldElement<M>,
+    values: &Vec<FiniteFieldElement<M>>,
+) -> Vec<FiniteFieldElement<M>> {
+    if values.len() == 1 {
+        return values.to_vec();
+    }
+
+    let ninv = FiniteFieldElement::<M>::from_value(values.len()).inverse();
+    let transformed_values = ntt(&primitive_root.inverse(), values);
+    transformed_values.iter().map(|tv| &ninv * tv).collect()
+}
+
+pub fn fast_multiply<M: ModulusValue>(
+    lhs: &Polynomial<FiniteFieldElement<M>>,
+    rhs: &Polynomial<FiniteFieldElement<M>>,
+    primitive_root: &FiniteFieldElement<M>,
+    root_order: usize,
+) -> Polynomial<FiniteFieldElement<M>> {
+    assert!(primitive_root.pow(root_order).is_zero());
+    assert!(!primitive_root.pow(root_order / 2).is_zero());
+
+    if lhs.is_zero() || rhs.is_zero() {
+        return Polynomial::<FiniteFieldElement<M>>::zero();
+    }
+
+    let mut root = primitive_root.clone();
+    let mut order = root_order;
+    let degree = lhs.degree() + rhs.degree();
+
+    if degree < 8 {
+        return lhs * rhs;
+    }
+
+    while degree < (order / 2).try_into().unwrap() {
+        root = &root * &root;
+        order = order / 2;
+    }
+
+    let mut lhs_coefficients = lhs.coef.clone();
+    let mut rhs_coefficients = rhs.coef.clone();
+    while lhs_coefficients.len() < order {
+        lhs_coefficients.push(FiniteFieldElement::<M>::zero());
+    }
+    while rhs_coefficients.len() < order {
+        rhs_coefficients.push(FiniteFieldElement::<M>::zero());
+    }
+
+    let lhs_codeword = ntt(&root, &lhs_coefficients);
+    let rhs_codeword = ntt(&root, &rhs_coefficients);
+    let hadamard_product = lhs_codeword
+        .iter()
+        .zip(rhs_codeword.iter())
+        .map(|(el, r)| el * r)
+        .collect();
+    let product_coefficients = intt(&root, &hadamard_product);
+
+    Polynomial {
+        coef: product_coefficients,
+    }
+}
+
+pub fn fast_zerofier<M: ModulusValue>(
+    domain: &Vec<FiniteFieldElement<M>>,
+    primitive_root: &FiniteFieldElement<M>,
+    root_order: usize,
+) -> Polynomial<FiniteFieldElement<M>> {
+    assert!(primitive_root.pow(root_order).is_zero());
+    assert!(!primitive_root.pow(root_order / 2).is_zero());
+
+    if domain.is_empty() {
+        return Polynomial::<FiniteFieldElement<M>>::zero();
+    }
+
+    if domain.len().is_one() {
+        return Polynomial {
+            coef: vec![
+                FiniteFieldElement::<M>::zero() - &domain[0],
+                FiniteFieldElement::<M>::one(),
+            ],
+        };
+    }
+
+    let half = domain.len() / 2;
+
+    let left = fast_zerofier(&domain[..half].to_vec(), primitive_root, root_order);
+    let right = fast_zerofier(&domain[half..].to_vec(), primitive_root, root_order);
+
+    fast_multiply(&left, &right, primitive_root, root_order)
+}
+
+pub fn fast_evaluate<M: ModulusValue>(
+    polynomial: &Polynomial<FiniteFieldElement<M>>,
+    domain: &Vec<FiniteFieldElement<M>>,
+    primitive_root: &FiniteFieldElement<M>,
+    root_order: usize,
+) -> Vec<FiniteFieldElement<M>> {
+    assert!(primitive_root.pow(root_order).is_zero());
+    assert!(!primitive_root.pow(root_order / 2).is_zero());
+
+    if domain.len().is_zero() {
+        return vec![];
+    }
+
+    if domain.len().is_one() {
+        return vec![polynomial.eval(&domain[0])];
+    }
+
+    let half = domain.len() / 2;
+
+    let left_zerofier = fast_zerofier(&domain[..half].to_vec(), primitive_root, root_order);
+    let right_zerofier = fast_zerofier(&domain[half..].to_vec(), primitive_root, root_order);
+
+    let mut left = fast_evaluate(
+        &(polynomial % &left_zerofier),
+        domain,
+        primitive_root,
+        root_order,
+    );
+    let mut right = fast_evaluate(
+        &(polynomial % &right_zerofier),
+        domain,
+        primitive_root,
+        root_order,
+    );
+
+    left.append(&mut right);
+    left
+}
+
+pub fn fast_interpolate<M: ModulusValue>(
+    domain: &Vec<FiniteFieldElement<M>>,
+    values: &Vec<FiniteFieldElement<M>>,
+    primitive_root: &FiniteFieldElement<M>,
+    root_order: usize,
+) -> Polynomial<FiniteFieldElement<M>> {
+    assert!(primitive_root.pow(root_order).is_zero());
+    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert_eq!(domain.len(), values.len());
+
+    if domain.len().is_zero() {
+        return Polynomial::zero();
+    }
+
+    if domain.len().is_one() {
+        return Polynomial {
+            coef: vec![values[0].clone()],
+        };
+    }
+
+    let half = domain.len() / 2;
+
+    let left_zerofier = fast_zerofier(&domain[..half].to_vec(), primitive_root, root_order);
+    let right_zerofier = fast_zerofier(&domain[half..].to_vec(), primitive_root, root_order);
+
+    let left_offset = fast_evaluate(
+        &right_zerofier,
+        &domain[..half].to_vec(),
+        primitive_root,
+        root_order,
+    );
+    let right_offset = fast_evaluate(
+        &left_zerofier,
+        &domain[half..].to_vec(),
+        primitive_root,
+        root_order,
+    );
+
+    let left_targets: Vec<_> = values[..half]
+        .iter()
+        .zip(left_offset.iter())
+        .map(|(n, d)| n.div_ref(d))
+        .collect();
+    let right_targets: Vec<_> = values[half..]
+        .iter()
+        .zip(right_offset.iter())
+        .map(|(n, d)| n.div_ref(d))
+        .collect();
+
+    let left_interpolant = fast_interpolate(
+        &domain[..half].to_vec(),
+        &left_targets,
+        primitive_root,
+        root_order,
+    );
+    let right_interpolant = fast_interpolate(
+        &domain[half..].to_vec(),
+        &right_targets,
+        primitive_root,
+        root_order,
+    );
+
+    left_interpolant * right_zerofier + right_interpolant * left_zerofier
+}
+
+pub fn fast_coset_evaluate<M: ModulusValue>(
+    polynomial: &Polynomial<FiniteFieldElement<M>>,
+    offset: &FiniteFieldElement<M>,
+    generator: FiniteFieldElement<M>,
+    order: usize,
+) -> Vec<FiniteFieldElement<M>> {
+    let scaled_polynomial = polynomial.scale(offset);
+    let mut coefs = scaled_polynomial.coef.clone();
+    for _ in 0..(order - polynomial.coef.len()) {
+        coefs.push(FiniteFieldElement::<M>::zero());
+    }
+    ntt(&generator, &coefs)
+}
+
+pub fn fast_coset_divide<M: ModulusValue>(
+    lhs: &Polynomial<FiniteFieldElement<M>>,
+    rhs: &Polynomial<FiniteFieldElement<M>>,
+    offset: &FiniteFieldElement<M>,
+    primitive_root: &FiniteFieldElement<M>,
+    root_order: usize,
+) -> Polynomial<FiniteFieldElement<M>> {
+    assert!(primitive_root.pow(root_order).is_zero());
+    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(!rhs.is_zero());
+    assert!(rhs.degree() < lhs.degree());
+
+    if lhs.is_zero() {
+        return Polynomial::zero();
+    }
+
+    let mut root = primitive_root.clone();
+    let mut order = root_order.clone();
+    let degree = std::cmp::max(lhs.degree(), rhs.degree());
+
+    if degree < 8 {
+        return lhs / rhs;
+    }
+
+    while degree < (order / 2).try_into().unwrap() {
+        root = &root * &root;
+        order = order / 2;
+    }
+
+    let scaled_lhs = lhs.scale(offset);
+    let scaled_rhs = rhs.scale(offset);
+
+    let mut lhs_coefficients: Vec<_> = scaled_lhs.coef[..lhs.degree() as usize + 1].to_vec();
+    while lhs_coefficients.len() < order {
+        lhs_coefficients.push(FiniteFieldElement::zero());
+    }
+    let mut rhs_coefficients: Vec<_> = scaled_rhs.coef[..rhs.degree() as usize + 1].to_vec();
+    while rhs_coefficients.len() < order {
+        rhs_coefficients.push(FiniteFieldElement::zero());
+    }
+
+    let lhs_codeword = ntt(&root, &lhs_coefficients);
+    let rhs_codeword = ntt(&root, &rhs_coefficients);
+
+    let quotient_codeword: Vec<_> = lhs_codeword
+        .into_iter()
+        .zip(rhs_codeword.iter())
+        .map(|(el, r)| el.div_ref(r))
+        .collect();
+    let scaled_quotient_coefficients = intt(&root, &quotient_codeword);
+    let scaled_quotient = Polynomial {
+        coef: scaled_quotient_coefficients[..(lhs.degree() as usize - rhs.degree() as usize + 1)]
+            .to_vec(),
+    };
+
+    scaled_quotient.scale(&offset.inverse())
+}
