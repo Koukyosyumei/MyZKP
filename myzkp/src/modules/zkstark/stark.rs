@@ -15,6 +15,19 @@ use crate::modules::zkstark::fri::{FriProof, FRI};
 
 use super::fri::{get_nth_root_of_m128, M128};
 
+pub type Trace<M> = Vec<Vec<FiniteFieldElement<M>>>;
+pub type Boundary<M> = Vec<(usize, usize, FiniteFieldElement<M>)>;
+pub type TransitionConstraints<M> = Vec<MPolynomial<FiniteFieldElement<M>>>;
+pub struct StarkProof<M: ModulusValue> {
+    pub fri_proof: FriProof<M>,
+    pub bqc_roots: Vec<MerkleRoot>,
+    pub bqc_points: Vec<FiniteFieldElement<M>>,
+    pub bqc_paths: Vec<MerklePath>,
+    pub rdc_root: MerkleRoot,
+    pub rdc_points: Vec<FiniteFieldElement<M>>,
+    pub rdc_paths: Vec<MerklePath>,
+}
+
 pub struct Stark<M: ModulusValue> {
     pub expansion_factor: usize,
     pub num_colinearity_checks: usize,
@@ -27,19 +40,6 @@ pub struct Stark<M: ModulusValue> {
     pub omicron: FiniteFieldElement<M>,
     pub omicron_domain: Vec<FiniteFieldElement<M>>,
     pub fri: FRI<M>,
-}
-
-pub type Trace<M> = Vec<Vec<FiniteFieldElement<M>>>;
-pub type Boundary<M> = Vec<(usize, usize, FiniteFieldElement<M>)>;
-pub type TransitionConstraints<M> = Vec<MPolynomial<FiniteFieldElement<M>>>;
-pub struct StarkProof<M: ModulusValue> {
-    pub fri_proof: FriProof<M>,
-    pub bqc_roots: Vec<MerkleRoot>,
-    pub bqc_points: Vec<FiniteFieldElement<M>>,
-    pub bqc_paths: Vec<MerklePath>,
-    pub rdc_root: MerkleRoot,
-    pub rdc_points: Vec<FiniteFieldElement<M>>,
-    pub rdc_paths: Vec<MerklePath>,
 }
 
 impl<M: ModulusValue> Stark<M> {
