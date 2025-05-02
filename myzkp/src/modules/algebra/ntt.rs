@@ -1,6 +1,5 @@
 use num_traits::{One, Zero};
 
-
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::field::FiniteFieldElement;
 use crate::modules::algebra::field::ModulusValue;
@@ -251,7 +250,7 @@ pub fn fast_interpolate<M: ModulusValue>(
 pub fn fast_coset_evaluate<M: ModulusValue>(
     polynomial: &Polynomial<FiniteFieldElement<M>>,
     offset: &FiniteFieldElement<M>,
-    generator: FiniteFieldElement<M>,
+    generator: &FiniteFieldElement<M>,
     order: usize,
 ) -> Vec<FiniteFieldElement<M>> {
     let scaled_polynomial = polynomial.scale(offset);
@@ -323,6 +322,8 @@ pub fn fast_coset_divide<M: ModulusValue>(
 #[cfg(test)]
 mod tests {
     use std::primitive;
+
+    use num_bigint::BigInt;
 
     use super::*;
 
