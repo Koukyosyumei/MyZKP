@@ -17,7 +17,7 @@ use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::modules::zkstark::fri::{FriProof, FRI};
 
 use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};
-use crate::modules::zkstark::stark::{Boundary, Stark, StarkProof, Trace, TransitionConstraints};
+use crate::modules::zkstark::stark::{Boundary, Trace, TransitionConstraints};
 
 pub struct FastStarkProof<M: ModulusValue> {
     pub fri_proof: FriProof<M>,
@@ -416,6 +416,7 @@ impl<M: ModulusValue> FastStark<M> {
         &self,
         proof: &FastStarkProof<M>,
         transition_constraints: &TransitionConstraints<M>,
+        transition_zerofier_root: &Vec<u8>,
         boundary: &Boundary<M>,
     ) -> bool {
         let mut proof_stream = FiatShamirTransformer::new();
@@ -501,8 +502,8 @@ impl<M: ModulusValue> FastStark<M> {
                 bincode::serialize(&proof.tzc_points[ctr]).expect("Serialization failed"),
             );
             let path = &proof.tzc_paths[ctr];
-            verifier_accepts =
-                verifier_accepts && Merkle::verify(&randomizer_root, *i, &path, &randomizer[&i]);
+            verifier_accepts = verifier_accepts
+                && Merkle::verify(&randomizer_root, *i, &path, &transition_zerofier[&i]);
             if !verifier_accepts {
                 return false;
             }
@@ -625,5 +626,76 @@ pub fn initialize_fast_stark_m128(
         fri: fri,
         omicron_domain_length: omicron_domain_length,
         fri_domain_length: fri_domain_length,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use num_bigint::BigInt;
+
+    use super::*;
+
+    use crate::modules::{
+        algebra::field::FiniteFieldElement,
+        zkstark::{fri::M128, rescueprime::RescuePrime},
+    };
+
+    // 1 + 407 * (1 << 119)
+
+    #[test]
+    fn test_fast_stark() {
+        let expansion_factor = 4;
+        let num_colinearity_checks = 2;
+        let security_level = 2;
+
+        let rp = RescuePrime::new();
+        let mut output_element =
+            FiniteFieldElement::<M128>::from_value(BigInt::from_str("123456789").unwrap());
+
+        for _ in 0..10 {
+            let input_element = output_element.clone();
+            output_element = rp.hash(&input_element);
+            let num_cycles = rp.n + 1;
+            let state_width = rp.m;
+
+            let stark = initialize_fast_stark_m128(
+                expansion_factor,
+                num_colinearity_checks,
+                security_level,
+                state_width,
+                num_cycles,
+                2,
+            );
+            let (transition_zerofier, transition_zerofier_codeword, transition_zerofier_root) =
+                stark.preprocess();
+
+            let mut trace = rp.trace(&input_element);
+            let air = rp.transition_constraints(&stark.omicron);
+            let boundary = rp.boundary_constraints(&output_element);
+            let proof = stark.prove(
+                &mut trace,
+                &boundary,
+                &transition_zerofier,
+                &transition_zerofier_codeword,
+                &air,
+            );
+            let result = stark.verify(&proof, &air, &transition_zerofier_root, &boundary);
+            assert!(result);
+
+            let false_output_element = output_element.clone() + FiniteFieldElement::<M128>::one();
+            let false_boundary = rp.boundary_constraints(&false_output_element);
+            let false_proof = stark.prove(
+                &mut trace,
+                &false_boundary,
+                &transition_zerofier,
+                &transition_zerofier_codeword,
+                &air,
+            );
+            let false_result =
+                stark.verify(&false_proof, &air, &transition_zerofier_root, &boundary);
+            assert!(!false_result);
+        }
     }
 }
