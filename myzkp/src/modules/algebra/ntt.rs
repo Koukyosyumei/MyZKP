@@ -71,8 +71,8 @@ pub fn fast_multiply<M: ModulusValue>(
     primitive_root: &FiniteFieldElement<M>,
     root_order: usize,
 ) -> Polynomial<FiniteFieldElement<M>> {
-    assert!(primitive_root.pow(root_order).is_zero());
-    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(primitive_root.pow(root_order).is_one());
+    assert!(!primitive_root.pow(root_order / 2).is_one());
 
     if lhs.is_zero() || rhs.is_zero() {
         return Polynomial::<FiniteFieldElement<M>>::zero();
@@ -119,8 +119,8 @@ pub fn fast_zerofier<M: ModulusValue>(
     primitive_root: &FiniteFieldElement<M>,
     root_order: usize,
 ) -> Polynomial<FiniteFieldElement<M>> {
-    assert!(primitive_root.pow(root_order).is_zero());
-    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(primitive_root.pow(root_order).is_one());
+    assert!(!primitive_root.pow(root_order / 2).is_one());
 
     if domain.is_empty() {
         return Polynomial::<FiniteFieldElement<M>>::zero();
@@ -149,8 +149,8 @@ pub fn fast_evaluate<M: ModulusValue>(
     primitive_root: &FiniteFieldElement<M>,
     root_order: usize,
 ) -> Vec<FiniteFieldElement<M>> {
-    assert!(primitive_root.pow(root_order).is_zero());
-    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(primitive_root.pow(root_order).is_one());
+    assert!(!primitive_root.pow(root_order / 2).is_one());
 
     if domain.len().is_zero() {
         return vec![];
@@ -188,8 +188,8 @@ pub fn fast_interpolate<M: ModulusValue>(
     primitive_root: &FiniteFieldElement<M>,
     root_order: usize,
 ) -> Polynomial<FiniteFieldElement<M>> {
-    assert!(primitive_root.pow(root_order).is_zero());
-    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(primitive_root.pow(root_order).is_one());
+    assert!(!primitive_root.pow(root_order / 2).is_one());
     assert_eq!(domain.len(), values.len());
 
     if domain.len().is_zero() {
@@ -268,8 +268,8 @@ pub fn fast_coset_divide<M: ModulusValue>(
     primitive_root: &FiniteFieldElement<M>,
     root_order: usize,
 ) -> Polynomial<FiniteFieldElement<M>> {
-    assert!(primitive_root.pow(root_order).is_zero());
-    assert!(!primitive_root.pow(root_order / 2).is_zero());
+    assert!(primitive_root.pow(root_order).is_one());
+    assert!(!primitive_root.pow(root_order / 2).is_one());
     assert!(!rhs.is_zero());
     assert!(rhs.degree() < lhs.degree());
 
