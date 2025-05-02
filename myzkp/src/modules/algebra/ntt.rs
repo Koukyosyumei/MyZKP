@@ -167,13 +167,13 @@ pub fn fast_evaluate<M: ModulusValue>(
 
     let mut left = fast_evaluate(
         &(polynomial % &left_zerofier),
-        domain,
+        &domain[..half].to_vec(),
         primitive_root,
         root_order,
     );
     let mut right = fast_evaluate(
         &(polynomial % &right_zerofier),
-        domain,
+        &domain[half..].to_vec(),
         primitive_root,
         root_order,
     );
@@ -244,7 +244,8 @@ pub fn fast_interpolate<M: ModulusValue>(
         root_order,
     );
 
-    left_interpolant * right_zerofier + right_interpolant * left_zerofier
+    left_interpolant.reduce() * right_zerofier.reduce()
+        + right_interpolant.reduce() * left_zerofier.reduce()
 }
 
 pub fn fast_coset_evaluate<M: ModulusValue>(
