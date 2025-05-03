@@ -447,6 +447,7 @@ impl<M: ModulusValue> FastStark<M> {
         let mut verifier_accepts = self.fri.verify(&proof.fri_proof, &mut polynomial_values);
         polynomial_values.sort_by_key(|iv| iv.0);
         if !verifier_accepts {
+            println!("22");
             return false;
         }
 
@@ -473,6 +474,7 @@ impl<M: ModulusValue> FastStark<M> {
                 let verifier_accepts = verifier_accepts
                     && Merkle::verify(&boundary_quotient_roots[r], *i, &path, &tmp[&i]);
                 if !verifier_accepts {
+                    println!("12");
                     return false;
                 }
                 ctr += 1;
@@ -491,6 +493,7 @@ impl<M: ModulusValue> FastStark<M> {
             verifier_accepts =
                 verifier_accepts && Merkle::verify(&randomizer_root, *i, &path, &randomizer[&i]);
             if !verifier_accepts {
+                println!("32");
                 return false;
             }
         }
@@ -504,8 +507,14 @@ impl<M: ModulusValue> FastStark<M> {
             );
             let path = &proof.tzc_paths[ctr];
             verifier_accepts = verifier_accepts
-                && Merkle::verify(&randomizer_root, *i, &path, &transition_zerofier[&i]);
+                && Merkle::verify(
+                    &transition_zerofier_root,
+                    *i,
+                    &path,
+                    &transition_zerofier[&i],
+                );
             if !verifier_accepts {
+                println!("42");
                 return false;
             }
         }
@@ -577,6 +586,7 @@ impl<M: ModulusValue> FastStark<M> {
             // verify against combination polynomial value
             verifier_accepts = verifier_accepts && (combination == values[i]);
             if !verifier_accepts {
+                println!("52");
                 return false;
             }
         }
@@ -682,10 +692,10 @@ mod tests {
                 &transition_zerofier_codeword,
                 &air,
             );
-            /*
+
             let result = stark.verify(&proof, &air, &transition_zerofier_root, &boundary);
             assert!(result);
-
+            /*
             let false_output_element = output_element.clone() + FiniteFieldElement::<M128>::one();
             let false_boundary = rp.boundary_constraints(&false_output_element);
             let false_proof = stark.prove(
