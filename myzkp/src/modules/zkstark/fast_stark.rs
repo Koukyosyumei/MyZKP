@@ -297,8 +297,8 @@ impl<M: ModulusValue> FastStark<M> {
         let randomizer_codeword = fast_coset_evaluate(
             &randomizer_polynomial,
             &self.generator,
-            &self.omicron,
-            self.omicron_domain_length,
+            &self.omega,
+            self.fri_domain_length,
         );
         let tmp: Vec<_> = randomizer_codeword
             .iter()
