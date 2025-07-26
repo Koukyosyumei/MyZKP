@@ -66,7 +66,9 @@ use crate::modules::algebra::utils::{extended_euclidean, mod_pow};
 ///
 /// This trait extends the `Ring` trait and adds operations specific to fields,
 /// such as division and finding multiplicative inverses.
-pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
+pub trait Field:
+    Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize + for<'a> Deserialize<'a>
+{
     /// Computes the multiplicative inverse of the element.
     fn inverse(&self) -> Self;
     fn div_ref(&self, other: &Self) -> Self;
