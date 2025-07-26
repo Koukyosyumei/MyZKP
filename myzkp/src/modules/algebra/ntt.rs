@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 use num_traits::{One, Zero};
 
 use crate::modules::algebra::field::Field;
@@ -6,10 +8,7 @@ use crate::modules::algebra::field::ModulusValue;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
-pub fn ntt<M: ModulusValue>(
-    primitive_root: &FiniteFieldElement<M>,
-    values: &Vec<FiniteFieldElement<M>>,
-) -> Vec<FiniteFieldElement<M>> {
+pub fn ntt<F: Field>(primitive_root: &F, values: &Vec<F>) -> Vec<F> {
     assert!(
         values.len() & (values.len() - 1) == 0,
         "cannot compute ntt of non-power-of-two sequence"
@@ -52,30 +51,35 @@ pub fn ntt<M: ModulusValue>(
         .collect()
 }
 
-pub fn intt<M: ModulusValue>(
-    primitive_root: &FiniteFieldElement<M>,
-    values: &Vec<FiniteFieldElement<M>>,
-) -> Vec<FiniteFieldElement<M>> {
+pub fn intt<F>(primitive_root: &F, values: &Vec<F>) -> Vec<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     if values.len() == 1 {
         return values.to_vec();
     }
 
-    let ninv = FiniteFieldElement::<M>::from_value(values.len()).inverse();
+    let ninv = F::from_value(values.len()).inverse();
     let transformed_values = ntt(&primitive_root.inverse(), values);
     transformed_values.iter().map(|tv| &ninv * tv).collect()
 }
 
-pub fn fast_multiply<M: ModulusValue>(
-    lhs: &Polynomial<FiniteFieldElement<M>>,
-    rhs: &Polynomial<FiniteFieldElement<M>>,
-    primitive_root: &FiniteFieldElement<M>,
+pub fn fast_multiply<F>(
+    lhs: &Polynomial<F>,
+    rhs: &Polynomial<F>,
+    primitive_root: &F,
     root_order: usize,
-) -> Polynomial<FiniteFieldElement<M>> {
+) -> Polynomial<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
 
     if lhs.is_zero() || rhs.is_zero() {
-        return Polynomial::<FiniteFieldElement<M>>::zero();
+        return Polynomial::<F>::zero();
     }
 
     let mut root = primitive_root.clone();
@@ -94,10 +98,10 @@ pub fn fast_multiply<M: ModulusValue>(
     let mut lhs_coefficients = lhs.coef.clone();
     let mut rhs_coefficients = rhs.coef.clone();
     while lhs_coefficients.len() < order {
-        lhs_coefficients.push(FiniteFieldElement::<M>::zero());
+        lhs_coefficients.push(F::zero());
     }
     while rhs_coefficients.len() < order {
-        rhs_coefficients.push(FiniteFieldElement::<M>::zero());
+        rhs_coefficients.push(F::zero());
     }
 
     let lhs_codeword = ntt(&root, &lhs_coefficients);
@@ -114,24 +118,21 @@ pub fn fast_multiply<M: ModulusValue>(
     }
 }
 
-pub fn fast_zerofier<M: ModulusValue>(
-    domain: &Vec<FiniteFieldElement<M>>,
-    primitive_root: &FiniteFieldElement<M>,
-    root_order: usize,
-) -> Polynomial<FiniteFieldElement<M>> {
+pub fn fast_zerofier<F>(domain: &Vec<F>, primitive_root: &F, root_order: usize) -> Polynomial<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
 
     if domain.is_empty() {
-        return Polynomial::<FiniteFieldElement<M>>::zero();
+        return Polynomial::<F>::zero();
     }
 
     if domain.len().is_one() {
         return Polynomial {
-            coef: vec![
-                FiniteFieldElement::<M>::zero() - &domain[0],
-                FiniteFieldElement::<M>::one(),
-            ],
+            coef: vec![F::zero() - &domain[0], F::one()],
         };
     }
 
@@ -143,12 +144,16 @@ pub fn fast_zerofier<M: ModulusValue>(
     fast_multiply(&left, &right, primitive_root, root_order)
 }
 
-pub fn fast_evaluate<M: ModulusValue>(
-    polynomial: &Polynomial<FiniteFieldElement<M>>,
-    domain: &Vec<FiniteFieldElement<M>>,
-    primitive_root: &FiniteFieldElement<M>,
+pub fn fast_evaluate<F>(
+    polynomial: &Polynomial<F>,
+    domain: &Vec<F>,
+    primitive_root: &F,
     root_order: usize,
-) -> Vec<FiniteFieldElement<M>> {
+) -> Vec<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
 
@@ -182,12 +187,16 @@ pub fn fast_evaluate<M: ModulusValue>(
     left
 }
 
-pub fn fast_interpolate<M: ModulusValue>(
-    domain: &Vec<FiniteFieldElement<M>>,
-    values: &Vec<FiniteFieldElement<M>>,
-    primitive_root: &FiniteFieldElement<M>,
+pub fn fast_interpolate<F>(
+    domain: &Vec<F>,
+    values: &Vec<F>,
+    primitive_root: &F,
     root_order: usize,
-) -> Polynomial<FiniteFieldElement<M>> {
+) -> Polynomial<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
     assert_eq!(domain.len(), values.len());
@@ -248,27 +257,35 @@ pub fn fast_interpolate<M: ModulusValue>(
         + right_interpolant.reduce() * left_zerofier.reduce()
 }
 
-pub fn fast_coset_evaluate<M: ModulusValue>(
-    polynomial: &Polynomial<FiniteFieldElement<M>>,
-    offset: &FiniteFieldElement<M>,
-    generator: &FiniteFieldElement<M>,
+pub fn fast_coset_evaluate<F>(
+    polynomial: &Polynomial<F>,
+    offset: &F,
+    generator: &F,
     order: usize,
-) -> Vec<FiniteFieldElement<M>> {
+) -> Vec<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     let scaled_polynomial = polynomial.scale(offset);
     let mut coefs = scaled_polynomial.coef.clone();
     for _ in 0..(order - polynomial.coef.len()) {
-        coefs.push(FiniteFieldElement::<M>::zero());
+        coefs.push(F::zero());
     }
     ntt(&generator, &coefs)
 }
 
-pub fn fast_coset_divide<M: ModulusValue>(
-    lhs: &Polynomial<FiniteFieldElement<M>>,
-    rhs: &Polynomial<FiniteFieldElement<M>>,
-    offset: &FiniteFieldElement<M>,
-    primitive_root: &FiniteFieldElement<M>,
+pub fn fast_coset_divide<F>(
+    lhs: &Polynomial<F>,
+    rhs: &Polynomial<F>,
+    offset: &F,
+    primitive_root: &F,
     root_order: usize,
-) -> Polynomial<FiniteFieldElement<M>> {
+) -> Polynomial<F>
+where
+    F: Field,
+    for<'a> &'a F: Mul<&'a F, Output = F>,
+{
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
     assert!(!rhs.is_zero());
@@ -296,11 +313,11 @@ pub fn fast_coset_divide<M: ModulusValue>(
 
     let mut lhs_coefficients: Vec<_> = scaled_lhs.coef[..lhs.degree() as usize + 1].to_vec();
     while lhs_coefficients.len() < order {
-        lhs_coefficients.push(FiniteFieldElement::zero());
+        lhs_coefficients.push(F::zero());
     }
     let mut rhs_coefficients: Vec<_> = scaled_rhs.coef[..rhs.degree() as usize + 1].to_vec();
     while rhs_coefficients.len() < order {
-        rhs_coefficients.push(FiniteFieldElement::zero());
+        rhs_coefficients.push(F::zero());
     }
 
     let lhs_codeword = ntt(&root, &lhs_coefficients);
