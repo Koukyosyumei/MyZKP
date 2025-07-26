@@ -111,6 +111,14 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
         Self::new((Polynomial { coef: vec![value] }).reduce()).sanitize()
     }
+
+    pub fn sample(byte_array: &[u8]) -> Self {
+        let mut acc: usize = 0;
+        for &b in byte_array {
+            acc = (acc << 8) ^ (b as usize);
+        }
+        Self::from_value(acc)
+    }
 }
 
 impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field

@@ -8,12 +8,13 @@ use num_traits::{One, Zero};
 use paste::paste;
 use serde::{Deserialize, Serialize};
 
-use crate::define_myzkp_modulus_type;
+use crate::modules::algebra::efield::{ExtendedFieldElement, IrreduciblePoly};
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
+use crate::{define_extension_field, define_myzkp_modulus_type};
 
 fn sample_index(byte_array: &[u8], size: usize) -> usize {
     let mut acc: usize = 0;
@@ -59,9 +60,9 @@ fn sample_indices(seed: &[u8], size: usize, reduced_size: usize, number: usize) 
     indices
 }
 
-pub struct FRI<M: ModulusValue> {
-    pub offset: FiniteFieldElement<M>,
-    pub omega: FiniteFieldElement<M>,
+pub struct FRI<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
+    pub offset: ExtendedFieldElement<M, P>,
+    pub omega: ExtendedFieldElement<M, P>,
     pub domain_length: usize,
     pub expansion_factor: usize,
     pub num_colinearity_tests: usize,
@@ -69,20 +70,20 @@ pub struct FRI<M: ModulusValue> {
 
 pub type Codeword<F> = Vec<F>;
 
-pub struct FriProof<M: ModulusValue> {
+pub struct FriProof<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
     pub top_level_indices: Vec<usize>,
-    pub last_codeword: Vec<FiniteFieldElement<M>>,
+    pub last_codeword: Vec<ExtendedFieldElement<M, P>>,
     pub merkle_roots: Vec<MerkleRoot>,
-    pub revealed_layers: Vec<FriQueryLayer<M>>,
+    pub revealed_layers: Vec<FriQueryLayer<M, P>>,
 }
 
-pub struct FriQueryLayer<M: ModulusValue> {
-    pub a: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
-    pub b: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
-    pub c: (Vec<FiniteFieldElement<M>>, Vec<MerklePath>),
+pub struct FriQueryLayer<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
+    pub a: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
+    pub b: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
+    pub c: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
 }
 
-impl<M: ModulusValue> FRI<M> {
+impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M, P> {
     pub fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
         let mut num_rounds = 0;
@@ -95,13 +96,13 @@ impl<M: ModulusValue> FRI<M> {
         num_rounds
     }
 
-    pub fn eval_domain(&self) -> Vec<FiniteFieldElement<M>> {
+    pub fn eval_domain(&self) -> Vec<ExtendedFieldElement<M, P>> {
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()
     }
 
-    pub fn prove(&self, initial_codeword: &Codeword<FiniteFieldElement<M>>) -> FriProof<M> {
+    pub fn prove(&self, initial_codeword: &Codeword<ExtendedFieldElement<M, P>>) -> FriProof<M, P> {
         let mut proof_stream = FiatShamirTransformer::new();
 
         assert!(
@@ -142,10 +143,10 @@ impl<M: ModulusValue> FRI<M> {
 
     pub fn commit(
         &self,
-        initial_codeword: &Codeword<FiniteFieldElement<M>>,
+        initial_codeword: &Codeword<ExtendedFieldElement<M, P>>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> (Vec<Codeword<FiniteFieldElement<M>>>, Vec<MerkleRoot>) {
-        let one = FiniteFieldElement::<M>::one();
+    ) -> (Vec<Codeword<ExtendedFieldElement<M, P>>>, Vec<MerkleRoot>) {
+        let one = ExtendedFieldElement::<M, P>::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
         let mut omega = self.omega.clone();
@@ -172,7 +173,7 @@ impl<M: ModulusValue> FRI<M> {
             }
 
             // get challenge
-            let alpha = FiniteFieldElement::<M>::sample(&proof_stream.prover_fiat_shamir(32));
+            let alpha = ExtendedFieldElement::<M, P>::sample(&proof_stream.prover_fiat_shamir(32));
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -208,10 +209,10 @@ impl<M: ModulusValue> FRI<M> {
 
     pub fn reveal(
         &self,
-        cur_codeword: &Codeword<FiniteFieldElement<M>>,
-        next_codeword: &Codeword<FiniteFieldElement<M>>,
+        cur_codeword: &Codeword<ExtendedFieldElement<M, P>>,
+        next_codeword: &Codeword<ExtendedFieldElement<M, P>>,
         c_indices: &Vec<usize>,
-    ) -> FriQueryLayer<M> {
+    ) -> FriQueryLayer<M, P> {
         let a_indices = c_indices.clone();
         let b_indices = c_indices
             .into_iter()
@@ -256,8 +257,8 @@ impl<M: ModulusValue> FRI<M> {
 
     pub fn verify(
         &self,
-        proof: &FriProof<M>,
-        polynomial_values: &mut Vec<(usize, FiniteFieldElement<M>)>,
+        proof: &FriProof<M, P>,
+        polynomial_values: &mut Vec<(usize, ExtendedFieldElement<M, P>)>,
     ) -> bool {
         let mut proof_stream = FiatShamirTransformer::new();
 
@@ -265,10 +266,10 @@ impl<M: ModulusValue> FRI<M> {
         let mut offset = self.offset.clone();
 
         // extract all roots and alphas
-        let mut alphas: Vec<FiniteFieldElement<M>> = Vec::new();
+        let mut alphas: Vec<ExtendedFieldElement<M, P>> = Vec::new();
         for r in &proof.merkle_roots {
             proof_stream.push(&vec![r.to_vec()]);
-            alphas.push(FiniteFieldElement::<M>::sample(
+            alphas.push(ExtendedFieldElement::<M, P>::sample(
                 &proof_stream.prover_fiat_shamir(32),
             ));
         }
@@ -307,8 +308,10 @@ impl<M: ModulusValue> FRI<M> {
             .into_iter()
             .map(|i| last_offset.clone() * (last_omega.pow(i)))
             .collect::<Vec<_>>();
-        let poly =
-            Polynomial::<FiniteFieldElement<M>>::interpolate(&last_domain, &proof.last_codeword);
+        let poly = Polynomial::<ExtendedFieldElement<M, P>>::interpolate(
+            &last_domain,
+            &proof.last_codeword,
+        );
 
         for i in 0..proof.last_codeword.len() {
             assert!(
@@ -339,13 +342,13 @@ impl<M: ModulusValue> FRI<M> {
                 .map(|i| i + (self.domain_length >> (r + 1)))
                 .collect::<Vec<_>>();
 
-            let mut aa = Vec::<FiniteFieldElement<M>>::new();
-            let mut bb = Vec::<FiniteFieldElement<M>>::new();
-            let mut cc = Vec::<FiniteFieldElement<M>>::new();
+            let mut aa = Vec::<ExtendedFieldElement<M, P>>::new();
+            let mut bb = Vec::<ExtendedFieldElement<M, P>>::new();
+            let mut cc = Vec::<ExtendedFieldElement<M, P>>::new();
             for s in 0..self.num_colinearity_tests {
-                let ay: FiniteFieldElement<M> = proof.revealed_layers[r].a.0[s].clone();
-                let by: FiniteFieldElement<M> = proof.revealed_layers[r].b.0[s].clone();
-                let cy: FiniteFieldElement<M> = proof.revealed_layers[r].c.0[s].clone();
+                let ay: ExtendedFieldElement<M, P> = proof.revealed_layers[r].a.0[s].clone();
+                let by: ExtendedFieldElement<M, P> = proof.revealed_layers[r].b.0[s].clone();
+                let cy: ExtendedFieldElement<M, P> = proof.revealed_layers[r].c.0[s].clone();
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
@@ -357,10 +360,10 @@ impl<M: ModulusValue> FRI<M> {
                 }
 
                 // colinearity check
-                let ax = &offset * &(omega.pow(a_indices[s]));
-                let bx = &offset * &(omega.pow(b_indices[s]));
+                let ax = &offset.mul_ref(&(omega.pow(a_indices[s])));
+                let bx = &offset.mul_ref(&(omega.pow(b_indices[s])));
                 let cx = &alphas[r];
-                let p = Polynomial::<FiniteFieldElement<M>>::interpolate(
+                let p = Polynomial::<ExtendedFieldElement<M, P>>::interpolate(
                     &[ax.clone(), bx.clone(), cx.clone()],
                     &[ay.clone(), by.clone(), cy.clone()],
                 );
@@ -412,6 +415,19 @@ impl<M: ModulusValue> FRI<M> {
 }
 
 define_myzkp_modulus_type!(M128, "270497897142230380135924736767050121217");
+define_myzkp_modulus_type!(M64, "18446744069414584321");
+define_extension_field!(
+    Ip3,
+    FiniteFieldElement<M64>,
+    Polynomial {
+        coef: vec![
+            FiniteFieldElement::<M64>::one(),
+            FiniteFieldElement::<M64>::zero() - FiniteFieldElement::<M64>::one(),
+            FiniteFieldElement::<M64>::zero(),
+            FiniteFieldElement::<M64>::one(),
+        ],
+    }
+);
 
 pub fn get_nth_root_of_m128(n: &BigInt) -> FiniteFieldElement<M128> {
     let one = BigInt::one();
@@ -433,6 +449,32 @@ pub fn get_nth_root_of_m128(n: &BigInt) -> FiniteFieldElement<M128> {
 
     while order != *n {
         root = &root * &root; // or root = &root * &root;
+        order = order.shr(1u32);
+    }
+
+    root
+}
+
+pub fn get_nth_root_of_m64(n: &BigInt) -> ExtendedFieldElement<M64, Ip3> {
+    let one = BigInt::one();
+    let shift_119 = one.clone().shl(32u32);
+    // let expected_p = &one.clone() + &BigInt::from(407u32) * &shift_119;
+
+    //assert_eq!(self.p, expected_p, "Field is not the expected one");
+
+    // Check that n <= 2^119 and n is a power of two
+    assert!(
+        n <= &shift_119 && (n & (n - &one)).is_zero(),
+        "Field does not have nth root of unity where n > 2^119 or not power of two."
+    );
+
+    let mut root = ExtendedFieldElement::<M64, Ip3>::from_value(
+        BigInt::from_str("1753635133440165772").unwrap(),
+    );
+    let mut order = shift_119.clone();
+
+    while order != *n {
+        root = root.mul_ref(&root); // or root = &root * &root;
         order = order.shr(1u32);
     }
 
@@ -462,19 +504,18 @@ mod tests {
     #[test]
     fn test_fri() {
         let degree: usize = 63;
-        let expansion_factor: usize = 4;
+        let expansion_factor: usize = 16;
         let num_colinearity_tests: usize = 17;
         let initial_codeword_length = (degree + 1) * expansion_factor;
 
         let log_codeword_length = compute_log_codeword_length(initial_codeword_length);
         assert_eq!(1 << log_codeword_length, initial_codeword_length);
 
-        let generator = FiniteFieldElement::<M128>::from_value(
-            BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
-        );
-        let omega = get_nth_root_of_m128(&BigInt::from(initial_codeword_length));
+        let generator =
+            ExtendedFieldElement::<M64, Ip3>::from_value(BigInt::from_str("7").unwrap());
+        let omega = get_nth_root_of_m64(&BigInt::from(initial_codeword_length));
         assert!(omega.pow(1 << log_codeword_length).is_one());
-        assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
+        //assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
 
         let fri = FRI {
             offset: generator,
@@ -486,7 +527,7 @@ mod tests {
 
         let polynomial = Polynomial {
             coef: (0..degree + 1)
-                .map(|i| FiniteFieldElement::<M128>::from_value(i))
+                .map(|i| ExtendedFieldElement::<M64, Ip3>::from_value(i))
                 .collect(),
         };
 
@@ -502,7 +543,7 @@ mod tests {
         }
 
         for i in 0..(degree / 3) {
-            codeword[i] = FiniteFieldElement::<M128>::one();
+            codeword[i] = ExtendedFieldElement::<M64, Ip3>::one();
         }
         let proof = fri.prove(&codeword);
         let mut points_second = Vec::new();

@@ -338,10 +338,10 @@ mod tests {
 
     use super::*;
 
+    use crate::define_extension_field;
     use crate::modules::algebra::field::FiniteFieldElement;
     use crate::modules::algebra::ring::Ring;
     use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};
-
     // 1 + 407 * (1 << 119)
 
     #[test]
