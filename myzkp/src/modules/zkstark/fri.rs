@@ -60,9 +60,9 @@ fn sample_indices(seed: &[u8], size: usize, reduced_size: usize, number: usize) 
     indices
 }
 
-pub struct FRI<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
-    pub offset: ExtendedFieldElement<M, P>,
-    pub omega: ExtendedFieldElement<M, P>,
+pub struct FRI<F: Field> {
+    pub offset: F,
+    pub omega: F,
     pub domain_length: usize,
     pub expansion_factor: usize,
     pub num_colinearity_tests: usize,
@@ -70,20 +70,20 @@ pub struct FRI<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
 
 pub type Codeword<F> = Vec<F>;
 
-pub struct FriProof<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
+pub struct FriProof<F: Field> {
     pub top_level_indices: Vec<usize>,
-    pub last_codeword: Vec<ExtendedFieldElement<M, P>>,
+    pub last_codeword: Vec<F>,
     pub merkle_roots: Vec<MerkleRoot>,
-    pub revealed_layers: Vec<FriQueryLayer<M, P>>,
+    pub revealed_layers: Vec<FriQueryLayer<F>>,
 }
 
-pub struct FriQueryLayer<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
-    pub a: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
-    pub b: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
-    pub c: (Vec<ExtendedFieldElement<M, P>>, Vec<MerklePath>),
+pub struct FriQueryLayer<F: Field> {
+    pub a: (Vec<F>, Vec<MerklePath>),
+    pub b: (Vec<F>, Vec<MerklePath>),
+    pub c: (Vec<F>, Vec<MerklePath>),
 }
 
-impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M, P> {
+impl<F: Field> FRI<F> {
     pub fn num_rounds(&self) -> usize {
         let mut codeword_length = self.domain_length;
         let mut num_rounds = 0;
@@ -96,13 +96,13 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
         num_rounds
     }
 
-    pub fn eval_domain(&self) -> Vec<ExtendedFieldElement<M, P>> {
+    pub fn eval_domain(&self) -> Vec<F> {
         (0..self.domain_length)
             .map(|i| self.offset.clone() * (self.omega.pow(i)))
             .collect()
     }
 
-    pub fn prove(&self, initial_codeword: &Codeword<ExtendedFieldElement<M, P>>) -> FriProof<M, P> {
+    pub fn prove(&self, initial_codeword: &Codeword<F>) -> FriProof<F> {
         let mut proof_stream = FiatShamirTransformer::new();
 
         assert!(
@@ -143,10 +143,10 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
 
     pub fn commit(
         &self,
-        initial_codeword: &Codeword<ExtendedFieldElement<M, P>>,
+        initial_codeword: &Codeword<F>,
         proof_stream: &mut FiatShamirTransformer,
-    ) -> (Vec<Codeword<ExtendedFieldElement<M, P>>>, Vec<MerkleRoot>) {
-        let one = ExtendedFieldElement::<M, P>::one();
+    ) -> (Vec<Codeword<F>>, Vec<MerkleRoot>) {
+        let one = F::one();
         let two = one.clone() + one.clone();
         let two_inverse = two.inverse();
         let mut omega = self.omega.clone();
@@ -173,7 +173,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
             }
 
             // get challenge
-            let alpha = ExtendedFieldElement::<M, P>::sample(&proof_stream.prover_fiat_shamir(32));
+            let alpha = F::sample(&proof_stream.prover_fiat_shamir(32));
 
             // collect codeword
             codewords.push(codeword.clone());
@@ -209,10 +209,10 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
 
     pub fn reveal(
         &self,
-        cur_codeword: &Codeword<ExtendedFieldElement<M, P>>,
-        next_codeword: &Codeword<ExtendedFieldElement<M, P>>,
+        cur_codeword: &Codeword<F>,
+        next_codeword: &Codeword<F>,
         c_indices: &Vec<usize>,
-    ) -> FriQueryLayer<M, P> {
+    ) -> FriQueryLayer<F> {
         let a_indices = c_indices.clone();
         let b_indices = c_indices
             .into_iter()
@@ -255,23 +255,17 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
         }
     }
 
-    pub fn verify(
-        &self,
-        proof: &FriProof<M, P>,
-        polynomial_values: &mut Vec<(usize, ExtendedFieldElement<M, P>)>,
-    ) -> bool {
+    pub fn verify(&self, proof: &FriProof<F>, polynomial_values: &mut Vec<(usize, F)>) -> bool {
         let mut proof_stream = FiatShamirTransformer::new();
 
         let mut omega = self.omega.clone();
         let mut offset = self.offset.clone();
 
         // extract all roots and alphas
-        let mut alphas: Vec<ExtendedFieldElement<M, P>> = Vec::new();
+        let mut alphas: Vec<F> = Vec::new();
         for r in &proof.merkle_roots {
             proof_stream.push(&vec![r.to_vec()]);
-            alphas.push(ExtendedFieldElement::<M, P>::sample(
-                &proof_stream.prover_fiat_shamir(32),
-            ));
+            alphas.push(F::sample(&proof_stream.prover_fiat_shamir(32)));
         }
 
         // extract last codeword
@@ -308,10 +302,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
             .into_iter()
             .map(|i| last_offset.clone() * (last_omega.pow(i)))
             .collect::<Vec<_>>();
-        let poly = Polynomial::<ExtendedFieldElement<M, P>>::interpolate(
-            &last_domain,
-            &proof.last_codeword,
-        );
+        let poly = Polynomial::<F>::interpolate(&last_domain, &proof.last_codeword);
 
         for i in 0..proof.last_codeword.len() {
             assert!(
@@ -342,13 +333,13 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
                 .map(|i| i + (self.domain_length >> (r + 1)))
                 .collect::<Vec<_>>();
 
-            let mut aa = Vec::<ExtendedFieldElement<M, P>>::new();
-            let mut bb = Vec::<ExtendedFieldElement<M, P>>::new();
-            let mut cc = Vec::<ExtendedFieldElement<M, P>>::new();
+            let mut aa = Vec::<F>::new();
+            let mut bb = Vec::<F>::new();
+            let mut cc = Vec::<F>::new();
             for s in 0..self.num_colinearity_tests {
-                let ay: ExtendedFieldElement<M, P> = proof.revealed_layers[r].a.0[s].clone();
-                let by: ExtendedFieldElement<M, P> = proof.revealed_layers[r].b.0[s].clone();
-                let cy: ExtendedFieldElement<M, P> = proof.revealed_layers[r].c.0[s].clone();
+                let ay: F = proof.revealed_layers[r].a.0[s].clone();
+                let by: F = proof.revealed_layers[r].b.0[s].clone();
+                let cy: F = proof.revealed_layers[r].c.0[s].clone();
                 aa.push(ay.clone());
                 bb.push(by.clone());
                 cc.push(cy.clone());
@@ -363,7 +354,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> FRI<M
                 let ax = &offset.mul_ref(&(omega.pow(a_indices[s])));
                 let bx = &offset.mul_ref(&(omega.pow(b_indices[s])));
                 let cx = &alphas[r];
-                let p = Polynomial::<ExtendedFieldElement<M, P>>::interpolate(
+                let p = Polynomial::<F>::interpolate(
                     &[ax.clone(), bx.clone(), cx.clone()],
                     &[ay.clone(), by.clone(), cy.clone()],
                 );
