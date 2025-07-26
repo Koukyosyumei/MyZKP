@@ -51,7 +51,6 @@ pub fn ntt<F: Field>(primitive_root: &F, values: &Vec<F>) -> Vec<F> {
 pub fn intt<F>(primitive_root: &F, values: &Vec<F>) -> Vec<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     if values.len() == 1 {
         return values.to_vec();
@@ -59,7 +58,10 @@ where
 
     let ninv = F::from_value(values.len()).inverse();
     let transformed_values = ntt(&primitive_root.inverse(), values);
-    transformed_values.iter().map(|tv| &ninv * tv).collect()
+    transformed_values
+        .iter()
+        .map(|tv| ninv.mul_ref(tv))
+        .collect()
 }
 
 pub fn fast_multiply<F>(
@@ -70,7 +72,6 @@ pub fn fast_multiply<F>(
 ) -> Polynomial<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
@@ -88,7 +89,7 @@ where
     }
 
     while degree < (order / 2).try_into().unwrap() {
-        root = &root * &root;
+        root = root.mul_ref(&root);
         order = order / 2;
     }
 
@@ -106,7 +107,7 @@ where
     let hadamard_product = lhs_codeword
         .iter()
         .zip(rhs_codeword.iter())
-        .map(|(el, r)| el * r)
+        .map(|(el, r)| el.mul_ref(r))
         .collect();
     let product_coefficients = intt(&root, &hadamard_product);
 
@@ -118,7 +119,6 @@ where
 pub fn fast_zerofier<F>(domain: &Vec<F>, primitive_root: &F, root_order: usize) -> Polynomial<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
@@ -149,7 +149,6 @@ pub fn fast_evaluate<F>(
 ) -> Vec<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
@@ -192,7 +191,6 @@ pub fn fast_interpolate<F>(
 ) -> Polynomial<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
@@ -262,7 +260,6 @@ pub fn fast_coset_evaluate<F>(
 ) -> Vec<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     let scaled_polynomial = polynomial.scale(offset);
     let mut coefs = scaled_polynomial.coef.clone();
@@ -281,7 +278,6 @@ pub fn fast_coset_divide<F>(
 ) -> Polynomial<F>
 where
     F: Field,
-    for<'a> &'a F: Mul<&'a F, Output = F>,
 {
     assert!(primitive_root.pow(root_order).is_one());
     assert!(!primitive_root.pow(root_order / 2).is_one());
@@ -301,7 +297,7 @@ where
     }
 
     while degree < (order / 2).try_into().unwrap() {
-        root = &root * &root;
+        root = root.mul_ref(&root);
         order = order / 2;
     }
 
