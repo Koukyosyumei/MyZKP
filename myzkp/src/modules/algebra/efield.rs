@@ -98,10 +98,10 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 {
     pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
         let result = Self {
-            poly: poly,
+            poly: &poly.reduce() % P::modulus(),
             _phantom: PhantomData,
         };
-        result.sanitize()
+        result //.sanitize()
     }
 
     pub fn degree(&self) -> isize {
@@ -109,7 +109,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new((Polynomial { coef: vec![value] }).reduce()).sanitize()
+        Self::new((Polynomial { coef: vec![value] }).reduce())
     }
 }
 
@@ -335,7 +335,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn add_assign_ref(&mut self, other: &Self) {
         self.poly += &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn mul_ref(&self, other: &Self) -> Self {
@@ -344,7 +344,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn mul_assign_ref(&mut self, other: &Self) {
         self.poly *= &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn sub_ref(&self, other: &Self) -> Self {
@@ -353,7 +353,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn sub_assign_ref(&mut self, other: &Self) {
         self.poly -= &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
