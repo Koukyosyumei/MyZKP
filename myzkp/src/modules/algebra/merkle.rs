@@ -1,4 +1,4 @@
-use sha2::{Digest, Sha256};
+use sha3::{Digest, Sha3_256};
 
 pub struct Merkle;
 pub type MerkleRoot = Vec<u8>;
@@ -6,7 +6,7 @@ pub type MerklePath = Vec<Vec<u8>>;
 
 impl Merkle {
     fn hash(data: &[u8]) -> Vec<u8> {
-        let mut hasher = Sha256::new();
+        let mut hasher = Sha3_256::new();
         hasher.update(data);
         hasher.finalize().to_vec()
     }
