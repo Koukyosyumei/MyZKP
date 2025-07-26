@@ -49,7 +49,7 @@ MyZKP is a growing library that provides:
   
 **🌟 Basic of zk-STARKs**
 
-- ✍️ TBD
+- 🌈 [FRI](https://koukyosyumei.github.io/MyZKP/zkstark/subsec1.html)
 
 **💻 Basic of zkVM**
 
@@ -69,6 +69,7 @@ MyZKP is a growing library that provides:
 | **zkSNARKs**| `tutorial_single_polynomial` | | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
 |             | `tutorial_snark` | | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
 |             | `pinocchio` | [Pinocchio Protocol](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](./myzkp/src/modules/zksnark/pinocchio.rs) |
+| **zkSTARKs**| `fri`       | [FRI](https://arxiv.org/abs/1903.12243) | [fri.rs](./myzkp/src/modules/zkstark/fri.rs) |
 
 ## 🤝 Contributions are Welcome!
 
