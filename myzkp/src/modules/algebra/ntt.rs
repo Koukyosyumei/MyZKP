@@ -3,10 +3,7 @@ use std::ops::Mul;
 use num_traits::{One, Zero};
 
 use crate::modules::algebra::field::Field;
-use crate::modules::algebra::field::FiniteFieldElement;
-use crate::modules::algebra::field::ModulusValue;
 use crate::modules::algebra::polynomial::Polynomial;
-use crate::modules::algebra::ring::Ring;
 
 pub fn ntt<F: Field>(primitive_root: &F, values: &Vec<F>) -> Vec<F> {
     assert!(
@@ -345,6 +342,8 @@ mod tests {
 
     use super::*;
 
+    use crate::modules::algebra::field::FiniteFieldElement;
+    use crate::modules::algebra::ring::Ring;
     use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};
 
     // 1 + 407 * (1 << 119)
