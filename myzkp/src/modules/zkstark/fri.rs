@@ -493,7 +493,58 @@ mod tests {
     // 1 + 407 * (1 << 119)
 
     #[test]
-    fn test_fri() {
+    fn test_fri_field() {
+        let degree: usize = 63;
+        let expansion_factor: usize = 4;
+        let num_colinearity_tests: usize = 17;
+        let initial_codeword_length = (degree + 1) * expansion_factor;
+
+        let log_codeword_length = compute_log_codeword_length(initial_codeword_length);
+        assert_eq!(1 << log_codeword_length, initial_codeword_length);
+
+        let generator = FiniteFieldElement::<M128>::from_value(
+            BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
+        );
+        let omega = get_nth_root_of_m128(&BigInt::from(initial_codeword_length));
+        assert!(omega.pow(1 << log_codeword_length).is_one());
+        assert!(!omega.pow(1 << (log_codeword_length - 1)).is_one());
+
+        let fri = FRI {
+            offset: generator,
+            omega: omega.clone(),
+            domain_length: initial_codeword_length,
+            expansion_factor: expansion_factor,
+            num_colinearity_tests: num_colinearity_tests,
+        };
+
+        let polynomial = Polynomial {
+            coef: (0..degree + 1)
+                .map(|i| FiniteFieldElement::<M128>::from_value(i))
+                .collect(),
+        };
+
+        let domain: Vec<_> = (0..initial_codeword_length).map(|i| omega.pow(i)).collect();
+        let mut codeword = polynomial.eval_domain(&domain);
+        let proof = fri.prove(&codeword);
+
+        let mut points = Vec::new();
+        let result = fri.verify(&proof, &mut points);
+        assert!(result);
+        for (x, y) in &points {
+            assert_eq!(polynomial.eval(&omega.pow(*x)), y.clone());
+        }
+
+        for i in 0..(degree / 3) {
+            codeword[i] = FiniteFieldElement::<M128>::one();
+        }
+        let proof = fri.prove(&codeword);
+        let mut points_second = Vec::new();
+        let result_second = fri.verify(&proof, &mut points_second);
+        assert!(!result_second);
+    }
+
+    #[test]
+    fn test_fri_efield() {
         let degree: usize = 63;
         let expansion_factor: usize = 16;
         let num_colinearity_tests: usize = 17;
