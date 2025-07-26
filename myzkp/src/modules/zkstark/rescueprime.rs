@@ -486,7 +486,7 @@ impl RescuePrime {
     pub fn transition_constraints(
         &self,
         omicron: &FiniteFieldElement<M128>,
-    ) -> TransitionConstraints<M128> {
+    ) -> TransitionConstraints<FiniteFieldElement<M128>> {
         let (first_step_constants, second_step_constants) =
             self.round_constants_polynomials(&omicron);
 
@@ -521,14 +521,17 @@ impl RescuePrime {
     pub fn boundary_constraints(
         &self,
         output_element: &FiniteFieldElement<M128>,
-    ) -> Boundary<M128> {
+    ) -> Boundary<FiniteFieldElement<M128>> {
         let mut constraints = Vec::new();
         constraints.push((0, 1, FiniteFieldElement::<M128>::zero()));
         constraints.push((self.n, 0, output_element.clone()));
         constraints
     }
 
-    pub fn trace(&self, input_element: &FiniteFieldElement<M128>) -> Trace<M128> {
+    pub fn trace(
+        &self,
+        input_element: &FiniteFieldElement<M128>,
+    ) -> Trace<FiniteFieldElement<M128>> {
         let mut state = vec![input_element.clone()];
         for _ in 0..(self.m - 1) {
             state.push(FiniteFieldElement::<M128>::zero());
