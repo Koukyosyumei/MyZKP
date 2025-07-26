@@ -17,11 +17,11 @@ Consider a polynomial \\(f(X) = \sum^{d}_{i=0} c_i X^{i}\\), where \\(d\\) is th
 - \\(f\_E(X^2) = \frac{f(X) + f(-X)}{2} = \sum\_{i=0}^{\frac{d + 1}{2} - 1} c\_{2i} X^{2i} \\)
 - \\(f\_O(X^2) = \frac{f(X) - f(-X)}{2X} = \sum\_{i=0}^{\frac{d + 1}{2} - 1} c\_{2i + 1} X^{2i} \\)
 
-The crucial step in FRI is the prover's construction of a new "folded" polynomial: 
+The crucial step in FRI is the prover's construction of a new "folded" polynomial with respect to \\(Y = X^2\\): 
 
-\\[f^{*}(X) = f_{E}(X) + \alpha \cdot f_{O}(X)\\]
+\\[f^{*}(Y) = f_{E}(Y) + \alpha \cdot f_{O}(Y)\\]
 
-Here, \\(\alpha\\) is a random value provided by the verifier. Notice that while \\(f(X)\\) has degree \\(d\\), **the new polynomial \\(f^{*}(X)\\) has degree approximately \\(\frac{d}{2}\\)**. This degree reduction is the engine of FRI's efficiency.
+Here, \\(\alpha\\) is a random value provided by the verifier. Notice that while \\(f(X)\\) has degree \\(d\\), **the new polynomial \\(f^{*}(Y)\\) has degree approximately \\(\frac{d}{2}\\)**. This degree reduction is the engine of FRI's efficiency.
 
 Let \\(D \subset \mathbb{F}_{p} \\) be a multiplicative subgroup of even order \\(N\\), and let \\(\omega\\) be a generator of \\(D\\). The prover commits to the evaluations of \\(f(x)\\) at all elements of \\(D\\), i.e., the codewords \\(\\{f(\omega^{i})\\}\_{i=0}^{N - 1}\\).
 
