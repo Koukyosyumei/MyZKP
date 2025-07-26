@@ -102,7 +102,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 {
     pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
         let result = Self {
-            poly: poly,
+            poly: &poly % P::modulus(),
             _phantom: PhantomData,
         };
         result
