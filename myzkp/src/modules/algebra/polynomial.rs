@@ -67,6 +67,7 @@ use crate::modules::algebra::field::Field;
 
 /// A struct representing a polynomial over a finite field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(bound(serialize = "F: Serialize", deserialize = "F: for<'a> Deserialize<'a>"))]
 pub struct Polynomial<F: Field> {
     /// Coefficients of the polynomial in increasing order of degree.
     pub coef: Vec<F>,

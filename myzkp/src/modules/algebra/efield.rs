@@ -88,6 +88,10 @@ pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(bound(
+    serialize = "M: Serialize, P: Serialize",
+    deserialize = "M: for<'a> Deserialize<'a>, P: for<'a> Deserialize<'a>"
+))]
 pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
     pub poly: Polynomial<FiniteFieldElement<M>>,
     _phantom: PhantomData<P>,
@@ -98,10 +102,10 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 {
     pub fn new(poly: Polynomial<FiniteFieldElement<M>>) -> Self {
         let result = Self {
-            poly: poly,
+            poly: &poly.reduce() % P::modulus(),
             _phantom: PhantomData,
         };
-        result.sanitize()
+        result //.sanitize()
     }
 
     pub fn degree(&self) -> isize {
@@ -109,12 +113,15 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
     }
 
     pub fn from_base_field(value: FiniteFieldElement<M>) -> Self {
-        Self::new((Polynomial { coef: vec![value] }).reduce()).sanitize()
+        Self::new((Polynomial { coef: vec![value] }).reduce())
     }
 }
 
 impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
+where
+    M: ModulusValue + Serialize + for<'de> Deserialize<'de> + 'static,
+    P: IrreduciblePoly<FiniteFieldElement<M>> + Serialize + for<'de> Deserialize<'de>,
 {
     fn inverse(&self) -> Self {
         //if self.poly.is_zero() {
@@ -308,6 +315,9 @@ impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 
 impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     for ExtendedFieldElement<M, P>
+where
+    M: ModulusValue + Serialize + for<'de> Deserialize<'de> + 'static,
+    P: IrreduciblePoly<FiniteFieldElement<M>> + Serialize + for<'de> Deserialize<'de>,
 {
     type Output = Self;
 
@@ -335,7 +345,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn add_assign_ref(&mut self, other: &Self) {
         self.poly += &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn mul_ref(&self, other: &Self) -> Self {
@@ -344,7 +354,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn mul_assign_ref(&mut self, other: &Self) {
         self.poly *= &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn sub_ref(&self, other: &Self) -> Self {
@@ -353,7 +363,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Ring
 
     fn sub_assign_ref(&mut self, other: &Self) {
         self.poly -= &other.poly;
-        self.sanitize();
+        //self.sanitize();
     }
 
     fn pow<V: Into<BigInt>>(&self, n: V) -> Self {
@@ -398,7 +408,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::
 #[macro_export]
 macro_rules! define_extension_field {
     ($name:ident, $base_field:ty, $modulus:expr) => {
-        paste! {#[derive(Debug, Clone, PartialEq, Hash)]
+        paste! {#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
             pub struct $name;
 
             lazy_static! {

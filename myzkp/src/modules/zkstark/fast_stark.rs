@@ -5,7 +5,7 @@ use blake2::{digest::consts::U32, Blake2b, Digest};
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
-use crate::modules::algebra::field::{FiniteFieldElement, ModulusValue};
+use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::ntt::{
@@ -19,19 +19,19 @@ use crate::modules::zkstark::fri::{FriProof, FRI};
 use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};
 use crate::modules::zkstark::stark::{Boundary, Trace, TransitionConstraints};
 
-pub struct FastStarkProof<M: ModulusValue> {
-    pub fri_proof: FriProof<M>,
+pub struct FastStarkProof<F: Field> {
+    pub fri_proof: FriProof<F>,
     pub bqc_roots: Vec<MerkleRoot>,
-    pub bqc_points: Vec<FiniteFieldElement<M>>,
+    pub bqc_points: Vec<F>,
     pub bqc_paths: Vec<MerklePath>,
     pub rdc_root: MerkleRoot,
-    pub rdc_points: Vec<FiniteFieldElement<M>>,
+    pub rdc_points: Vec<F>,
     pub rdc_paths: Vec<MerklePath>,
-    pub tzc_points: Vec<FiniteFieldElement<M>>,
+    pub tzc_points: Vec<F>,
     pub tzc_paths: Vec<MerklePath>,
 }
 
-pub struct FastStark<M: ModulusValue> {
+pub struct FastStark<F: Field> {
     pub expansion_factor: usize,
     pub num_colinearity_checks: usize,
     pub security_level: usize,
@@ -41,21 +41,15 @@ pub struct FastStark<M: ModulusValue> {
     //pub randomized_trace_length: usize,
     pub omicron_domain_length: usize,
     pub fri_domain_length: usize,
-    pub generator: FiniteFieldElement<M>,
-    pub omega: FiniteFieldElement<M>,
-    pub omicron: FiniteFieldElement<M>,
-    pub omicron_domain: Vec<FiniteFieldElement<M>>,
-    pub fri: FRI<M>,
+    pub generator: F,
+    pub omega: F,
+    pub omicron: F,
+    pub omicron_domain: Vec<F>,
+    pub fri: FRI<F>,
 }
 
-impl<M: ModulusValue> FastStark<M> {
-    pub fn preprocess(
-        &self,
-    ) -> (
-        Polynomial<FiniteFieldElement<M>>,
-        Vec<FiniteFieldElement<M>>,
-        Vec<u8>,
-    ) {
+impl<F: Field> FastStark<F> {
+    pub fn preprocess(&self) -> (Polynomial<F>, Vec<F>, Vec<u8>) {
         let transition_zerofier = fast_zerofier(
             &self.omicron_domain[..(self.original_trace_length - 1)].to_vec(),
             &self.omicron,
@@ -82,7 +76,7 @@ impl<M: ModulusValue> FastStark<M> {
 
     fn transition_degree_bounds(
         &self,
-        transition_constraints: &TransitionConstraints<M>,
+        transition_constraints: &TransitionConstraints<F>,
     ) -> Vec<usize> {
         let mut point_degrees = vec![1];
         for _ in 0..(2 * self.num_registers) {
@@ -102,7 +96,7 @@ impl<M: ModulusValue> FastStark<M> {
 
     fn transition_quotient_degree_bounds(
         &self,
-        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
+        transition_constraints: &Vec<MPolynomial<F>>,
     ) -> Vec<usize> {
         self.transition_degree_bounds(transition_constraints)
             .iter()
@@ -110,21 +104,18 @@ impl<M: ModulusValue> FastStark<M> {
             .collect()
     }
 
-    fn max_degree(
-        &self,
-        transition_constraints: &Vec<MPolynomial<FiniteFieldElement<M>>>,
-    ) -> usize {
+    fn max_degree(&self, transition_constraints: &Vec<MPolynomial<F>>) -> usize {
         let binding = self.transition_quotient_degree_bounds(transition_constraints);
         let md = binding.iter().max().unwrap();
         (1 << (format!("{:b}", md).len())) - 1
     }
 
-    fn transition_zerofier(&self) -> Polynomial<FiniteFieldElement<M>> {
+    fn transition_zerofier(&self) -> Polynomial<F> {
         let domain = &self.omicron_domain[0..(self.original_trace_length - 1)];
         Polynomial::from_monomials(domain)
     }
 
-    fn boundary_zerofiers(&self, boundary: &Boundary<M>) -> Vec<Polynomial<FiniteFieldElement<M>>> {
+    fn boundary_zerofiers(&self, boundary: &Boundary<F>) -> Vec<Polynomial<F>> {
         let mut zerofiers = Vec::new();
         for s in 0..self.num_registers {
             let mut points = Vec::new();
@@ -138,10 +129,7 @@ impl<M: ModulusValue> FastStark<M> {
         zerofiers
     }
 
-    fn boundary_interpolants(
-        &self,
-        boundary: &Boundary<M>,
-    ) -> Vec<Polynomial<FiniteFieldElement<M>>> {
+    fn boundary_interpolants(&self, boundary: &Boundary<F>) -> Vec<Polynomial<F>> {
         let mut interpolants = Vec::new();
         for s in 0..self.num_registers {
             let mut points = Vec::new();
@@ -162,7 +150,7 @@ impl<M: ModulusValue> FastStark<M> {
     fn boundary_quotient_degree_bounds(
         &self,
         randomized_trace_length: usize,
-        boundary: &Boundary<M>,
+        boundary: &Boundary<F>,
     ) -> Vec<usize> {
         let randomized_trace_degree = randomized_trace_length - 1;
         self.boundary_zerofiers(boundary)
@@ -171,7 +159,7 @@ impl<M: ModulusValue> FastStark<M> {
             .collect()
     }
 
-    fn sample_weights(&self, number: usize, randomness: Vec<u8>) -> Vec<FiniteFieldElement<M>> {
+    fn sample_weights(&self, number: usize, randomness: Vec<u8>) -> Vec<F> {
         let mut result = Vec::new();
         for i in 0..number {
             let mut tmp_r = randomness.clone();
@@ -181,19 +169,19 @@ impl<M: ModulusValue> FastStark<M> {
             let mut hasher = Blake2b::<U32>::new();
             hasher.update(tmp_r);
             let hash_result = hasher.finalize();
-            result.push(FiniteFieldElement::<M>::sample(&hash_result));
+            result.push(F::sample(&hash_result));
         }
         result
     }
 
     pub fn prove(
         &self,
-        trace: &mut Trace<M>,
-        boundary: &Boundary<M>,
-        transition_zerofier: &Polynomial<FiniteFieldElement<M>>,
-        transition_zerofier_codeword: &Vec<FiniteFieldElement<M>>,
-        transition_constraints: &TransitionConstraints<M>,
-    ) -> FastStarkProof<M> {
+        trace: &mut Trace<F>,
+        boundary: &Boundary<F>,
+        transition_zerofier: &Polynomial<F>,
+        transition_zerofier_codeword: &Vec<F>,
+        transition_constraints: &TransitionConstraints<F>,
+    ) -> FastStarkProof<F> {
         let mut proof_stream = FiatShamirTransformer::new();
 
         // concatenate randomizers
@@ -201,7 +189,7 @@ impl<M: ModulusValue> FastStark<M> {
             trace.push(
                 (0..self.num_registers)
                     .into_iter()
-                    .map(|_| FiniteFieldElement::<M>::random_element(&[]))
+                    .map(|_| F::random_element(&[]))
                     .collect(),
             );
         }
@@ -257,10 +245,7 @@ impl<M: ModulusValue> FastStark<M> {
 
         // symbolically evaluate transition constraints
         let mut point = vec![Polynomial {
-            coef: vec![
-                FiniteFieldElement::<M>::zero(),
-                FiniteFieldElement::<M>::one(),
-            ],
+            coef: vec![F::zero(), F::one()],
         }];
         for tp in &trace_polynomials {
             point.push(tp.clone());
@@ -291,7 +276,7 @@ impl<M: ModulusValue> FastStark<M> {
         let randomizer_polynomial = Polynomial {
             coef: (0..(self.max_degree(transition_constraints) + 1))
                 .into_iter()
-                .map(|_| FiniteFieldElement::<M>::random_element(&[]))
+                .map(|_| F::random_element(&[]))
                 .collect(),
         };
         let randomizer_codeword = fast_coset_evaluate(
@@ -315,10 +300,7 @@ impl<M: ModulusValue> FastStark<M> {
 
         // compute terms of nonlinear combination polynomial
         let x = Polynomial {
-            coef: vec![
-                FiniteFieldElement::<M>::zero(),
-                FiniteFieldElement::<M>::one(),
-            ],
+            coef: vec![F::zero(), F::one()],
         };
         let mut terms = vec![randomizer_polynomial];
         for i in 0..transition_quotients.len() {
@@ -335,7 +317,7 @@ impl<M: ModulusValue> FastStark<M> {
         }
 
         // take weighted sum
-        let mut combination = Polynomial::<FiniteFieldElement<M>>::zero();
+        let mut combination = Polynomial::<F>::zero();
         for i in 0..terms.len() {
             let tmp = Polynomial {
                 coef: vec![weights[i].clone()],
@@ -415,10 +397,10 @@ impl<M: ModulusValue> FastStark<M> {
 
     pub fn verify(
         &self,
-        proof: &FastStarkProof<M>,
-        transition_constraints: &TransitionConstraints<M>,
+        proof: &FastStarkProof<F>,
+        transition_constraints: &TransitionConstraints<F>,
         transition_zerofier_root: &Vec<u8>,
-        boundary: &Boundary<M>,
+        boundary: &Boundary<F>,
     ) -> bool {
         let mut proof_stream = FiatShamirTransformer::new();
 
@@ -525,19 +507,18 @@ impl<M: ModulusValue> FastStark<M> {
             let domain_next_index = self.generator.clone() * (self.omega.pow(next_index));
             let mut current_trace: Vec<_> = (0..self.num_registers)
                 .into_iter()
-                .map(|_| FiniteFieldElement::<M>::zero())
+                .map(|_| F::zero())
                 .collect();
             let mut next_trace: Vec<_> = (0..self.num_registers)
                 .into_iter()
-                .map(|_| FiniteFieldElement::<M>::zero())
+                .map(|_| F::zero())
                 .collect();
             for s in 0..self.num_registers {
                 let zerofier = self.boundary_zerofiers(boundary)[s].clone();
                 let interpolant = self.boundary_interpolants(boundary)[s].clone();
-                let tmp_cur: FiniteFieldElement<M> =
-                    bincode::deserialize(&leafs[s][&current_index])
-                        .expect("Deserialization failed");
-                let tmp_next: FiniteFieldElement<M> =
+                let tmp_cur: F = bincode::deserialize(&leafs[s][&current_index])
+                    .expect("Deserialization failed");
+                let tmp_next: F =
                     bincode::deserialize(&leafs[s][&next_index]).expect("Deserialization failed");
                 current_trace[s] = tmp_cur * zerofier.eval(&domain_current_index)
                     + interpolant.eval(&domain_current_index);
@@ -567,14 +548,13 @@ impl<M: ModulusValue> FastStark<M> {
             }
             for s in 0..self.num_registers {
                 let tmp = &leafs[s][&current_index];
-                let bqv: FiniteFieldElement<M> =
-                    bincode::deserialize(&tmp).expect("Deserialization failed");
+                let bqv: F = bincode::deserialize(&tmp).expect("Deserialization failed");
                 terms.push(bqv.clone());
                 let shift = self.max_degree(transition_constraints)
                     - self.boundary_quotient_degree_bounds(randomized_trace_length, boundary)[s];
                 terms.push(bqv * (domain_current_index.pow(shift)));
             }
-            let mut combination = FiniteFieldElement::<M>::zero();
+            let mut combination = F::zero();
             for j in 0..terms.len() {
                 combination = combination + (terms[j].mul_ref(&weights[j]));
             }
@@ -597,7 +577,7 @@ pub fn initialize_fast_stark_m128(
     num_registers: usize,
     num_cycles: usize,
     transition_constraints_degree: usize,
-) -> FastStark<M128> {
+) -> FastStark<FiniteFieldElement<M128>> {
     let generator = FiniteFieldElement::<M128>::from_value(
         BigInt::from_str("85408008396924667383611388730472331217").unwrap(),
     );
@@ -618,7 +598,7 @@ pub fn initialize_fast_stark_m128(
         num_colinearity_tests: num_colinearity_checks,
     };
 
-    FastStark::<M128> {
+    FastStark::<FiniteFieldElement<M128>> {
         expansion_factor: expansion_factor,
         num_colinearity_checks: num_colinearity_checks,
         security_level: security_level,
