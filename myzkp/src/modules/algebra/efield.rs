@@ -88,6 +88,10 @@ pub trait IrreduciblePoly<F: Field>: Debug + Clone + Hash {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(bound(
+    serialize = "M: Serialize, P: Serialize",
+    deserialize = "M: for<'a> Deserialize<'a>, P: for<'a> Deserialize<'a>"
+))]
 pub struct ExtendedFieldElement<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> {
     pub poly: Polynomial<FiniteFieldElement<M>>,
     _phantom: PhantomData<P>,
@@ -115,6 +119,9 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 
 impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
     for ExtendedFieldElement<M, P>
+where
+    M: ModulusValue + Serialize + for<'de> Deserialize<'de> + 'static,
+    P: IrreduciblePoly<FiniteFieldElement<M>> + Serialize + for<'de> Deserialize<'de>,
 {
     fn inverse(&self) -> Self {
         //if self.poly.is_zero() {
@@ -308,6 +315,9 @@ impl<'a, M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>>
 
 impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Div
     for ExtendedFieldElement<M, P>
+where
+    M: ModulusValue + Serialize + for<'de> Deserialize<'de> + 'static,
+    P: IrreduciblePoly<FiniteFieldElement<M>> + Serialize + for<'de> Deserialize<'de>,
 {
     type Output = Self;
 
@@ -398,7 +408,7 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> fmt::
 #[macro_export]
 macro_rules! define_extension_field {
     ($name:ident, $base_field:ty, $modulus:expr) => {
-        paste! {#[derive(Debug, Clone, PartialEq, Hash)]
+        paste! {#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
             pub struct $name;
 
             lazy_static! {

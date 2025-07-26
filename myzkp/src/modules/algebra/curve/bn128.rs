@@ -31,7 +31,7 @@ pub type FqOrder = FiniteFieldElement<ModEIP197>;
 pub type G1Point = EllipticCurvePoint<Fq, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
-#[derive(Debug, Clone, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Fq2Poly;
 lazy_static! {
     // x^2 + 1
@@ -49,7 +49,7 @@ pub type Fq2 = ExtendedFieldElement<BN128Modulus, Fq2Poly>;
 pub type G2Point = EllipticCurvePoint<Fq2, BN128Curve>;
 
 // Define Fq2 as a quadratic extension field
-#[derive(Debug, Clone, PartialEq, Hash)]
+#[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Fq12Poly;
 lazy_static! {
     // x^2 + 1
