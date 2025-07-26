@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec1.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec1.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zkstark/subsec1.html"><strong aria-hidden="true">4.1.</strong> FRI</a></li></ol></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -3403,7 +3403,81 @@ pub fn verify(
     pairing10 * pairing11 == pairing12
 }
 <span class="boring">}</span></code></pre></pre>
-<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-stark"><a class="header" href="#basics-of-zk-stark">Basics of zk-STARK</a></h1>
+<p>zk-Stark stands for <strong>S</strong>calable <strong>T</strong>ransparent <strong>AR</strong>gument of <strong>K</strong>nowledge. Its key properties are:</p>
+<ul>
+<li>Scalability: Prover time grows as \(\mathcal{O}(T\log{T})\) and verifier time as \(\mathcal{O}(\log{T})\), where \(T\) is the cost of executing the statement being proven.</li>
+<li>Transparency: Unlike many SNARK systems, zk‑STARKs require no trusted setup.</li>
+<li>Post‑Quantum Security: Security depends solely on the collision and preimage resistance of cryptographic hash functions, making zk‑STARKs resilient against quantum‑computing attacks.</li>
+</ul>
+<p>In this tutorial, we will unpack and implement the fundamental building blocks of zk‑STARKs. Our presentation draws heavily on the <a href="https://aszepieniec.github.io/stark-anatomy/">Anatomy of a STARK</a> guide by Alan Szepieniec and the <a href="https://starkware.co/stark-101/">STARK 101</a> series from StarkWare.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fri"><a class="header" href="#fri">FRI</a></h1>
+<p>The Fast Reed-Solomon IOP of Proximity (FRI) is a powerful interactive proof system that allows a verifier to efficiently check if a claimed polynomial has a degree bounded by some value \(d\), without the prover needing to reveal the entire polynomial.</p>
+<h2 id="core-concept"><a class="header" href="#core-concept">Core Concept</a></h2>
+<p>At its heart, FRI employs a clever divide-and-conquer strategy. The prover commits to the evaluation of the polynomial over a large domain. The protocol then iteratively "folds" the polynomial into a new polynomial of roughly half the degree. This process continues until the degree is so small that the verifier can directly check the degree bound by querying the remaining evaluations. The logarithmic communication complexity, scaling as \(\mathcal{O}(\log{d})\), arises from this halving of the degree in each round.</p>
+<h2 id="mathematical-foundation"><a class="header" href="#mathematical-foundation">Mathematical Foundation</a></h2>
+<p>COnsider a polynomial \(f(X) = \sum^{d}_{i=0} c_i X^{i}\), where \(d\) is the maximum degree. This polynomial can be divided into two parts:</p>
+<p>\[f(X) = f_E(X^2) + X \cdot f_O(X^2)\]</p>
+<p>, where</p>
+<ul>
+<li>\(f_E(X^2) = \frac{f(X) + f(-X)}{2} = \sum_{i=0}^{\frac{d + 1}{2} - 1} c_{2i} X^{2i} \)</li>
+<li>\(f_O(X^2) = \frac{f(X) - f(-X)}{2X} = \sum_{i=0}^{\frac{d + 1}{2} - 1} c_{2i + 1} X^{2i} \)</li>
+</ul>
+<p>The crucial step in FRI is the prover's construction of a new "folded" polynomial:</p>
+<p>\[f^{*}(X) = f_{E}(X) + \alpha \cdot f_{O}(X)\]</p>
+<p>Here, \(\alpha\) is a random value provided by the verifier. Notice that while \(f(X)\) has degree \(d\), <strong>the new polynomial \(f^{*}(X)\) has degree approximately \(\frac{d}{2}\)</strong>. This degree reduction is the engine of FRI's efficiency.</p>
+<p>Let \(D \subset \mathbb{F}_{p} \ {0} \) be a multiplicative subgroup of even order \(N\), and let \(omega\) be a generator of \(D\). The prover commits to the evaluations of \(f(x)\) at all elements of \(D\), i.e., the codewords \(\{f(\omega^{i})\}_{i=0}^{N - 1}\).</p>
+<p>For any \(i \in {0, 1, \dots \frac{N}{2}-1}\), we have the following relationship:</p>
+<p>\begin{align*}
+f^{*}(w^{2i}) &amp;= \frac{f(\omega^{i}) + f(- \omega^{i})}{2} + \alpha \cdot \frac{f(\omega^{i}) - f(- \omega^{i})}{2\omega^{i}} \\
+&amp;= \frac{1}{2} \{(1 + \alpha \omega^{-i}) \cdot f(\omega^{i}) + (1 - \alpha \omega^{-i}) \cdot f(- \omega^{i})\}
+\end{align*}</p>
+<p>Since \(\omega\) has order \(N\), we have that \(\omega^{\frac{N}{2}} = -1\) and \(f(- \omega^{i}) = f(\omega^{\frac{N}{2} + i})\). Thus, we can rewrite the above as</p>
+<p>\[f^{*}(\omega^{2i}) = \frac{1}{2} \left( (1 + \alpha \omega^{-i}) \cdot f(\omega^{i}) + (1 - \alpha \omega^{-i}) \cdot f(\omega^{\frac{N}{2} + i}) \right)\]</p>
+<p>In addition, consider the following three points:</p>
+<ul>
+<li>A: \((\omega^{i}, f(\omega^{i}))\)</li>
+<li>B: \((\omega^{\frac{N}{2} + i}, f(\omega^{\frac{N}{2} + i}))\)</li>
+<li>C: \((\alpha, f^{*}(\omega^{2i}))\)</li>
+</ul>
+<p><strong>These three points lie on a straight line if and only if \(f^{*}(\omega^{2i})\) is correctly computed</strong> from \(f(\omega^{i})\) and \(f(\omega^{\frac{N}{2} + i})\). We can see it by applying the Lagrance interpolation for A and B:</p>
+<p>\begin{align*}
+y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \omega^{\frac{N}{2} + i}} + f(\omega^{\frac{N}{2} + i}) \cdot \frac{x - \omega^{i}}{\omega^{\frac{N}{2} + i} - \omega^{i}} \\
+&amp;= f(\omega^{i}) \cdot \frac{x + \omega^{i}}{\omega^{i} + \omega^{i}} + f(\omega^{\frac{N}{2} + i}) \cdot \frac{x - \omega^{i}}{-\omega^{i} - \omega^{i}} \\
+&amp;= \frac{1}{2} \left( (1 + x \omega^{-i}) f(\omega^{i}) + (1 - x \omega^{-i}) f(\omega^{\frac{N}{2} + i}) \right)
+\end{align*}</p>
+<h2 id="fri-protocol-interactive"><a class="header" href="#fri-protocol-interactive">FRI Protocol (Interactive)</a></h2>
+<p>The FRI protocol proceeds in rounds:</p>
+<ol>
+<li>
+<p><strong>Commitment Phase</strong></p>
+<ul>
+<li>The prover computes the evaluations of the initial polynomial \(f(X)\) over the subgroup \(D\) of size \(N\), forming the codeword \(\{f(\omega^{i})\}_{i=0}^{N - 1}\).</li>
+<li>The verifier sends a random value \(\alpha\) to the prover.</li>
+<li>The prover computes the evaluations of the folded polynomial \(f^{*}(x)\) over the subgroup \(D^2\), forming the other codeword \(\{f^{*}(w^{2i})\}_{i=0}^{\frac{N}{2} - 1}\)</li>
+<li>The prover commits to these codewords by sending their Merkle roots to the verifier. The prover cannot change codewords after this commitment.</li>
+</ul>
+</li>
+<li>
+<p><strong>Interactive Query Phase</strong></p>
+<ul>
+<li>The verifier randomly samples an index \(i \leftarrow \{0, \dots, \frac{N}{2} - 1\}\).</li>
+<li>The prover reveals the values \(f(\omega^{i})\), \(f(\omega^{\frac{N}{2} + i})\), and \(f^{*}(\omega^{2i})\) along with their Merkle authentication paths.</li>
+<li>The verifier checks the Merkle paths to ensure the revealed values are consistent with the previously sent Merkle roots.</li>
+<li>The verifier performs the collinearity check: verifies if the point \((\alpha, f^{*}(\omega^{2i}))\) lies on the line defined by \((\omega^{i}, f(\omega^{i}))\) and \((\omega^{\frac{N}{2} + i}, f(\omega^{\frac{N}{2} + i}))\).</li>
+</ul>
+</li>
+<li>
+<p><strong>Degree Reduction</strong></p>
+<ul>
+<li>If the collinearity check passes, the verifier is convinced that the folded polynomial \(f^{*}(X)\) was correctly derived. The protocol then repeats with \(f^{*}(X)\) and the subgroup \(D^2\). The size of the subgroup and the effective degree of the polynomial are roughly halved in each round.</li>
+</ul>
+</li>
+</ol>
+<p>This process continues for approximately \(\log_2{d}\) rounds. At the final round, the remaining polynomial has a very low degree (can be a constant function). The verifier might directly query all the remaining evaluation points to verify the degree bound.</p>
+<h2 id="fri-protocol-non-interactive"><a class="header" href="#fri-protocol-non-interactive">FRI Protocol (Non-Interactive)</a></h2>
+<p>TBD</p>
+<div style="break-before: page; page-break-before: always;"></div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -3421,6 +3495,22 @@ pub fn verify(
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

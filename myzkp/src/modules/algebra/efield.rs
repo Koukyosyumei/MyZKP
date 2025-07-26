@@ -169,6 +169,14 @@ impl<M: ModulusValue + 'static, P: IrreduciblePoly<FiniteFieldElement<M>>> Field
             _phantom: PhantomData,
         }
     }
+
+    fn sample(byte_array: &[u8]) -> Self {
+        let mut acc: usize = 0;
+        for &b in byte_array {
+            acc = (acc << 8) ^ (b as usize);
+        }
+        Self::from_value(acc)
+    }
 }
 
 impl<M: ModulusValue, P: IrreduciblePoly<FiniteFieldElement<M>>> Hash

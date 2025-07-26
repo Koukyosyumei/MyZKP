@@ -14,4 +14,5 @@
   - [Proving Single Polynomial](./zksnark/subsec2.md)
   - [Bringing It All Together: SNARK](./zksnark/subsec3.md)
 - [Basics of zk-STARKS](./zkstark/README.md)
+  - [FRI](./zkstark/subsec1.md)
 - [Basics of zkVM](./zkvm/README.md)

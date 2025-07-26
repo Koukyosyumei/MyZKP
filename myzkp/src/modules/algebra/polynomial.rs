@@ -118,8 +118,18 @@ impl<F: Field> Polynomial<F> {
     /// Evaluate the polynomial at a given point.
     pub fn eval(&self, point: &F) -> F {
         let mut result = F::zero();
-        for coef in self.coef.iter().rev() {
-            result = result.mul_ref(&point) + coef;
+        let mut tp = F::one();
+        for coef in self.coef.iter() {
+            result += tp.mul_ref(coef);
+            tp = tp.mul_ref(point);
+        }
+        result
+    }
+
+    pub fn eval_domain(&self, points: &[F]) -> Vec<F> {
+        let mut result = Vec::new();
+        for p in points {
+            result.push(self.eval(p));
         }
         result
     }
@@ -151,6 +161,15 @@ impl<F: Field> Polynomial<F> {
             result += powers[i].mul_ref(coef.sanitize().get_value());
         }
         result
+    }
+
+    pub fn scale(&self, factor: &F) -> Polynomial<F> {
+        Polynomial {
+            coef: (0..self.coef.len())
+                .into_iter()
+                .map(|i| (factor.pow(i)).mul_ref(&self.coef[i]))
+                .collect(),
+        }
     }
 
     /// Performs Lagrange interpolation to compute polynomials passing through given points.
@@ -315,6 +334,39 @@ impl<F: Field> Polynomial<F> {
         self.coef = Self::trim_trailing_zeros(&result);
     }
 
+    pub fn pow(&self, exponent: usize) -> Self {
+        if self.is_zero() {
+            if exponent == 0 {
+                return Self::one();
+            }
+            return Self::zero();
+        }
+
+        if exponent == 0 {
+            return Self::one();
+        }
+
+        if exponent == 1 {
+            return self.clone();
+        }
+
+        // Binary exponentiation algorithm
+        let mut acc = Self::one();
+
+        // Convert exponent to binary and process each bit
+        for bit in format!("{:b}", exponent).chars() {
+            // Square the accumulator
+            acc = acc.clone() * acc.clone();
+
+            // If this bit is 1, multiply by the base
+            if bit == '1' {
+                acc = acc.clone() * self.clone();
+            }
+        }
+
+        acc
+    }
+
     fn div_rem_ref<'b>(&self, other: &'b Polynomial<F>) -> (Polynomial<F>, Polynomial<F>) {
         if self.degree() < other.degree() {
             return (Polynomial::zero(), self.clone());
@@ -322,6 +374,9 @@ impl<F: Field> Polynomial<F> {
 
         let mut remainder_coeffs = Self::trim_trailing_zeros(&self.coef);
         let divisor_coeffs = Self::trim_trailing_zeros(&other.coef);
+        if divisor_coeffs.len().is_zero() {
+            return (Polynomial::zero(), self.clone());
+        }
         let divisor_lead_inv = divisor_coeffs.last().unwrap().inverse();
 
         let mut quotient = vec![F::zero(); self.degree() as usize - other.degree() as usize + 1];
@@ -762,5 +817,52 @@ mod tests {
             ],
         };
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_polynomial_pow() {
+        // Test (1 + x)^2 = 1 + 2x + x^2
+        let poly = Polynomial {
+            coef: (vec![
+                FiniteFieldElement::<ModEIP197>::from_value(1),
+                FiniteFieldElement::<ModEIP197>::from_value(1),
+            ]),
+        };
+        let result = poly.pow(2);
+
+        assert_eq!(result.coef.len(), 3);
+        assert_eq!(
+            result.coef[0],
+            FiniteFieldElement::<ModEIP197>::from_value(1)
+        );
+        assert_eq!(
+            result.coef[1],
+            FiniteFieldElement::<ModEIP197>::from_value(2)
+        );
+        assert_eq!(
+            result.coef[2],
+            FiniteFieldElement::<ModEIP197>::from_value(1)
+        );
+
+        // Test (1 + x)^3 = 1 + 3x + 3x^2 + x^3
+        let result = poly.pow(3);
+
+        assert_eq!(result.coef.len(), 4);
+        assert_eq!(
+            result.coef[0],
+            FiniteFieldElement::<ModEIP197>::from_value(1)
+        );
+        assert_eq!(
+            result.coef[1],
+            FiniteFieldElement::<ModEIP197>::from_value(3)
+        );
+        assert_eq!(
+            result.coef[2],
+            FiniteFieldElement::<ModEIP197>::from_value(3)
+        );
+        assert_eq!(
+            result.coef[3],
+            FiniteFieldElement::<ModEIP197>::from_value(1)
+        );
     }
 }

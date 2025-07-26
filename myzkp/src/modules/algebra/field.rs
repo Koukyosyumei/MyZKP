@@ -76,6 +76,7 @@ pub trait Field: Ring + Div<Output = Self> + PartialEq + Eq + Hash + Serialize {
     fn mul_m1_ref(&self, rhs: &Self) -> Self;
     fn pow_m1<M: Into<BigInt>>(&self, n: M) -> Self;
     fn sanitize(&self) -> Self;
+    fn sample(byte_array: &[u8]) -> Self;
 }
 
 /// Represents an element in a finite field.
@@ -264,6 +265,14 @@ impl<M: ModulusValue> Field for FiniteFieldElement<M> {
             value: value_sanitized,
             _phantom: PhantomData,
         }
+    }
+
+    fn sample(byte_array: &[u8]) -> Self {
+        let mut acc: usize = 0;
+        for &b in byte_array {
+            acc = (acc << 8) ^ (b as usize);
+        }
+        Self::from_value(acc)
     }
 }
 

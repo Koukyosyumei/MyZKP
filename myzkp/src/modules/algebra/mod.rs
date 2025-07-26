@@ -3,6 +3,8 @@ pub mod efield;
 pub mod field;
 pub mod kzg;
 pub mod merkle;
+pub mod mpolynomials;
+pub mod ntt;
 pub mod polynomial;
 pub mod reedsolomon;
 pub mod ring;
