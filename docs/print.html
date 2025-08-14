@@ -92,7 +92,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">3.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec1.html"><strong aria-hidden="true">3.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">3.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">3.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-STARKS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zkstark/subsec1.html"><strong aria-hidden="true">4.1.</strong> FRI</a></li></ol></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">5.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="polynomial_commitment/index.html"><strong aria-hidden="true">3.</strong> Basics of Polynomial Commitment</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="polynomial_commitment/kzg.html"><strong aria-hidden="true">3.1.</strong> KZG</a></li><li class="chapter-item expanded "><a href="polynomial_commitment/gemini.html"><strong aria-hidden="true">3.2.</strong> Gemini</a></li></ol></li><li class="chapter-item expanded "><a href="zksnark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zksnark/subsec1.html"><strong aria-hidden="true">4.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="zksnark/subsec2.html"><strong aria-hidden="true">4.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="zksnark/subsec3.html"><strong aria-hidden="true">4.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="zkstark/index.html"><strong aria-hidden="true">5.</strong> Basics of zk-STARKS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="zkstark/subsec1.html"><strong aria-hidden="true">5.1.</strong> FRI</a></li></ol></li><li class="chapter-item expanded "><a href="zkvm/index.html"><strong aria-hidden="true">6.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -1344,6 +1344,57 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <li>Alice cannot generate \((t, t')\) such that \(t \neq h\) and \(t^{b} = t'\).</li>
 <li>If \(h^{b} = h'\), Bob can conclude that \(h\) is the power of \(g\).</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="polynomial-commitment"><a class="header" href="#polynomial-commitment">Polynomial Commitment</a></h1>
+<p>Good point — let’s start with a short, formal definition of <em>polynomial commitments</em> and then embed that as the intro to the KZG write-up.</p>
+<h1 id="polynomial-commitment-definition"><a class="header" href="#polynomial-commitment-definition">Polynomial commitment (definition)</a></h1>
+<p>A <strong>polynomial commitment scheme</strong> lets a prover commit to a polynomial \(f(X)\) so that later the prover can (1) reveal the value \(f(u)\) at any point \(u\) together with a <em>short</em> proof (witness), and (2) the verifier can efficiently check that the revealed value is correct relative to the original commitment. A scheme typically provides four algorithms:</p>
+<ul>
+<li><strong>Setup</strong>\((1^\lambda, D)\): (possibly trusted) produces public parameters \(\text{PK}\) and possibly a secret key \(\text{SK}\). \(D\) is a public upper bound on polynomial degree.</li>
+<li><strong>Commit</strong>\((\text{PK}, f)\to C\): the prover computes a short commitment \(C\) to polynomial \(f\).</li>
+<li><strong>Open</strong>\((\text{PK}, f, u)\to (y, W)\): the prover computes \(y=f(u)\) and a witness \(W\) that proves \(y\) is the value of \(f\) at \(u\).</li>
+<li><strong>Verify</strong>\((\text{PK}, C, u, y, W)\to\{\text{accept},\text{reject}\}\): the verifier checks the witness and either accepts or rejects.</li>
+</ul>
+<p><strong>Correctness.</strong> For honestly generated keys and honest prover, if \(C\leftarrow\text{Commit}(f)\) and \((y,W)\leftarrow\text{Open}(f,u)\), then \(\text{Verify}(\text{PK},C,u,y,W)\) must accept.</p>
+<p><strong>Security properties (informal).</strong></p>
+<ul>
+<li><strong>Binding:</strong> After publishing \(C\), the committer cannot (except with negligible probability under standard assumptions) produce two different openings \((u,y,W)\) and \((u,y',W')\) with \(y\ne y'\) that both verify. This prevents equivocation.</li>
+<li><strong>Hiding (optional):</strong> Some schemes hide the polynomial (or its evaluations) from the verifier; others are not hiding by default. Hiding can be statistical or computational depending on the scheme and added randomness.</li>
+<li><strong>Succinctness / efficiency:</strong> Commitments and opening proofs should be short (ideally constant size independent of polynomial degree), and verification should be much cheaper than re-evaluating \(f\) from its coefficients.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kzg"><a class="header" href="#kzg">KZG</a></h1>
+<p>We consider the polynomial commitment shceme, where the target polynomial \(f \in F_{q}[X]\) such that \(f(x) = \sum_{i=0}^{d} c_{i} x^{i}\).</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>Let \(D\) be a maximu degree such that \(d \leq D\).</p>
+<p>\begin{align*}
+&amp;\mathrm{SK} : \alpha \xleftarrow{\text{random}} F_{q} \\
+&amp;\mathrm{PK} : (\{g_1^{(\alpha^{i})}\}^{D}_{i=0}, g_2, g^{\alpha}_2)
+\end{align*}</p>
+<h2 id="commitment"><a class="header" href="#commitment">Commitment</a></h2>
+<p>\[
+c = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i}
+\]</p>
+<p>We can observe that</p>
+<p>\begin{align*}
+c &amp;= \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
+\end{align*}</p>
+<h2 id="open"><a class="header" href="#open">Open</a></h2>
+<p>We want to open this polynomial at \(u\). Note that \(f(x) - f(u)\) has \(x - u\) as its root. Then we denote</p>
+<p>\begin{align*}
+f(x) - f(u) = (x - u) f_u(x)
+\end{align*}</p>
+<p>Since \(f(x)\) is \(d\)-th degree polynomial, \(f_u\) is a \(d-1\)-th degree polynomial.</p>
+<p>Let</p>
+<p>\begin{align*}
+f_u(x) = \sum_{i=0}^{d-1} c' x^{i}
+\end{align*}</p>
+<p>Then, the witness is \(w = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'}\), which corresponds to \(g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}\)</p>
+<h2 id="verification"><a class="header" href="#verification">Verification</a></h2>
+<p>We want to verify that \(f(\alpha) - f(u) = (\alpha - u)f_u(\alpha)\). To check it,</p>
+<p>\begin{align*}
+e(c, g_2) / e(g_1, g_2)^{f(u)} \overset{?}{=} e(w, g_2^{\alpha} \cdot g_2^{-u})
+\end{align*}</p>
+<p>\(e(c, g_2)\) is equal to \(e(g_1^{f(\alpha)}, g_2) = g_T^{f(\alpha)}\), \(e(g_1, g_2)^{f(u)} = g_T^{f(u)}\) and \(e(w, g_2^{\alpha} \cdot g_2^{-u})\) is equal to \(e(g_1^{f_u(\alpha)}, g_2^{\alpha-u}) = g_T^{f_u(\alpha)\cdot (\alpha - u)}\).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gemini"><a class="header" href="#gemini">Gemini</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
 <p>zk-SNARK stands for "<strong>Z</strong>ero-<strong>K</strong>nowledge <strong>S</strong>uccinct <strong>N</strong>on-Interactive <strong>AR</strong>gument of <strong>K</strong>nowledge". It's a cryptographic proof protocol that allows one party (the prover) to convince an another party (the verifier) that they possess certain information, without even revealing the information itself.</p>
 <p>In this tutorial, we will gradually implement two of the most popular zk-SNARK protocols: <a href="https://dl.acm.org/doi/abs/10.1145/2856449">Pinocchio</a> and <a href="https://eprint.iacr.org/2016/260.pdf">Groth16</a>. The structure of this guide closely follows the excellent tutorial by, <a href="https://arxiv.org/abs/1906.07221">Petkus, Maksym. "Why and how zk-snark works."</a>, as well as the fantastic eBook <a href="https://www.rareskills.io/zk-book">"The RareSkills Book of Zero Knowledge"</a>.</p>

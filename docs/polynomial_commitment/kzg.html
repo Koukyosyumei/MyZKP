@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Basics of zk-STARKS - Book of MyZKP</title>
+        <title>KZG - Book of MyZKP</title>
 
 
         <!-- Custom HTML head -->
@@ -91,7 +91,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../polynomial_commitment/index.html"><strong aria-hidden="true">3.</strong> Basics of Polynomial Commitment</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../polynomial_commitment/kzg.html"><strong aria-hidden="true">3.1.</strong> KZG</a></li><li class="chapter-item expanded "><a href="../polynomial_commitment/gemini.html"><strong aria-hidden="true">3.2.</strong> Gemini</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec1.html"><strong aria-hidden="true">4.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">4.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">4.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html" class="active"><strong aria-hidden="true">5.</strong> Basics of zk-STARKS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zkstark/subsec1.html"><strong aria-hidden="true">5.1.</strong> FRI</a></li></ol></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">6.</strong> Basics of zkVM</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="../number_theory/index.html"><strong aria-hidden="true">2.</strong> Basics of Number Theory</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../number_theory/subsec1.html"><strong aria-hidden="true">2.1.</strong> Computation Rule and Properties</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec2.html"><strong aria-hidden="true">2.2.</strong> Semigroup, Group, Ring, and Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec3.html"><strong aria-hidden="true">2.3.</strong> Polynomials</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec4.html"><strong aria-hidden="true">2.4.</strong> Galois Field</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec5.html"><strong aria-hidden="true">2.5.</strong> Elliptic Curve</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec6.html"><strong aria-hidden="true">2.6.</strong> Pairing</a></li><li class="chapter-item expanded "><a href="../number_theory/subsec7.html"><strong aria-hidden="true">2.7.</strong> Useful Assumptions</a></li></ol></li><li class="chapter-item expanded "><a href="../polynomial_commitment/index.html"><strong aria-hidden="true">3.</strong> Basics of Polynomial Commitment</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../polynomial_commitment/kzg.html" class="active"><strong aria-hidden="true">3.1.</strong> KZG</a></li><li class="chapter-item expanded "><a href="../polynomial_commitment/gemini.html"><strong aria-hidden="true">3.2.</strong> Gemini</a></li></ol></li><li class="chapter-item expanded "><a href="../zksnark/index.html"><strong aria-hidden="true">4.</strong> Basics of zk-SNARKs</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zksnark/subsec1.html"><strong aria-hidden="true">4.1.</strong> Arithmetization</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec2.html"><strong aria-hidden="true">4.2.</strong> Proving Single Polynomial</a></li><li class="chapter-item expanded "><a href="../zksnark/subsec3.html"><strong aria-hidden="true">4.3.</strong> Bringing It All Together: SNARK</a></li></ol></li><li class="chapter-item expanded "><a href="../zkstark/index.html"><strong aria-hidden="true">5.</strong> Basics of zk-STARKS</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../zkstark/subsec1.html"><strong aria-hidden="true">5.1.</strong> FRI</a></li></ol></li><li class="chapter-item expanded "><a href="../zkvm/index.html"><strong aria-hidden="true">6.</strong> Basics of zkVM</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -179,24 +179,49 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="basics-of-zk-stark"><a class="header" href="#basics-of-zk-stark">Basics of zk-STARK</a></h1>
-<p>zk-Stark stands for <strong>S</strong>calable <strong>T</strong>ransparent <strong>AR</strong>gument of <strong>K</strong>nowledge. Its key properties are:</p>
-<ul>
-<li><strong>Scalability</strong>: Prover time grows as \(\mathcal{O}(T\log{T})\) and verifier time as \(\mathcal{O}(\log{T})\), where \(T\) is the cost of executing the statement being proven.</li>
-<li><strong>Transparency</strong>: Unlike many SNARK systems, zk‑STARKs require no trusted setup.</li>
-<li><strong>Post‑Quantum Security</strong>: Security depends solely on the collision and preimage resistance of cryptographic hash functions, making zk‑STARKs resilient against quantum‑computing attacks.</li>
-</ul>
-<p>In this tutorial, we will unpack and implement the fundamental building blocks of zk‑STARKs. Our presentation draws heavily on the <a href="https://aszepieniec.github.io/stark-anatomy/">Anatomy of a STARK</a> guide by Alan Szepieniec and the <a href="https://starkware.co/stark-101/">STARK 101</a> series from StarkWare.</p>
+                        <h1 id="kzg"><a class="header" href="#kzg">KZG</a></h1>
+<p>We consider the polynomial commitment shceme, where the target polynomial \(f \in F_{q}[X]\) such that \(f(x) = \sum_{i=0}^{d} c_{i} x^{i}\).</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p>Let \(D\) be a maximu degree such that \(d \leq D\).</p>
+<p>\begin{align*}
+&amp;\mathrm{SK} : \alpha \xleftarrow{\text{random}} F_{q} \\
+&amp;\mathrm{PK} : (\{g_1^{(\alpha^{i})}\}^{D}_{i=0}, g_2, g^{\alpha}_2)
+\end{align*}</p>
+<h2 id="commitment"><a class="header" href="#commitment">Commitment</a></h2>
+<p>\[
+c = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i}
+\]</p>
+<p>We can observe that</p>
+<p>\begin{align*}
+c &amp;= \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
+\end{align*}</p>
+<h2 id="open"><a class="header" href="#open">Open</a></h2>
+<p>We want to open this polynomial at \(u\). Note that \(f(x) - f(u)\) has \(x - u\) as its root. Then we denote</p>
+<p>\begin{align*}
+f(x) - f(u) = (x - u) f_u(x)
+\end{align*}</p>
+<p>Since \(f(x)\) is \(d\)-th degree polynomial, \(f_u\) is a \(d-1\)-th degree polynomial.</p>
+<p>Let</p>
+<p>\begin{align*}
+f_u(x) = \sum_{i=0}^{d-1} c' x^{i}
+\end{align*}</p>
+<p>Then, the witness is \(w = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'}\), which corresponds to \(g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}\)</p>
+<h2 id="verification"><a class="header" href="#verification">Verification</a></h2>
+<p>We want to verify that \(f(\alpha) - f(u) = (\alpha - u)f_u(\alpha)\). To check it,</p>
+<p>\begin{align*}
+e(c, g_2) / e(g_1, g_2)^{f(u)} \overset{?}{=} e(w, g_2^{\alpha} \cdot g_2^{-u})
+\end{align*}</p>
+<p>\(e(c, g_2)\) is equal to \(e(g_1^{f(\alpha)}, g_2) = g_T^{f(\alpha)}\), \(e(g_1, g_2)^{f(u)} = g_T^{f(u)}\) and \(e(w, g_2^{\alpha} \cdot g_2^{-u})\) is equal to \(e(g_1^{f_u(\alpha)}, g_2^{\alpha-u}) = g_T^{f_u(\alpha)\cdot (\alpha - u)}\).</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../zksnark/subsec3.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../polynomial_commitment/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../zkstark/subsec1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../polynomial_commitment/gemini.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -206,11 +231,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../zksnark/subsec3.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../polynomial_commitment/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../zkstark/subsec1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../polynomial_commitment/gemini.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
