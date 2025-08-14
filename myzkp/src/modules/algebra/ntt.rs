@@ -1,4 +1,3 @@
-use std::ops::Mul;
 
 use num_traits::{One, Zero};
 

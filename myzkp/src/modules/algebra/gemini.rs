@@ -1,12 +1,5 @@
 use std::fmt;
-use std::num::IntErrorKind;
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
-use bincode::Error;
-use num_traits::{One, Zero};
-use serde::{Deserialize, Serialize};
-
-use crate::modules::algebra::curve::curve::{EllipticCurve, EllipticCurvePoint};
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 
@@ -137,21 +130,13 @@ pub fn vanila_verify<F: Field>(
     true
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
-    use std::iter::zip;
-    use std::str::FromStr;
+    use num_traits::{One, Zero};
 
-    use lazy_static::lazy_static;
-    use num_bigint::BigInt;
-    use num_bigint::ToBigInt;
-    use paste::paste;
-    use serde::{Deserialize, Serialize};
-
-    use crate::define_myzkp_modulus_type;
-    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197, ModulusValue};
-    use crate::modules::algebra::polynomial::Polynomial;
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::algebra::ring::Ring;
 
     type F = FiniteFieldElement<ModEIP197>;
