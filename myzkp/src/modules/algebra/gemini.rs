@@ -39,7 +39,7 @@ mod tests {
     type F31 = FiniteFieldElement<Mod31>;
 
     #[test]
-    fn test_tensor_product() {
+    fn test_tensor_product_1() {
         let a = vec![F31::from_value(2), F31::from_value(3)];
         let b = vec![F31::from_value(4), F31::from_value(5), F31::from_value(6)];
         let c = tensor_product(&a, &b);
@@ -50,6 +50,28 @@ mod tests {
             F31::from_value(15),
             F31::from_value(12),
             F31::from_value(18),
+        ];
+        assert_eq!(c.len(), c_groundtruth.len());
+        for (u, v) in c.iter().zip(c_groundtruth.iter()) {
+            assert_eq!(u, v);
+        }
+    }
+
+    #[test]
+    fn test_tensor_product_2() {
+        let x1 = vec![F31::from_value(1), F31::from_value(2)];
+        let x2 = vec![F31::from_value(1), F31::from_value(3)];
+        let x3 = vec![F31::from_value(1), F31::from_value(4)];
+        let c = tensor_product(&tensor_product(&x1, &x2), &x3);
+        let c_groundtruth = vec![
+            F31::from_value(1),
+            F31::from_value(2),
+            F31::from_value(3),
+            F31::from_value(6),
+            F31::from_value(4),
+            F31::from_value(8),
+            F31::from_value(12),
+            F31::from_value(24),
         ];
         assert_eq!(c.len(), c_groundtruth.len());
         for (u, v) in c.iter().zip(c_groundtruth.iter()) {
