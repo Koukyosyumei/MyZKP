@@ -5,15 +5,15 @@ use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
 pub struct PublicKeyKZG {
-    alpha_1: Vec<G1Point>,
-    alpha_2: Vec<G2Point>,
+    pub alpha_1: Vec<G1Point>,
+    pub alpha_2: Vec<G2Point>,
 }
 
 pub type CommitmentKZG = G1Point;
 
 pub struct ProofKZG {
-    y: FqOrder,
-    w: G1Point,
+    pub y: FqOrder,
+    pub w: G1Point,
 }
 
 pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {

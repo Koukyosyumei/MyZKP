@@ -1,7 +1,14 @@
 use std::fmt;
 
+use num_traits::Zero;
+
+use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::field::Field;
+use crate::modules::algebra::kzg::{
+    commit_kzg, open_kzg, setup_kzg, verify_kzg, CommitmentKZG, ProofKZG, PublicKeyKZG,
+};
 use crate::modules::algebra::polynomial::Polynomial;
+use crate::modules::algebra::ring::Ring;
 
 #[derive(Debug)]
 pub enum SplitFoldError {
@@ -93,12 +100,97 @@ pub fn split_and_fold<F: Field>(
     Ok(fs)
 }
 
-pub fn vanila_verify<F: Field>(
-    rhos: &Vec<F>,
-    mu: &F,
-    polys: &Vec<Polynomial<F>>,
-    beta: &F,
+pub type CommitmentGemini = Vec<CommitmentKZG>;
+
+pub struct ProofGemini {
+    es: Vec<ProofKZG>,
+    es_neg: Vec<ProofKZG>,
+    es_hat: Vec<ProofKZG>,
+}
+
+pub fn commit_gemini(polys: &[Polynomial<FqOrder>], pk: &PublicKeyKZG) -> CommitmentGemini {
+    polys.iter().map(|p| commit_kzg(p, pk)).collect()
+}
+
+pub fn open_gemini(
+    polys: &[Polynomial<FqOrder>],
+    beta: &FqOrder,
+    pk: &PublicKeyKZG,
+) -> ProofGemini {
+    ProofGemini {
+        es: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, beta, pk))
+            .collect(),
+        es_neg: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, &(FqOrder::zero() - beta).sanitize(), pk))
+            .collect(),
+        es_hat: polys
+            .iter()
+            .skip(1)
+            .take(polys.len() - 2)
+            .map(|p| open_kzg(p, &beta.pow(2), pk))
+            .collect(),
+    }
+}
+
+pub fn verify_gemini(
+    rhos: &Vec<FqOrder>,
+    mu: &FqOrder,
+    beta: &FqOrder,
+    commitment: &CommitmentGemini,
+    proof: &ProofGemini,
+    pk: &PublicKeyKZG,
 ) -> bool {
+    let log2_n = rhos.len();
+    if log2_n != commitment.len() - 1 {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es.iter())
+        .all(|(c, p)| verify_kzg(beta, c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es_neg.iter())
+        .all(|(c, p)| verify_kzg(&(FqOrder::zero() - beta).sanitize(), c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .skip(1)
+        .take(commitment.len() - 2)
+        .zip(proof.es_hat.iter())
+        .all(|(c, p)| verify_kzg(&beta.pow(2), c, p, pk))
+    {
+        return false;
+    }
+    let es = proof.es.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    let es_neg = proof.es_neg.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    let mut es_hat = proof.es_hat.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    es_hat.push(mu.clone());
+
+    let two = FqOrder::from_value(2);
+    (0..log2_n).all(|j| {
+        two.mul_ref(beta).mul_ref(&es_hat[j])
+            == beta.mul_ref(&es[j].add_ref(&es_neg[j]))
+                + rhos[j].mul_ref(&es[j].sub_ref(&es_neg[j]))
+    })
+}
+
+pub fn debug_verify<F: Field>(rhos: &Vec<F>, mu: &F, polys: &Vec<Polynomial<F>>, beta: &F) -> bool {
     let log2_n = rhos.len();
     let es = polys
         .iter()
@@ -132,6 +224,7 @@ mod tests {
 
     use num_traits::{One, Zero};
 
+    use crate::modules::algebra::curve::bn128::BN128;
     use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
     use crate::modules::algebra::ring::Ring;
 
@@ -179,7 +272,11 @@ mod tests {
     }
 
     #[test]
-    fn test_vanila_verifier() {
+    fn test_gemini() {
+        let g1 = BN128::generator_g1();
+        let g2 = BN128::generator_g2();
+        let pk = setup_kzg(&g1, &g2, 8);
+
         let coef = (0..8).map(|i| F::from_value(i + 1)).collect::<Vec<_>>();
         let rhos = vec![F::from_value(2), F::from_value(3), F::from_value(4)];
         let c = tensor_product(
@@ -196,8 +293,46 @@ mod tests {
         }
 
         let fs = split_and_fold(&coef, &rhos).unwrap();
-        assert!(vanila_verify(&rhos, &mu, &fs, &F::from_value(1234)));
-        assert!(!vanila_verify(
+
+        let commitment = commit_gemini(&fs, &pk);
+
+        let beta = FqOrder::from_value(1234);
+        let proof = open_gemini(&fs, &beta, &pk);
+
+        let flag = verify_gemini(&rhos, &mu, &beta, &commitment, &proof, &pk);
+        assert!(flag);
+
+        let flag_1 = verify_gemini(
+            &rhos,
+            &(mu + FqOrder::one()),
+            &beta,
+            &commitment,
+            &proof,
+            &pk,
+        );
+        assert!(!flag_1);
+    }
+
+    #[test]
+    fn test_debug_verifier() {
+        let coef = (0..8).map(|i| F::from_value(i + 1)).collect::<Vec<_>>();
+        let rhos = vec![F::from_value(2), F::from_value(3), F::from_value(4)];
+        let c = tensor_product(
+            &tensor_product(
+                &vec![F::one(), rhos[0].clone()],
+                &vec![F::one(), rhos[1].clone()],
+            ),
+            &vec![F::one(), rhos[2].clone()],
+        );
+
+        let mut mu = F::zero();
+        for (u, v) in coef.iter().zip(&c) {
+            mu += u.mul_ref(v);
+        }
+
+        let fs = split_and_fold(&coef, &rhos).unwrap();
+        assert!(debug_verify(&rhos, &mu, &fs, &F::from_value(1234)));
+        assert!(!debug_verify(
             &rhos,
             &(mu + F::one()),
             &fs,
