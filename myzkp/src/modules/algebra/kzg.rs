@@ -17,17 +17,16 @@ pub struct ProofKZG {
 }
 
 pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
-    let s = FqOrder::random_element(&[]);
+    let alpha = FqOrder::random_element(&[]);
 
     let mut alpha_1 = Vec::with_capacity(n);
-    let mut alpha_2 = Vec::with_capacity(n);
-
     let mut s_power = FqOrder::one();
     for _ in 0..1 + n {
         alpha_1.push(g1.mul_ref(s_power.clone().get_value()));
-        alpha_2.push(g2.mul_ref(s_power.clone().get_value()));
-        s_power = s_power * s.clone();
+        s_power = s_power * alpha.clone();
     }
+
+    let alpha_2 = vec![g2.clone(), g2.mul_ref(alpha.get_value())];
 
     PublicKeyKZG { alpha_1, alpha_2 }
 }

@@ -1,27 +1,49 @@
 # KZG
 
-We consider the polynomial commitment shceme, where the target polynomial \\(f \in F_{q}[X]\\) such that \\(f(x) = \sum_{i=0}^{d} c_{i} x^{i}\\).
+Let \\(G_1\\), \\(G_2\\), and \\(G_T\\) be groups such that there exists a bilinear mapping \\(e: G_1 \times G_2 \to G_T\\). Let \\(g_1 \in G_1\\) and \\(g_2 \in G_2\\) be fixed generators.
+
+We want a short commitment to a polynomial over \\(F\\) denoted as \\(f(X) = \sum_{i=0}^{d} c_{i} x^{i} \in F_{q}[X]\\) with a public maximum degree bound \\(D\\) such that \\(d \leq D\\).
 
 ## Setup
 
-Let \\(D\\) be a maximu degree such that \\(d \leq D\\).
+A trusted party samples a secret \\(\alpha \xleftarrow{\text{random}} F_{q}\\), and publishes a Structured Reference String (SRS):
 
 \begin{align*}
-    &\mathrm{SK} : \alpha \xleftarrow{\text{random}} F_{q} \\\\
-    &\mathrm{PK} : (\\{g_1^{(\alpha^{i})}\\}^{D}_{i=0}, g_2, g^{\alpha}_2)
+    &\mathrm{PK} := (\\{g_1^{(\alpha^{i})}\\}^{D}_{i=0}, g_2, g^{\alpha}_2)
 \end{align*}
+
+```rust
+pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
+    let alpha = FqOrder::random_element(&[]);
+
+    let mut alpha_1 = Vec::with_capacity(n);
+    let mut s_power = FqOrder::one();
+    for _ in 0..1 + n {
+        alpha_1.push(g1.mul_ref(s_power.clone().get_value()));
+        s_power = s_power * alpha.clone();
+    }
+
+    let alpha_2 = vec![g2.clone(), g2.mul_ref(alpha.get_value())];
+
+    PublicKeyKZG { alpha_1, alpha_2 }
+}
+```
 
 ## Commitment
 
+Given \\(f\\) with coefficients \\(c_i\\), compute the commitment:
+
 \\[
-    c = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i}
+    C = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
 \\]
 
-We can observe that
+Because the SRS contains \\(g_1^{(\alpha^{i})}\\), the prover can compute this multi-exponentiation without knowing \\(\alpha\\).
 
-\begin{align*}
-    c &= \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
-\end{align*}
+```rust
+pub fn commit_kzg(p: &Polynomial<FqOrder>, pk: &PublicKeyKZG) -> CommitmentKZG {
+    p.eval_with_powers_on_curve(&pk.alpha_1)
+}
+```
 
 ## Open
 
