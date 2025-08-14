@@ -119,15 +119,11 @@ pub fn vanila_verify<F: Field>(
     es_hat.push(mu.clone());
 
     let two = F::from_value(2);
-    for j in 0..log2_n {
-        if two.mul_ref(&beta).mul_ref(&es_hat[j])
-            != beta.mul_ref(&es[j].add_ref(&es_neg[j]))
+    (0..log2_n).all(|j| {
+        two.mul_ref(beta).mul_ref(&es_hat[j])
+            == beta.mul_ref(&es[j].add_ref(&es_neg[j]))
                 + rhos[j].mul_ref(&es[j].sub_ref(&es_neg[j]))
-        {
-            return false;
-        }
-    }
-    true
+    })
 }
 
 #[cfg(test)]
