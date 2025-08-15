@@ -6,7 +6,7 @@ We want a short commitment to a polynomial over \\(\mathbb{F}\\) denoted as \\(f
 
 ## Setup
 
-A trusted party samples a secret \\(\alpha \xleftarrow{\text{random}} \mathbb{F}_{q}\\), and publishes a Structured Reference String (SRS):
+A trusted party samples a secret \\(\alpha \xleftarrow{\text{random}} \mathbb{F}_{q}\\), and publishes a public key \\(\mathrm{PK}\\):
 
 \begin{align*}
     &\mathrm{PK} := (\\{g_1^{(\alpha^{i})}\\}^{D}_{i=0}, g_2, g^{\alpha}_2)
@@ -44,7 +44,7 @@ Given \\(f\\) with coefficients \\(c_i\\), compute the commitment:
     C = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
 \\]
 
-Because the SRS contains \\(g_1^{(\alpha^{i})}\\), the prover can compute this multi-exponentiation without knowing \\(\alpha\\).
+Because the public key contains \\(g_1^{(\alpha^{i})}\\), the prover can compute this multi-exponentiation without knowing \\(\alpha\\).
 
 ```rust
 pub type CommitmentKZG = G1Point;
@@ -68,7 +68,7 @@ This \\(f_u\\) is a polynomial of degree \\(\leq d - 1\\) (because \\(X - u\\) d
     W = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'} = g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}
 \end{align*}
 
-Here, the prover can computes \\(W\\) only using SRS, and \\(\alpha\\) is not required.
+Here, the prover can computes \\(W\\) only using the public key, and \\(\alpha\\) is not required.
 
 ```rust
 pub struct ProofKZG {
@@ -92,7 +92,7 @@ pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKeyKZG) -> Proo
 
 ## Verification
 
-The verifier is given the public SRS, the commitment \\(C\\), the claimed evauation \\(y = f(u)\\), and the witness \\(W\\). They check the pairing equation:
+The verifier is given the public key, the commitment \\(C\\), the claimed evauation \\(y = f(u)\\), and the witness \\(W\\). They check the pairing equation:
 
 \begin{align*}
     \frac{e(c, g_2)}{e(g_1, g_2)^{y}} \overset{?}{=} e(W, g_2^{\alpha} \cdot g_2^{-u})
