@@ -141,7 +141,13 @@ which holds by the definition of \\(f_u(\alpha)\\). Thus a correct witness passe
 
 #### Binding
 
-TBD
+The binding property of the KZG commitment protocol relies on the **t-Strong Diffie-Hellman (t-SDH) assumption**:
+
+---
+
+*Let \\(\alpha\\) be a random point in \\(\mathbb{F}_p\\), and \\(g\\) be a generator of a group \\(G\\). Given as input a \\(d + 1\\)-tuple \\(\langle g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{t+1}\\), for every adversary \\(\mathcal{A}\\), the probability \\(Pr[\mathcal{A}(g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}) = \langle c, g^{\frac{1}{\alpha + c}} \rangle]\\) is negligible for any value of \\(c \in \mathbb{F}_p \setminus \\{-\alpha\\}\\).*
+
+---
 
 #### Hiding
 

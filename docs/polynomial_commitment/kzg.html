@@ -293,7 +293,10 @@ f(\alpha) - f(u) = (\alpha - u) f_u(\alpha)
 \end{align*}</p>
 <p>which holds by the definition of \(f_u(\alpha)\). Thus a correct witness passes verification.</p>
 <h4 id="binding"><a class="header" href="#binding">Binding</a></h4>
-<p>TBD</p>
+<p>The binding property of the KZG commitment protocol relies on the <strong>t-Strong Diffie-Hellman (t-SDH) assumption</strong>:</p>
+<hr />
+<p><em>Let \(\alpha\) be a random point in \(\mathbb{F}_p\), and \(g\) be a generator of a group \(G\). Given as input a \(d + 1\)-tuple \(\langle g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{t+1}\), for every adversary \(\mathcal{A}\), the probability \(Pr[\mathcal{A}(g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}) = \langle c, g^{\frac{1}{\alpha + c}} \rangle]\) is negligible for any value of \(c \in \mathbb{F}_p \setminus \{-\alpha\}\).</em></p>
+<hr />
 <h4 id="hiding"><a class="header" href="#hiding">Hiding</a></h4>
 <p>TBD</p>
 
