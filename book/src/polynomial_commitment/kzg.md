@@ -38,7 +38,7 @@ pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
 
 ## Commitment
 
-Given \\(f\\) with coefficients \\(c_i\\), compute the commitment:
+Given \\(f\\) with coefficients \\(\\{c_i\\}_{i=0}^{d}\\), compute the commitment:
 
 \\[
     C = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
@@ -62,7 +62,7 @@ To open \\(f\\) at \\(u\\), define the quotient polynomial:
     f_u(X) = \frac{f(X) - f(u)}{X - u}
 \end{align*}
 
-This \\(f_u\\) is a polynomial of degree \\(\leq d - 1\\) (because \\(X - u\\) divides \\(f(X) - f(u)\\)). Let \\(f_u(x) = \sum_{i=0}^{d-1} c' x^{i}\\). The prover then forms the witness:
+This \\(f_u\\) is a polynomial of degree \\(\leq d - 1\\) (because \\(X - u\\) divides \\(f(X) - f(u)\\)). Let \\(f_u(x) = \sum_{i=0}^{d-1} c'_{i} x^{i}\\). The prover then forms the witness:
 
 \begin{align*}
     W = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'} = g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}

@@ -1393,7 +1393,7 @@ pub fn setup_kzg(g1: &amp;G1Point, g2: &amp;G2Point, n: usize) -&gt; PublicKeyKZ
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="commitment"><a class="header" href="#commitment">Commitment</a></h2>
-<p>Given \(f\) with coefficients \(c_i\), compute the commitment:</p>
+<p>Given \(f\) with coefficients \(\{c_i\}_{i=0}^{d}\), compute the commitment:</p>
 <p>\[
 C = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i}} = g_1^{f(\alpha)}
 \]</p>
@@ -1411,7 +1411,7 @@ pub fn commit_kzg(p: &amp;Polynomial&lt;FqOrder&gt;, pk: &amp;PublicKeyKZG) -&gt
 <p>\begin{align*}
 f_u(X) = \frac{f(X) - f(u)}{X - u}
 \end{align*}</p>
-<p>This \(f_u\) is a polynomial of degree \(\leq d - 1\) (because \(X - u\) divides \(f(X) - f(u)\)). Let \(f_u(x) = \sum_{i=0}^{d-1} c' x^{i}\). The prover then forms the witness:</p>
+<p>This \(f_u\) is a polynomial of degree \(\leq d - 1\) (because \(X - u\) divides \(f(X) - f(u)\)). Let \(f_u(x) = \sum_{i=0}^{d-1} c'_{i} x^{i}\). The prover then forms the witness:</p>
 <p>\begin{align*}
 W = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'} = g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}
 \end{align*}</p>
