@@ -1,4 +1,4 @@
-use num_traits::One;
+use num_traits::{One, Zero};
 
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::polynomial::Polynomial;
@@ -16,6 +16,8 @@ pub struct ProofKZG {
     pub w: G1Point,
 }
 
+pub type ProofDegreeBound = G1Point;
+
 pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
     let alpha = FqOrder::random_element(&[]);
 
@@ -27,6 +29,21 @@ pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
     }
 
     let powers_2 = vec![g2.clone(), g2.mul_ref(alpha.get_value())];
+
+    PublicKeyKZG { powers_1, powers_2 }
+}
+
+pub fn setup_kzg_with_full_g2(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
+    let alpha = FqOrder::random_element(&[]);
+
+    let mut powers_1 = Vec::with_capacity(n);
+    let mut powers_2 = Vec::with_capacity(n);
+    let mut alpha_power = FqOrder::one();
+    for _ in 0..1 + n {
+        powers_1.push(g1.mul_ref(alpha_power.clone().get_value()));
+        powers_2.push(g2.mul_ref(alpha_power.clone().get_value()));
+        alpha_power = alpha_power * alpha.clone();
+    }
 
     PublicKeyKZG { powers_1, powers_2 }
 }
@@ -62,6 +79,31 @@ pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicK
     e3 == e1 * (e2.pow(proof.y.get_value()))
 }
 
+pub fn prove_degree_bound(
+    p: &Polynomial<FqOrder>,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> ProofDegreeBound {
+    let max_d = pk.powers_1.len() - 1;
+    let mut q_coef = (0..(max_d + 1 - d))
+        .map(|_| FqOrder::zero())
+        .collect::<Vec<_>>();
+    q_coef[max_d - d] = FqOrder::one();
+    let q = Polynomial { coef: q_coef };
+    let r = p * &q;
+    r.eval_with_powers_on_curve(&pk.powers_1)
+}
+
+pub fn verify_degree_bound(
+    c: &CommitmentKZG,
+    proof: &ProofDegreeBound,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> bool {
+    let max_d = pk.powers_1.len() - 1;
+    optimal_ate_pairing(proof, &pk.powers_2[0]) == optimal_ate_pairing(c, &pk.powers_2[max_d - d])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -91,5 +133,25 @@ mod tests {
         // Verification
         let flag = verify_kzg(&z, &c, &proof, &pk);
         assert!(flag);
+    }
+
+    #[test]
+    fn test_degree_bound() {
+        let g1 = BN128::generator_g1();
+        let g2 = BN128::generator_g2();
+
+        let p = Polynomial::from_monomials(&[
+            FqOrder::from_value(-1),
+            FqOrder::from_value(-2),
+            FqOrder::from_value(-3),
+        ]);
+
+        let pk = setup_kzg(&g1, &g2, 4);
+
+        // Commitment
+        let c = commit_kzg(&p, &pk);
+
+        let proof = prove_degree_bound(&p, &pk, 3);
+        assert!(verify_degree_bound(&c, &proof, &pk, 3));
     }
 }
