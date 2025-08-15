@@ -122,7 +122,7 @@ pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicK
 
 ### Why this works:
 
-#### Completeness
+#### Correctness
 
 Expand both sides in the target group \\(G_T\\):
 
@@ -139,6 +139,10 @@ So the equality is exactly the exponent identity:
 
 which holds by the definition of \\(f_u(\alpha)\\). Thus a correct witness passes verification.
 
-#### Soundness
+#### Binding
+
+TBD
+
+#### Hiding
 
 TBD
