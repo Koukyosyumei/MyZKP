@@ -68,7 +68,7 @@ This \\(f_u\\) is a polynomial of degree \\(\leq d - 1\\) (because \\(X - u\\) d
     W = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'} = g_1^{\sum_{i=0}^{d-1} c'_i \alpha^{i}} = g_1^{f_u(\alpha)}
 \end{align*}
 
-Here, the prover can computes \\(W\\) only using the public key, and \\(\alpha\\) is not required.
+Finally, the prover submits the evaluation and the witness \\(\langle f(u), W \rangle \\) to the verifier.
 
 ```rust
 pub struct ProofKZG {
@@ -89,6 +89,8 @@ pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKeyKZG) -> Proo
     }
 }
 ```
+
+Here, the prover can computes \\(W\\) only using the public key, and \\(\alpha\\) is not required.
 
 ## Verification
 
@@ -141,13 +143,44 @@ which holds by the definition of \\(f_u(\alpha)\\). Thus a correct witness passe
 
 #### Binding
 
-The binding property of the KZG commitment protocol relies on the **t-Strong Diffie-Hellman (t-SDH) assumption**:
+The binding property of the KZG commitment protocol follows from the **t-Strong Diffie-Hellman (t-SDH)** assumption:
 
 ---
 
-*Let \\(\alpha\\) be a random point in \\(\mathbb{F}_p\\), and \\(g\\) be a generator of a group \\(G\\). Given as input a \\(d + 1\\)-tuple \\(\langle g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{t+1}\\), for every adversary \\(\mathcal{A}\\), the probability \\(Pr[\mathcal{A}(g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}) = \langle c, g^{\frac{1}{\alpha + c}} \rangle]\\) is negligible for any value of \\(c \in \mathbb{F}_p \setminus \\{-\alpha\\}\\).*
+*Let \\(\alpha\\) be a random point in \\(\mathbb{F}_p\\), and let \\(g\\) be a generator of a group \\(G\\). Given the \\(d + 1\\)-tuple \\(\langle G, g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{d+1}\\), no polynomial-time adversary \\(\mathcal{A}\\) can output a pair \\(\langle c, g^{\frac{1}{\alpha + c}} \rangle\\) for any value of \\(c \in \mathbb{F}_p \setminus \\{-\alpha\\}\\) with non-negligible probability.*
 
 ---
+
+Assume, for contradiction, that there exists an adversary \\(\mathcal{A}\\) that breaks the binding property of the KZG commitment. That is, \\(\mathcal{A}\\) produces two distinct valid openings of the same commitment \\(C\\) at the same evaluation point \\(u\\): \\(\langle y, W \rangle\\) and \\(\langle y', W' \rangle\\) with \\(y \neq y'\\). 
+
+We construct a reduction \\(\mathcal{B}\\) that uses \\(\mathcal{A}\\) to solve the t-SDH problem.
+
+Specifically, \\(\mathcal{B}\\) is given the t-SDH instance \\(\langle G_1, g_1, g_1^{\alpha}, \dots, g_1^{(\alpha^{t})} \rangle\\), and it sets the KZG public key to \\(\mathrm{PK} = (g_1, g_1^{\alpha}, \dots, g_1^{(\alpha^{t})}, g_2, g^{\alpha}_2)\\) and gives this \\(\mathrm{PK}\\) to \\(\mathcal{A}\\). Then, \\(\mathcal{A}\\) outputs a commitment \\(C\\) and two valid openings \\(\langle y, W \rangle\\) and \\(\langle y', W' \rangle\\) for the same \\(u \in \mathbb{F}_p\\) such that \\(y \neq y'\\). Both openings satisfy:
+
+\begin{align*}
+    e(C, g_2) = e(W, g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y} = e(W', g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y'}
+\end{align*}
+
+Since \\(g_1\\) is a generator of \\(G_1\\), there exist \\(\psi\\) and \\(\psi'\\) such that \\(W = g_1^{\psi}\\) and \\(W' = g_1^{\psi'}\\). Substitute into the pairing equations:
+
+\begin{align*}
+                &e(W, g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y} = e(W', g^{\alpha - u}) \cdot e(g_1, g_2)^{y'} \\\\
+    \Rightarrow &e(g_1^{\psi}, g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y} = e(g_1^{\psi'}, g^{\alpha - u}) \cdot e(g_1, g_2)^{y'} \\\\
+    \Rightarrow &g_T^{\psi \cdot (\alpha - u)} \cdot g_T^{y} = g_T^{\psi' \cdot (\alpha - u)} \cdot g_T^{y'} \\\\
+    \Rightarrow &\psi(\alpha - u) + y = \psi'(\alpha - u) + y' \\\\
+    \Rightarrow &(\psi - \psi')(\alpha - u) = y' - y \\\\
+    \Rightarrow &\frac{\psi - \psi'}{y' - y} = \frac{1}{\alpha - u}
+\end{align*}
+
+Therefore, \\(\mathcal{B}\\) can compute
+
+\begin{align*}
+    (\frac{W}{W'})^{\frac{1}{y' - y}} = (g_1^{\psi - \psi'})^{\frac{1}{y' - y}} = g_1^{\frac{1}{\alpha - u}}
+\end{align*}
+
+and outputs \\(\langle -u, g_1^{\frac{1}{\alpha - u}} \rangle\\), which is a valid solution to the t-SDH problem. 
+
+This constructino shows that \\(\mathcal{B}\\) can use \\(\mathcal{A}\\) to solve the t-SDH problem with the same success probability and withonly a constant-factor overhead in running time. Therefore, under the t-SDH assumption, the KZG commitment scheme is binding.
 
 #### Hiding
 
