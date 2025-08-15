@@ -5,8 +5,8 @@ use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
 pub struct PublicKeyKZG {
-    pub alpha_1: Vec<G1Point>,
-    pub alpha_2: Vec<G2Point>,
+    pub powers_1: Vec<G1Point>,
+    pub powers_2: Vec<G2Point>,
 }
 
 pub type CommitmentKZG = G1Point;
@@ -19,20 +19,20 @@ pub struct ProofKZG {
 pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
     let alpha = FqOrder::random_element(&[]);
 
-    let mut alpha_1 = Vec::with_capacity(n);
-    let mut s_power = FqOrder::one();
+    let mut powers_1 = Vec::with_capacity(n);
+    let mut alpha_power = FqOrder::one();
     for _ in 0..1 + n {
-        alpha_1.push(g1.mul_ref(s_power.clone().get_value()));
-        s_power = s_power * alpha.clone();
+        powers_1.push(g1.mul_ref(alpha_power.clone().get_value()));
+        alpha_power = alpha_power * alpha.clone();
     }
 
-    let alpha_2 = vec![g2.clone(), g2.mul_ref(alpha.get_value())];
+    let powers_2 = vec![g2.clone(), g2.mul_ref(alpha.get_value())];
 
-    PublicKeyKZG { alpha_1, alpha_2 }
+    PublicKeyKZG { powers_1, powers_2 }
 }
 
 pub fn commit_kzg(p: &Polynomial<FqOrder>, pk: &PublicKeyKZG) -> CommitmentKZG {
-    p.eval_with_powers_on_curve(&pk.alpha_1)
+    p.eval_with_powers_on_curve(&pk.powers_1)
 }
 
 pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKeyKZG) -> ProofKZG {
@@ -44,14 +44,14 @@ pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKeyKZG) -> Proo
     let q = (p - &y_poly) / Polynomial::<FqOrder>::from_monomials(&[z.clone()]);
     ProofKZG {
         y: y,
-        w: q.eval_with_powers_on_curve(&pk.alpha_1),
+        w: q.eval_with_powers_on_curve(&pk.powers_1),
     }
 }
 
 pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicKeyKZG) -> bool {
-    let g1 = &pk.alpha_1[0];
-    let g2 = &pk.alpha_2[0];
-    let g2_s = &pk.alpha_2[1];
+    let g1 = &pk.powers_1[0];
+    let g2 = &pk.powers_2[0];
+    let g2_s = &pk.powers_2[1];
     let g2_z = g2.mul_ref(z.clone().get_value());
     let g2_s_minus_z = g2_s.clone() - g2_z;
 
