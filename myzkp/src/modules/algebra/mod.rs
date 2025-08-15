@@ -1,6 +1,7 @@
 pub mod curve;
 pub mod efield;
 pub mod field;
+pub mod gemini;
 pub mod kzg;
 pub mod merkle;
 pub mod mpolynomials;

@@ -66,10 +66,12 @@ MyZKP is a growing library that provides:
 |             | `curve`     | Elliptic curve operations | [curve](./myzkp/src/modules/algebra/curve/)           |
 | **Arithmetization** | `r1cs` | Rank One Constraint System | [r1cs.rs](./myzkp/src/modules/arithmetization/r1cs.rs) |
 |             | `qap` | Quadratic Arithmetic Program | [qap.rs](./myzkp/src/modules/arithmetization/qap.rs) |
-| **zkSNARKs**| `tutorial_single_polynomial` | | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
-|             | `tutorial_snark` | | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
-|             | `pinocchio` | [Pinocchio Protocol](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](./myzkp/src/modules/zksnark/pinocchio.rs) |
-| **zkSTARKs**| `fri`       | [FRI](https://arxiv.org/abs/1903.12243) | [fri.rs](./myzkp/src/modules/zkstark/fri.rs) |
+| **Polynomial Commitment** | `kzg`| [Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.](https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11) | [kzg.rs](./myzkp/src/modules/algebra/kzg.rs) |
+|                           | `gemini`| [Bootle, Jonathan, et al. "Gemini: Elastic SNARKs for diverse environments." Annual International Conference on the Theory and Applications of Cryptographic Techniques. Cham: Springer International Publishing, 2022.](https://link.springer.com/chapter/10.1007/978-3-031-07085-3_15) | [gemini.rs](./myzkp/src/modules/algebra/gemini.rs) |
+| **zkSNARKs**| `tutorial_single_polynomial` | [Petkus, Maksym. "Why and how zk-snark works." arXiv preprint arXiv:1906.07221 (2019).](https://arxiv.org/abs/1906.07221) | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
+|             | `tutorial_snark` | [Petkus, Maksym. "Why and how zk-snark works." arXiv preprint arXiv:1906.07221 (2019).](https://arxiv.org/abs/1906.07221) | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
+|             | `pinocchio` | [Parno, Bryan, et al. "Pinocchio: Nearly practical verifiable computation." Communications of the ACM 59.2 (2016): 103-112.](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](./myzkp/src/modules/zksnark/pinocchio.rs) |
+| **zkSTARKs**| `fri`       | [Ben-Sasson, Eli, et al. "DEEP-FRI: sampling outside the box improves soundness." arXiv preprint arXiv:1903.12243 (2019).](https://arxiv.org/abs/1903.12243) | [fri.rs](./myzkp/src/modules/zkstark/fri.rs) |
 
 ## 🤝 Contributions are Welcome!
 

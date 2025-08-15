@@ -5,7 +5,7 @@ use blake2::{digest::consts::U32, Blake2b, Digest};
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
-use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
+use crate::modules::algebra::field::{Field, FiniteFieldElement};
 use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::ntt::{
