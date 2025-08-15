@@ -146,7 +146,7 @@ mod tests {
             FqOrder::from_value(-3),
         ]);
 
-        let pk = setup_kzg(&g1, &g2, 4);
+        let pk = setup_kzg_with_full_g2(&g1, &g2, 4);
 
         // Commitment
         let c = commit_kzg(&p, &pk);
