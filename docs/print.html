@@ -1462,8 +1462,8 @@ e(c, g_2) \overset{?}{=} e(g_1, g_2)^{y} \cdot e(W, g_2^{\alpha} \cdot g_2^{-u})
     e3 == e1 * (e2.pow(proof.y.get_value()))
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="why-this-works"><a class="header" href="#why-this-works">Why this works:</a></h3>
-<h4 id="correctness"><a class="header" href="#correctness">Correctness</a></h4>
+<h2 id="why-this-works"><a class="header" href="#why-this-works">Why this works:</a></h2>
+<h3 id="correctness"><a class="header" href="#correctness">Correctness</a></h3>
 <p>Expand both sides in the target group \(G_T\):</p>
 <ul>
 <li>\(e(c, g_2) = e(g_1^{f(\alpha)}, g_2) = g_T^{f(\alpha)}\)</li>
@@ -1475,7 +1475,7 @@ e(c, g_2) \overset{?}{=} e(g_1, g_2)^{y} \cdot e(W, g_2^{\alpha} \cdot g_2^{-u})
 f(\alpha) - f(u) = (\alpha - u) f_u(\alpha)
 \end{align*}</p>
 <p>which holds by the definition of \(f_u(\alpha)\). Thus a correct witness passes verification.</p>
-<h4 id="binding"><a class="header" href="#binding">Binding</a></h4>
+<h3 id="binding"><a class="header" href="#binding">Binding</a></h3>
 <p>The binding property of the KZG commitment protocol follows from the <strong>t-Strong Diffie-Hellman (t-SDH)</strong> assumption:</p>
 <hr />
 <p><em>Let \(\alpha\) be a random point in \(\mathbb{F}_p\), and let \(g\) be a generator of a group \(G\). Given the \(d + 1\)-tuple \(\langle G, g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{d+1}\), no polynomial-time adversary \(\mathcal{A}\) can output a pair \(\langle c, g^{\frac{1}{\alpha + c}} \rangle\) for any value of \(c \in \mathbb{F}_p \setminus \{-\alpha\}\) with non-negligible probability.</em></p>
@@ -1501,8 +1501,22 @@ e(C, g_2) = e(W, g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y} = e(W', g_2^{\alpha - u
 \end{align*}</p>
 <p>and outputs \(\langle -u, g_1^{\frac{1}{\alpha - u}} \rangle\), which is a valid solution to the t-SDH problem.</p>
 <p>This constructino shows that \(\mathcal{B}\) can use \(\mathcal{A}\) to solve the t-SDH problem with the same success probability and withonly a constant-factor overhead in running time. Therefore, under the t-SDH assumption, the KZG commitment scheme is binding.</p>
-<h4 id="hiding"><a class="header" href="#hiding">Hiding</a></h4>
+<h3 id="hiding"><a class="header" href="#hiding">Hiding</a></h3>
 <p>TBD</p>
+<h2 id="batch-proof"><a class="header" href="#batch-proof">Batch Proof</a></h2>
+<p>When the prover wants to open the same polynomial at multiple points, we can efficiently generate a witness that can prove those batched openings. Suppose the prover wants to open at \(k\) points \((u_1, u_2, \dots, u_k)\) whose evaluations are \((y_1, y_2, \dots, y_k)\). The setup and the commitment are the same with the above normal KZG commitment.</p>
+<p>We then introduce two new polynomials for the opening process. Let \(I(X)\) be a polynomial that interpolates \([(u_1, y_1), (u_2, y_2), \dots, (u_k, y_k)]\), and \(Z(X)\) be \(\prod_{i=1}^{k} (X - u_i)\). Then, we construct the quotient polynomial as follows:</p>
+<p>\begin{align*}
+f_u(X) = \frac{f(X) - I(X)}{Z(X)}
+\end{align*}</p>
+<p>Like the normal KZG commitment for a single opning point, the witness of the batch proof is defined as</p>
+<p>\begin{align*}
+W = g_1^{f_u(\alpha)}
+\end{align*}</p>
+<p>Finally, the verifier checks the correctness as follows:</p>
+<p>\begin{align*}
+e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
+\end{align*}</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gemini"><a class="header" href="#gemini">Gemini</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
 <p>zk-SNARK stands for "<strong>Z</strong>ero-<strong>K</strong>nowledge <strong>S</strong>uccinct <strong>N</strong>on-Interactive <strong>AR</strong>gument of <strong>K</strong>nowledge". It's a cryptographic proof protocol that allows one party (the prover) to convince an another party (the verifier) that they possess certain information, without even revealing the information itself.</p>

@@ -122,9 +122,9 @@ pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicK
 }
 ```
 
-### Why this works:
+## Why this works:
 
-#### Correctness
+### Correctness
 
 Expand both sides in the target group \\(G_T\\):
 
@@ -141,7 +141,7 @@ So the equality is exactly the exponent identity:
 
 which holds by the definition of \\(f_u(\alpha)\\). Thus a correct witness passes verification.
 
-#### Binding
+### Binding
 
 The binding property of the KZG commitment protocol follows from the **t-Strong Diffie-Hellman (t-SDH)** assumption:
 
@@ -182,6 +182,29 @@ and outputs \\(\langle -u, g_1^{\frac{1}{\alpha - u}} \rangle\\), which is a val
 
 This constructino shows that \\(\mathcal{B}\\) can use \\(\mathcal{A}\\) to solve the t-SDH problem with the same success probability and withonly a constant-factor overhead in running time. Therefore, under the t-SDH assumption, the KZG commitment scheme is binding.
 
-#### Hiding
+### Hiding
 
 TBD
+
+## Batch Proof
+
+When the prover wants to open the same polynomial at multiple points, we can efficiently generate a witness that can prove those batched openings. Suppose the prover wants to open at \\(k\\) points \\((u_1, u_2, \dots, u_k)\\) whose evaluations are \\((y_1, y_2, \dots, y_k)\\). The setup and the commitment are the same with the above normal KZG commitment.
+
+We then introduce two new polynomials for the opening process. Let \\(I(X)\\) be a polynomial that interpolates \\([(u_1, y_1), (u_2, y_2), \dots, (u_k, y_k)]\\), and \\(Z(X)\\) be \\(\prod_{i=1}^{k} (X - u_i)\\). Then, we construct the quotient polynomial as follows:
+
+\begin{align*}
+    f_u(X) = \frac{f(X) - I(X)}{Z(X)}
+\end{align*}
+
+Like the normal KZG commitment for a single opning point, the witness of the batch proof is defined as
+
+\begin{align*}
+    W = g_1^{f_u(\alpha)}
+\end{align*}
+
+Finally, the verifier checks the correctness as follows:
+
+\begin{align*}
+    e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
+\end{align*}
+
