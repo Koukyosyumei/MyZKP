@@ -1362,6 +1362,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <li><strong>Succinctness / efficiency:</strong> Commitments and opening proofs should be short (ideally constant size independent of polynomial degree), and verification should be much cheaper than re-evaluating \(f\) from its coefficients.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="kzg"><a class="header" href="#kzg">KZG</a></h1>
+<p><a href="https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11">Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.</a></p>
 <p>Let \(G_1\), \(G_2\), and \(G_T\) be groups such that there exists a bilinear mapping \(e: G_1 \times G_2 \to G_T\). Let \(g_1 \in G_1\) and \(g_2 \in G_2\) be fixed generators.</p>
 <p>We want a short commitment to a polynomial over \(\mathbb{F}\) denoted as \(f(X) = \sum_{i=0}^{d} c_{i} x^{i} \in \mathbb{F}_{q}[X]\) with a public maximum degree bound \(D\) such that \(d \leq D\). The prover produces a commitment \(C\) for this polynomial so that it cannot change the polynomial after that. Then, the prover submits a short witness that proves the value \(f(u)\) at a point \(u \in F_q\)</p>
 <h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
@@ -1518,6 +1519,7 @@ W = g_1^{f_u(\alpha)}
 e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
 \end{align*}</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gemini"><a class="header" href="#gemini">Gemini</a></h1>
+<p><a href="https://eprint.iacr.org/2022/420.pdf">Bootle, Jonathan, et al. "Gemini: Elastic SNARKs for diverse environments." Annual International Conference on the Theory and Applications of Cryptographic Techniques. Cham: Springer International Publishing, 2022.</a></p>
 <p>While many polynomial commitment schemes work for standard single-variable (univariate) polynomials, things get trickier when we deal with multilinear polynomials, which are polynomials with multiple variables where each variable has a maximum degree of one. The Gemini protocol offers an elegant way to handle these.</p>
 <h2 id="multilinear-polynomial"><a class="header" href="#multilinear-polynomial">Multilinear Polynomial</a></h2>
 <p>First, let's get a handle on the main object of interest. A multilinear polynomial with \(m\) variables (\(f(X_0, X_1, \dots, X_{m- 1})\)) can be written as a sum over all possible combinations of its variables. A general \(m\)-variate multilinear polynomial \(f\) is defined as:</p>
@@ -1647,6 +1649,7 @@ g^{(3)}(Y_3) &amp;= g_{E}^{(1)}(Y_3) + \rho_2 g_{O}^{(1)}(Y_3) \\
 g^{(i)}(X^2) &amp;= g_{E}^{(i-1)}(X) + \rho_{i-1} g_{O}^{(i-1)}(X) \\
 &amp;=\frac{g^{(i-1)}(X) + g^{(i-1)}(-X)}{2} + \rho_{i-1} \frac{g^{(i-1)}(X) - g^{(i-1)}(-X)}{2X}
 \end{align*}</p>
+<p>By the Schwartz–Zippel lemma, we can check this relationship by evaluating the polynomials at a random point, with only negligible probability of successful cheating.</p>
 <h2 id="the-protocol"><a class="header" href="#the-protocol">The protocol</a></h2>
 <p>At a high level, Gemini works as follows:</p>
 <ul>
@@ -1671,7 +1674,7 @@ g^{(i)}(\beta^2) = \frac{g^{(i-1)}(\beta) + g^{(i-1)}(-\beta)}{2} + \rho_{i-1} \
 <ol start="5">
 <li>Finally, the verifier checks that the last folded value \(g^{(m)}(\beta^2)\) is equal to the public target \(u\).</li>
 </ol>
-<p>For example, we can use KZG commitment scheme to commit and open the above polynomials.</p>
+<p>For example, we can use KZG commitment scheme to commit and open the above polynomials. We can leverage the batch proof of KZG to evaluate a polynomial at \(\beta\), \(-\beta\), and \(\beta^2\) at once, and degree-bound test to check the degree of each polynomial.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub type CommitmentGemini = Vec&lt;CommitmentKZG&gt;;

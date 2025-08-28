@@ -1,5 +1,7 @@
 # KZG
 
+[Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.](https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11)
+
 Let \\(G_1\\), \\(G_2\\), and \\(G_T\\) be groups such that there exists a bilinear mapping \\(e: G_1 \times G_2 \to G_T\\). Let \\(g_1 \in G_1\\) and \\(g_2 \in G_2\\) be fixed generators.
 
 We want a short commitment to a polynomial over \\(\mathbb{F}\\) denoted as \\(f(X) = \sum_{i=0}^{d} c_{i} x^{i} \in \mathbb{F}_{q}[X]\\) with a public maximum degree bound \\(D\\) such that \\(d \leq D\\). The prover produces a commitment \\(C\\) for this polynomial so that it cannot change the polynomial after that. Then, the prover submits a short witness that proves the value \\(f(u)\\) at a point \\(u \in F_q\\)

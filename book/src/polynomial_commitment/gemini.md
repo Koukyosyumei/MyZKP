@@ -1,5 +1,7 @@
 # Gemini
 
+[Bootle, Jonathan, et al. "Gemini: Elastic SNARKs for diverse environments." Annual International Conference on the Theory and Applications of Cryptographic Techniques. Cham: Springer International Publishing, 2022.](https://eprint.iacr.org/2022/420.pdf)
+
 While many polynomial commitment schemes work for standard single-variable (univariate) polynomials, things get trickier when we deal with multilinear polynomials, which are polynomials with multiple variables where each variable has a maximum degree of one. The Gemini protocol offers an elegant way to handle these.
 
 ## Multilinear Polynomial
@@ -163,6 +165,8 @@ The recurrence used between consecutive folded polynomials is:
                &=\frac{g^{(i-1)}(X) + g^{(i-1)}(-X)}{2} + \rho_{i-1} \frac{g^{(i-1)}(X) - g^{(i-1)}(-X)}{2X}
 \end{align*}
 
+By the Schwartz–Zippel lemma, we can check this relationship by evaluating the polynomials at a random point, with only negligible probability of successful cheating.
+
 ## The protocol
 
 At a high level, Gemini works as follows:
@@ -184,7 +188,7 @@ At a high level, Gemini works as follows:
 
 5. Finally, the verifier checks that the last folded value \\(g^{(m)}(\beta^2)\\) is equal to the public target \\(u\\).
 
-For example, we can use KZG commitment scheme to commit and open the above polynomials.
+For example, we can use KZG commitment scheme to commit and open the above polynomials. We can leverage the batch proof of KZG to evaluate a polynomial at \\(\beta\\), \\(-\beta\\), and \\(\beta^2\\) at once, and degree-bound test to check the degree of each polynomial.
 
 ```rust
 pub type CommitmentGemini = Vec<CommitmentKZG>;
