@@ -80,6 +80,62 @@ We then define a sequence of folded polynomials as follows:
 
 Intuitively, each folding step substitutes the known scalar \\(\rho_{i-1}\\) for one of the original variables, and reduces the number of remaining variables by one. After \\(m\\) folds, we obtain a constant equal to \\(f(\rho)\\), i.e., \\(g^{(m)}(\cdot) = u\\).
 
+```rust
+pub fn split_and_fold<F: Field>(
+    coef: &Vec<F>,
+    rhos: &Vec<F>,
+) -> Result<Vec<Polynomial<F>>, SplitFoldError> {
+    let n = coef.len();
+    if n.count_ones() != 1 {
+        return Err(SplitFoldError::CoefsNotPowerOfTwo { found: n });
+    }
+
+    let log2_n = int_log2(n);
+    if rhos.len() != log2_n as usize {
+        return Err(SplitFoldError::PointsLenMismatch {
+            expected: log2_n as usize,
+            found: rhos.len(),
+        });
+    }
+
+    let mut f = Polynomial::<F> { coef: coef.clone() };
+    let mut fs = vec![f.clone()];
+    for i in 1..(log2_n + 1) {
+        let f_e = Polynomial::<F> {
+            coef: f
+                .coef
+                .iter()
+                .enumerate()
+                .map(|(i, x)| if i % 2 == 0 { x.clone() } else { F::zero() })
+                .collect(),
+        };
+        let f_o = Polynomial::<F> {
+            coef: f
+                .coef
+                .iter()
+                .skip(1)
+                .enumerate()
+                .map(|(i, x)| if i % 2 == 0 { x.clone() } else { F::zero() })
+                .collect(),
+        };
+        let f_i = f_e + f_o * rhos[i as usize - 1].clone();
+
+        f = Polynomial::<F> {
+            coef: f_i
+                .coef
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| i % 2 == 0)
+                .map(|(_, x)| x.clone())
+                .collect(),
+        };
+        fs.push(f.clone());
+    }
+
+    Ok(fs)
+}
+```
+
 For example, the above three-variable example yeilds the following sequence, where \\(Y_i\\) denotes \\(X^{2^{i}}\\):
 
 \begin{align*}
@@ -107,13 +163,148 @@ The recurrence used between consecutive folded polynomials is:
                &=\frac{g^{(i-1)}(X) + g^{(i-1)}(-X)}{2} + \rho_{i-1} \frac{g^{(i-1)}(X) - g^{(i-1)}(-X)}{2X}
 \end{align*}
 
+## The protocol
 
+At a high level, Gemini works as follows:
 
-## Proving
+- **Pubic Inputs**: the evaluation points \\(\rho\\) and the value \\(u\\)
+- **Goal**: prover convinces verifier that \\(f(\rho) = u\\) (equivalently \\(g^{(m)}(\cdot) = u\\))
 
-Then, to prove the original claim saying that "I know a multilinear polynomial \\(f\\) whose evaluation on \\(\vec{\rho}\\) is \\(u\\)", where \\(\vec{\rho}\\) and \\(u\\) are public, the verifier first draws a random value \\(\beta\\) asks the prover to open each \\(g^{i}\\) on \\(\beta\\), \\(-\beta\\) and \\(\beta^2\\). Then, the verifier checks the above relation between \\(g^{(i-1)}\\) and \\(g^{(i)}\\), and whether \\(g^{(m)}(\beta) = u\\). This verification of each polynomial can be implemented with KZG commitmentm, and evaluation on \\(\beta\\), \\(-\beta\\) and \\(\beta^2\\) can be done with a batch proof of KZG commitmment.
+1. The prover commits all \\(g^{(i)}\\)
+2. Verifier samples a random value \\(\beta\\)
+3. For each round \\(u = 1, \dots, m\\), the verifier asks the prover to open:
+   - \\(g^{i-1}\\) at \\(\beta\\),
+   - \\(g^{i-1}\\) at \\(-\beta\\),
+   - \\(g^{i}\\) at \\(\beta^2\\)
+4. The verifier checks, for each \\(i\\), that the three opened values satisfy the recurrence:
 
-For example, suppose the following polynomial \\(f(X_0, X_1, X_2) = 1 + 2 X_0 + 3 X_1 + 4 X_0 X_1 + 5 X_2 + 6 X_0 X_2 + 7 X_1 X_2 + 8 X_0 X_1 X_2\\), and the following evaluatin point \\(\rho_0 = 1, \rho_1 = 2, \rho_2 = 3\\). \\(f(\rho_0, \rho_1, \rho_2) = 140\\). 
+\begin{align*}
+    g^{(i)}(\beta^2) = \frac{g^{(i-1)}(\beta) + g^{(i-1)}(-\beta)}{2} + \rho_{i-1} \frac{g^{(i-1)}(\beta) - g^{(i-1)}(-\beta)}{2\beta}
+\end{align*}
+
+5. Finally, the verifier checks that the last folded value \\(g^{(m)}(\beta^2)\\) is equal to the public target \\(u\\).
+
+For example, we can use KZG commitment scheme to commit and open the above polynomials.
+
+```rust
+pub type CommitmentGemini = Vec<CommitmentKZG>;
+
+pub struct ProofGemini {
+    es: Vec<ProofKZG>,
+    es_neg: Vec<ProofKZG>,
+    es_hat: Vec<ProofKZG>,
+    degree_proofs: Vec<ProofDegreeBound>,
+}
+
+pub fn commit_gemini(polys: &[Polynomial<FqOrder>], pk: &PublicKeyKZG) -> CommitmentGemini {
+    polys.iter().map(|p| commit_kzg(p, pk)).collect()
+}
+
+pub fn open_gemini(
+    polys: &[Polynomial<FqOrder>],
+    beta: &FqOrder,
+    pk: &PublicKeyKZG,
+) -> ProofGemini {
+    let num_polys = polys.len();
+    ProofGemini {
+        es: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, beta, pk))
+            .collect(),
+        es_neg: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, &(FqOrder::zero() - beta).sanitize(), pk))
+            .collect(),
+        es_hat: polys
+            .iter()
+            .skip(1)
+            .take(polys.len() - 2)
+            .map(|p| open_kzg(p, &beta.pow(2), pk))
+            .collect(),
+        degree_proofs: polys
+            .iter()
+            .enumerate()
+            .map(|(i, p)| prove_degree_bound(p, pk, 2_usize.pow((num_polys - i - 1) as u32)))
+            .collect(),
+    }
+}
+
+pub fn verify_gemini(
+    rhos: &Vec<FqOrder>,
+    mu: &FqOrder,
+    beta: &FqOrder,
+    commitment: &CommitmentGemini,
+    proof: &ProofGemini,
+    pk: &PublicKeyKZG,
+) -> bool {
+    let log2_n = rhos.len();
+    if log2_n != commitment.len() - 1 {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .zip(proof.degree_proofs.iter())
+        .enumerate()
+        .all(|(i, (c, p))| verify_degree_bound(c, p, pk, 2_usize.pow((log2_n - i) as u32)))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es.iter())
+        .all(|(c, p)| verify_kzg(beta, c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es_neg.iter())
+        .all(|(c, p)| verify_kzg(&(FqOrder::zero() - beta).sanitize(), c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .skip(1)
+        .take(commitment.len() - 2)
+        .zip(proof.es_hat.iter())
+        .all(|(c, p)| verify_kzg(&beta.pow(2), c, p, pk))
+    {
+        return false;
+    }
+    let es = proof.es.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    let es_neg = proof.es_neg.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    let mut es_hat = proof.es_hat.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+    es_hat.push(mu.clone());
+
+    let two = FqOrder::from_value(2);
+    (0..log2_n).all(|j| {
+        two.mul_ref(beta).mul_ref(&es_hat[j])
+            == beta.mul_ref(&es[j].add_ref(&es_neg[j]))
+                + rhos[j].mul_ref(&es[j].sub_ref(&es_neg[j]))
+    })
+}
+```
+
+### Example
+
+Take
+
+\begin{align*}
+    f(X_0, X_1, X_2) = 1 + 2 X_0 + 3 X_1 + 4 X_0 X_1 + 5 X_2 + 6 X_0 X_2 + 7 X_1 X_2 + 8 X_0 X_1 X_2
+\end{align*}
+
+so when packed into the univariate \\(g(X) = 1 + 2 X + 3 X^2 + 4 X^3 + 5 X^4 + 6 X^5 + 7 X^6 + 8 X^7\\).
+
+Let \\(rho = (1, 2, 3)\\). Then, \\f(\rho) = 140\\, which will be out public target \\(u\\) and yeild the following folded polynomials:
 
 \begin{align*}
     g^{(0)}(Y_0) &= 1 + 3 Y_0^2 + 5 Y_0^4 + 7 Y_0^6 + Y_0 (2 + 4 Y_0^2 + 6 Y_0^4 + 8 Y_0^6)  \\\\
@@ -125,7 +316,7 @@ For example, suppose the following polynomial \\(f(X_0, X_1, X_2) = 1 + 2 X_0 + 
     g^{(3)}(Y_3) &= 17 + 3 \cdot 41 = 140
 \end{align*}
 
-Let's use \\(\beta = 2\\).
+Choose \\(\beta = 2\\). Then, we can observe that the fold sequence evaluates numerically as:
 
 \begin{align*}
     g^{(0)}(2) &= 1793, \quad g^{(0)}(-2) = -711, \quad g^{(1)}(4) = 1167, \quad \frac{g^{(0)}(2) + g^{(0)}(-2)}{2} + 1 \cdot \frac{g^{(0)}(2) - g^{(0)}(-2)}{2 * 2} = 1167 \\\\
