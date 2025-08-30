@@ -212,6 +212,11 @@ This repository is a work in progress and may contain bugs or inaccuracies. Cont
 <li>🔗 <a href="https://koukyosyumei.github.io/MyZKP/number_theory/subsec6.html">Pairing</a></li>
 <li>🤔 <a href="https://koukyosyumei.github.io/MyZKP/number_theory/subsec7.html">Useful Assumptions</a></li>
 </ul>
+<p><strong>🌀Basic of Polynomial Commitment</strong></p>
+<ul>
+<li>⚔️ <a href="https://koukyosyumei.github.io/MyZKP/polynomial_commitment/kzg.html">KZG</a></li>
+<li>♊ <a href="https://koukyosyumei.github.io/MyZKP/polynomial_commitment/gemini.html">Gemini</a></li>
+</ul>
 <p><strong>🔒 Basic of zk-SNARKs</strong></p>
 <ul>
 <li>⚡ <a href="https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html">Arithmetization</a></li>
@@ -226,20 +231,6 @@ This repository is a work in progress and may contain bugs or inaccuracies. Cont
 <ul>
 <li>✍️ TBD</li>
 </ul>
-<h2 id="-code-reference"><a class="header" href="#-code-reference">🛠️ Code Reference</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Module</th><th>Submodule</th><th>Description</th><th>📂 Path</th></tr></thead><tbody>
-<tr><td><strong>albebra</strong></td><td><code>ring</code></td><td>Defines Ring</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/ring.rs">ring.rs</a></td></tr>
-<tr><td></td><td><code>field</code></td><td>Defines Finite Field</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/field.rs">field.rs</a></td></tr>
-<tr><td></td><td><code>efield</code></td><td>Field Extension (Galois Field)</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/efield.rs">efield.rs</a></td></tr>
-<tr><td></td><td><code>Polynomial</code></td><td>Polynomial Arithmetic</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/polynomial.rs">polynomial.rs</a></td></tr>
-<tr><td></td><td><code>curve</code></td><td>Elliptic curve operations</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/curve/">curve</a></td></tr>
-<tr><td><strong>Arithmetization</strong></td><td><code>r1cs</code></td><td>Rank One Constraint System</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/r1cs.rs">r1cs.rs</a></td></tr>
-<tr><td></td><td><code>qap</code></td><td>Quadratic Arithmetic Program</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/qap.rs">qap.rs</a></td></tr>
-<tr><td><strong>zkSNARKs</strong></td><td><code>tutorial_single_polynomial</code></td><td></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_single_polynomial/">tutorial_single_polynomial</a></td></tr>
-<tr><td></td><td><code>tutorial_snark</code></td><td></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_snark/">tutorial_snark</a></td></tr>
-<tr><td></td><td><code>pinocchio</code></td><td><a href="https://dl.acm.org/doi/abs/10.1145/2856449">Pinocchio Protocol</a></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/pinocchio.rs">pinocchio.rs</a></td></tr>
-</tbody></table>
-</div>
 <h2 id="-contributions-are-welcome"><a class="header" href="#-contributions-are-welcome">🤝 Contributions are Welcome!</a></h2>
 <p>We welcome your ideas, feedback, and contributions!</p>
 <p>💡 Here are ways to contribute:</p>
@@ -4008,22 +3999,6 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
