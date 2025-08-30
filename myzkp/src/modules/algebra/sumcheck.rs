@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt;
 
 use num_traits::Zero;
@@ -9,6 +10,7 @@ use crate::modules::algebra::kzg::{
     verify_degree_bound, verify_kzg, BatchProofKZG, CommitmentKZG, ProofDegreeBound, ProofKZG,
     PublicKeyKZG,
 };
+use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
@@ -53,9 +55,45 @@ impl Iterator for BitCombinations {
     }
 }
 
+pub fn build_gj_from_prefix<F: Field>(g: &MPolynomial<F>, rs: &Vec<F>) -> MPolynomial<F> {
+    let el = g.get_num_vars();
+    let j_sub_1 = rs.len();
+    assert!(el >= 1 && el > j_sub_1, "invalid sizes for sum-check round");
+    let comb = BitCombinations::new(el - 1 - j_sub_1, 0);
+
+    let mut g_j = MPolynomial::zero();
+    for c in comb {
+        let mut h = HashMap::new();
+        for (i, v) in rs.iter().enumerate() {
+            h.insert(i, v.clone());
+        }
+        for (i, v) in c.iter().enumerate() {
+            h.insert(i + 1 + j_sub_1, F::from_value(v.clone()));
+        }
+        g_j = &g_j + &(g.partial_evaluate(&h));
+    }
+
+    g_j
+}
+
+pub fn sumcheck_fold<F: Field>(g_j: &MPolynomial<F>, j: usize) -> F {
+    let el = g_j.get_num_vars();
+    let mut one = vec![F::zero(); el];
+    one[j] = F::one();
+    let zero = vec![F::zero(); el];
+    g_j.evaluate(&one) + g_j.evaluate(&zero)
+}
+
 #[cfg(test)]
 mod tests {
+    use std::hash::Hash;
+
+    use num_traits::One;
+
     use super::*;
+
+    use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+    use crate::modules::algebra::ring::Ring;
 
     #[test]
     fn test_bitcombinations() {
@@ -66,5 +104,29 @@ mod tests {
         let combinations = BitCombinations::new(3, 1);
         let vs = combinations.into_iter().collect::<Vec<_>>();
         assert_eq!(vs.len(), 7);
+    }
+
+    #[test]
+    fn test_check() {
+        type F = FiniteFieldElement<ModEIP197>;
+        let mut dict = HashMap::new();
+        dict.insert(vec![0, 0, 0], F::from_value(1));
+        dict.insert(vec![1, 0, 0], F::from_value(2));
+        dict.insert(vec![0, 1, 0], F::from_value(3));
+        dict.insert(vec![0, 1, 1], F::from_value(4));
+        dict.insert(vec![1, 1, 1], F::from_value(5));
+        let g = MPolynomial::new(dict);
+        println!("g: {}", g);
+
+        let comb = BitCombinations::new(3, 0);
+        let mut h: FiniteFieldElement<ModEIP197> = F::zero();
+        for c in comb {
+            let c_casted = c.iter().map(|v| F::from_value(*v)).collect::<Vec<_>>();
+            h = h + g.evaluate(&c_casted);
+        }
+        assert_eq!(h, F::from_value(41));
+
+        let g_0 = build_gj_from_prefix(&g, &vec![]);
+        assert_eq!(h, sumcheck_fold(&g_0, 0));
     }
 }

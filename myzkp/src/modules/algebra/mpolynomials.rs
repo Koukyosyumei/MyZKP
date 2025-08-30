@@ -27,6 +27,14 @@ impl<F: Field> MPolynomial<F> {
         }
     }
 
+    pub fn get_num_vars(&self) -> usize {
+        let mut num_vars = 0;
+        for (k, _) in &self.dictionary {
+            num_vars = std::cmp::max(num_vars, k.len());
+        }
+        num_vars
+    }
+
     pub fn zero() -> Self {
         MPolynomial {
             dictionary: HashMap::new(),
