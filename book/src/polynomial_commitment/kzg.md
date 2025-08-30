@@ -210,3 +210,63 @@ Finally, the verifier checks the correctness as follows:
     e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
 \end{align*}
 
+Note that we need to additionally include \\(\\{g_2^{(\alpha^i)}\\}_{i=2}^{k}\\) in the public key during the setup phase.
+
+## Degree Bound Proof
+
+When we want to ensure that the polunomial \\(f(X)\\) has degree at most \\(d\\), we can verify this property with a small modification to the standard KZG commitment scheme.
+
+The idea is to define
+
+\begin{align*}
+    h(X) = X^{D - d} \cdot f(X)
+\end{align*}
+
+, where \\(D\\) is the maximum supported degree in the public key. The degree bound proof works as follows:
+
+1. Along with the stanrad commitment \\(C\\), the prover also submits \\(g_1^{h(\alpha)}\\) to the verifier.
+2. The verifier checks the pairing equation:
+
+\begin{align*}
+e(g_1^{h(\alpha)}, g_2) \overset{?}{=} e(C, g_2^{\alpha^{D - d}})
+\end{align*}
+
+If the prover is honest, then the equality holds because \\(e(g_1^{h(\alpha)}, g_2) = e(g_1, g_2)^{\alpha^{D - d} \cdot f(\alpha)}\\) and \\(e(C, g_2^{\alpha^{D - d}}) = e(g_1, g_2)^{f(\alpha) \cdot \alpha^{D - d}}\\).
+
+If the degree of \\(f(X)\\) exceeds \\(d\\), then \\(h(X)\\) has degree larger than \\(D\\). In that case, the prover **cannot** compute \\(g_1^{h(\alpha)}\\) since the public key only contains up to \\(D\\)-th powers of \\(g_1^{\alpha}\\).
+
+Note that the public key must also include \\(\\{g_2^{(\alpha^i)}\\}_{i=2}^{D}\\).
+
+```rust
+pub fn prove_degree_bound(
+    p: &Polynomial<FqOrder>,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> ProofDegreeBound {
+    let max_d = pk.powers_1.len() - 1;
+    let mut q_coef = (0..(max_d + 1 - d))
+        .map(|_| FqOrder::zero())
+        .collect::<Vec<_>>();
+    q_coef[max_d - d] = FqOrder::one();
+    let q = Polynomial { coef: q_coef };
+    let r = p * &q;
+    r.eval_with_powers_on_curve(&pk.powers_1)
+}
+
+pub fn verify_degree_bound(
+    c: &CommitmentKZG,
+    proof: &ProofDegreeBound,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> bool {
+    let max_d = pk.powers_1.len() - 1;
+    optimal_ate_pairing(proof, &pk.powers_2[0]) == optimal_ate_pairing(c, &pk.powers_2[max_d - d])
+}
+```
+
+See the following papers for the detail about the degree bound proof:
+
+- Kohrita, Tohru, and Patrick Towa. "Zeromorph: Zero-knowledge multilinear-evaluation proofs from
+homomorphic univariate commitments." Cryptology ePrint Archive (2023). https://eprint.iacr.org/2023/917
+- Chiesa, Alessandro, Yuncong Hu, Mary Maller, et al. "Marlin: Preprocessing zkSNARKs with Universal
+and Updatable SRS." Cryptology ePrint Archive (2019). https://eprint.iacr.org/2019/1047
