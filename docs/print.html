@@ -212,6 +212,11 @@ This repository is a work in progress and may contain bugs or inaccuracies. Cont
 <li>🔗 <a href="https://koukyosyumei.github.io/MyZKP/number_theory/subsec6.html">Pairing</a></li>
 <li>🤔 <a href="https://koukyosyumei.github.io/MyZKP/number_theory/subsec7.html">Useful Assumptions</a></li>
 </ul>
+<p><strong>🌀Basic of Polynomial Commitment</strong></p>
+<ul>
+<li>⚔️ <a href="https://koukyosyumei.github.io/MyZKP/polynomial_commitment/kzg.html">KZG</a></li>
+<li>♊ <a href="https://koukyosyumei.github.io/MyZKP/polynomial_commitment/gemini.html">Gemini</a></li>
+</ul>
 <p><strong>🔒 Basic of zk-SNARKs</strong></p>
 <ul>
 <li>⚡ <a href="https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html">Arithmetization</a></li>
@@ -226,20 +231,6 @@ This repository is a work in progress and may contain bugs or inaccuracies. Cont
 <ul>
 <li>✍️ TBD</li>
 </ul>
-<h2 id="-code-reference"><a class="header" href="#-code-reference">🛠️ Code Reference</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Module</th><th>Submodule</th><th>Description</th><th>📂 Path</th></tr></thead><tbody>
-<tr><td><strong>albebra</strong></td><td><code>ring</code></td><td>Defines Ring</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/ring.rs">ring.rs</a></td></tr>
-<tr><td></td><td><code>field</code></td><td>Defines Finite Field</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/field.rs">field.rs</a></td></tr>
-<tr><td></td><td><code>efield</code></td><td>Field Extension (Galois Field)</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/efield.rs">efield.rs</a></td></tr>
-<tr><td></td><td><code>Polynomial</code></td><td>Polynomial Arithmetic</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/polynomial.rs">polynomial.rs</a></td></tr>
-<tr><td></td><td><code>curve</code></td><td>Elliptic curve operations</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/curve/">curve</a></td></tr>
-<tr><td><strong>Arithmetization</strong></td><td><code>r1cs</code></td><td>Rank One Constraint System</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/r1cs.rs">r1cs.rs</a></td></tr>
-<tr><td></td><td><code>qap</code></td><td>Quadratic Arithmetic Program</td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/qap.rs">qap.rs</a></td></tr>
-<tr><td><strong>zkSNARKs</strong></td><td><code>tutorial_single_polynomial</code></td><td></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_single_polynomial/">tutorial_single_polynomial</a></td></tr>
-<tr><td></td><td><code>tutorial_snark</code></td><td></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_snark/">tutorial_snark</a></td></tr>
-<tr><td></td><td><code>pinocchio</code></td><td><a href="https://dl.acm.org/doi/abs/10.1145/2856449">Pinocchio Protocol</a></td><td><a href="https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/pinocchio.rs">pinocchio.rs</a></td></tr>
-</tbody></table>
-</div>
 <h2 id="-contributions-are-welcome"><a class="header" href="#-contributions-are-welcome">🤝 Contributions are Welcome!</a></h2>
 <p>We welcome your ideas, feedback, and contributions!</p>
 <p>💡 Here are ways to contribute:</p>
@@ -1362,6 +1353,7 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
 <li><strong>Succinctness / efficiency:</strong> Commitments and opening proofs should be short (ideally constant size independent of polynomial degree), and verification should be much cheaper than re-evaluating \(f\) from its coefficients.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="kzg"><a class="header" href="#kzg">KZG</a></h1>
+<p><a href="https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11">Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.</a></p>
 <p>Let \(G_1\), \(G_2\), and \(G_T\) be groups such that there exists a bilinear mapping \(e: G_1 \times G_2 \to G_T\). Let \(g_1 \in G_1\) and \(g_2 \in G_2\) be fixed generators.</p>
 <p>We want a short commitment to a polynomial over \(\mathbb{F}\) denoted as \(f(X) = \sum_{i=0}^{d} c_{i} x^{i} \in \mathbb{F}_{q}[X]\) with a public maximum degree bound \(D\) such that \(d \leq D\). The prover produces a commitment \(C\) for this polynomial so that it cannot change the polynomial after that. Then, the prover submits a short witness that proves the value \(f(u)\) at a point \(u \in F_q\)</p>
 <h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
@@ -1462,8 +1454,8 @@ e(c, g_2) \overset{?}{=} e(g_1, g_2)^{y} \cdot e(W, g_2^{\alpha} \cdot g_2^{-u})
     e3 == e1 * (e2.pow(proof.y.get_value()))
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="why-this-works"><a class="header" href="#why-this-works">Why this works:</a></h3>
-<h4 id="correctness"><a class="header" href="#correctness">Correctness</a></h4>
+<h2 id="why-this-works"><a class="header" href="#why-this-works">Why this works:</a></h2>
+<h3 id="correctness"><a class="header" href="#correctness">Correctness</a></h3>
 <p>Expand both sides in the target group \(G_T\):</p>
 <ul>
 <li>\(e(c, g_2) = e(g_1^{f(\alpha)}, g_2) = g_T^{f(\alpha)}\)</li>
@@ -1475,7 +1467,7 @@ e(c, g_2) \overset{?}{=} e(g_1, g_2)^{y} \cdot e(W, g_2^{\alpha} \cdot g_2^{-u})
 f(\alpha) - f(u) = (\alpha - u) f_u(\alpha)
 \end{align*}</p>
 <p>which holds by the definition of \(f_u(\alpha)\). Thus a correct witness passes verification.</p>
-<h4 id="binding"><a class="header" href="#binding">Binding</a></h4>
+<h3 id="binding"><a class="header" href="#binding">Binding</a></h3>
 <p>The binding property of the KZG commitment protocol follows from the <strong>t-Strong Diffie-Hellman (t-SDH)</strong> assumption:</p>
 <hr />
 <p><em>Let \(\alpha\) be a random point in \(\mathbb{F}_p\), and let \(g\) be a generator of a group \(G\). Given the \(d + 1\)-tuple \(\langle G, g, g^{\alpha}, g^{(\alpha^2)}, \dots g^{(\alpha^t)}  \rangle \in G^{d+1}\), no polynomial-time adversary \(\mathcal{A}\) can output a pair \(\langle c, g^{\frac{1}{\alpha + c}} \rangle\) for any value of \(c \in \mathbb{F}_p \setminus \{-\alpha\}\) with non-negligible probability.</em></p>
@@ -1501,9 +1493,361 @@ e(C, g_2) = e(W, g_2^{\alpha - u}) \cdot e(g_1, g_2)^{y} = e(W', g_2^{\alpha - u
 \end{align*}</p>
 <p>and outputs \(\langle -u, g_1^{\frac{1}{\alpha - u}} \rangle\), which is a valid solution to the t-SDH problem.</p>
 <p>This constructino shows that \(\mathcal{B}\) can use \(\mathcal{A}\) to solve the t-SDH problem with the same success probability and withonly a constant-factor overhead in running time. Therefore, under the t-SDH assumption, the KZG commitment scheme is binding.</p>
-<h4 id="hiding"><a class="header" href="#hiding">Hiding</a></h4>
+<h3 id="hiding"><a class="header" href="#hiding">Hiding</a></h3>
 <p>TBD</p>
+<h2 id="batch-proof"><a class="header" href="#batch-proof">Batch Proof</a></h2>
+<p>When the prover wants to open the same polynomial at multiple points, we can efficiently generate a witness that can prove those batched openings. Suppose the prover wants to open at \(k\) points \((u_1, u_2, \dots, u_k)\) whose evaluations are \((y_1, y_2, \dots, y_k)\). The setup and the commitment are the same with the above normal KZG commitment.</p>
+<p>We then introduce two new polynomials for the opening process. Let \(I(X)\) be a polynomial that interpolates \([(u_1, y_1), (u_2, y_2), \dots, (u_k, y_k)]\), and \(Z(X)\) be \(\prod_{i=1}^{k} (X - u_i)\). Then, we construct the quotient polynomial as follows:</p>
+<p>\begin{align*}
+f_u(X) = \frac{f(X) - I(X)}{Z(X)}
+\end{align*}</p>
+<p>Like the normal KZG commitment for a single opning point, the witness of the batch proof is defined as</p>
+<p>\begin{align*}
+W = g_1^{f_u(\alpha)}
+\end{align*}</p>
+<p>Finally, the verifier checks the correctness as follows:</p>
+<p>\begin{align*}
+e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
+\end{align*}</p>
+<p>Note that we need to additionally include \(\{g_2^{(\alpha^i)}\}_{i=2}^{k}\) in the public key during the setup phase.</p>
+<h2 id="degree-bound-proof"><a class="header" href="#degree-bound-proof">Degree Bound Proof</a></h2>
+<p>When we want to ensure that the polunomial \(f(X)\) has degree at most \(d\), we can verify this property with a small modification to the standard KZG commitment scheme.</p>
+<p>The idea is to define</p>
+<p>\begin{align*}
+h(X) = X^{D - d} \cdot f(X)
+\end{align*}</p>
+<p>, where \(D\) is the maximum supported degree in the public key. The degree bound proof works as follows:</p>
+<ol>
+<li>Along with the stanrad commitment \(C\), the prover also submits \(g_1^{h(\alpha)}\) to the verifier.</li>
+<li>The verifier checks the pairing equation:</li>
+</ol>
+<p>\begin{align*}
+e(g_1^{h(\alpha)}, g_2) \overset{?}{=} e(C, g_2^{\alpha^{D - d}})
+\end{align*}</p>
+<p>If the prover is honest, then the equality holds because \(e(g_1^{h(\alpha)}, g_2) = e(g_1, g_2)^{\alpha^{D - d} \cdot f(\alpha)}\) and \(e(C, g_2^{\alpha^{D - d}}) = e(g_1, g_2)^{f(\alpha) \cdot \alpha^{D - d}}\).</p>
+<p>If the degree of \(f(X)\) exceeds \(d\), then \(h(X)\) has degree larger than \(D\). In that case, the prover <strong>cannot</strong> compute \(g_1^{h(\alpha)}\) since the public key only contains up to \(D\)-th powers of \(g_1^{\alpha}\).</p>
+<p>Note that the public key must also include \(\{g_2^{(\alpha^i)}\}_{i=2}^{D}\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn prove_degree_bound(
+    p: &amp;Polynomial&lt;FqOrder&gt;,
+    pk: &amp;PublicKeyKZG,
+    d: usize,
+) -&gt; ProofDegreeBound {
+    let max_d = pk.powers_1.len() - 1;
+    let mut q_coef = (0..(max_d + 1 - d))
+        .map(|_| FqOrder::zero())
+        .collect::&lt;Vec&lt;_&gt;&gt;();
+    q_coef[max_d - d] = FqOrder::one();
+    let q = Polynomial { coef: q_coef };
+    let r = p * &amp;q;
+    r.eval_with_powers_on_curve(&amp;pk.powers_1)
+}
+
+pub fn verify_degree_bound(
+    c: &amp;CommitmentKZG,
+    proof: &amp;ProofDegreeBound,
+    pk: &amp;PublicKeyKZG,
+    d: usize,
+) -&gt; bool {
+    let max_d = pk.powers_1.len() - 1;
+    optimal_ate_pairing(proof, &amp;pk.powers_2[0]) == optimal_ate_pairing(c, &amp;pk.powers_2[max_d - d])
+}
+<span class="boring">}</span></code></pre></pre>
+<p>See the following papers for the detail about the degree bound proof:</p>
+<ul>
+<li>Kohrita, Tohru, and Patrick Towa. "Zeromorph: Zero-knowledge multilinear-evaluation proofs from
+homomorphic univariate commitments." Cryptology ePrint Archive (2023). https://eprint.iacr.org/2023/917</li>
+<li>Chiesa, Alessandro, Yuncong Hu, Mary Maller, et al. "Marlin: Preprocessing zkSNARKs with Universal
+and Updatable SRS." Cryptology ePrint Archive (2019). https://eprint.iacr.org/2019/1047</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gemini"><a class="header" href="#gemini">Gemini</a></h1>
+<p><a href="https://eprint.iacr.org/2022/420.pdf">Bootle, Jonathan, et al. "Gemini: Elastic SNARKs for diverse environments." Annual International Conference on the Theory and Applications of Cryptographic Techniques. Cham: Springer International Publishing, 2022.</a></p>
+<p>While many polynomial commitment schemes work for standard single-variable (univariate) polynomials, things get trickier when we deal with multilinear polynomials, which are polynomials with multiple variables where each variable has a maximum degree of one. The Gemini protocol offers an elegant way to handle these.</p>
+<h2 id="multilinear-polynomial"><a class="header" href="#multilinear-polynomial">Multilinear Polynomial</a></h2>
+<p>First, let's get a handle on the main object of interest. A multilinear polynomial with \(m\) variables (\(f(X_0, X_1, \dots, X_{m- 1})\)) can be written as a sum over all possible combinations of its variables. A general \(m\)-variate multilinear polynomial \(f\) is defined as:</p>
+<p>\begin{align*}
+f(X_0, X_1, \dots, X_{m-1}) = \sum_{i = 0}^{2^m-1} c_i \prod_{j=0}^{m-1} X_j^{b_j(i)}
+\end{align*}</p>
+<p>Here, \(c_i\) is the \(i\)-th coefficient, and \((b_{m-1}(i), \dots, b_0(i))\) is the binary representation of the number \(i\). THis formula just means we sum up terms where each variable \(X_{j}\) is either present or absent.</p>
+<p>For example, a three-variable (\(m = 3\)) multilinear polynomial looks like this:</p>
+<p>\begin{align*}
+f(X_0, X_1, X_2) = c_{000} + c_{100} X_0 + c_{010} X_1 + c_{110} X_0 X_1 + c_{001} X_2 + c_{101} X_0 X_2 + c_{011} X_1 X_2 + c_{111} X_0 X_1 X_2
+\end{align*}</p>
+<p>The subscript of each coefficient \(c\) tells you which variables are in that term. For instance, \(c_{110}\) is the coefficient of the \(X_0 X_1\) term (reading the bits from right to left as \(i_0\),\(i_1\),\(i_2\)).</p>
+<h2 id="problem"><a class="header" href="#problem">Problem</a></h2>
+<p>Our goal is to create a commitment scheme for these polynomials. Specifically, a Prover wants to commit to a multilinear polynomial \(f\) and then convince a Verifier that for a specific, publicly known point \(\rho = (\rho_0, \rho_1, \dots, \rho_{m-1})\) and a public value \(u\), the following statement is true:</p>
+<p>\begin{align*}
+f(\rho) = u
+\end{align*}</p>
+<p>The Prover must prove this without revealing the entire polynomial \(f\).</p>
+<h2 id="key-idea"><a class="header" href="#key-idea">Key idea</a></h2>
+<p>Here's the core idea of Gemini: <strong>transform the multivariable problem into a series of single-variable problems</strong>, which are much easier to handle.</p>
+<p>We first take the \(2^{m}\) coefficients of our multilinear polynomial \(f\) and use them to define a new <strong>univariate</strong> polynomial \(g\) of degree \(2^{m} - 1\).</p>
+<p>\begin{align*}
+g(X) = \sum_{i=0}^{2^{m} - 1} c_{i} X^{i}
+\end{align*}</p>
+<p>Using our three-variable example, the corresponding univariate polynomial \(g(X)\) would be:</p>
+<p>\begin{align*}
+g(X) = c_{000} + c_{100} X + c_{010} X^2 + c_{110} X^3 + c_{001} X^4 + c_{101} X^5 + c_{011} X^6 + c_{111} X^7
+\end{align*}</p>
+<h3 id="split-and-fold"><a class="header" href="#split-and-fold">Split and Fold</a></h3>
+<p>Then, we are going to recursively fold this univariate polynomialan univariate polynomial with the <strong>folding</strong> trick, which repeatedly halves the degree by separating even and odd exponents:</p>
+<p>For any univariate polynomial \(g(X)\), we can write:</p>
+<p>\begin{align*}
+g(X) = g_E(X) + X \cdot g_O(X)
+\end{align*}, where</p>
+<p>\begin{align*}
+g_E(X) = \frac{g(X) + g(-X)}{2}, \quad \quad g_O(X) = \frac{g(X) - g(-X)}{2X}
+\end{align*}</p>
+<p>Here, \(g_E\) contains the even exponents of \(g\) and \(g_O\) contains the shifted odd exponents.</p>
+<p>\begin{align*}
+g_E(X) = \sum_{i=0}^{\frac{m+1}{2} - 1} c_{2i} X^{2i}, \quad \quad g_O(X) = \sum_{i=0}^{\frac{m+1}{2} - 1} c_{2i + 1} X^{2i}
+\end{align*}</p>
+<p>Now treat \(Y := X^2\). Because the even and odd parts only use powers \(X^{2k}\), both \(g_E\) and \(g_O\) can be seen as polynomials in \(Y\) with half the degree.</p>
+<p>We then define a sequence of folded polynomials as follows:</p>
+<p>\begin{align*}
+g^{(0)}(X) &amp;:= g(X) \\
+g^{(1)}(X) &amp;:= g_E^{(0)}(X) + \rho_0 g_O^{(0)}(X) \\
+g^{(2)}(X^2) &amp;:= g_E^{(1)}(X^2) + \rho_1 g_O^{(1)}(X^2) \\
+&amp;\quad\vdots \\
+g^{(m)}(X^{2^{m-1}}) &amp;:= g_E^{(m-1)}(X^{2^{m-1}}) + \rho_{m-1} g_O^{(m-1)}(X^{2^{m-1}}) = (\text{a constant}) \\
+\end{align*}</p>
+<p>Intuitively, each folding step substitutes the known scalar \(\rho_{i-1}\) for one of the original variables, and reduces the number of remaining variables by one. After \(m\) folds, we obtain a constant equal to \(f(\rho)\), i.e., \(g^{(m)}(\cdot) = u\).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn split_and_fold&lt;F: Field&gt;(
+    coef: &amp;Vec&lt;F&gt;,
+    rhos: &amp;Vec&lt;F&gt;,
+) -&gt; Result&lt;Vec&lt;Polynomial&lt;F&gt;&gt;, SplitFoldError&gt; {
+    let n = coef.len();
+    if n.count_ones() != 1 {
+        return Err(SplitFoldError::CoefsNotPowerOfTwo { found: n });
+    }
+
+    let log2_n = int_log2(n);
+    if rhos.len() != log2_n as usize {
+        return Err(SplitFoldError::PointsLenMismatch {
+            expected: log2_n as usize,
+            found: rhos.len(),
+        });
+    }
+
+    let mut f = Polynomial::&lt;F&gt; { coef: coef.clone() };
+    let mut fs = vec![f.clone()];
+    for i in 1..(log2_n + 1) {
+        let f_e = Polynomial::&lt;F&gt; {
+            coef: f
+                .coef
+                .iter()
+                .enumerate()
+                .map(|(i, x)| if i % 2 == 0 { x.clone() } else { F::zero() })
+                .collect(),
+        };
+        let f_o = Polynomial::&lt;F&gt; {
+            coef: f
+                .coef
+                .iter()
+                .skip(1)
+                .enumerate()
+                .map(|(i, x)| if i % 2 == 0 { x.clone() } else { F::zero() })
+                .collect(),
+        };
+        let f_i = f_e + f_o * rhos[i as usize - 1].clone();
+
+        f = Polynomial::&lt;F&gt; {
+            coef: f_i
+                .coef
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| i % 2 == 0)
+                .map(|(_, x)| x.clone())
+                .collect(),
+        };
+        fs.push(f.clone());
+    }
+
+    Ok(fs)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>For example, the above three-variable example yeilds the following sequence, where \(Y_i\) denotes \(X^{2^{i}}\):</p>
+<p>\begin{align*}
+g^{(0)}(Y_0) &amp;= c_{000} + c_{100} Y_0 + c_{010} Y_0^2 + c_{110} Y_0^3 + c_{001} Y_0^4 + c_{101} Y_0^5 + c_{011} Y_0^6 + c_{111} Y_0^7 \\
+&amp;= c_{000} + c_{010} Y_0^2 + c_{001} Y_0^4 + c_{011} Y_0^6 + Y_0 (c_{100} + c_{110} Y_0^2 + c_{101} Y_0^4 + c_{111} Y_0^6) \\
+g^{(1)}(Y_1) &amp;= g_{E}^{(0)}(Y_1) + \rho_0 g_{O}^{(0)}(Y_1) \\
+&amp;= c_{000} + c_{010} Y_1 + c_{001} Y_1^2 + c_{011} Y_1^3 + \rho_0 (c_{100} + c_{110} Y_1 + c_{101} Y_1^2 + c_{111} Y_1^3) \\
+&amp;= (c_{000} + \rho_0  c_{100}) + (c_{010} + \rho_0  c_{110}) Y_1 + (c_{001} + \rho_0  c_{101}) Y_1^2 + (c_{011} + \rho_0  c_{111}) Y_1^3 \\
+&amp;= (c_{000} + \rho_0  c_{100}) + (c_{001} + \rho_0  c_{101}) Y_1^2 + Y_1 ((c_{010} + \rho_0  c_{110}) + (c_{011} + \rho_0  c_{111}) Y_1^2) \\
+g^{(2)}(Y_2) &amp;= g_{E}^{(1)}(Y_2) + \rho_1 g_{O}^{(1)}(Y_2) \\
+&amp;= (c_{000} + \rho_0  c_{100}) + (c_{001} + \rho_0  c_{101}) Y_2 + \rho_1 ((c_{010} + \rho_0  c_{110}) + (c_{011} + \rho_0  c_{111}) Y_2) \\
+&amp;= (c_{000} + \rho_0  c_{100} + \rho_1 c_{010} + \rho_0 \rho_1 c_{110}) + Y_2 (c_{001} + \rho_0 c_{101} + \rho_1 c_{011} + \rho_0 \rho_1 c_{111}) \\
+g^{(3)}(Y_3) &amp;= g_{E}^{(1)}(Y_3) + \rho_2 g_{O}^{(1)}(Y_3) \\
+&amp;= (c_{000} + \rho_0  c_{100} + \rho_1 c_{010} + \rho_0 \rho_1 c_{110}) + \rho_2 (c_{001} + \rho_0 c_{101} + \rho_1 c_{011} + \rho_0 \rho_1 c_{111}) \\
+&amp;= c_{000} + \rho_0  c_{100} + \rho_1 c_{010} + \rho_0 \rho_1 c_{110} + \rho_2 c_{001} + \rho_0 \rho_2 c_{101} + \rho_1 \rho_2 c_{011} + \rho_0 \rho_1 \rho_2 c_{111} \\
+&amp;= u
+\end{align*}</p>
+<h3 id="relationship-used-for-verification"><a class="header" href="#relationship-used-for-verification">Relationship used for verification</a></h3>
+<p>The recurrence used between consecutive folded polynomials is:</p>
+<p>\begin{align*}
+g^{(i)}(X^2) &amp;= g_{E}^{(i-1)}(X) + \rho_{i-1} g_{O}^{(i-1)}(X) \\
+&amp;=\frac{g^{(i-1)}(X) + g^{(i-1)}(-X)}{2} + \rho_{i-1} \frac{g^{(i-1)}(X) - g^{(i-1)}(-X)}{2X}
+\end{align*}</p>
+<p>By the Schwartz–Zippel lemma, we can check this relationship by evaluating the polynomials at a random point, with only negligible probability of successful cheating.</p>
+<h2 id="the-protocol"><a class="header" href="#the-protocol">The protocol</a></h2>
+<p>At a high level, Gemini works as follows:</p>
+<ul>
+<li><strong>Pubic Inputs</strong>: the evaluation points \(\rho\) and the value \(u\)</li>
+<li><strong>Goal</strong>: prover convinces verifier that \(f(\rho) = u\) (equivalently \(g^{(m)}(\cdot) = u\))</li>
+</ul>
+<ol>
+<li>The prover commits all \(g^{(i)}\)</li>
+<li>Verifier samples a random value \(\beta\)</li>
+<li>For each round \(u = 1, \dots, m\), the verifier asks the prover to open:
+<ul>
+<li>\(g^{i-1}\) at \(\beta\),</li>
+<li>\(g^{i-1}\) at \(-\beta\),</li>
+<li>\(g^{i}\) at \(\beta^2\)</li>
+</ul>
+</li>
+<li>The verifier checks, for each \(i\), that the three opened values satisfy the recurrence:</li>
+</ol>
+<p>\begin{align*}
+g^{(i)}(\beta^2) = \frac{g^{(i-1)}(\beta) + g^{(i-1)}(-\beta)}{2} + \rho_{i-1} \frac{g^{(i-1)}(\beta) - g^{(i-1)}(-\beta)}{2\beta}
+\end{align*}</p>
+<ol start="5">
+<li>Finally, the verifier checks that the last folded value \(g^{(m)}(\beta^2)\) is equal to the public target \(u\).</li>
+</ol>
+<p>For example, we can use KZG commitment scheme to commit and open the above polynomials. We can leverage the batch proof of KZG to evaluate a polynomial at \(\beta\), \(-\beta\), and \(\beta^2\) at once, and degree-bound test to check the degree of each polynomial.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub type CommitmentGemini = Vec&lt;CommitmentKZG&gt;;
+
+pub struct ProofGemini {
+    es: Vec&lt;ProofKZG&gt;,
+    es_neg: Vec&lt;ProofKZG&gt;,
+    es_hat: Vec&lt;ProofKZG&gt;,
+    degree_proofs: Vec&lt;ProofDegreeBound&gt;,
+}
+
+pub fn commit_gemini(polys: &amp;[Polynomial&lt;FqOrder&gt;], pk: &amp;PublicKeyKZG) -&gt; CommitmentGemini {
+    polys.iter().map(|p| commit_kzg(p, pk)).collect()
+}
+
+pub fn open_gemini(
+    polys: &amp;[Polynomial&lt;FqOrder&gt;],
+    beta: &amp;FqOrder,
+    pk: &amp;PublicKeyKZG,
+) -&gt; ProofGemini {
+    let num_polys = polys.len();
+    ProofGemini {
+        es: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, beta, pk))
+            .collect(),
+        es_neg: polys
+            .iter()
+            .take(polys.len() - 1)
+            .map(|p| open_kzg(p, &amp;(FqOrder::zero() - beta).sanitize(), pk))
+            .collect(),
+        es_hat: polys
+            .iter()
+            .skip(1)
+            .take(polys.len() - 2)
+            .map(|p| open_kzg(p, &amp;beta.pow(2), pk))
+            .collect(),
+        degree_proofs: polys
+            .iter()
+            .enumerate()
+            .map(|(i, p)| prove_degree_bound(p, pk, 2_usize.pow((num_polys - i - 1) as u32)))
+            .collect(),
+    }
+}
+
+pub fn verify_gemini(
+    rhos: &amp;Vec&lt;FqOrder&gt;,
+    mu: &amp;FqOrder,
+    beta: &amp;FqOrder,
+    commitment: &amp;CommitmentGemini,
+    proof: &amp;ProofGemini,
+    pk: &amp;PublicKeyKZG,
+) -&gt; bool {
+    let log2_n = rhos.len();
+    if log2_n != commitment.len() - 1 {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .zip(proof.degree_proofs.iter())
+        .enumerate()
+        .all(|(i, (c, p))| verify_degree_bound(c, p, pk, 2_usize.pow((log2_n - i) as u32)))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es.iter())
+        .all(|(c, p)| verify_kzg(beta, c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .take(commitment.len() - 1)
+        .zip(proof.es_neg.iter())
+        .all(|(c, p)| verify_kzg(&amp;(FqOrder::zero() - beta).sanitize(), c, p, pk))
+    {
+        return false;
+    }
+
+    if !commitment
+        .iter()
+        .skip(1)
+        .take(commitment.len() - 2)
+        .zip(proof.es_hat.iter())
+        .all(|(c, p)| verify_kzg(&amp;beta.pow(2), c, p, pk))
+    {
+        return false;
+    }
+    let es = proof.es.iter().map(|p| p.y.clone()).collect::&lt;Vec&lt;_&gt;&gt;();
+    let es_neg = proof.es_neg.iter().map(|p| p.y.clone()).collect::&lt;Vec&lt;_&gt;&gt;();
+    let mut es_hat = proof.es_hat.iter().map(|p| p.y.clone()).collect::&lt;Vec&lt;_&gt;&gt;();
+    es_hat.push(mu.clone());
+
+    let two = FqOrder::from_value(2);
+    (0..log2_n).all(|j| {
+        two.mul_ref(beta).mul_ref(&amp;es_hat[j])
+            == beta.mul_ref(&amp;es[j].add_ref(&amp;es_neg[j]))
+                + rhos[j].mul_ref(&amp;es[j].sub_ref(&amp;es_neg[j]))
+    })
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
+<p>Take</p>
+<p>\begin{align*}
+f(X_0, X_1, X_2) = 1 + 2 X_0 + 3 X_1 + 4 X_0 X_1 + 5 X_2 + 6 X_0 X_2 + 7 X_1 X_2 + 8 X_0 X_1 X_2
+\end{align*}</p>
+<p>so when packed into the univariate \(g(X) = 1 + 2 X + 3 X^2 + 4 X^3 + 5 X^4 + 6 X^5 + 7 X^6 + 8 X^7\).</p>
+<p>Let \(rho = (1, 2, 3)\). Then, \f(\rho) = 140\, which will be out public target \(u\) and yeild the following folded polynomials:</p>
+<p>\begin{align*}
+g^{(0)}(Y_0) &amp;= 1 + 3 Y_0^2 + 5 Y_0^4 + 7 Y_0^6 + Y_0 (2 + 4 Y_0^2 + 6 Y_0^4 + 8 Y_0^6)  \\
+g^{(1)}(Y_1) &amp;= 1 + 3 Y_1 + 5 Y_1^2 + 7 Y_1^3 + (2 + 4 Y_1 + 6 Y_1^2 + 8 Y_1^3) \\
+&amp;= 3 + 7 Y_1 + 11 Y_1^2 + 15 Y_1^3\\
+&amp;= 3 + 11 Y_1^2 + Y_1 (7 + 15 Y_1^2) \\
+g^{(2)}(Y_2) &amp;= 3 + 11 Y_2 + 2 (7 + 15 Y_2)\\
+&amp;= 17 + Y_2 (41) \\
+g^{(3)}(Y_3) &amp;= 17 + 3 \cdot 41 = 140
+\end{align*}</p>
+<p>Choose \(\beta = 2\). Then, we can observe that the fold sequence evaluates numerically as:</p>
+<p>\begin{align*}
+g^{(0)}(2) &amp;= 1793, \quad g^{(0)}(-2) = -711, \quad g^{(1)}(4) = 1167, \quad \frac{g^{(0)}(2) + g^{(0)}(-2)}{2} + 1 \cdot \frac{g^{(0)}(2) - g^{(0)}(-2)}{2 * 2} = 1167 \\
+g^{(1)}(2) &amp;= 181, \quad g^{(1)}(-2) = -87, \quad g^{(2)}(4) = 181, \quad \frac{g^{(1)}(2) + g^{(1)}(-2)}{2} + 2 \cdot \frac{g^{(1)}(2) - g^{(1)}(-2)}{2 * 2} = 181 \\
+g^{(2)}(2) &amp;= 99, \quad g^{(2)}(-2) = -65, \quad g^{(3)}(4) = u = 140, \quad \frac{g^{(2)}(2) + g^{(2)}(-2)}{2} + 3 \cdot \frac{g^{(2)}(2) - g^{(2)}(-2)}{2 * 2} = 140
+\end{align*}</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="basics-of-zk-snark"><a class="header" href="#basics-of-zk-snark">Basics of zk-SNARK</a></h1>
 <p>zk-SNARK stands for "<strong>Z</strong>ero-<strong>K</strong>nowledge <strong>S</strong>uccinct <strong>N</strong>on-Interactive <strong>AR</strong>gument of <strong>K</strong>nowledge". It's a cryptographic proof protocol that allows one party (the prover) to convince an another party (the verifier) that they possess certain information, without even revealing the information itself.</p>
 <p>In this tutorial, we will gradually implement two of the most popular zk-SNARK protocols: <a href="https://dl.acm.org/doi/abs/10.1145/2856449">Pinocchio</a> and <a href="https://eprint.iacr.org/2016/260.pdf">Groth16</a>. The structure of this guide closely follows the excellent tutorial by, <a href="https://arxiv.org/abs/1906.07221">Petkus, Maksym. "Why and how zk-snark works."</a>, as well as the fantastic eBook <a href="https://www.rareskills.io/zk-book">"The RareSkills Book of Zero Knowledge"</a>.</p>
@@ -3655,22 +3999,6 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

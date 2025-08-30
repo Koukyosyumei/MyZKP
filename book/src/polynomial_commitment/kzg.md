@@ -1,5 +1,7 @@
 # KZG
 
+[Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.](https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11)
+
 Let \\(G_1\\), \\(G_2\\), and \\(G_T\\) be groups such that there exists a bilinear mapping \\(e: G_1 \times G_2 \to G_T\\). Let \\(g_1 \in G_1\\) and \\(g_2 \in G_2\\) be fixed generators.
 
 We want a short commitment to a polynomial over \\(\mathbb{F}\\) denoted as \\(f(X) = \sum_{i=0}^{d} c_{i} x^{i} \in \mathbb{F}_{q}[X]\\) with a public maximum degree bound \\(D\\) such that \\(d \leq D\\). The prover produces a commitment \\(C\\) for this polynomial so that it cannot change the polynomial after that. Then, the prover submits a short witness that proves the value \\(f(u)\\) at a point \\(u \in F_q\\)
@@ -122,9 +124,9 @@ pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicK
 }
 ```
 
-### Why this works:
+## Why this works:
 
-#### Correctness
+### Correctness
 
 Expand both sides in the target group \\(G_T\\):
 
@@ -141,7 +143,7 @@ So the equality is exactly the exponent identity:
 
 which holds by the definition of \\(f_u(\alpha)\\). Thus a correct witness passes verification.
 
-#### Binding
+### Binding
 
 The binding property of the KZG commitment protocol follows from the **t-Strong Diffie-Hellman (t-SDH)** assumption:
 
@@ -182,6 +184,89 @@ and outputs \\(\langle -u, g_1^{\frac{1}{\alpha - u}} \rangle\\), which is a val
 
 This constructino shows that \\(\mathcal{B}\\) can use \\(\mathcal{A}\\) to solve the t-SDH problem with the same success probability and withonly a constant-factor overhead in running time. Therefore, under the t-SDH assumption, the KZG commitment scheme is binding.
 
-#### Hiding
+### Hiding
 
 TBD
+
+## Batch Proof
+
+When the prover wants to open the same polynomial at multiple points, we can efficiently generate a witness that can prove those batched openings. Suppose the prover wants to open at \\(k\\) points \\((u_1, u_2, \dots, u_k)\\) whose evaluations are \\((y_1, y_2, \dots, y_k)\\). The setup and the commitment are the same with the above normal KZG commitment.
+
+We then introduce two new polynomials for the opening process. Let \\(I(X)\\) be a polynomial that interpolates \\([(u_1, y_1), (u_2, y_2), \dots, (u_k, y_k)]\\), and \\(Z(X)\\) be \\(\prod_{i=1}^{k} (X - u_i)\\). Then, we construct the quotient polynomial as follows:
+
+\begin{align*}
+    f_u(X) = \frac{f(X) - I(X)}{Z(X)}
+\end{align*}
+
+Like the normal KZG commitment for a single opning point, the witness of the batch proof is defined as
+
+\begin{align*}
+    W = g_1^{f_u(\alpha)}
+\end{align*}
+
+Finally, the verifier checks the correctness as follows:
+
+\begin{align*}
+    e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
+\end{align*}
+
+Note that we need to additionally include \\(\\{g_2^{(\alpha^i)}\\}_{i=2}^{k}\\) in the public key during the setup phase.
+
+## Degree Bound Proof
+
+When we want to ensure that the polunomial \\(f(X)\\) has degree at most \\(d\\), we can verify this property with a small modification to the standard KZG commitment scheme.
+
+The idea is to define
+
+\begin{align*}
+    h(X) = X^{D - d} \cdot f(X)
+\end{align*}
+
+, where \\(D\\) is the maximum supported degree in the public key. The degree bound proof works as follows:
+
+1. Along with the stanrad commitment \\(C\\), the prover also submits \\(g_1^{h(\alpha)}\\) to the verifier.
+2. The verifier checks the pairing equation:
+
+\begin{align*}
+e(g_1^{h(\alpha)}, g_2) \overset{?}{=} e(C, g_2^{\alpha^{D - d}})
+\end{align*}
+
+If the prover is honest, then the equality holds because \\(e(g_1^{h(\alpha)}, g_2) = e(g_1, g_2)^{\alpha^{D - d} \cdot f(\alpha)}\\) and \\(e(C, g_2^{\alpha^{D - d}}) = e(g_1, g_2)^{f(\alpha) \cdot \alpha^{D - d}}\\).
+
+If the degree of \\(f(X)\\) exceeds \\(d\\), then \\(h(X)\\) has degree larger than \\(D\\). In that case, the prover **cannot** compute \\(g_1^{h(\alpha)}\\) since the public key only contains up to \\(D\\)-th powers of \\(g_1^{\alpha}\\).
+
+Note that the public key must also include \\(\\{g_2^{(\alpha^i)}\\}_{i=2}^{D}\\).
+
+```rust
+pub fn prove_degree_bound(
+    p: &Polynomial<FqOrder>,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> ProofDegreeBound {
+    let max_d = pk.powers_1.len() - 1;
+    let mut q_coef = (0..(max_d + 1 - d))
+        .map(|_| FqOrder::zero())
+        .collect::<Vec<_>>();
+    q_coef[max_d - d] = FqOrder::one();
+    let q = Polynomial { coef: q_coef };
+    let r = p * &q;
+    r.eval_with_powers_on_curve(&pk.powers_1)
+}
+
+pub fn verify_degree_bound(
+    c: &CommitmentKZG,
+    proof: &ProofDegreeBound,
+    pk: &PublicKeyKZG,
+    d: usize,
+) -> bool {
+    let max_d = pk.powers_1.len() - 1;
+    optimal_ate_pairing(proof, &pk.powers_2[0]) == optimal_ate_pairing(c, &pk.powers_2[max_d - d])
+}
+```
+
+See the following papers for the detail about the degree bound proof:
+
+- Kohrita, Tohru, and Patrick Towa. "Zeromorph: Zero-knowledge multilinear-evaluation proofs from
+homomorphic univariate commitments." Cryptology ePrint Archive (2023). https://eprint.iacr.org/2023/917
+- Chiesa, Alessandro, Yuncong Hu, Mary Maller, et al. "Marlin: Preprocessing zkSNARKs with Universal
+and Updatable SRS." Cryptology ePrint Archive (2019). https://eprint.iacr.org/2019/1047
