@@ -9,4 +9,5 @@ pub mod ntt;
 pub mod polynomial;
 pub mod reedsolomon;
 pub mod ring;
+pub mod sumcheck;
 pub mod utils;
