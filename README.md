@@ -41,6 +41,11 @@ MyZKP is a growing library that provides:
 - 🔗 [Pairing](https://koukyosyumei.github.io/MyZKP/number_theory/subsec6.html)
 - 🤔 [Useful Assumptions](https://koukyosyumei.github.io/MyZKP/number_theory/subsec7.html)
 
+**🌀Basic of Polynomial Commitment**
+
+- ⚔️ [KZG](https://koukyosyumei.github.io/MyZKP/polynomial_commitment/kzg.html)
+- ♊ [Gemini](https://koukyosyumei.github.io/MyZKP/polynomial_commitment/gemini.html)
+
 **🔒 Basic of zk-SNARKs**
 
 - ⚡ [Arithmetization](https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html)
@@ -54,24 +59,6 @@ MyZKP is a growing library that provides:
 **💻 Basic of zkVM**
 
 - ✍️ TBD
-
-## 🛠️ Code Reference
-
-|Module       | Submodule   | Description  |📂 Path                                      |
-|-------------|-------------|--------------|-------------------------------------------------- |
-| **albebra** | `ring`      | Defines Ring  | [ring.rs](./myzkp/src/modules/algebra/ring.rs)           |
-|             | `field`     | Defines Finite Field | [field.rs](./myzkp/src/modules/algebra/field.rs)           |
-|             | `efield`    | Field Extension (Galois Field) |[efield.rs](./myzkp/src/modules/algebra/efield.rs)           |
-|             | `Polynomial`| Polynomial Arithmetic | [polynomial.rs](./myzkp/src/modules/algebra/polynomial.rs)|
-|             | `curve`     | Elliptic curve operations | [curve](./myzkp/src/modules/algebra/curve/)           |
-| **Arithmetization** | `r1cs` | Rank One Constraint System | [r1cs.rs](./myzkp/src/modules/arithmetization/r1cs.rs) |
-|             | `qap` | Quadratic Arithmetic Program | [qap.rs](./myzkp/src/modules/arithmetization/qap.rs) |
-| **Polynomial Commitment** | `kzg`| [Kate, Aniket, Gregory M. Zaverucha, and Ian Goldberg. "Constant-size commitments to polynomials and their applications." International conference on the theory and application of cryptology and information security. Berlin, Heidelberg: Springer Berlin Heidelberg, 2010.](https://link.springer.com/chapter/10.1007/978-3-642-17373-8_11) | [kzg.rs](./myzkp/src/modules/algebra/kzg.rs) |
-|                           | `gemini`| [Bootle, Jonathan, et al. "Gemini: Elastic SNARKs for diverse environments." Annual International Conference on the Theory and Applications of Cryptographic Techniques. Cham: Springer International Publishing, 2022.](https://link.springer.com/chapter/10.1007/978-3-031-07085-3_15) | [gemini.rs](./myzkp/src/modules/algebra/gemini.rs) |
-| **zkSNARKs**| `tutorial_single_polynomial` | [Petkus, Maksym. "Why and how zk-snark works." arXiv preprint arXiv:1906.07221 (2019).](https://arxiv.org/abs/1906.07221) | [tutorial_single_polynomial](./myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
-|             | `tutorial_snark` | [Petkus, Maksym. "Why and how zk-snark works." arXiv preprint arXiv:1906.07221 (2019).](https://arxiv.org/abs/1906.07221) | [tutorial_snark](./myzkp/src/modules/zksnark/tutorial_snark/) |
-|             | `pinocchio` | [Parno, Bryan, et al. "Pinocchio: Nearly practical verifiable computation." Communications of the ACM 59.2 (2016): 103-112.](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](./myzkp/src/modules/zksnark/pinocchio.rs) |
-| **zkSTARKs**| `fri`       | [Ben-Sasson, Eli, et al. "DEEP-FRI: sampling outside the box improves soundness." arXiv preprint arXiv:1903.12243 (2019).](https://arxiv.org/abs/1903.12243) | [fri.rs](./myzkp/src/modules/zkstark/fri.rs) |
 
 ## 🤝 Contributions are Welcome!
 

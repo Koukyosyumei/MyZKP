@@ -36,6 +36,11 @@ MyZKP is a growing library that provides:
 - 🔗 [Pairing](https://koukyosyumei.github.io/MyZKP/number_theory/subsec6.html)
 - 🤔 [Useful Assumptions](https://koukyosyumei.github.io/MyZKP/number_theory/subsec7.html)
 
+**🌀Basic of Polynomial Commitment**
+
+- ⚔️ [KZG](https://koukyosyumei.github.io/MyZKP/polynomial_commitment/kzg.html)
+- ♊ [Gemini](https://koukyosyumei.github.io/MyZKP/polynomial_commitment/gemini.html)
+
 **🔒 Basic of zk-SNARKs**
 
 - ⚡ [Arithmetization](https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html)
@@ -49,21 +54,6 @@ MyZKP is a growing library that provides:
 **💻 Basic of zkVM**
 
 - ✍️ TBD
-
-## 🛠️ Code Reference
-
-|Module       | Submodule   | Description  |📂 Path                                      |
-|-------------|-------------|--------------|-------------------------------------------------- |
-| **albebra** | `ring`      | Defines Ring  | [ring.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/ring.rs)           |
-|             | `field`     | Defines Finite Field | [field.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/field.rs)           |
-|             | `efield`    | Field Extension (Galois Field) |[efield.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/efield.rs)           |
-|             | `Polynomial`| Polynomial Arithmetic | [polynomial.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/polynomial.rs)|
-|             | `curve`     | Elliptic curve operations | [curve](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/algebra/curve/)           |
-| **Arithmetization** | `r1cs` | Rank One Constraint System | [r1cs.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/r1cs.rs) |
-|             | `qap` | Quadratic Arithmetic Program | [qap.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/arithmetization/qap.rs) |
-| **zkSNARKs**| `tutorial_single_polynomial` | | [tutorial_single_polynomial](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_single_polynomial/)                                   |
-|             | `tutorial_snark` | | [tutorial_snark](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/tutorial_snark/) |
-|             | `pinocchio` | [Pinocchio Protocol](https://dl.acm.org/doi/abs/10.1145/2856449) | [pinocchio.rs](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/src/modules/zksnark/pinocchio.rs) |
 
 ## 🤝 Contributions are Welcome!
 
