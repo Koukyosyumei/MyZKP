@@ -55,6 +55,17 @@ impl Iterator for BitCombinations {
     }
 }
 
+pub fn sum_over_boolean_hypercube<F: Field>(g: &MPolynomial<F>) -> F {
+    let el = g.get_num_vars();
+    let comb = BitCombinations::new(el, 0);
+    let mut h = F::zero();
+    for c in comb {
+        let c_casted = c.iter().map(|v| F::from_value(*v)).collect::<Vec<_>>();
+        h = h + g.evaluate(&c_casted);
+    }
+    h
+}
+
 pub fn build_gj_from_prefix<F: Field>(g: &MPolynomial<F>, rs: &Vec<F>) -> MPolynomial<F> {
     let el = g.get_num_vars();
     let j_sub_1 = rs.len();
@@ -116,14 +127,8 @@ mod tests {
         dict.insert(vec![0, 1, 1], F::from_value(4));
         dict.insert(vec![1, 1, 1], F::from_value(5));
         let g = MPolynomial::new(dict);
-        println!("g: {}", g);
 
-        let comb = BitCombinations::new(3, 0);
-        let mut h: FiniteFieldElement<ModEIP197> = F::zero();
-        for c in comb {
-            let c_casted = c.iter().map(|v| F::from_value(*v)).collect::<Vec<_>>();
-            h = h + g.evaluate(&c_casted);
-        }
+        let h = sum_over_boolean_hypercube(&g);
         assert_eq!(h, F::from_value(41));
 
         let g_0 = build_gj_from_prefix(&g, &vec![]);
