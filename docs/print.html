@@ -1369,12 +1369,12 @@ The Knowledge of Exponent Assumption is useful for constructing verifiable expon
     pub powers_2: Vec&lt;G2Point&gt;,
 }
 
-pub fn setup_kzg(g1: &amp;G1Point, g2: &amp;G2Point, n: usize) -&gt; PublicKeyKZG {
+pub fn setup_kzg(g1: &amp;G1Point, g2: &amp;G2Point, max_d: usize) -&gt; PublicKeyKZG {
     let alpha = FqOrder::random_element(&amp;[]);
 
-    let mut powers_1 = Vec::with_capacity(n);
+    let mut powers_1 = Vec::with_capacity(max_d);
     let mut alpha_power = FqOrder::one();
-    for _ in 0..1 + n {
+    for _ in 0..1 + max_d {
         powers_1.push(g1.mul_ref(alpha_power.clone().get_value()));
         alpha_power = alpha_power * alpha.clone();
     }
@@ -1394,8 +1394,8 @@ C = \Pi_{i=0}^{d} (g_1^{(\alpha^{i})})^{c_i} = g_1^{\sum_{i=0}^{d} c_i \alpha^{i
 </span><span class="boring">fn main() {
 </span>pub type CommitmentKZG = G1Point;
 
-pub fn commit_kzg(p: &amp;Polynomial&lt;FqOrder&gt;, pk: &amp;PublicKeyKZG) -&gt; CommitmentKZG {
-    p.eval_with_powers_on_curve(&amp;pk.powers_1)
+pub fn commit_kzg(f: &amp;Polynomial&lt;FqOrder&gt;, pk: &amp;PublicKeyKZG) -&gt; CommitmentKZG {
+    f.eval_with_powers_on_curve(&amp;pk.powers_1)
 }
 <span class="boring">}</span></code></pre></pre>
 <h2 id="open"><a class="header" href="#open">Open</a></h2>
@@ -1415,16 +1415,16 @@ W = \Pi_{i=0}^{d-1} (g_1^{(\alpha^{i})})^{c_{i}'} = g_1^{\sum_{i=0}^{d-1} c'_i \
     pub w: G1Point,
 }
 
-pub fn open_kzg(p: &amp;Polynomial&lt;FqOrder&gt;, z: &amp;FqOrder, pk: &amp;PublicKeyKZG) -&gt; ProofKZG {
-    let y = p.eval(z);
+pub fn open_kzg(f: &amp;Polynomial&lt;FqOrder&gt;, u: &amp;FqOrder, pk: &amp;PublicKeyKZG) -&gt; ProofKZG {
+    let y = f.eval(u);
     let y_poly = Polynomial {
         coef: (&amp;[y.clone()]).to_vec(),
     };
+    let f_u = (f - &amp;y_poly) / Polynomial::&lt;FqOrder&gt;::from_monomials(&amp;[u.clone()]);
 
-    let q = (p - &amp;y_poly) / Polynomial::&lt;FqOrder&gt;::from_monomials(&amp;[z.clone()]);
     ProofKZG {
         y: y,
-        w: q.eval_with_powers_on_curve(&amp;pk.powers_1),
+        w: f_u.eval_with_powers_on_curve(&amp;pk.powers_1),
     }
 }
 <span class="boring">}</span></code></pre></pre>
@@ -1440,14 +1440,14 @@ e(c, g_2) \overset{?}{=} e(g_1, g_2)^{y} \cdot e(W, g_2^{\alpha} \cdot g_2^{-u})
 \end{align*}</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn verify_kzg(z: &amp;FqOrder, c: &amp;CommitmentKZG, proof: &amp;ProofKZG, pk: &amp;PublicKeyKZG) -&gt; bool {
+</span>pub fn verify_kzg(u: &amp;FqOrder, c: &amp;CommitmentKZG, proof: &amp;ProofKZG, pk: &amp;PublicKeyKZG) -&gt; bool {
     let g1 = &amp;pk.powers_1[0];
     let g2 = &amp;pk.powers_2[0];
-    let g2_s = &amp;pk.powers_2[1];
-    let g2_z = g2.mul_ref(z.clone().get_value());
-    let g2_s_minus_z = g2_s.clone() - g2_z;
+    let g2_alpha = &amp;pk.powers_2[1];
+    let g2_u = g2.mul_ref(u.clone().get_value());
+    let g2_alpha_minus_u = g2_alpha.clone() - g2_u;
 
-    let e1 = optimal_ate_pairing(&amp;proof.w, &amp;g2_s_minus_z);
+    let e1 = optimal_ate_pairing(&amp;proof.w, &amp;g2_alpha_minus_u);
     let e2 = optimal_ate_pairing(&amp;g1, &amp;g2);
     let e3 = optimal_ate_pairing(&amp;c, &amp;g2);
 
@@ -1510,6 +1510,41 @@ W = g_1^{f_u(\alpha)}
 e(W, g_2^{Z(\alpha)}) \overset{?}{=} e(C / I(\alpha), g_2)
 \end{align*}</p>
 <p>Note that we need to additionally include \(\{g_2^{(\alpha^i)}\}_{i=2}^{k}\) in the public key during the setup phase.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn batch_open_kzg(
+    f: &amp;Polynomial&lt;FqOrder&gt;,
+    us: &amp;Vec&lt;FqOrder&gt;,
+    pk: &amp;PublicKeyKZG,
+) -&gt; BatchProofKZG {
+    let ys = us.iter().map(|z| f.eval(z)).collect::&lt;Vec&lt;_&gt;&gt;();
+    let ip = Polynomial::interpolate(us, &amp;ys);
+    let z = Polynomial::from_monomials(us);
+    let f_u = (f - &amp;ip) / z;
+
+    BatchProofKZG {
+        ys: ys,
+        w: f_u.eval_with_powers_on_curve(&amp;pk.powers_1),
+    }
+}
+
+pub fn batch_verify_kzg(
+    us: &amp;Vec&lt;FqOrder&gt;,
+    c: &amp;CommitmentKZG,
+    proof: &amp;BatchProofKZG,
+    pk: &amp;PublicKeyKZG,
+) -&gt; bool {
+    let g2 = &amp;pk.powers_2[0];
+    let ip = Polynomial::interpolate(us, &amp;proof.ys);
+    let z = Polynomial::from_monomials(us);
+    let g1_ip = ip.eval_with_powers_on_curve(&amp;pk.powers_1);
+    let g2_z = z.eval_with_powers_on_curve(&amp;pk.powers_2);
+
+    let e1 = optimal_ate_pairing(&amp;proof.w, &amp;g2_z);
+    let e2 = optimal_ate_pairing(&amp;(c.clone() - g1_ip), g2);
+    e1 == e2
+}
+<span class="boring">}</span></code></pre></pre>
 <h2 id="degree-bound-proof"><a class="header" href="#degree-bound-proof">Degree Bound Proof</a></h2>
 <p>When we want to ensure that the polunomial \(f(X)\) has degree at most \(d\), we can verify this property with a small modification to the standard KZG commitment scheme.</p>
 <p>The idea is to define</p>
@@ -1530,7 +1565,7 @@ e(g_1^{h(\alpha)}, g_2) \overset{?}{=} e(C, g_2^{\alpha^{D - d}})
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn prove_degree_bound(
-    p: &amp;Polynomial&lt;FqOrder&gt;,
+    f: &amp;Polynomial&lt;FqOrder&gt;,
     pk: &amp;PublicKeyKZG,
     d: usize,
 ) -&gt; ProofDegreeBound {
@@ -1540,7 +1575,7 @@ e(g_1^{h(\alpha)}, g_2) \overset{?}{=} e(C, g_2^{\alpha^{D - d}})
         .collect::&lt;Vec&lt;_&gt;&gt;();
     q_coef[max_d - d] = FqOrder::one();
     let q = Polynomial { coef: q_coef };
-    let r = p * &amp;q;
+    let r = f * &amp;q;
     r.eval_with_powers_on_curve(&amp;pk.powers_1)
 }
 
@@ -3999,6 +4034,22 @@ y &amp;= f(\omega^{i}) \cdot \frac{x - \omega^{\frac{N}{2} + i}}{\omega^{i} - \o
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

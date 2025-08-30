@@ -120,7 +120,7 @@ pub fn batch_verify_kzg(
 }
 
 pub fn prove_degree_bound(
-    p: &Polynomial<FqOrder>,
+    f: &Polynomial<FqOrder>,
     pk: &PublicKeyKZG,
     d: usize,
 ) -> ProofDegreeBound {
@@ -130,7 +130,7 @@ pub fn prove_degree_bound(
         .collect::<Vec<_>>();
     q_coef[max_d - d] = FqOrder::one();
     let q = Polynomial { coef: q_coef };
-    let r = p * &q;
+    let r = f * &q;
     r.eval_with_powers_on_curve(&pk.powers_1)
 }
 
