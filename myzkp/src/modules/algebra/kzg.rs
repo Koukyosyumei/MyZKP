@@ -25,12 +25,12 @@ pub struct BatchProofKZG {
 
 pub type ProofDegreeBound = G1Point;
 
-pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
+pub fn setup_kzg(g1: &G1Point, g2: &G2Point, max_d: usize) -> PublicKeyKZG {
     let alpha = FqOrder::random_element(&[]);
 
-    let mut powers_1 = Vec::with_capacity(n);
+    let mut powers_1 = Vec::with_capacity(max_d);
     let mut alpha_power = FqOrder::one();
-    for _ in 0..1 + n {
+    for _ in 0..1 + max_d {
         powers_1.push(g1.mul_ref(alpha_power.clone().get_value()));
         alpha_power = alpha_power * alpha.clone();
     }
@@ -40,13 +40,13 @@ pub fn setup_kzg(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
     PublicKeyKZG { powers_1, powers_2 }
 }
 
-pub fn setup_kzg_with_full_g2(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKeyKZG {
+pub fn setup_kzg_with_full_g2(g1: &G1Point, g2: &G2Point, max_d: usize) -> PublicKeyKZG {
     let alpha = FqOrder::random_element(&[]);
 
-    let mut powers_1 = Vec::with_capacity(n);
-    let mut powers_2 = Vec::with_capacity(n);
+    let mut powers_1 = Vec::with_capacity(max_d);
+    let mut powers_2 = Vec::with_capacity(max_d);
     let mut alpha_power = FqOrder::one();
-    for _ in 0..1 + n {
+    for _ in 0..1 + max_d {
         powers_1.push(g1.mul_ref(alpha_power.clone().get_value()));
         powers_2.push(g2.mul_ref(alpha_power.clone().get_value()));
         alpha_power = alpha_power * alpha.clone();
@@ -55,47 +55,47 @@ pub fn setup_kzg_with_full_g2(g1: &G1Point, g2: &G2Point, n: usize) -> PublicKey
     PublicKeyKZG { powers_1, powers_2 }
 }
 
-pub fn commit_kzg(p: &Polynomial<FqOrder>, pk: &PublicKeyKZG) -> CommitmentKZG {
-    p.eval_with_powers_on_curve(&pk.powers_1)
+pub fn commit_kzg(f: &Polynomial<FqOrder>, pk: &PublicKeyKZG) -> CommitmentKZG {
+    f.eval_with_powers_on_curve(&pk.powers_1)
 }
 
-pub fn open_kzg(p: &Polynomial<FqOrder>, z: &FqOrder, pk: &PublicKeyKZG) -> ProofKZG {
-    let y = p.eval(z);
+pub fn open_kzg(f: &Polynomial<FqOrder>, u: &FqOrder, pk: &PublicKeyKZG) -> ProofKZG {
+    let y = f.eval(u);
     let y_poly = Polynomial {
         coef: (&[y.clone()]).to_vec(),
     };
-    let q = (p - &y_poly) / Polynomial::<FqOrder>::from_monomials(&[z.clone()]);
+    let f_u = (f - &y_poly) / Polynomial::<FqOrder>::from_monomials(&[u.clone()]);
 
     ProofKZG {
         y: y,
-        w: q.eval_with_powers_on_curve(&pk.powers_1),
+        w: f_u.eval_with_powers_on_curve(&pk.powers_1),
     }
 }
 
 pub fn batch_open_kzg(
-    p: &Polynomial<FqOrder>,
-    zs: &Vec<FqOrder>,
+    f: &Polynomial<FqOrder>,
+    us: &Vec<FqOrder>,
     pk: &PublicKeyKZG,
 ) -> BatchProofKZG {
-    let ys = zs.iter().map(|z| p.eval(z)).collect::<Vec<_>>();
-    let ip = Polynomial::interpolate(zs, &ys);
-    let denominator = Polynomial::from_monomials(zs);
-    let q = (p - &ip) / denominator;
+    let ys = us.iter().map(|z| f.eval(z)).collect::<Vec<_>>();
+    let ip = Polynomial::interpolate(us, &ys);
+    let z = Polynomial::from_monomials(us);
+    let f_u = (f - &ip) / z;
 
     BatchProofKZG {
         ys: ys,
-        w: q.eval_with_powers_on_curve(&pk.powers_1),
+        w: f_u.eval_with_powers_on_curve(&pk.powers_1),
     }
 }
 
-pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicKeyKZG) -> bool {
+pub fn verify_kzg(u: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicKeyKZG) -> bool {
     let g1 = &pk.powers_1[0];
     let g2 = &pk.powers_2[0];
-    let g2_s = &pk.powers_2[1];
-    let g2_z = g2.mul_ref(z.clone().get_value());
-    let g2_s_minus_z = g2_s.clone() - g2_z;
+    let g2_alpha = &pk.powers_2[1];
+    let g2_u = g2.mul_ref(u.clone().get_value());
+    let g2_alpha_minus_u = g2_alpha.clone() - g2_u;
 
-    let e1 = optimal_ate_pairing(&proof.w, &g2_s_minus_z);
+    let e1 = optimal_ate_pairing(&proof.w, &g2_alpha_minus_u);
     let e2 = optimal_ate_pairing(&g1, &g2);
     let e3 = optimal_ate_pairing(&c, &g2);
 
@@ -103,16 +103,16 @@ pub fn verify_kzg(z: &FqOrder, c: &CommitmentKZG, proof: &ProofKZG, pk: &PublicK
 }
 
 pub fn batch_verify_kzg(
-    zs: &Vec<FqOrder>,
+    us: &Vec<FqOrder>,
     c: &CommitmentKZG,
     proof: &BatchProofKZG,
     pk: &PublicKeyKZG,
 ) -> bool {
     let g2 = &pk.powers_2[0];
-    let ip = Polynomial::interpolate(zs, &proof.ys);
-    let denominator = Polynomial::from_monomials(zs);
+    let ip = Polynomial::interpolate(us, &proof.ys);
+    let z = Polynomial::from_monomials(us);
     let g1_ip = ip.eval_with_powers_on_curve(&pk.powers_1);
-    let g2_z = denominator.eval_with_powers_on_curve(&pk.powers_2);
+    let g2_z = z.eval_with_powers_on_curve(&pk.powers_2);
 
     let e1 = optimal_ate_pairing(&proof.w, &g2_z);
     let e2 = optimal_ate_pairing(&(c.clone() - g1_ip), g2);
