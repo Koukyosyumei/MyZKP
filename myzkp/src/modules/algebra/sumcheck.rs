@@ -4,14 +4,14 @@ use std::fmt;
 use num_traits::Zero;
 
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
-use crate::modules::algebra::field::Field;
+use crate::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
+use crate::modules::algebra::gemini::{commit_gemini, open_gemini, split_and_fold, verify_gemini};
 use crate::modules::algebra::kzg::{
     batch_open_kzg, batch_verify_kzg, commit_kzg, open_kzg, prove_degree_bound, setup_kzg,
     verify_degree_bound, verify_kzg, BatchProofKZG, CommitmentKZG, ProofDegreeBound, ProofKZG,
     PublicKeyKZG,
 };
 use crate::modules::algebra::mpolynomials::MPolynomial;
-use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
 
 pub struct BitCombinations {
@@ -93,6 +93,64 @@ pub fn sumcheck_fold<F: Field>(g_j: &MPolynomial<F>, j: usize) -> F {
     one[j] = F::one();
     let zero = vec![F::zero(); el];
     g_j.evaluate(&one) + g_j.evaluate(&zero)
+}
+
+pub fn get_coefs_in_order<F: Field>(g: &MPolynomial<F>) -> Vec<F> {
+    let el = g.get_num_vars();
+    let comb = BitCombinations::new(el, 0);
+    comb.into_iter()
+        .map(|v| {
+            g.dictionary
+                .get(&v.iter().map(|u| *u as usize).collect::<Vec<_>>())
+                .unwrap()
+                .clone()
+        })
+        .collect::<Vec<_>>()
+}
+
+pub fn sumcheck(
+    h: &FqOrder,
+    g: &MPolynomial<FqOrder>,
+    rs: &Vec<FqOrder>,
+    pk: &PublicKeyKZG,
+) -> bool {
+    let el = g.get_num_vars();
+
+    let coefs = get_coefs_in_order(&g);
+    let fs = split_and_fold(&coefs, &rs).unwrap();
+    let commitment = commit_gemini(&fs, &pk);
+
+    let g_0 = build_gj_from_prefix(&g, &vec![]);
+    if h != &sumcheck_fold(&g_0, 0) {
+        return false;
+    }
+
+    let mut g_j = g_0.clone();
+    let mut g_j_minus_1 = g_0.clone();
+    for j in 1..el {
+        g_j = build_gj_from_prefix(&g, &rs);
+        let mut rs_j_minus_1_vec = vec![FqOrder::zero(); el];
+        rs_j_minus_1_vec[j - 1] = rs[j - 1].clone();
+        if g_j_minus_1.evaluate(&rs_j_minus_1_vec) != sumcheck_fold(&g_j, j) {
+            return false;
+        }
+        g_j_minus_1 = g_j.clone();
+    }
+
+    let mut rs_el_minus_1_vec = vec![FqOrder::zero(); el];
+    rs_el_minus_1_vec[el - 1] = rs[el - 1].clone();
+    let g_el_minus_1_at_el_minus_1 = g_j.evaluate(&rs_el_minus_1_vec);
+
+    let beta = FqOrder::random_element(&vec![]);
+    let proof = open_gemini(&fs, &beta, &pk);
+    verify_gemini(
+        &rs,
+        &g_el_minus_1_at_el_minus_1,
+        &beta,
+        &commitment,
+        &proof,
+        &pk,
+    )
 }
 
 #[cfg(test)]
