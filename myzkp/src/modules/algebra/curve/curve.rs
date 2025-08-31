@@ -5,6 +5,7 @@ use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 
 use num_bigint::BigInt;
 use num_traits::{One, Signed, Zero};
+use serde::Serialize;
 
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 
@@ -13,7 +14,7 @@ pub trait EllipticCurve: Debug + Clone + PartialEq {
     fn get_b() -> BigInt;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct EllipticCurvePoint<F: Field, E: EllipticCurve> {
     pub x: Option<F>,
     pub y: Option<F>,
