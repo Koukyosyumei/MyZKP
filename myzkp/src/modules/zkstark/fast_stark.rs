@@ -5,6 +5,7 @@ use blake2::{digest::consts::U32, Blake2b, Digest};
 use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
+use crate::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use crate::modules::algebra::field::{Field, FiniteFieldElement};
 use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::mpolynomials::MPolynomial;
@@ -13,7 +14,6 @@ use crate::modules::algebra::ntt::{
 };
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
-use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::modules::zkstark::fri::{FriProof, FRI};
 
 use crate::modules::zkstark::fri::{get_nth_root_of_m128, M128};

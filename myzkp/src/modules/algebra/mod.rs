@@ -1,5 +1,6 @@
 pub mod curve;
 pub mod efield;
+pub mod fiat_shamir;
 pub mod field;
 pub mod gemini;
 pub mod kzg;

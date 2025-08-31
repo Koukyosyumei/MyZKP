@@ -5,11 +5,12 @@ use std::fmt::Debug;
 use std::ops::{Add, Mul, Neg, Sub};
 
 use num_traits::Zero;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct MPolynomial<F: Field> {
     pub dictionary: HashMap<Vec<usize>, F>,
 }

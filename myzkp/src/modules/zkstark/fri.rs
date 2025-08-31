@@ -9,11 +9,11 @@ use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::efield::{ExtendedFieldElement, IrreduciblePoly};
+use crate::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use crate::modules::algebra::field::{Field, FiniteFieldElement, ModulusValue};
 use crate::modules::algebra::merkle::{Merkle, MerklePath, MerkleRoot};
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
-use crate::modules::zkstark::fiat_shamir::FiatShamirTransformer;
 use crate::{define_extension_field, define_myzkp_modulus_type};
 
 fn sample_index(byte_array: &[u8], size: usize) -> usize {
