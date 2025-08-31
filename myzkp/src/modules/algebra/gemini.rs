@@ -5,8 +5,9 @@ use num_traits::Zero;
 use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::kzg::{
-    commit_kzg, open_kzg, prove_degree_bound, setup_kzg, verify_degree_bound, verify_kzg,
-    CommitmentKZG, ProofDegreeBound, ProofKZG, PublicKeyKZG,
+    batch_open_kzg, batch_verify_kzg, commit_kzg, open_kzg, prove_degree_bound, setup_kzg,
+    verify_degree_bound, verify_kzg, BatchProofKZG, CommitmentKZG, ProofDegreeBound, ProofKZG,
+    PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
@@ -104,9 +105,7 @@ pub fn split_and_fold<F: Field>(
 pub type CommitmentGemini = Vec<CommitmentKZG>;
 
 pub struct ProofGemini {
-    es: Vec<ProofKZG>,
-    es_neg: Vec<ProofKZG>,
-    es_hat: Vec<ProofKZG>,
+    es: Vec<BatchProofKZG>,
     degree_proofs: Vec<ProofDegreeBound>,
 }
 
@@ -124,18 +123,17 @@ pub fn open_gemini(
         es: polys
             .iter()
             .take(polys.len() - 1)
-            .map(|p| open_kzg(p, beta, pk))
-            .collect(),
-        es_neg: polys
-            .iter()
-            .take(polys.len() - 1)
-            .map(|p| open_kzg(p, &(FqOrder::zero() - beta).sanitize(), pk))
-            .collect(),
-        es_hat: polys
-            .iter()
-            .skip(1)
-            .take(polys.len() - 2)
-            .map(|p| open_kzg(p, &beta.pow(2), pk))
+            .map(|p| {
+                batch_open_kzg(
+                    p,
+                    &vec![
+                        beta.clone(),
+                        (FqOrder::zero() - beta).sanitize(),
+                        beta.pow(2),
+                    ],
+                    pk,
+                )
+            })
             .collect(),
         degree_proofs: polys
             .iter()
@@ -171,32 +169,30 @@ pub fn verify_gemini(
         .iter()
         .take(commitment.len() - 1)
         .zip(proof.es.iter())
-        .all(|(c, p)| verify_kzg(beta, c, p, pk))
+        .all(|(c, p)| {
+            batch_verify_kzg(
+                &vec![
+                    beta.clone(),
+                    (FqOrder::zero() - beta).sanitize(),
+                    beta.pow(2),
+                ],
+                c,
+                p,
+                pk,
+            )
+        })
     {
         return false;
     }
 
-    if !commitment
+    let es = proof.es.iter().map(|p| p.ys[0].clone()).collect::<Vec<_>>();
+    let es_neg = proof.es.iter().map(|p| p.ys[1].clone()).collect::<Vec<_>>();
+    let mut es_hat = proof
+        .es
         .iter()
-        .take(commitment.len() - 1)
-        .zip(proof.es_neg.iter())
-        .all(|(c, p)| verify_kzg(&(FqOrder::zero() - beta).sanitize(), c, p, pk))
-    {
-        return false;
-    }
-
-    if !commitment
-        .iter()
+        .map(|p| p.ys[2].clone())
         .skip(1)
-        .take(commitment.len() - 2)
-        .zip(proof.es_hat.iter())
-        .all(|(c, p)| verify_kzg(&beta.pow(2), c, p, pk))
-    {
-        return false;
-    }
-    let es = proof.es.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
-    let es_neg = proof.es_neg.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
-    let mut es_hat = proof.es_hat.iter().map(|p| p.y.clone()).collect::<Vec<_>>();
+        .collect::<Vec<_>>();
     es_hat.push(mu.clone());
 
     let two = FqOrder::from_value(2);

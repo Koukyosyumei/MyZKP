@@ -1,13 +1,16 @@
+use std::cmp::Reverse;
 use std::collections::HashMap;
+use std::fmt;
 use std::fmt::Debug;
 use std::ops::{Add, Mul, Neg, Sub};
 
 use num_traits::Zero;
+use serde::{Deserialize, Serialize};
 
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct MPolynomial<F: Field> {
     pub dictionary: HashMap<Vec<usize>, F>,
 }
@@ -23,6 +26,14 @@ impl<F: Field> MPolynomial<F> {
         MPolynomial {
             dictionary: filtered,
         }
+    }
+
+    pub fn get_num_vars(&self) -> usize {
+        let mut num_vars = 0;
+        for (k, _) in &self.dictionary {
+            num_vars = std::cmp::max(num_vars, k.len());
+        }
+        num_vars
     }
 
     pub fn zero() -> Self {
@@ -102,12 +113,7 @@ impl<F: Field> MPolynomial<F> {
                 }
 
                 // Calculate point[i]^k[i]
-                let mut term = F::one();
-                for _ in 0..k[i] {
-                    term = term * point[i].clone();
-                }
-
-                prod = prod * term;
+                prod = prod * point[i].pow(k[i]);
             }
 
             acc = acc + prod;
@@ -155,6 +161,42 @@ impl<F: Field> MPolynomial<F> {
         }
 
         acc
+    }
+
+    pub fn partial_evaluate(&self, assignments: &HashMap<usize, F>) -> MPolynomial<F> {
+        let mut new_dictionary: HashMap<Vec<usize>, F> = HashMap::new();
+
+        for (k, v) in &self.dictionary {
+            // work on a copy of exponent vector
+            let mut new_exp = k.clone();
+            // ensure new_exp is long enough for any assignment index (optional; here we don't extend)
+            // multiply coefficient by assigned variables' powers
+            let mut coef = v.clone();
+
+            for (&idx, val) in assignments.iter() {
+                if idx < new_exp.len() {
+                    let e = new_exp[idx];
+                    if e != 0 {
+                        let p = val.pow(e);
+                        coef = coef * p;
+                        new_exp[idx] = 0; // variable is substituted
+                    }
+                } else {
+                    // If assignment index is outside exponent length, ignore (no effect)
+                }
+            }
+
+            if let Some(existing) = new_dictionary.get_mut(&new_exp) {
+                *existing = existing.clone() + coef;
+                if existing.is_zero() {
+                    new_dictionary.remove(&new_exp);
+                }
+            } else {
+                new_dictionary.insert(new_exp, coef);
+            }
+        }
+
+        MPolynomial::new(new_dictionary)
     }
 }
 
@@ -307,8 +349,83 @@ impl<F: Field> Sub for MPolynomial<F> {
     }
 }
 
+impl<F> fmt::Display for MPolynomial<F>
+where
+    F: Field + Clone + PartialEq + fmt::Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // collect non-zero terms
+        let mut terms: Vec<(Vec<usize>, F)> = self
+            .dictionary
+            .iter()
+            .filter_map(|(k, v)| {
+                if v.is_zero() {
+                    None
+                } else {
+                    Some((k.clone(), v.clone()))
+                }
+            })
+            .collect();
+
+        if terms.is_empty() {
+            return write!(f, "0");
+        }
+
+        // helper: total degree of exponent vector
+        let total_degree = |exps: &Vec<usize>| exps.iter().copied().sum::<usize>();
+
+        // sort: primary by total degree desc, secondary lexicographic desc (for stable pretty order)
+        terms.sort_by_key(|(exps, _coef)| (Reverse(total_degree(exps)), Reverse(exps.clone())));
+
+        // format a single monomial x0^e0 * x1^e1 ...
+        let fmt_monomial = |exps: &Vec<usize>| -> String {
+            let mut parts = Vec::new();
+            for (i, &e) in exps.iter().enumerate() {
+                if e == 0 {
+                    continue;
+                } else if e == 1 {
+                    parts.push(format!("x_{}", i));
+                } else {
+                    parts.push(format!("x_{}^{}", i, e));
+                }
+            }
+            if parts.is_empty() {
+                "1".to_string()
+            } else {
+                parts.join("*")
+            }
+        };
+
+        // produce term strings
+        let mut out_terms: Vec<String> = Vec::with_capacity(terms.len());
+        for (exps, coef) in terms.into_iter() {
+            let mono = fmt_monomial(&exps);
+            // decide whether to omit coefficient `1` for non-constant monomials
+            if mono != "1" && coef == F::one() {
+                out_terms.push(mono);
+            } else {
+                // general case: show coef (and multiply sign/monomial)
+                if mono == "1" {
+                    // pure constant
+                    out_terms.push(format!("{}", coef));
+                } else {
+                    out_terms.push(format!("{}*{}", coef, mono));
+                }
+            }
+        }
+
+        // join with " + "
+        // (Note: if your field prints negatives as `-N`, they'll appear with the plus join,
+        //  e.g., "5*x0 + -3*x1". If you want to convert that into "5*x0 - 3*x1", we can
+        //  post-process terms to handle leading '-' specially — tell me if you'd prefer that.)
+        write!(f, "{}", out_terms.join(" + "))
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::fmt::format;
+
     use super::*;
 
     use crate::modules::algebra::field::{FiniteFieldElement, ModEIP197};
@@ -598,5 +715,22 @@ mod tests {
             multi_poly.dictionary[&vec![0, 0, 2]],
             FiniteFieldElement::<ModEIP197>::from_value(3)
         ); // x_2^2 term
+    }
+
+    #[test]
+    fn test_fmt() {
+        // Create polynomials: 2x and 3y
+        let mut dict1 = HashMap::new();
+        dict1.insert(vec![0, 0], FiniteFieldElement::<ModEIP197>::from_value(1));
+        dict1.insert(vec![1, 0], FiniteFieldElement::<ModEIP197>::from_value(2));
+        dict1.insert(vec![0, 1], FiniteFieldElement::<ModEIP197>::from_value(3));
+        dict1.insert(vec![1, 1], FiniteFieldElement::<ModEIP197>::from_value(4));
+        let poly1 = MPolynomial::new(dict1);
+        assert_eq!(format!("{}", poly1), "4*x_0*x_1 + 2*x_0 + 3*x_1 + 1");
+
+        let mut assignment1 = HashMap::new();
+        assignment1.insert(1, FiniteFieldElement::<ModEIP197>::from_value(3));
+        let poly2 = poly1.partial_evaluate(&assignment1);
+        assert_eq!(format!("{}", poly2), "14*x_0 + 10");
     }
 }

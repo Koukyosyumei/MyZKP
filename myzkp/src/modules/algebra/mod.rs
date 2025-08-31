@@ -1,5 +1,6 @@
 pub mod curve;
 pub mod efield;
+pub mod fiat_shamir;
 pub mod field;
 pub mod gemini;
 pub mod kzg;
@@ -9,4 +10,5 @@ pub mod ntt;
 pub mod polynomial;
 pub mod reedsolomon;
 pub mod ring;
+pub mod sumcheck;
 pub mod utils;
