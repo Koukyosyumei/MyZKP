@@ -99,40 +99,166 @@ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
     return res;
 }
 
-__device__ fr_t fr_mul(const fr_t &a, const fr_t &b) {
-    unsigned __int128 tmp[8] = {0};
+// R = 2^256
+// Montgomery constant: FR_MOD * FR_MOD_INV = -1 (mod R)
+__device__ const uint64_t FR_MOD_INV[4] = {
+    0xc2e1f593efffffffULL,
+    0x6586864b4c6911b3ULL,
+    0xe39a982899062391ULL,
+    0x73f82f1d0d8341b2ULL
+};
 
-    // Schoolbook multiplication
+__device__ const fr_t R_INV_MOD_N = {{
+    0xdc5ba0056db1194eULL,
+    0x090ef5a9e111ec87ULL,
+    0xc8260de4aeb85d5dULL,
+    0x15ebf95182c5551cULL
+}};
+
+// Montgomery constant: R^2 mod N, where R = 2^256
+__device__ const fr_t R2_MOD_N = {{
+    0x1bb8e645ae216da7ULL,
+    0x53fe3ab1e35c59e3ULL,
+    0x8c49833d53bb8085ULL,
+    0x0216d0b17f4e44a5ULL
+}};
+
+// --- Helper Types and Functions ---
+
+// Helper struct for a 512-bit integer
+struct u512_t {
+    uint64_t limbs[8];
+};
+
+// --- New Helper Functions ---
+
+/**
+ * @brief Adds two 512-bit numbers. res = a + b.
+ */
+__device__ void add_512(u512_t &res, const u512_t &a, const u512_t &b) {
+    unsigned __int128 carry = 0;
+    for (int i = 0; i < 8; i++) {
+        carry += (unsigned __int128)a.limbs[i] + b.limbs[i];
+        res.limbs[i] = (uint64_t)carry;
+        carry >>= 64;
+    }
+}
+
+/**
+ * @brief Subtracts one 256-bit number from another. res = a - b.
+ * Assumes a >= b.
+ */
+__device__ void sub_256(fr_t &res, const fr_t &a, const fr_t &b) {
+    uint64_t borrow = 0;
     for (int i = 0; i < 4; i++) {
+        unsigned __int128 tmp = (unsigned __int128)a.limbs[i] - b.limbs[i] - borrow;
+        res.limbs[i] = (uint64_t)tmp;
+        borrow = (tmp >> 127) & 1; // 1 if underflow, 0 otherwise
+    }
+}
+
+/**
+ * @brief Multiplies two 256-bit numbers to produce a 512-bit result.
+ * @param res The 512-bit result (a * b).
+ * @param a The first 256-bit operand.
+ * @param b The second 256-bit operand.
+ */
+__device__ void mul_512(u512_t &res, const fr_t &a, const fr_t &b) {
+    // Initialize result limbs to 0
+    for(int i = 0; i < 8; ++i) res.limbs[i] = 0;
+
+    for (int i = 0; i < 4; i++) {
+        unsigned __int128 carry = 0;
         for (int j = 0; j < 4; j++) {
-            tmp[i+j] += (unsigned __int128)a.limbs[i] * b.limbs[j];
+            // Add product and existing value in limb
+            carry += (unsigned __int128)a.limbs[i] * b.limbs[j] + res.limbs[i + j];
+            res.limbs[i + j] = (uint64_t)carry;
+            carry >>= 64;
         }
+        // Propagate final carry
+        res.limbs[i + 4] += (uint64_t)carry;
     }
+}
 
-    // Propagate carry
-    for (int i = 0; i < 7; i++) {
-        tmp[i+1] += tmp[i] >> 64;
-        tmp[i] &= 0xFFFFFFFFFFFFFFFFULL;
-    }
+// --- Core Montgomery Reduction and Multiplication Functions ---
 
-    // Reduce modulo r (fixed algorithm)
-    // 1. Copy low 4 limbs
+/**
+ * @brief Reduces a 512-bit number T using Montgomery reduction (REDC).
+ * @param t The 512-bit number to reduce.
+ * @return The result (T * R^-1) mod N, where R = 2^256.
+ */
+__device__ fr_t mont_reduce(const u512_t &t) {
+    // 1. m = (T mod R) * N' mod R
+    // T mod R is just the lower 4 limbs of T.
+    // N' is FR_MOD_INV.
+    fr_t t_low;
+    for (int i = 0; i < 4; ++i) t_low.limbs[i] = t.limbs[i];
+    
+    u512_t m_full;
+    mul_512(m_full, t_low, *(const fr_t*)FR_MOD_INV); // m = (T mod R) * N'
+    // We only need the lower 256 bits of m_full for the next step.
+
+    // 2. tmp = (T + m*N)
+    u512_t mN;
+    mul_512(mN, *(const fr_t*)m_full.limbs, *(const fr_t*)FR_MOD);
+
+    u512_t sum;
+    add_512(sum, t, mN);
+    
+    // 3. result = tmp / R
+    // By construction, the lower 256 bits of `sum` are zero,
+    // so division by R (2^256) is just a right shift by 256 bits.
     fr_t res;
-    for (int i = 0; i < 4; i++) res.limbs[i] = (uint64_t)tmp[i];
+    for (int i = 0; i < 4; ++i) res.limbs[i] = sum.limbs[i + 4];
 
-    // 2. Reduce high limbs manually using BN254 modulus
-    //    (this is simplified; for best performance use Montgomery)
-    for (int i = 4; i < 8; i++) {
-        // Multiply tmp[i] by reduction factor from modulus
-        // Add to low limbs with carry
-        unsigned __int128 carry = tmp[i];
-        for (int j = 0; j < 4 && carry != 0; j++) {
-            unsigned __int128 sum = (unsigned __int128)res.limbs[j] + carry;
-            res.limbs[j] = (uint64_t)sum;
-            carry = sum >> 64;
-        }
+    // 4. Final conditional subtraction
+    if (fr_gte(res, FR_MOD)) {
+        sub_256(res, res, *(const fr_t*)FR_MOD);
     }
-
-    fr_reduce(res); // ensure < r
+    
     return res;
+}
+
+/**
+ * @brief Multiplies two numbers that are already in the Montgomery domain.
+ * @param a_mont A number in Montgomery form (a * R mod N).
+ * @param b_mont Another number in Montgomery form (b * R mod N).
+ * @return The result (a * b * R mod N).
+ */
+__device__ fr_t fr_mul_mont(const fr_t &a_mont, const fr_t &b_mont) {
+    u512_t prod;
+    mul_512(prod, a_mont, b_mont);
+    return mont_reduce(prod);
+}
+
+/**
+ * @brief Converts a number into the Montgomery domain.
+ * @param a A standard number.
+ * @return The number in Montgomery form (a * R mod N).
+ */
+__device__ fr_t to_mont(const fr_t &a) {
+    u512_t prod;
+    mul_512(prod, a, R2_MOD_N);
+    return mont_reduce(prod);
+}
+
+/**
+ * @brief Multiplies two standard numbers. Handles all conversions.
+ * @param a The first operand.
+ * @param b The second operand.
+ * @return The result (a * b) mod N.
+ */
+__device__ fr_t fr_mul(const fr_t &a, const fr_t &b) {
+    // 1. Convert both operands to Montgomery form
+    fr_t a_mont = to_mont(a);
+    fr_t b_mont = to_mont(b);
+    
+    // 2. Multiply in the Montgomery domain
+    fr_t res_mont = fr_mul_mont(a_mont, b_mont);
+    
+    // 3. Convert the result back from Montgomery form
+    u512_t zero_ext_res = {{0}};
+    for(int i = 0; i < 4; ++i) zero_ext_res.limbs[i] = res_mont.limbs[i];
+    
+    return mont_reduce(zero_ext_res);
 }
