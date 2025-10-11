@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstdio>
 
 // BN254 modulus r (little-endian limbs)
 __device__ const uint64_t FR_MOD[4] = {
@@ -11,6 +12,11 @@ __device__ const uint64_t FR_MOD[4] = {
 struct fr_t {
     uint64_t limbs[4]; // 256-bit little-endian
 };
+
+__host__ void fr_print(const fr_t &x) {
+    printf("0x");
+    for (int i = 3; i >= 0; --i) printf("%016llx", (unsigned long long)x.limbs[i]);
+}
 
 __device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
     for (int i = 3; i >= 0; i--) {

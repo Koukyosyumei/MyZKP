@@ -15,7 +15,7 @@ __global__ void test_kernel(bool *results) {
 
     // fr_sub wrap-around
     fr_t sub_neg = fr_sub(a, b);
-    //results[2] = fr_gte(sub_neg, a); // should wrap around mod p
+    results[2] = fr_gte(sub_neg, a.limbs); // should wrap around mod p
 
     // fr_mul
     fr_t mul_res = fr_mul(b, b);
