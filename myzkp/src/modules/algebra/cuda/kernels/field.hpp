@@ -13,6 +13,13 @@ struct fr_t {
     uint64_t limbs[4]; // 256-bit little-endian
 };
 
+__device__ bool fr_eq(const fr_t &a, const fr_t &b) {
+    for (int i = 3; i >= 0; i--) {
+       if (a.limbs[i] != b.limbs[i]) return false;
+    }
+    return true;
+}
+
 __host__ __device__ void fr_print(const fr_t &x) {
     printf("0x");
     for (int i = 3; i >= 0; --i) printf("%016llx", (unsigned long long)x.limbs[i]);
