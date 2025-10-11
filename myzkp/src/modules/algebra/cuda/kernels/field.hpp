@@ -18,6 +18,28 @@ __host__ void fr_print(const fr_t &x) {
     for (int i = 3; i >= 0; --i) printf("%016llx", (unsigned long long)x.limbs[i]);
 }
 
+__host__ __device__ __forceinline__ fr_t fr_zero() {
+    fr_t z = {{0, 0, 0, 0}};
+    return z;
+}
+
+__host__ __device__ __forceinline__ fr_t fr_one() {
+    fr_t o = {{1, 0, 0, 0}};
+    return o;
+}
+
+__host__ __device__ __forceinline__ fr_t fr_minus_one() {
+    fr_t m1 = {
+        {
+            0x43e1f593efffffffULL,
+            0x2833e84879b97091ULL,
+            0xb85045b68181585dULL,
+            0x30644e72e131a029ULL
+        }
+    };
+    return m1;
+}
+
 __device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
     for (int i = 3; i >= 0; i--) {
         if (a.limbs[i] > b[i]) return true;
