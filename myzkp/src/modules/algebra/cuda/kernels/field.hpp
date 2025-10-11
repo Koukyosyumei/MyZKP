@@ -3,7 +3,7 @@
 
 // BN254 modulus r (little-endian limbs)
 __device__ const uint64_t FR_MOD[4] = {
-    0x43e1f593f0000000ULL,
+    0x43e1f593f0000001ULL,
     0x2833e84879b97091ULL,
     0xb85045b68181585dULL,
     0x30644e72e131a029ULL
@@ -13,7 +13,7 @@ struct fr_t {
     uint64_t limbs[4]; // 256-bit little-endian
 };
 
-__host__ void fr_print(const fr_t &x) {
+__host__ __device__ void fr_print(const fr_t &x) {
     printf("0x");
     for (int i = 3; i >= 0; --i) printf("%016llx", (unsigned long long)x.limbs[i]);
 }
@@ -31,7 +31,7 @@ __host__ __device__ __forceinline__ fr_t fr_one() {
 __host__ __device__ __forceinline__ fr_t fr_minus_one() {
     fr_t m1 = {
         {
-            0x43e1f593efffffffULL,
+            0x43e1f593f0000000ULL,
             0x2833e84879b97091ULL,
             0xb85045b68181585dULL,
             0x30644e72e131a029ULL

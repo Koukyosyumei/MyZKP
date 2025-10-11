@@ -21,6 +21,9 @@ __global__ void test_kernel(bool *results) {
     fr_t mul_res = fr_mul(b, b);
     results[3] = (mul_res.limbs[0] == 4);
 
+    fr_t fmo = fr_minus_one();
+    fr_print(fmo);
+
     // fr_gtr / fr_gte
     //results[4] = fr_gtr(b, a);
     //results[5] = fr_gte(b, b);
