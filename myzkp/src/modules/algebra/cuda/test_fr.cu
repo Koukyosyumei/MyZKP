@@ -32,8 +32,8 @@ __global__ void test_kernel(bool *results) {
     fr_t f_z_s_12 = fr_sub(f_z, f_12);   // -12 = 0 - 12
     results[5] = fr_eq(f_z_s_12, f_m12);
 
-    fr_t f_m2_mul_m12 = fr_mul(f_m2, f_m12); // 24 = -2 * -12
-    //fr_print(f_m2_mul_m12);
+    fr_t f_m2_mul_m12 = fr_mul1(f_m2, f_m12); // 24 = -2 * -12
+    fr_print(f_m2_mul_m12);
     results[6] = fr_eq(f_m2_mul_m12, f_24);
 }
 
