@@ -33,30 +33,33 @@ __global__ void test_kernel(bool *results) {
     results[5] = fr_eq(f_z_s_12, f_m12);
 
     fr_t f_m2_mul_m12 = fr_mul(f_m2, f_m12); // 24 = -2 * -12
-    fr_print(f_m2_mul_m12);
     results[6] = fr_eq(f_m2_mul_m12, f_24);
+
+    fr_t f_m12_mul_2_add_24 = fr_mul(f_m12, f_2);
+    f_m12_mul_2_add_24 = fr_add(f_m12_mul_2_add_24, f_24);
+    results[7] = fr_eq(f_m12_mul_2_add_24, f_24);
 }
 
 int main() {
     bool host_results[7];
     bool *dev_results;
-    cudaMalloc(&dev_results, sizeof(bool) * 7);
+    cudaMalloc(&dev_results, sizeof(bool) * 8);
 
     test_kernel<<<1, 1>>>(dev_results);
     cudaMemcpy(host_results, dev_results, sizeof(bool) * 7, cudaMemcpyDeviceToHost);
     cudaFree(dev_results);
 
-    const char *names[7] = {
-        "fr_add", "fr_sub", "fr_sub_wrap", "fr_mul", "fr_add_wrap", "fr_sub_wrap", "f_mul_wrap"
+    const char *names[8] = {
+        "fr_add", "fr_sub", "fr_sub_wrap", "fr_mul", "fr_add_wrap", "fr_sub_wrap", "f_mul_wrap", "f_mul_wrap1"
     };
 
     int pass_count = 0;
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 8; i++) {
         printf("%-15s : %s\n", names[i], host_results[i] ? "PASS" : "FAIL");
         if (host_results[i]) pass_count++;
     }
 
-    printf("\n%d / 7 tests passed.\n", pass_count);
+    printf("\n%d / 8 tests passed.\n", pass_count);
     return 0;
 }
 
