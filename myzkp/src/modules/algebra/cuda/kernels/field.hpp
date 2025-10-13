@@ -1,17 +1,77 @@
 #include <cstdint>
 #include <cstdio>
 
-// BN254 modulus r (little-endian limbs)
-__device__ const uint64_t FR_MOD[4] = {
+struct fr_t {
+    uint64_t limbs[4]; // 256-bit little-endian
+};
+	
+// Device-only constants (for device compilation)
+__device__ __constant__ fr_t FR_MOD_DEV = {{
     0x43e1f593f0000001ULL,
     0x2833e84879b97091ULL,
     0xb85045b68181585dULL,
     0x30644e72e131a029ULL
-};
+}};
 
-struct fr_t {
-    uint64_t limbs[4]; // 256-bit little-endian
-};
+__device__ __constant__ fr_t FR_MOD_INV_DEV = {{
+    0xc2e1f593efffffffULL,
+    0x6586864b4c6911b3ULL,
+    0xe39a982899062391ULL,
+    0x73f82f1d0d8341b2ULL
+}};
+
+__device__ __constant__ fr_t R2_MOD_N_DEV = {{
+    0x1bb8e645ae216da7ULL,
+    0x53fe3ab1e35c59e3ULL,
+    0x8c49833d53bb8085ULL,
+    0x0216d0b17f4e44a5ULL
+}};
+
+// Host constexpr copies (for host compilation)
+static constexpr fr_t FR_MOD_HOST = {{
+    0x43e1f593f0000001ULL,
+    0x2833e84879b97091ULL,
+    0xb85045b68181585dULL,
+    0x30644e72e131a029ULL
+}};
+
+static constexpr fr_t FR_MOD_INV_HOST = {{
+    0xc2e1f593efffffffULL,
+    0x6586864b4c6911b3ULL,
+    0xe39a982899062391ULL,
+    0x73f82f1d0d8341b2ULL
+}};
+
+static constexpr fr_t R2_MOD_N_HOST = {{
+    0x1bb8e645ae216da7ULL,
+    0x53fe3ab1e35c59e3ULL,
+    0x8c49833d53bb8085ULL,
+    0x0216d0b17f4e44a5ULL
+}};
+
+inline __host__ __device__ const fr_t* get_FR_MOD_ptr() {
+#ifdef __CUDA_ARCH__
+    return &FR_MOD_DEV;
+#else
+    return &FR_MOD_HOST;
+#endif
+}
+
+inline __host__ __device__ const fr_t* get_FR_MOD_INV_ptr() {
+#ifdef __CUDA_ARCH__
+    return &FR_MOD_INV_DEV;
+#else
+    return &FR_MOD_INV_HOST;
+#endif
+}
+
+inline __host__ __device__ const fr_t* get_R2_MOD_N_ptr() {
+#ifdef __CUDA_ARCH__
+    return &R2_MOD_N_DEV;
+#else
+    return &R2_MOD_N_HOST;
+#endif
+}
 
 inline fr_t to_fr(uint64_t val) {
     return {{val, 0, 0, 0}};
@@ -51,20 +111,21 @@ __host__ __device__ __forceinline__ fr_t fr_minus_one() {
     return m1;
 }
 
-__host__ __device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
+__host__ __device__ bool fr_gte(const fr_t &a, const fr_t &b) {
     for (int i = 3; i >= 0; i--) {
-        if (a.limbs[i] > b[i]) return true;
-        if (a.limbs[i] < b[i]) return false;
+        if (a.limbs[i] > b.limbs[i]) return true;
+        if (a.limbs[i] < b.limbs[i]) return false;
     }
     return true;
 }
 
 __host__ __device__ void fr_reduce(fr_t &a) {
-    if (fr_gte(a, FR_MOD)) {
+    if (fr_gte(a, *get_FR_MOD_ptr())) {
         uint64_t borrow = 0;
+	const fr_t &mod = *get_FR_MOD_ptr();
         for (int i = 0; i < 4; i++) {
-            uint64_t tmp = a.limbs[i] - FR_MOD[i] - borrow;
-            borrow = (a.limbs[i] < FR_MOD[i] + borrow) ? 1 : 0;
+            uint64_t tmp = a.limbs[i] - mod.limbs[i] - borrow;
+            borrow = (a.limbs[i] < mod.limbs[i] + borrow) ? 1 : 0;
             a.limbs[i] = tmp;
         }
     }
@@ -91,10 +152,11 @@ __host__ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
         borrow = (tmp >> 127) & 1; // borrow = 1 if underflow
     }
 
+    const fr_t &mod = *get_FR_MOD_ptr();
     if (borrow) { // add modulus back
         uint64_t carry = 0;
         for (int i = 0; i < 4; i++) {
-            unsigned __int128 tmp = (unsigned __int128)res.limbs[i] + FR_MOD[i] + carry;
+            unsigned __int128 tmp = (unsigned __int128)res.limbs[i] + mod.limbs[i] + carry;
             res.limbs[i] = (uint64_t)tmp;
             carry = tmp >> 64;
         }
@@ -105,27 +167,6 @@ __host__ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
 
 // R = 2^256
 // Montgomery constant: FR_MOD * FR_MOD_INV = -1 (mod R)
-__device__ const uint64_t FR_MOD_INV[4] = {
-    0xc2e1f593efffffffULL,
-    0x6586864b4c6911b3ULL,
-    0xe39a982899062391ULL,
-    0x73f82f1d0d8341b2ULL
-};
-
-__device__ const fr_t R_INV_MOD_N = {{
-    0xdc5ba0056db1194eULL,
-    0x090ef5a9e111ec87ULL,
-    0xc8260de4aeb85d5dULL,
-    0x15ebf95182c5551cULL
-}};
-
-// Montgomery constant: R^2 mod N, where R = 2^256
-__device__ const fr_t R2_MOD_N = {{
-    0x1bb8e645ae216da7ULL,
-    0x53fe3ab1e35c59e3ULL,
-    0x8c49833d53bb8085ULL,
-    0x0216d0b17f4e44a5ULL
-}};
 
 // --- Helper Types and Functions ---
 
@@ -199,12 +240,12 @@ __host__ __device__ fr_t mont_reduce(const u512_t &t) {
     for (int i = 0; i < 4; ++i) t_low.limbs[i] = t.limbs[i];
     
     u512_t m_full;
-    mul_512(m_full, t_low, *(const fr_t*)FR_MOD_INV); // m = (T mod R) * N'
+    mul_512(m_full, t_low, *get_FR_MOD_INV_ptr()); // m = (T mod R) * N'
     // We only need the lower 256 bits of m_full for the next step.
 
     // 2. tmp = (T + m*N)
     u512_t mN;
-    mul_512(mN, *(const fr_t*)m_full.limbs, *(const fr_t*)FR_MOD);
+    mul_512(mN, *(const fr_t*)m_full.limbs, *get_FR_MOD_ptr());
 
     u512_t sum;
     add_512(sum, t, mN);
@@ -216,8 +257,8 @@ __host__ __device__ fr_t mont_reduce(const u512_t &t) {
     for (int i = 0; i < 4; ++i) res.limbs[i] = sum.limbs[i + 4];
 
     // 4. Final conditional subtraction
-    if (fr_gte(res, FR_MOD)) {
-        sub_256(res, res, *(const fr_t*)FR_MOD);
+    if (fr_gte(res, *get_FR_MOD_ptr())) {
+        sub_256(res, res, *get_FR_MOD_ptr());
     }
     
     return res;
@@ -242,7 +283,7 @@ __host__ __device__ fr_t fr_mul_mont(const fr_t &a_mont, const fr_t &b_mont) {
  */
 __host__ __device__ fr_t to_mont(const fr_t &a) {
     u512_t prod;
-    mul_512(prod, a, R2_MOD_N);
+    mul_512(prod, a, *get_R2_MOD_N_ptr());
     return mont_reduce(prod);
 }
 
