@@ -13,6 +13,10 @@ struct fr_t {
     uint64_t limbs[4]; // 256-bit little-endian
 };
 
+inline fr_t to_fr(uint64_t val) {
+    return {{val, 0, 0, 0}};
+}
+
 __host__ __device__ bool fr_eq(const fr_t &a, const fr_t &b) {
     for (int i = 3; i >= 0; i--) {
        if (a.limbs[i] != b.limbs[i]) return false;
