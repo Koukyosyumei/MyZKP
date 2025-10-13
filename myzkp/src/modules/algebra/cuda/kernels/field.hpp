@@ -2,7 +2,7 @@
 #include <cstdio>
 
 // BN254 modulus r (little-endian limbs)
-__device__ const uint64_t FR_MOD[4] = {
+__host__ __device__ const uint64_t FR_MOD[4] = {
     0x43e1f593f0000001ULL,
     0x2833e84879b97091ULL,
     0xb85045b68181585dULL,
@@ -13,7 +13,7 @@ struct fr_t {
     uint64_t limbs[4]; // 256-bit little-endian
 };
 
-__device__ bool fr_eq(const fr_t &a, const fr_t &b) {
+__host__ __device__ bool fr_eq(const fr_t &a, const fr_t &b) {
     for (int i = 3; i >= 0; i--) {
        if (a.limbs[i] != b.limbs[i]) return false;
     }
@@ -30,12 +30,12 @@ __host__ __device__ __forceinline__ fr_t fr_zero() {
     return z;
 }
 
-__device__ __forceinline__ fr_t fr_one() {
+__host__ __device__ __forceinline__ fr_t fr_one() {
     fr_t o = {{1, 0, 0, 0}};
     return o;
 }
 
-__device__ __forceinline__ fr_t fr_minus_one() {
+__host__ __device__ __forceinline__ fr_t fr_minus_one() {
     fr_t m1 = {
         {
             0x43e1f593f0000000ULL,
@@ -47,7 +47,7 @@ __device__ __forceinline__ fr_t fr_minus_one() {
     return m1;
 }
 
-__device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
+__host__ __device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
     for (int i = 3; i >= 0; i--) {
         if (a.limbs[i] > b[i]) return true;
         if (a.limbs[i] < b[i]) return false;
@@ -55,7 +55,7 @@ __device__ bool fr_gte(const fr_t &a, const uint64_t b[4]) {
     return true;
 }
 
-__device__ void fr_reduce(fr_t &a) {
+__host__ __device__ void fr_reduce(fr_t &a) {
     if (fr_gte(a, FR_MOD)) {
         uint64_t borrow = 0;
         for (int i = 0; i < 4; i++) {
@@ -66,7 +66,7 @@ __device__ void fr_reduce(fr_t &a) {
     }
 }
 
-__device__ fr_t fr_add(const fr_t &a, const fr_t &b) {
+__host__ __device__ fr_t fr_add(const fr_t &a, const fr_t &b) {
     fr_t res;
     uint64_t carry = 0;
     for (int i = 0; i < 4; i++) {
@@ -78,7 +78,7 @@ __device__ fr_t fr_add(const fr_t &a, const fr_t &b) {
     return res;
 }
 
-__device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
+__host__ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
     fr_t res;
     uint64_t borrow = 0;
     for (int i = 0; i < 4; i++) {
@@ -101,14 +101,14 @@ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
 
 // R = 2^256
 // Montgomery constant: FR_MOD * FR_MOD_INV = -1 (mod R)
-__device__ const uint64_t FR_MOD_INV[4] = {
+__host__ __device__ const uint64_t FR_MOD_INV[4] = {
     0xc2e1f593efffffffULL,
     0x6586864b4c6911b3ULL,
     0xe39a982899062391ULL,
     0x73f82f1d0d8341b2ULL
 };
 
-__device__ const fr_t R_INV_MOD_N = {{
+__host__ __device__ const fr_t R_INV_MOD_N = {{
     0xdc5ba0056db1194eULL,
     0x090ef5a9e111ec87ULL,
     0xc8260de4aeb85d5dULL,
@@ -116,7 +116,7 @@ __device__ const fr_t R_INV_MOD_N = {{
 }};
 
 // Montgomery constant: R^2 mod N, where R = 2^256
-__device__ const fr_t R2_MOD_N = {{
+__host__ __device__ const fr_t R2_MOD_N = {{
     0x1bb8e645ae216da7ULL,
     0x53fe3ab1e35c59e3ULL,
     0x8c49833d53bb8085ULL,
@@ -135,7 +135,7 @@ struct u512_t {
 /**
  * @brief Adds two 512-bit numbers. res = a + b.
  */
-__device__ void add_512(u512_t &res, const u512_t &a, const u512_t &b) {
+__host__ __device__ void add_512(u512_t &res, const u512_t &a, const u512_t &b) {
     unsigned __int128 carry = 0;
     for (int i = 0; i < 8; i++) {
         carry += (unsigned __int128)a.limbs[i] + b.limbs[i];
@@ -148,7 +148,7 @@ __device__ void add_512(u512_t &res, const u512_t &a, const u512_t &b) {
  * @brief Subtracts one 256-bit number from another. res = a - b.
  * Assumes a >= b.
  */
-__device__ void sub_256(fr_t &res, const fr_t &a, const fr_t &b) {
+__host__ __device__ void sub_256(fr_t &res, const fr_t &a, const fr_t &b) {
     uint64_t borrow = 0;
     for (int i = 0; i < 4; i++) {
         unsigned __int128 tmp = (unsigned __int128)a.limbs[i] - b.limbs[i] - borrow;
@@ -163,7 +163,7 @@ __device__ void sub_256(fr_t &res, const fr_t &a, const fr_t &b) {
  * @param a The first 256-bit operand.
  * @param b The second 256-bit operand.
  */
-__device__ void mul_512(u512_t &res, const fr_t &a, const fr_t &b) {
+__host__ __device__ void mul_512(u512_t &res, const fr_t &a, const fr_t &b) {
     // Initialize result limbs to 0
     for(int i = 0; i < 8; ++i) res.limbs[i] = 0;
 
@@ -187,7 +187,7 @@ __device__ void mul_512(u512_t &res, const fr_t &a, const fr_t &b) {
  * @param t The 512-bit number to reduce.
  * @return The result (T * R^-1) mod N, where R = 2^256.
  */
-__device__ fr_t mont_reduce(const u512_t &t) {
+__host__ __device__ fr_t mont_reduce(const u512_t &t) {
     // 1. m = (T mod R) * N' mod R
     // T mod R is just the lower 4 limbs of T.
     // N' is FR_MOD_INV.
@@ -225,7 +225,7 @@ __device__ fr_t mont_reduce(const u512_t &t) {
  * @param b_mont Another number in Montgomery form (b * R mod N).
  * @return The result (a * b * R mod N).
  */
-__device__ fr_t fr_mul_mont(const fr_t &a_mont, const fr_t &b_mont) {
+__host__ __device__ fr_t fr_mul_mont(const fr_t &a_mont, const fr_t &b_mont) {
     u512_t prod;
     mul_512(prod, a_mont, b_mont);
     return mont_reduce(prod);
@@ -236,7 +236,7 @@ __device__ fr_t fr_mul_mont(const fr_t &a_mont, const fr_t &b_mont) {
  * @param a A standard number.
  * @return The number in Montgomery form (a * R mod N).
  */
-__device__ fr_t to_mont(const fr_t &a) {
+__host__ __device__ fr_t to_mont(const fr_t &a) {
     u512_t prod;
     mul_512(prod, a, R2_MOD_N);
     return mont_reduce(prod);
@@ -248,7 +248,7 @@ __device__ fr_t to_mont(const fr_t &a) {
  * @param b The second operand.
  * @return The result (a * b) mod N.
  */
-__device__ fr_t fr_mul(const fr_t &a, const fr_t &b) {
+__host__ __device__ fr_t fr_mul(const fr_t &a, const fr_t &b) {
     // 1. Convert both operands to Montgomery form
     fr_t a_mont = to_mont(a);
     fr_t b_mont = to_mont(b);
