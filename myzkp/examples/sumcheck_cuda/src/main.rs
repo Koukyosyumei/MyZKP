@@ -13,6 +13,7 @@ use num_bigint::{BigInt, Sign};
 
 use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 use myzkp::modules::algebra::ring::Ring;
+use myzkp::modules::algebra::field::Field;
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::sumcheck::{sum_over_boolean_hypercube};
@@ -173,59 +174,68 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut s_evals_dev = stream.alloc_zeros::<u8>(32 * (max_degree + 1))?;
     let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
-    for d in 0..(max_degree+1) {
-        let eval_point = F::from_value(d);
-        let eval_point_bytes = f_to_bytes(&eval_point);
-        let eval_point_dev = stream.memcpy_stod(&eval_point_bytes)?;
-    
-        let mut builder = stream.launch_builder(&eval_folded_poly_kernel);
+    let s_eval_point: Vec<F> = (0..(max_degree+1)).map(|d| F::from_value(d)).collect();
+
+    for i in 0..2 { //domain_size {
+        for d in 0..(max_degree+1) {
+            let eval_point = F::from_value(d);
+            let eval_point_bytes = f_to_bytes(&eval_point);
+            let eval_point_dev = stream.memcpy_stod(&eval_point_bytes)?;
+        
+            let mut builder = stream.launch_builder(&eval_folded_poly_kernel);
+            builder.arg(&num_remaining_vars);
+            builder.arg(&domain_size);
+            builder.arg(&num_blocks_per_poly);
+            builder.arg(&evals_dev);
+            builder.arg(&mut buf_dev);
+            builder.arg(&eval_point_dev);
+            unsafe { builder.launch(launch_config) }?;
+
+            let mut builder = stream.launch_builder(&fold_factors_pointwise_kernel);
+            builder.arg(&mut buf_dev);
+            let half_domain_size: usize = 1 << (num_remaining_vars - 1);
+            builder.arg(&half_domain_size);
+            builder.arg(&num_factors);
+            unsafe { builder.launch(launch_config) }?;
+
+            let half_half_domain_size: usize = half_domain_size >> 1;
+            let mut builder = stream.launch_builder(&sum_kernel);
+            builder.arg(&buf_dev);
+            builder.arg(&mut s_evals_dev);
+            builder.arg(&half_half_domain_size);
+            builder.arg(&d);
+            unsafe { builder.launch(launch_config) }?;
+        }
+
+        let s_evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&s_evals_dev)?);
+        println!("s_evals_host: {:?}", s_evals_host);
+        let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals_host);
+        s_evals.push(s_evals_host);
+
+        
+        let challenge = F::from_value(2);
+        let challenge_bytes = f_to_bytes(&challenge);
+        let challenge_dev = stream.memcpy_stod(&challenge_bytes)?;
+        let mut builder = stream.launch_builder(&fold_into_half_kernel);
         builder.arg(&num_remaining_vars);
         builder.arg(&domain_size);
         builder.arg(&num_blocks_per_poly);
-        builder.arg(&evals_dev);
-        builder.arg(&mut buf_dev);
-        builder.arg(&eval_point_dev);
+        builder.arg(&mut evals_dev);
+        builder.arg(&challenge_dev);
         unsafe { builder.launch(launch_config) }?;
 
-        let mut builder = stream.launch_builder(&fold_factors_pointwise_kernel);
-        builder.arg(&mut buf_dev);
-        let half_domain_size: usize = 1 << (num_remaining_vars - 1);
-        builder.arg(&half_domain_size);
-        builder.arg(&num_factors);
-        unsafe { builder.launch(launch_config) }?;
+        println!("s(c): {}", s_poly.eval(&challenge).sanitize());
 
-        let half_half_domain_size: usize = half_domain_size >> 1;
-        let mut builder = stream.launch_builder(&sum_kernel);
-        builder.arg(&buf_dev);
-        builder.arg(&mut s_evals_dev);
-        builder.arg(&half_half_domain_size);
-        builder.arg(&d);
-        unsafe { builder.launch(launch_config) }?;
-    }
+        num_remaining_vars -= 1;
 
-    let s_evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&s_evals_dev)?);
-    s_evals.push(s_evals_host);
-
-    
-    let challenge = F::from_value(2);
-    let challenge_bytes = f_to_bytes(&challenge);
-    let challenge_dev = stream.memcpy_stod(&challenge_bytes)?;
-    let mut builder = stream.launch_builder(&fold_into_half_kernel);
-    builder.arg(&num_remaining_vars);
-    builder.arg(&domain_size);
-    builder.arg(&num_blocks_per_poly);
-    builder.arg(&mut evals_dev);
-    builder.arg(&challenge_dev);
-    unsafe { builder.launch(launch_config) }?;
-
-    num_remaining_vars -= 1;
-
-    let evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&evals_dev)?);
-    for i in 0..3 {
-        for j in 0..8 {
-            print!("{}, ", evals_host[i * 8 + j]);
-        }
-        print!("\n");
+        /*
+        let evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&evals_dev)?);
+        for i in 0..3 {
+            for j in 0..8 {
+                print!("{}, ", evals_host[i * 8 + j]);
+            }
+            print!("\n");
+        }*/
     }
 
     
