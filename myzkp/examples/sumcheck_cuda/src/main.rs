@@ -170,8 +170,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let mut evals_dev = stream.memcpy_stod(&evals_bytes)?;
-    let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
     let mut s_evals_dev = stream.alloc_zeros::<u8>(32 * (max_degree + 1))?;
+    
+    let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
     for d in 0..(max_degree+1) {
         let eval_point = F::from_value(d);
