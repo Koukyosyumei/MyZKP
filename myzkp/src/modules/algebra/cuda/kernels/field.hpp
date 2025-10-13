@@ -2,7 +2,7 @@
 #include <cstdio>
 
 // BN254 modulus r (little-endian limbs)
-__host__ __device__ const uint64_t FR_MOD[4] = {
+__device__ const uint64_t FR_MOD[4] = {
     0x43e1f593f0000001ULL,
     0x2833e84879b97091ULL,
     0xb85045b68181585dULL,
@@ -105,14 +105,14 @@ __host__ __device__ fr_t fr_sub(const fr_t &a, const fr_t &b) {
 
 // R = 2^256
 // Montgomery constant: FR_MOD * FR_MOD_INV = -1 (mod R)
-__host__ __device__ const uint64_t FR_MOD_INV[4] = {
+__device__ const uint64_t FR_MOD_INV[4] = {
     0xc2e1f593efffffffULL,
     0x6586864b4c6911b3ULL,
     0xe39a982899062391ULL,
     0x73f82f1d0d8341b2ULL
 };
 
-__host__ __device__ const fr_t R_INV_MOD_N = {{
+__device__ const fr_t R_INV_MOD_N = {{
     0xdc5ba0056db1194eULL,
     0x090ef5a9e111ec87ULL,
     0xc8260de4aeb85d5dULL,
@@ -120,7 +120,7 @@ __host__ __device__ const fr_t R_INV_MOD_N = {{
 }};
 
 // Montgomery constant: R^2 mod N, where R = 2^256
-__host__ __device__ const fr_t R2_MOD_N = {{
+__device__ const fr_t R2_MOD_N = {{
     0x1bb8e645ae216da7ULL,
     0x53fe3ab1e35c59e3ULL,
     0x8c49833d53bb8085ULL,
