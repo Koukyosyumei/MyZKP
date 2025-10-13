@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+num-bigint = { version = "0.4", features = ["rand", "serde"] }
 num-traits = "0.2"
 rand = "0.8.5"
 cudarc = { version = "0.17.3", features = ["cuda-version-from-build-system"] }
