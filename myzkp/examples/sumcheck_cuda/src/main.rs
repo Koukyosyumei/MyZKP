@@ -1,4 +1,6 @@
 use std::fs;
+use std::hash::Hash;
+use std::collections::HashMap;
 
 use cudarc;
 use cudarc::nvrtc::Ptx;
@@ -10,6 +12,9 @@ use num_bigint::{BigInt, Sign};
 
 use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 use myzkp::modules::algebra::ring::Ring;
+use myzkp::modules::algebra::mpolynomials::MPolynomial;
+use myzkp::modules::algebra::polynomial::Polynomial;
+use myzkp::modules::algebra::sumcheck::{BitCombinations, sum_over_boolean_hypercube};
 
 type F = FiniteFieldElement<ModEIP197>;
 
@@ -34,6 +39,15 @@ fn vec_f_from_bytes(bytes: &[u8]) -> Vec<F> {
             F::from_value(BigInt::from_bytes_le(Sign::Plus, &arr))
         })
         .collect()
+}
+
+fn evals_over_boolean_hypercube(f: &MPolynomial<F>, result: &mut Vec<F>) {
+    let el = f.get_num_vars();
+    let comb = BitCombinations::new(el, 0);
+    for c in comb {
+        let c_casted = c.iter().map(|v| F::from_value(*v)).collect::<Vec<_>>();
+        result.push(f.evaluate(&c_casted));
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -66,6 +80,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     unsafe { builder.launch(LaunchConfig::for_num_elems(2)) }?;
     let out_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&out)?);
     println!("out_host: {:?}", out_host);
+
+    let mut dict_1 = HashMap::new();
+    dict_1.insert(vec![0, 0, 0], F::from_value(1));
+    dict_1.insert(vec![1, 0, 0], F::from_value(2));
+    let factor_1 = MPolynomial::new(dict_1);
+
+    let mut dict_2 = HashMap::new();
+    dict_2.insert(vec![0, 0, 0], F::from_value(2));
+    dict_2.insert(vec![0, 1, 0], F::from_value(3));
+    let factor_2 = MPolynomial::new(dict_2); 
+
+    let mut dict_3 = HashMap::new();
+    dict_3.insert(vec![0, 0, 0], F::from_value(3));
+    dict_3.insert(vec![0, 0, 1], F::from_value(4));
+    let factor_3 = MPolynomial::new(dict_3);
+
+    let g = &(&factor_1 * &factor_2) * &factor_3;
+    println!("g: {}", g);
+    let h = sum_over_boolean_hypercube(&g);
+
+    let mut evals = vec![];
+    evals_over_boolean_hypercube(&factor_1, &mut evals);
+    evals_over_boolean_hypercube(&factor_2, &mut evals);
+    evals_over_boolean_hypercube(&factor_3, &mut evals);
 
     /*
     // or allocate directly
