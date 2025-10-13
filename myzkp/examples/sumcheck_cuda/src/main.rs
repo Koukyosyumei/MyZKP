@@ -1,12 +1,25 @@
+use std::fs;
+
 use cudarc;
+use cudarc::nvrtc::Ptx;
+use cudarc::nvrtc::compile_ptx;
 use cudarc::driver::PushKernelArg;
 use cudarc::driver::LaunchConfig;
 use num_traits::identities::One;
+
 use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 
 type F = FiniteFieldElement<ModEIP197>;
 
+fn f_to_bytes(x: &F) -> Vec<u8> {
+    let (_, digits) = x.value.to_u64_digits();
+    digits.iter().flat_map(|d| d.to_le_bytes()).collect()
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    //let contents = fs::read_to_string("../../src/modules/algebra/cuda/kernels/sumcheck.hpp")?;
+    let ptx = Ptx::from_file("../../src/modules/algebra/cuda/kernels/sumcheck.cu"); //.unwrap();
+
     let a = F::one();
 
     let ctx = cudarc::driver::CudaContext::new(0)?;

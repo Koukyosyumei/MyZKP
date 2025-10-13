@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "./kernels/sumcheck.hpp"
+#include "./kernels/sumcheck.cu"
 
 __global__ void test_kernel(bool *results) {
     fr_t f_z   = fr_zero();

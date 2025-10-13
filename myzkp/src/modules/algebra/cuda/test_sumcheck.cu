@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <vector>
 #include <numeric>
-#include "kernels/sumcheck.hpp"
+#include "kernels/sumcheck.cu"
 
 // Macro to check for CUDA errors
 #define CUDA_CHECK(err) { \
