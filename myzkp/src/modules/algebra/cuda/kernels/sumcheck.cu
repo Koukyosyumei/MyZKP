@@ -58,12 +58,11 @@ extern "C" __global__ void fold_into_half(
     // Calculate the base offset for the current polynomial factor's evaluations.
     const int offset = poly_idx * domain_size;
     while (tid < stride) {
-        int idx = offset + tid;
+	int idx = offset + tid;
 	// p'(x') = p(0, x') + challenge * (p(1, x') - p(0, x'))
 	fr_t tmp = fr_sub(evals[idx + stride], evals[idx]);
 	tmp = fr_mul(*challenge, tmp);
 	evals[idx] = fr_add(tmp, evals[idx]);
-        
 	// Stride to the next element for this thread.
 	tid += blockDim.x * num_blocks_per_factor;
     }

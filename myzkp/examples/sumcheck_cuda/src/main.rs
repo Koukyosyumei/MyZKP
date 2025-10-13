@@ -101,7 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let module = ctx.load_module(ptx)?;
     let fold_factors_pointwise_kernel = module.load_function("fold_factors_pointwise")?;
-    let fold_into_half_kernel = module.load_function("fold_factors_pointwise")?;
+    let fold_into_half_kernel = module.load_function("fold_into_half")?;
     let eval_folded_poly_kernel = module.load_function("eval_folded_poly")?;
     let sum_kernel = module.load_function("sum")?;
 
@@ -161,7 +161,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let domain_size = 1 << num_remaining_vars;
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
-
+    let mut s_evals = vec![];
 
     let launch_config = LaunchConfig {
         grid_dim: (num_blocks_per_poly * (num_factors as u32), 1, 1),
@@ -171,7 +171,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut evals_dev = stream.memcpy_stod(&evals_bytes)?;
     let mut s_evals_dev = stream.alloc_zeros::<u8>(32 * (max_degree + 1))?;
-    
     let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
     for d in 0..(max_degree+1) {
@@ -205,9 +204,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let s_evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&s_evals_dev)?);
-    println!("{:?}", s_evals_host);
+    s_evals.push(s_evals_host);
 
+    
+    let challenge = F::from_value(2);
+    let challenge_bytes = f_to_bytes(&challenge);
+    let challenge_dev = stream.memcpy_stod(&challenge_bytes)?;
+    let mut builder = stream.launch_builder(&fold_into_half_kernel);
+    builder.arg(&num_remaining_vars);
+    builder.arg(&domain_size);
+    builder.arg(&num_blocks_per_poly);
+    builder.arg(&mut evals_dev);
+    builder.arg(&challenge_dev);
+    unsafe { builder.launch(launch_config) }?;
 
+    num_remaining_vars -= 1;
+
+    let evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&evals_dev)?);
+    for i in 0..3 {
+        for j in 0..8 {
+            print!("{}, ", evals_host[i * 8 + j]);
+        }
+        print!("\n");
+    }
+
+    
 
     //let mut builder = stream.launch_builder(&sum_kernel);
     //builder.arg(&inp);
