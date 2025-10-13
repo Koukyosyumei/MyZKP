@@ -17,6 +17,7 @@ use myzkp::modules::algebra::field::Field;
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::sumcheck::{sum_over_boolean_hypercube};
+use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
 
 #[derive(Debug)]
 struct BitCombinations {
@@ -89,13 +90,12 @@ fn evals_over_boolean_hypercube(f: &MPolynomial<F>, result: &mut Vec<F>) {
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let ptx = compile_ptx("").unwrap();
-    let ptx = Ptx::from_file("../../src/modules/algebra/cuda/kernels/sumcheck.ptx"); //.unwrap();
+//fn prove_sumcheck() {
+//
+//}
 
-    //let a = F::one();
-    //let b = F::one();
-    //let x = vec![a, b];
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let ptx = Ptx::from_file("../../src/modules/algebra/cuda/kernels/sumcheck.ptx"); //.unwrap();
 
     let ctx = cudarc::driver::CudaContext::new(0)?;
     let stream = ctx.default_stream();
@@ -105,21 +105,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let fold_into_half_kernel = module.load_function("fold_into_half")?;
     let eval_folded_poly_kernel = module.load_function("eval_folded_poly")?;
     let sum_kernel = module.load_function("sum")?;
-
-    // copy a rust slice to the device
-    //let x_bytes = vec_f_to_bytes(&x);
-    //println!("x :{:?}", x_bytes);
-    //let inp = stream.memcpy_stod(&x_bytes)?;
-    //let mut out = stream.alloc_zeros::<u8>(32)?;
-
-    //let mut builder = stream.launch_builder(&sum_kernel);
-    //builder.arg(&inp);
-    //builder.arg(&mut out);
-    //builder.arg(&2usize);
-    //builder.arg(&0usize);
-    //unsafe { builder.launch(LaunchConfig::for_num_elems(2)) }?;
-    //let out_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&out)?);
-    //println!("out_host: {:?}", out_host);
 
     let mut dict_1 = HashMap::new();
     dict_1.insert(vec![0, 0, 0], F::from_value(1));
@@ -158,11 +143,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let max_degree = 3;
     let num_factors: usize = 3;
-    let mut num_remaining_vars = 3;
-    let domain_size = 1 << num_remaining_vars;
+    let num_vars = 3;
+    let domain_size = 1 << num_vars;
+    
+    let s_eval_point: Vec<F> = (0..(max_degree+1)).map(|d| F::from_value(d)).collect();
+    let mut num_remaining_vars = num_vars;
+    let mut s_polys = vec![];
+    let mut challenges: Vec<F> = vec![];
+    
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
-    let mut s_evals = vec![];
 
     let launch_config = LaunchConfig {
         grid_dim: (num_blocks_per_poly * (num_factors as u32), 1, 1),
@@ -170,13 +160,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         shared_mem_bytes: 128,
     };
 
+    let mut proof_stream = FiatShamirTransformer::new();
+    proof_stream.push(&vec![bincode::serialize(&max_degree).expect("Serialization failed")]);
+    proof_stream.push(&vec![bincode::serialize(&num_remaining_vars).expect("Serialization failed")]);
+    proof_stream.push(&vec![bincode::serialize(&g).expect("Serialization failed")]);
+
     let mut evals_dev = stream.memcpy_stod(&evals_bytes)?;
     let mut s_evals_dev = stream.alloc_zeros::<u8>(32 * (max_degree + 1))?;
     let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
-    let s_eval_point: Vec<F> = (0..(max_degree+1)).map(|d| F::from_value(d)).collect();
 
-    for i in 0..2 { //domain_size {
+    for i in 0..num_vars {
         for d in 0..(max_degree+1) {
             let eval_point = F::from_value(d);
             let eval_point_bytes = f_to_bytes(&eval_point);
@@ -208,12 +202,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         let s_evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&s_evals_dev)?);
-        println!("s_evals_host: {:?}", s_evals_host);
-        let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals_host);
-        s_evals.push(s_evals_host);
+        for se in &s_evals_host {
+            proof_stream.push(&vec![bincode::serialize(&se).expect("Serialization failed")]);
+        }
 
-        
-        let challenge = F::from_value(2);
+        let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals_host);
+        s_polys.push(s_poly);
+
+        let challenge = F::sample(&proof_stream.prover_fiat_shamir(32));
         let challenge_bytes = f_to_bytes(&challenge);
         let challenge_dev = stream.memcpy_stod(&challenge_bytes)?;
         let mut builder = stream.launch_builder(&fold_into_half_kernel);
@@ -223,57 +219,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         builder.arg(&mut evals_dev);
         builder.arg(&challenge_dev);
         unsafe { builder.launch(launch_config) }?;
+        challenges.push(challenge);
 
-        println!("s(c): {}", s_poly.eval(&challenge).sanitize());
-
+        if i == 0 {
+            assert_eq!(s_evals_host[0].add_ref(&s_evals_host[1]), h);
+        } else {
+            assert_eq!(s_evals_host[0].add_ref(&s_evals_host[1]), s_polys[i-1].eval(&challenges[i-1]).sanitize());
+        }
         num_remaining_vars -= 1;
+   }
 
-        /*
-        let evals_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&evals_dev)?);
-        for i in 0..3 {
-            for j in 0..8 {
-                print!("{}, ", evals_host[i * 8 + j]);
-            }
-            print!("\n");
-        }*/
-    }
-
-    
-
-    //let mut builder = stream.launch_builder(&sum_kernel);
-    //builder.arg(&inp);
-    //builder.arg(&mut out);
-    //builder.arg(&2usize);
-    //builder.arg(&0usize);
-    //unsafe { builder.launch(LaunchConfig::for_num_elems(2)) }?;
-    //let out_host: Vec<F> = vec_f_from_bytes(&stream.memcpy_dtov(&out)?);
-    //println!("out_host: {:?}", out_host);
-
-
-    /*
-    // or allocate directly
-
-    let ptx = cudarc::nvrtc::compile_ptx("
-    extern \"C\" __global__ void sin_kernel(float *out, const float *inp, const size_t numel) {
-    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < numel) {
-        out[i] = sin(inp[i]);
-    }
-    }")?;
-
-    // Dynamically load it into the device
-    let module = ctx.load_module(ptx)?;
-    let sin_kernel = module.load_function("sin_kernel")?;
-
-    let mut builder = stream.launch_builder(&sin_kernel);
-    builder.arg(&mut out);
-    builder.arg(&inp);
-    builder.arg(&100usize);
-    unsafe { builder.launch(LaunchConfig::for_num_elems(100)) }?;
-
-    let out_host: Vec<f32> = stream.memcpy_dtov(&out)?;
-    assert_eq!(out_host, [1.0; 100].map(f32::sin));
-    */
+    assert_eq!(g.evaluate(&challenges), s_polys[num_vars - 1].eval(&challenges[num_vars - 1]).sanitize());
 
     Ok(())
 }
