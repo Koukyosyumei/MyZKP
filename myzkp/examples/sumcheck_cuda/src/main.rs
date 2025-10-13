@@ -237,6 +237,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let recovered_g = proof_stream.pull();
     assert_eq!(vec![bincode::serialize(&g).expect("Serialization failed")], recovered_g);
 
+    let mut s_polys = vec![];
+    let mut challenges: Vec<F> = vec![];
+    for i in 0..num_vars {
+        let mut s_evals = vec![];
+        for d in 0..(max_degree+1) {
+            let tmp_bytes = proof_stream.pull();
+            let se = bincode::deserialize::<F>(&tmp_bytes[0])?;
+            s_evals.push(se);
+        }
+
+        let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals);
+        s_polys.push(s_poly);
+
+        let challenge = F::sample(&proof_stream.verifier_fiat_shamir(32));
+        challenges.push(challenge);
+
+        if i == 0 {
+            assert_eq!(s_evals[0].add_ref(&s_evals[1]), h);
+        } else {
+            assert_eq!(s_evals[0].add_ref(&s_evals[1]), s_polys[i-1].eval(&challenges[i-1]).sanitize());
+        }
+    }
+
 
     Ok(())
 }
