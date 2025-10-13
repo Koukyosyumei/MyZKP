@@ -1,0 +1,11 @@
+[package]
+name = "sumcheck_cuda"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+num-traits = "0.2"
+rand = "0.8.5"
+cudarc = { version = "0.17.3", features = ["cuda-version-from-build-system"] }
+myzkp = { path = "../../" }
