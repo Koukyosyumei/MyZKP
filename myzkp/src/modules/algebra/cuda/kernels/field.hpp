@@ -13,6 +13,9 @@ __device__ __constant__ fr_t FR_MOD_DEV = {{
     0x30644e72e131a029ULL
 }};
 
+// R = 2^256
+// Montgomery constant: FR_MOD * FR_MOD_INV = -1 (mod R)
+
 __device__ __constant__ fr_t FR_MOD_INV_DEV = {{
     0xc2e1f593efffffffULL,
     0x6586864b4c6911b3ULL,
