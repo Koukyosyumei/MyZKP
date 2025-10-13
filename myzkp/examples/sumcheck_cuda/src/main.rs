@@ -12,7 +12,8 @@ use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 type F = FiniteFieldElement<ModEIP197>;
 
 fn f_to_bytes(x: &F) -> Vec<u8> {
-    let (_, digits) = x.value.to_u64_digits();
+    let (_, mut digits) = x.value.to_u64_digits();
+    digits.resize(4, 0);
     digits.iter().flat_map(|d| d.to_le_bytes()).collect()
 }
 
@@ -37,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // copy a rust slice to the device
     let x_bytes = vec_f_to_bytes(&x);
-    // println!(":{}")
+    println!("x :{:?}", x_bytes);
     let inp = stream.memcpy_stod(&x_bytes)?;
     let mut out = stream.alloc_zeros::<u8>(32)?;
     
