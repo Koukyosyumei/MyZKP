@@ -162,13 +162,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut proof_stream = FiatShamirTransformer::new();
     proof_stream.push(&vec![bincode::serialize(&max_degree).expect("Serialization failed")]);
-    proof_stream.push(&vec![bincode::serialize(&num_remaining_vars).expect("Serialization failed")]);
+    proof_stream.push(&vec![bincode::serialize(&num_vars).expect("Serialization failed")]);
     proof_stream.push(&vec![bincode::serialize(&g).expect("Serialization failed")]);
 
     let mut evals_dev = stream.memcpy_stod(&evals_bytes)?;
     let mut s_evals_dev = stream.alloc_zeros::<u8>(32 * (max_degree + 1))?;
     let mut buf_dev = stream.alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
-
 
     for i in 0..num_vars {
         for d in 0..(max_degree+1) {
@@ -227,9 +226,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             assert_eq!(s_evals_host[0].add_ref(&s_evals_host[1]), s_polys[i-1].eval(&challenges[i-1]).sanitize());
         }
         num_remaining_vars -= 1;
-   }
+    }
 
     assert_eq!(g.evaluate(&challenges), s_polys[num_vars - 1].eval(&challenges[num_vars - 1]).sanitize());
+
+    let recovered_max_degree = proof_stream.pull();   
+    assert_eq!(vec![bincode::serialize(&max_degree).expect("Serialization failed")], recovered_max_degree);
+    let recovered_num_vars = proof_stream.pull();
+    assert_eq!(vec![bincode::serialize(&num_vars).expect("Serialization failed")], recovered_num_vars);
+    let recovered_g = proof_stream.pull();
+    assert_eq!(vec![bincode::serialize(&g).expect("Serialization failed")], recovered_g);
+
 
     Ok(())
 }
