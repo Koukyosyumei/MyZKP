@@ -1,42 +1,17 @@
 #include <cstdint>
 #include "field.hpp"
 
-
 /**
- * @brief Computes the pointwise product of multiple polynomials at a single evaluation point.
+ * @brief CUDA kernel to fold multiple polynomial factors into one by computing their pointwise product.
  *
- * @details This function is executed on the GPU device. It calculates the product
- * g(x) = p_1(x) * p_2(x) * ... * p_d(x) for a specific evaluation point `x_id`.
- * The evaluations of all polynomials (p_1, ..., p_d) are stored in a single contiguous
- * array `evals`. The evaluations for each polynomial form a block of size `domain_size`.
+ * @details This kernel calculates the product g(x) = p_1(x) * p_2(x) * ... * p_d(x) over the
+ * entire evaluation domain. Each thread computes the product for one point in the domain.
+ * The result for each point `idx` is written back in-place to `buf[idx]`.
  *
  * Example layout for evals with num_factors = 3 and domain_size = 8:
  * evals = [p_1(000), p_1(001), p_1(010), p_1(011), p_1(100), p_1(101), p_1(110), p_1(111),
  *          p_2(000), p_2(001), p_2(010), p_2(011), p_2(100), p_2(101), p_2(110), p_2(111),
  *          p_3(000), p_3(001), p_3(010), p_2(011), p_3(100), p_3(101), p_3(110), p_3(111)]
- *
- * Calling `evaluate_pointwise_product(evals, 1, 8, 3)` would compute p_1(001) * p_2(001) * p_3(001).
- *
- * @param evals Pointer to the array containing the evaluations of all polynomial factors.
- * @param x_id The index of the evaluation point (from 0 to domain_size - 1).
- * @param domain_size The size of the evaluation domain for a single polynomial factor.
- * @param num_factors The number of polynomial factors to multiply.
- * @return The product of the evaluations as a finite field element (fr_t).
- */
-__device__ fr_t evaluate_pointwise_product(fr_t* evals, unsigned int x_id, unsigned int domain_size, unsigned int num_factors) {
-    fr_t result = fr_one();
-    for (int i = 0; i < num_factors; i++) result = fr_mul(result, evals[x_id + i * domain_size]);
-    return result;
-}
-
-/**
- * @brief CUDA kernel to fold multiple polynomial factors into one by computing their pointwise product.
- *
- * @details This kernel parallelizes the `evaluate_pointwise_product` function across the
- * entire evaluation domain. Each thread computes the product for one point in the domain.
- * The result for each point `idx` is written back in-place to `buf[idx]`, effectively
- * replacing the evaluations of the first polynomial factor with the evaluations of the product polynomial.
- * It uses a grid-stride loop to ensure that all points are processed, regardless of the grid size.
  *
  * @param buf Buffer containing the evaluations of the polynomial factors. The results are written to the start of this buffer.
  * @param domain_size The size of the evaluation domain.
@@ -46,7 +21,11 @@ extern "C" __global__ void fold_factors_pointwise(fr_t* buf, unsigned int domain
     const int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + tid;
     while (idx < domain_size) {
-        buf[idx] = evaluate_pointwise_product(buf, idx, domain_size, num_factors);
+	fr_t result = buf[idx];
+	for (int i = 1; i < num_factors; i++) {
+	    result = fr_mul(result, buf[idx + i * domain_size]);
+	}
+	buf[idx] = result;
         idx += blockDim.x * gridDim.x;
     }
 }
@@ -117,7 +96,6 @@ extern "C" __global__ void eval_folded_poly(
 	  result[buf_offset + tid] = fr_sub(evals[poly_offset + tid + stride], evals[poly_offset + tid]);
 	  result[buf_offset + tid] = fr_mul(*eval_point, result[buf_offset + tid]);
 	  result[buf_offset + tid] = fr_add(result[buf_offset + tid], evals[poly_offset + tid]);
-	  // result[buf_offset + tid] = (*eval_point) * (evals[poly_offset + tid + stride] - evals[poly_offset + tid]) + evals[poly_offset + tid];
 	}
         tid += blockDim.x * num_blocks_per_poly;
     }
