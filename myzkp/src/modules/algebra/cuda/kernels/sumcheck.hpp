@@ -85,19 +85,33 @@ extern "C" __global__ void fold_into_half(
 extern "C" __global__ void eval_folded_poly(
     unsigned int num_vars, unsigned int initial_poly_size, unsigned int num_blocks_per_poly, fr_t* evals, fr_t* result, const fr_t* eval_point
 ) {
-    int tid = (blockIdx.x % num_blocks_per_poly) * blockDim.x + threadIdx.x;
+    const int tid = (blockIdx.x % num_blocks_per_poly) * blockDim.x + threadIdx.x;
     const int stride = 1 << (num_vars - 1);
     const int buf_offset = (blockIdx.x / num_blocks_per_poly) * stride;
     const int poly_offset = (blockIdx.x / num_blocks_per_poly) * initial_poly_size;
-    while (tid < stride) {
-        if (fr_eq(*eval_point, fr_zero())) {result[buf_offset + tid] = evals[poly_offset + tid];}
-        else if (fr_eq(*eval_point, fr_one())) {result[buf_offset + tid] = evals[poly_offset + tid + stride];}
+
+    __shared__ bool is_zero, is_one;
+    if (threadIdx.x == 0) {
+        is_zero = fr_eq(*eval_point, fr_zero());
+        is_one = fr_eq(*eval_point, fr_one());
+    }
+    __syncthreads();
+
+    int idx = tid;
+    while (idx < stride) {
+        fr_t a = evals[poly_offset + idx];
+        fr_t b = evals[poly_offset + idx + stride];
+        fr_t r;
+
+        if (is_zero) {r = a;}
+        else if (is_one) {r = b;}
         else {
-	  result[buf_offset + tid] = fr_sub(evals[poly_offset + tid + stride], evals[poly_offset + tid]);
-	  result[buf_offset + tid] = fr_mul(*eval_point, result[buf_offset + tid]);
-	  result[buf_offset + tid] = fr_add(result[buf_offset + tid], evals[poly_offset + tid]);
+	  fr_t diff = fr_sub(b, a);
+	  r = fr_add(a, fr_mul(*eval_point, diff));
 	}
-        tid += blockDim.x * num_blocks_per_poly;
+
+	result[buf_offset + idx] = r;
+        idx += blockDim.x * num_blocks_per_poly;
     }
 }
 
