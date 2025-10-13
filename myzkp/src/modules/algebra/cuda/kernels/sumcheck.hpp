@@ -104,18 +104,18 @@ extern "C" __global__ void fold_into_half(
  * @param eval_point The point at which to evaluate the first variable of the polynomial.
  */
 extern "C" __global__ void eval_folded_poly(
-    unsigned int num_vars, unsigned int initial_poly_size, unsigned int num_blocks_per_poly, fr* evals, fr* result, const fr* eval_point
+    unsigned int num_vars, unsigned int initial_poly_size, unsigned int num_blocks_per_poly, fr_t* evals, fr_t* result, const fr_t* eval_point
 ) {
     int tid = (blockIdx.x % num_blocks_per_poly) * blockDim.x + threadIdx.x;
     const int stride = 1 << (num_vars - 1);
     const int buf_offset = (blockIdx.x / num_blocks_per_poly) * stride;
     const int poly_offset = (blockIdx.x / num_blocks_per_poly) * initial_poly_size;
     while (tid < stride) {
-        if (*eval_point == fr::zero()) {result[buf_offset + tid] = evals[poly_offset + tid];}
-        else if (*eval_point == fr::one()) {result[buf_offset + tid] = evals[poly_offset + tid + stride];}
+        if (fr_eq(*eval_point, fr_zero())) {result[buf_offset + tid] = evals[poly_offset + tid];}
+        else if (fr_eq(*eval_point, fr_one())) {result[buf_offset + tid] = evals[poly_offset + tid + stride];}
         else {
 	  result[buf_offset + tid] = fr_sub(evals[poly_offset + tid + stride], evals[poly_offset + tid]);
-	  result[buf_offset + tid] = fr_mul(eval_point, result[buf_offset + tid]);
+	  result[buf_offset + tid] = fr_mul(*eval_point, result[buf_offset + tid]);
 	  result[buf_offset + tid] = fr_add(result[buf_offset + tid], evals[poly_offset + tid]);
 	  // result[buf_offset + tid] = (*eval_point) * (evals[poly_offset + tid + stride] - evals[poly_offset + tid]) + evals[poly_offset + tid];
 	}

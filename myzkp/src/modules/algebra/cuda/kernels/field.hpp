@@ -25,7 +25,7 @@ __host__ __device__ void fr_print(const fr_t &x) {
     for (int i = 3; i >= 0; --i) printf("%016llx", (unsigned long long)x.limbs[i]);
 }
 
-__device__ __forceinline__ fr_t fr_zero() {
+__host__ __device__ __forceinline__ fr_t fr_zero() {
     fr_t z = {{0, 0, 0, 0}};
     return z;
 }
