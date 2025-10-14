@@ -385,17 +385,6 @@ impl SumCheckVerifier {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let ptx = Ptx::from_file("../../src/modules/algebra/cuda/kernels/sumcheck.ptx");
-
-    let ctx = cudarc::driver::CudaContext::new(0)?;
-    let stream = ctx.default_stream();
-
-    let module = ctx.load_module(ptx)?;
-    let fold_factors_pointwise_kernel = module.load_function("fold_factors_pointwise")?;
-    let fold_into_half_kernel = module.load_function("fold_into_half")?;
-    let eval_folded_poly_kernel = module.load_function("eval_folded_poly")?;
-    let sum_kernel = module.load_function("sum")?;
-
     let mut dict_1 = HashMap::new();
     dict_1.insert(vec![0, 0, 0], F::from_value(1));
     dict_1.insert(vec![1, 0, 0], F::from_value(2));
@@ -423,10 +412,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //println!("g': {}", gg);
 
     let max_degree = 3;
-    let num_factors: usize = 3;
-    let num_vars = 3;
-    let domain_size = 1 << num_vars;
-
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
 
