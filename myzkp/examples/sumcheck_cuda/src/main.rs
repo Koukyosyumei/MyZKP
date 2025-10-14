@@ -135,7 +135,7 @@ impl<'a> SumCheckProver<'a> {
         }
     }
 
-    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<FiatShamirTransformer, Box<dyn std::error::Error>> {
+    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, FiatShamirTransformer), Box<dyn std::error::Error>> {
         let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
         let num_factors = polynomial_factors.len();
         let mut evaluation_table = vec![];
@@ -176,6 +176,37 @@ impl<'a> SumCheckProver<'a> {
         };
 
         let all_evals_bytes = fields_to_bytes(&evaluation_table);
+
+        // Calculate Sum
+        let mut tmp_evals_dev = self.cuda_backend.stream.memcpy_stod(&all_evals_bytes)?;
+        let mut sum_result_dev = self
+            .cuda_backend
+            .stream
+            .alloc_zeros::<u8>(32)?;
+
+        let mut builder = self
+            .cuda_backend
+            .stream
+            .launch_builder(&self.cuda_backend.fold_factors_pointwise_kernel);
+        builder.arg(&mut tmp_evals_dev);
+        builder.arg(&domain_size);
+        builder.arg(&num_factors);
+        unsafe { builder.launch(launch_config) }?;
+
+        let half_domain_size: usize = domain_size >> 1;
+        let mut builder = self
+            .cuda_backend
+            .stream
+            .launch_builder(&self.cuda_backend.sum_kernel);
+        builder.arg(&tmp_evals_dev);
+        builder.arg(&mut sum_result_dev);
+        builder.arg(&half_domain_size);
+        builder.arg(&0);
+        unsafe { builder.launch(launch_config) }?;
+        let sum_result_host: F =
+            fields_from_bytes(&self.cuda_backend.stream.memcpy_dtov(&sum_result_dev)?)[0].clone();
+
+        // Start Proving
         let mut evals_dev = self.cuda_backend.stream.memcpy_stod(&all_evals_bytes)?;
         let mut s_evals_dev = self
             .cuda_backend
@@ -219,7 +250,7 @@ impl<'a> SumCheckProver<'a> {
             num_remaining_vars -= 1;
         }
 
-        Ok(transcript)
+        Ok((sum_result_host, transcript))
     }
 
     /// Computes the evaluations of the round polynomial `s_i(c)` for `c` in `{0, 1, ..., d}`.
@@ -390,16 +421,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dict_3.insert(vec![0, 0, 1], F::from_value(4));
     let factor_3 = MPolynomial::new(dict_3);
 
-    println!("f_1: {}", factor_1);
-    println!("f_2: {}", factor_2);
-    println!("f_3: {}", factor_3);
     let factors = vec![factor_1, factor_2, factor_3];
-    let g = factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p);
-    println!("g: {}", g);
-    let h = sum_over_boolean_hypercube(&g);
-    println!("h: {}", h);
-
-    //println!("g': {}", gg);
 
     let max_degree = 3;
     let num_blocks_per_poly = 1;
@@ -412,8 +434,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &cuda_backend,
     );
 
-    let mut transcript = prover.prove(max_degree, &factors)?;
-    let is_valid = SumCheckVerifier::verify(max_degree, &factors, h, &mut transcript)?;
+    let (claimed_sum, mut transcript) = prover.prove(max_degree, &factors)?;
+    
+    let g = factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p);
+    let true_sum = sum_over_boolean_hypercube(&g);
+    assert_eq!(true_sum, claimed_sum);
+    
+    let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &mut transcript)?;
     assert!(is_valid);
 
     println!("success");
