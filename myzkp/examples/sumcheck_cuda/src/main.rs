@@ -4,14 +4,13 @@ use std::sync::Arc;
 use cudarc;
 use cudarc::driver::CudaStream;
 use cudarc::driver::LaunchConfig;
-use cudarc::driver::PushKernelArg;
-use cudarc::driver::{CudaFunction, CudaSlice};
+use cudarc::driver::{PushKernelArg, CudaFunction, CudaSlice};
 use cudarc::nvrtc::Ptx;
 use num_bigint::{BigInt, Sign};
+use log::{info, warn};
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
-use myzkp::modules::algebra::field::Field;
-use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
+use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
