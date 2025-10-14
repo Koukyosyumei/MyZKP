@@ -7,7 +7,6 @@ use cudarc::driver::LaunchConfig;
 use cudarc::driver::{PushKernelArg, CudaFunction, CudaSlice};
 use cudarc::nvrtc::Ptx;
 use num_bigint::{BigInt, Sign};
-use log::{info, warn};
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
