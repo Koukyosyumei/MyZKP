@@ -122,67 +122,51 @@ impl CudaBackend {
 }
 
 struct SumCheckProver<'a> {
-    num_variables: usize,
-    num_factors: usize,
-    max_degree: usize,
     num_blocks_per_poly: usize,
     num_threads_per_block: usize,
-    evaluation_table: Vec<F>,
-    polynomial_product: MPolynomial<F>,
     cuda_backend: &'a CudaBackend,
 }
 
 impl<'a> SumCheckProver<'a> {
     pub fn new(
-        num_variables: usize,
-        max_degree: usize,
         num_blocks_per_poly: usize,
         num_threads_per_block: usize,
-        polynomial_product: MPolynomial<F>,
-        polynomial_factors: &[MPolynomial<F>],
         cuda_backend: &'a CudaBackend,
     ) -> Self {
+        Self {
+            num_blocks_per_poly,
+            num_threads_per_block,
+            cuda_backend,
+        }
+    }
+
+    pub fn prove(&self, num_variables: usize, max_degree: usize, polynomial_product: MPolynomial<F>, polynomial_factors: &[MPolynomial<F>]) -> Result<FiatShamirTransformer, Box<dyn std::error::Error>> {
         let num_factors = polynomial_factors.len();
         let mut evaluation_table = vec![];
         for f in polynomial_factors {
             evals_over_boolean_hypercube(&f, &mut evaluation_table);
         }
-        // let polynomial_product = polynomial_factors.iter().skip(1).fold(polynomial_factors[0].clone(), |acc, p| &acc * p);
 
-        Self {
-            num_variables,
-            num_factors,
-            max_degree,
-            num_blocks_per_poly,
-            num_threads_per_block,
-            evaluation_table,
-            polynomial_product,
-            cuda_backend,
-        }
-    }
-
-    pub fn prove(&self) -> Result<FiatShamirTransformer, Box<dyn std::error::Error>> {
         let mut transcript = FiatShamirTransformer::new();
+        transcript.push(&vec![
+            bincode::serialize(&max_degree).expect("Serialization failed")
+        ]);
+        transcript.push(&vec![
+            bincode::serialize(&num_variables).expect("Serialization failed")
+        ]);
+        transcript.push(&vec![
+            bincode::serialize(&polynomial_product).expect("Serialization failed")
+        ]);
 
-        transcript.push(&vec![
-            bincode::serialize(&self.max_degree).expect("Serialization failed")
-        ]);
-        transcript.push(&vec![
-            bincode::serialize(&self.num_variables).expect("Serialization failed")
-        ]);
-        transcript.push(&vec![
-            bincode::serialize(&self.polynomial_product).expect("Serialization failed")
-        ]);
-
-        let mut round_polynomials = Vec::with_capacity(self.num_variables);
-        let mut challenges = Vec::with_capacity(self.num_variables);
-        let mut num_remaining_vars = self.num_variables;
-        let domain_size = 1 << self.num_variables;
-        let s_eval_points: Vec<F> = (0..=self.max_degree).map(|d| F::from_value(d)).collect();
+        let mut round_polynomials = Vec::with_capacity(num_variables);
+        let mut challenges = Vec::with_capacity(num_variables);
+        let mut num_remaining_vars = num_variables;
+        let domain_size = 1 << num_variables;
+        let s_eval_points: Vec<F> = (0..=max_degree).map(|d| F::from_value(d)).collect();
 
         let launch_config = LaunchConfig {
             grid_dim: (
-                (self.num_blocks_per_poly as u32) * (self.num_factors as u32),
+                (self.num_blocks_per_poly as u32) * (num_factors as u32),
                 1,
                 1,
             ),
@@ -190,20 +174,22 @@ impl<'a> SumCheckProver<'a> {
             shared_mem_bytes: 128,
         };
 
-        let all_evals_bytes = fields_to_bytes(&self.evaluation_table);
+        let all_evals_bytes = fields_to_bytes(&evaluation_table);
         let mut evals_dev = self.cuda_backend.stream.memcpy_stod(&all_evals_bytes)?;
         let mut s_evals_dev = self
             .cuda_backend
             .stream
-            .alloc_zeros::<u8>(32 * (self.max_degree + 1))?;
+            .alloc_zeros::<u8>(32 * (max_degree + 1))?;
         let mut buf_dev = self
             .cuda_backend
             .stream
-            .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * self.num_factors))?;
+            .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
-        for _round in 0..self.num_variables {
+        for _round in 0..num_variables {
             // Step 1: Compute the round polynomial s_i.
             let s_i_evaluations = self.compute_round_polynomial_evals(
+                max_degree,
+                num_factors,
                 &evals_dev,
                 &mut s_evals_dev,
                 num_remaining_vars,
@@ -242,6 +228,8 @@ impl<'a> SumCheckProver<'a> {
     /// Computes the evaluations of the round polynomial `s_i(c)` for `c` in `{0, 1, ..., d}`.
     fn compute_round_polynomial_evals(
         &self,
+        max_degree: usize,
+        num_factors: usize,
         evals_dev: &CudaSlice<u8>,
         s_evals_dev: &mut CudaSlice<u8>,
         num_remaining_vars: usize,
@@ -249,12 +237,12 @@ impl<'a> SumCheckProver<'a> {
         launch_config: &LaunchConfig,
     ) -> Result<Vec<F>, Box<dyn std::error::Error>> {
         let current_domain_size = 1 << num_remaining_vars;
-        let s_eval_points: Vec<F> = (0..=self.max_degree).map(|d| F::from_value(d)).collect();
+        let s_eval_points: Vec<F> = (0..=max_degree).map(|d| F::from_value(d)).collect();
 
         let mut buf_dev = self
             .cuda_backend
             .stream
-            .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * self.num_factors))?;
+            .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
         for (idx, eval_point) in s_eval_points.iter().enumerate() {
             let eval_point_bytes = field_to_bytes(eval_point);
@@ -279,7 +267,7 @@ impl<'a> SumCheckProver<'a> {
             builder.arg(&mut buf_dev);
             let half_domain_size: usize = 1 << (num_remaining_vars - 1);
             builder.arg(&half_domain_size);
-            builder.arg(&self.num_factors);
+            builder.arg(&num_factors);
             unsafe { builder.launch(*launch_config) }?;
 
             let half_half_domain_size: usize = half_domain_size >> 1;
@@ -439,15 +427,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cuda_backend = CudaBackend::new(0)?;
     let prover = SumCheckProver::new(
-        num_vars,
-        max_degree,
         num_blocks_per_poly,
         num_threads_per_block,
-        g.clone(),
-        &factors,
         &cuda_backend,
     );
-    let mut transcript = prover.prove()?;
+
+    let mut transcript = prover.prove(num_vars, max_degree, g.clone(), &factors)?;
     let is_valid = SumCheckVerifier::verify(max_degree, num_vars, &g, h, &mut transcript)?;
     assert!(is_valid);
 
