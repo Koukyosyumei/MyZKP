@@ -181,10 +181,6 @@ impl<'a> SumCheckProver<'a> {
             .cuda_backend
             .stream
             .alloc_zeros::<u8>(32 * (max_degree + 1))?;
-        let buf_dev = self
-            .cuda_backend
-            .stream
-            .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
 
         for _round in 0..num_variables {
             // Step 1: Compute the round polynomial s_i.
@@ -237,7 +233,6 @@ impl<'a> SumCheckProver<'a> {
         domain_size: usize,
         launch_config: &LaunchConfig,
     ) -> Result<Vec<F>, Box<dyn std::error::Error>> {
-        let current_domain_size = 1 << num_remaining_vars;
         let s_eval_points: Vec<F> = (0..=max_degree).map(|d| F::from_value(d)).collect();
 
         let mut buf_dev = self
