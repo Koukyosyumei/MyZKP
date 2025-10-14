@@ -436,9 +436,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (claimed_sum, mut transcript) = prover.prove(max_degree, &factors)?;
     
-    let g = factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p);
-    let true_sum = sum_over_boolean_hypercube(&g);
-    assert_eq!(true_sum, claimed_sum);
+    debug_assert_eq!(sum_over_boolean_hypercube(&factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p)), claimed_sum);
     
     let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &mut transcript)?;
     assert!(is_valid);
