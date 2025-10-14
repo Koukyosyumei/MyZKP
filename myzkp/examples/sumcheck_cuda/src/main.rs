@@ -132,72 +132,6 @@ struct SumCheckProver<'a> {
     cuda_backend: &'a CudaBackend,
 }
 
-struct SumCheckVerifier;
-
-impl SumCheckVerifier {
-    pub fn verify(
-        max_degree: usize,
-        num_vars: usize,
-        polynomial_product: &MPolynomial<F>,
-        claimed_sum: F,
-        transcript: &mut FiatShamirTransformer,
-    ) -> Result<bool, Box<dyn std::error::Error>> {
-        //let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
-
-        let s_eval_point: Vec<F> = (0..(max_degree + 1)).map(|d| F::from_value(d)).collect();
-
-        let recovered_max_degree = transcript.pull();
-        assert_eq!(
-            vec![bincode::serialize(&max_degree).expect("Serialization failed")],
-            recovered_max_degree
-        );
-        let recovered_num_vars = transcript.pull();
-        assert_eq!(
-            vec![bincode::serialize(&num_vars).expect("Serialization failed")],
-            recovered_num_vars
-        );
-        let recovered_g = transcript.pull();
-        assert_eq!(
-            vec![bincode::serialize(&polynomial_product).expect("Serialization failed")],
-            recovered_g
-        );
-
-        let mut s_polys = vec![];
-        let mut challenges: Vec<F> = vec![];
-        for i in 0..num_vars {
-            let mut s_evals = vec![];
-            for d in 0..(max_degree + 1) {
-                let tmp_bytes = transcript.pull();
-                let se = bincode::deserialize::<F>(&tmp_bytes[0])?;
-                s_evals.push(se);
-            }
-
-            let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals);
-            s_polys.push(s_poly);
-
-            let challenge = F::sample(&transcript.verifier_fiat_shamir(32));
-            challenges.push(challenge);
-
-            if i == 0 {
-                assert_eq!(s_evals[0].add_ref(&s_evals[1]), claimed_sum);
-            } else {
-                assert_eq!(
-                    s_evals[0].add_ref(&s_evals[1]),
-                    s_polys[i - 1].eval(&challenges[i - 1]).sanitize()
-                );
-            }
-        }
-        assert_eq!(
-            polynomial_product.evaluate(&challenges),
-            s_polys[num_vars - 1]
-                .eval(&challenges[num_vars - 1])
-                .sanitize()
-        );
-
-        Ok(true)
-    }
-}
-
 impl<'a> SumCheckProver<'a> {
     pub fn new(
         num_variables: usize,
@@ -310,7 +244,6 @@ impl<'a> SumCheckProver<'a> {
         &self,
         evals_dev: &CudaSlice<u8>,
         s_evals_dev: &mut CudaSlice<u8>,
-        //buf_dev: mut &CudaSlice<u8>,
         num_remaining_vars: usize,
         domain_size: usize,
         launch_config: &LaunchConfig,
@@ -318,7 +251,6 @@ impl<'a> SumCheckProver<'a> {
         let current_domain_size = 1 << num_remaining_vars;
         let s_eval_points: Vec<F> = (0..=self.max_degree).map(|d| F::from_value(d)).collect();
 
-        //let mut s_evals_dev = self.cuda_backend.stream.alloc_zeros::<u8>(32 * (self.max_degree + 1))?;
         let mut buf_dev = self
             .cuda_backend
             .stream
@@ -393,6 +325,72 @@ impl<'a> SumCheckProver<'a> {
     }
 }
 
+struct SumCheckVerifier;
+
+impl SumCheckVerifier {
+    pub fn verify(
+        max_degree: usize,
+        num_vars: usize,
+        polynomial_product: &MPolynomial<F>,
+        claimed_sum: F,
+        transcript: &mut FiatShamirTransformer,
+    ) -> Result<bool, Box<dyn std::error::Error>> {
+        //let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
+
+        let s_eval_point: Vec<F> = (0..(max_degree + 1)).map(|d| F::from_value(d)).collect();
+
+        let recovered_max_degree = transcript.pull();
+        assert_eq!(
+            vec![bincode::serialize(&max_degree).expect("Serialization failed")],
+            recovered_max_degree
+        );
+        let recovered_num_vars = transcript.pull();
+        assert_eq!(
+            vec![bincode::serialize(&num_vars).expect("Serialization failed")],
+            recovered_num_vars
+        );
+        let recovered_g = transcript.pull();
+        assert_eq!(
+            vec![bincode::serialize(&polynomial_product).expect("Serialization failed")],
+            recovered_g
+        );
+
+        let mut s_polys = vec![];
+        let mut challenges: Vec<F> = vec![];
+        for i in 0..num_vars {
+            let mut s_evals = vec![];
+            for d in 0..(max_degree + 1) {
+                let tmp_bytes = transcript.pull();
+                let se = bincode::deserialize::<F>(&tmp_bytes[0])?;
+                s_evals.push(se);
+            }
+
+            let s_poly = Polynomial::interpolate(&s_eval_point, &s_evals);
+            s_polys.push(s_poly);
+
+            let challenge = F::sample(&transcript.verifier_fiat_shamir(32));
+            challenges.push(challenge);
+
+            if i == 0 {
+                assert_eq!(s_evals[0].add_ref(&s_evals[1]), claimed_sum);
+            } else {
+                assert_eq!(
+                    s_evals[0].add_ref(&s_evals[1]),
+                    s_polys[i - 1].eval(&challenges[i - 1]).sanitize()
+                );
+            }
+        }
+        assert_eq!(
+            polynomial_product.evaluate(&challenges),
+            s_polys[num_vars - 1]
+                .eval(&challenges[num_vars - 1])
+                .sanitize()
+        );
+
+        Ok(true)
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ptx = Ptx::from_file("../../src/modules/algebra/cuda/kernels/sumcheck.ptx");
 
@@ -420,15 +418,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dict_3.insert(vec![0, 0, 1], F::from_value(4));
     let factor_3 = MPolynomial::new(dict_3);
 
-    let g = &(&factor_1 * &factor_2) * &factor_3;
     println!("f_1: {}", factor_1);
     println!("f_2: {}", factor_2);
     println!("f_3: {}", factor_3);
+    let factors = vec![factor_1, factor_2, factor_3];
+    let g = factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p);
     println!("g: {}", g);
     let h = sum_over_boolean_hypercube(&g);
     println!("h: {}", h);
 
-    let factors = vec![factor_1, factor_2, factor_3];
+    //println!("g': {}", gg);
 
     let max_degree = 3;
     let num_factors: usize = 3;
