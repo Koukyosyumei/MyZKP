@@ -448,7 +448,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     println!("    Verifier is now checking the proof interactively...");
     let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &proof)?;
-    println!("    Verification complete.");
+    println!("    ✅ Verification complete.");
 
     if is_valid {
         println!("\n🎉 SUCCESS: Proof is valid! 🎉");
