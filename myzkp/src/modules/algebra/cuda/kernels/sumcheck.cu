@@ -75,19 +75,19 @@ extern "C" __global__ void fold_into_half(
  * it uses a specific evaluation point.
  *
  * @param num_vars The number of variables in the current polynomial representation.
- * @param initial_poly_size The domain size of the original, unfolded polynomial.
+ * @param domain_size The domain size of the original, unfolded polynomial.
  * @param num_blocks_per_poly The number of thread blocks assigned to process a single polynomial.
  * @param evals The buffer of polynomial evaluations.
  * @param result Output buffer to store the evaluated polynomial.
  * @param eval_point The point at which to evaluate the first variable of the polynomial.
  */
 extern "C" __global__ void eval_folded_poly(
-    unsigned int num_vars, unsigned int initial_poly_size, unsigned int num_blocks_per_poly, fr_t* evals, fr_t* result, const fr_t* eval_point
+    unsigned int num_vars, unsigned int domain_size, unsigned int num_blocks_per_poly, fr_t* evals, fr_t* result, const fr_t* eval_point
 ) {
     const int tid = (blockIdx.x % num_blocks_per_poly) * blockDim.x + threadIdx.x;
     const int stride = 1 << (num_vars - 1);
     const int buf_offset = (blockIdx.x / num_blocks_per_poly) * stride;
-    const int poly_offset = (blockIdx.x / num_blocks_per_poly) * initial_poly_size;
+    const int poly_offset = (blockIdx.x / num_blocks_per_poly) * domain_size;
 
     __shared__ bool is_zero, is_one;
     if (threadIdx.x == 0) {
