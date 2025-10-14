@@ -135,7 +135,7 @@ impl<'a> SumCheckProver<'a> {
         }
     }
 
-    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, FiatShamirTransformer), Box<dyn std::error::Error>> {
+    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
         let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
         let num_factors = polynomial_factors.len();
         let mut evaluation_table = vec![];
@@ -250,7 +250,7 @@ impl<'a> SumCheckProver<'a> {
             num_remaining_vars -= 1;
         }
 
-        Ok((sum_result_host, transcript))
+        Ok((sum_result_host, transcript.serialize()))
     }
 
     /// Computes the evaluations of the round polynomial `s_i(c)` for `c` in `{0, 1, ..., d}`.
@@ -347,8 +347,10 @@ impl SumCheckVerifier {
         max_degree: usize,
         polynomial_factors: &[MPolynomial<F>],
         claimed_sum: F,
-        transcript: &mut FiatShamirTransformer,
+        proof: &Vec<u8>,
     ) -> Result<bool, Box<dyn std::error::Error>> {
+        let mut transcript = FiatShamirTransformer::deserialize(&proof);
+
         let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
         let polynomial_product = polynomial_factors.iter().skip(1).fold(polynomial_factors[0].clone(), |acc, p| &acc * p);
         let s_eval_point: Vec<F> = (0..(max_degree + 1)).map(|d| F::from_value(d)).collect();
@@ -434,11 +436,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &cuda_backend,
     );
 
-    let (claimed_sum, mut transcript) = prover.prove(max_degree, &factors)?;
+    let (claimed_sum, mut proof) = prover.prove(max_degree, &factors)?;
     
     debug_assert_eq!(sum_over_boolean_hypercube(&factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p)), claimed_sum);
     
-    let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &mut transcript)?;
+    let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &proof)?;
     assert!(is_valid);
 
     println!("success");
