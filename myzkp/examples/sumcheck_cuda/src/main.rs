@@ -1,18 +1,13 @@
 use std::collections::HashMap;
-use std::fs;
-use std::hash::Hash;
 use std::sync::Arc;
 
 use cudarc;
 use cudarc::driver::CudaStream;
 use cudarc::driver::LaunchConfig;
 use cudarc::driver::PushKernelArg;
-use cudarc::driver::{CudaFunction, CudaSlice, DeviceRepr};
-use cudarc::nvrtc::compile_ptx;
+use cudarc::driver::{CudaFunction, CudaSlice};
 use cudarc::nvrtc::Ptx;
 use num_bigint::{BigInt, Sign};
-use num_traits::identities::One;
-use num_traits::Zero;
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use myzkp::modules::algebra::field::Field;
@@ -186,7 +181,7 @@ impl<'a> SumCheckProver<'a> {
             .cuda_backend
             .stream
             .alloc_zeros::<u8>(32 * (max_degree + 1))?;
-        let mut buf_dev = self
+        let buf_dev = self
             .cuda_backend
             .stream
             .alloc_zeros::<u8>(32 * ((1 << (num_remaining_vars - 1)) * num_factors))?;
