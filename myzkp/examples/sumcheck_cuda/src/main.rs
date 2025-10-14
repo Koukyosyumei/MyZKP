@@ -406,6 +406,9 @@ impl SumCheckVerifier {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Starting Sumcheck Protocol Example...");
+    println!("-------------------------------------------");
+    
     let mut dict_1 = HashMap::new();
     dict_1.insert(vec![0, 0, 0], F::from_value(1));
     dict_1.insert(vec![1, 0, 0], F::from_value(2));
@@ -427,21 +430,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
 
+    println!("    Initializing CUDA Backend...");
     let cuda_backend = CudaBackend::new(0)?;
+    println!("    ✅ CUDA Backend initialized.");
+
     let prover = SumCheckProver::new(
         num_blocks_per_poly,
         num_threads_per_block,
         &cuda_backend,
     );
-
+    println!("    Prover created. Generating proof...");
     let (claimed_sum, mut proof) = prover.prove(max_degree, &factors)?;
-    
+    println!("    ✅ Proof generated!");
+    println!("    Prover's Claimed Sum (C1): {}", claimed_sum);
+
     debug_assert_eq!(sum_over_boolean_hypercube(&factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p)), claimed_sum);
     
+    println!("    Verifier is now checking the proof interactively...");
     let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &proof)?;
-    assert!(is_valid);
+    println!("    Verification complete.");
 
-    println!("success");
+    if is_valid {
+        println!("\n🎉 SUCCESS: Proof is valid! 🎉");
+    } else {
+        // This branch will cause a panic due to the assert! above
+        println!("\n❌ FAILURE: Proof is invalid! ❌");
+    }
 
     Ok(())
 }
