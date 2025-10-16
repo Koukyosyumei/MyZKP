@@ -2,11 +2,11 @@ use std::fmt;
 
 use num_traits::Zero;
 
-use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::curve::bn128::FqOrder;
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::kzg::{
-    batch_open_kzg, batch_verify_kzg, commit_kzg, open_kzg, prove_degree_bound, setup_kzg,
-    verify_degree_bound, verify_kzg, BatchProofKZG, CommitmentKZG, ProofDegreeBound, ProofKZG,
+    batch_open_kzg, batch_verify_kzg, commit_kzg, prove_degree_bound,
+    verify_degree_bound, BatchProofKZG, CommitmentKZG, ProofDegreeBound,
     PublicKeyKZG,
 };
 use crate::modules::algebra::polynomial::Polynomial;

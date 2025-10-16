@@ -1,21 +1,14 @@
 use std::collections::HashMap;
-use std::fmt;
 
 use num_traits::{One, Zero};
-use serde::Serialize;
 
-use crate::modules::algebra::curve::bn128::{optimal_ate_pairing, FqOrder, G1Point, G2Point};
+use crate::modules::algebra::curve::bn128::FqOrder;
 use crate::modules::algebra::fiat_shamir::FiatShamirTransformer;
-use crate::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
-use crate::modules::algebra::gemini::tensor_product;
+use crate::modules::algebra::field::Field;
 use crate::modules::algebra::gemini::{
     commit_gemini, open_gemini, split_and_fold, verify_gemini, CommitmentGemini, ProofGemini,
 };
-use crate::modules::algebra::kzg::{
-    batch_open_kzg, batch_verify_kzg, commit_kzg, open_kzg, prove_degree_bound, setup_kzg,
-    verify_degree_bound, verify_kzg, BatchProofKZG, CommitmentKZG, ProofDegreeBound, ProofKZG,
-    PublicKeyKZG,
-};
+use crate::modules::algebra::kzg::PublicKeyKZG;
 use crate::modules::algebra::mpolynomials::MPolynomial;
 use crate::modules::algebra::polynomial::Polynomial;
 use crate::modules::algebra::ring::Ring;
