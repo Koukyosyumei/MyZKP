@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time;
 
 use cudarc;
 use cudarc::driver::CudaStream;
@@ -7,6 +8,8 @@ use cudarc::driver::LaunchConfig;
 use cudarc::driver::{PushKernelArg, CudaFunction, CudaSlice};
 use cudarc::nvrtc::Ptx;
 use num_bigint::{BigInt, Sign};
+use rand::Rng;
+use rand::{rngs::StdRng, SeedableRng};
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
@@ -17,30 +20,29 @@ use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
 use sumcheck_cuda::prover::{CudaBackend, SumCheckProverCPU, SumCheckProverGPU};
 use sumcheck_cuda::verifier::SumCheckVerifier;
-use sumcheck_cuda::utils::{F};
+use sumcheck_cuda::utils::{F, BitCombinationsDictOrder};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example...");
     println!("-------------------------------------------");
-    
-    let mut dict_1 = HashMap::new();
-    dict_1.insert(vec![0, 0, 0], F::from_value(1));
-    dict_1.insert(vec![1, 0, 0], F::from_value(2));
-    let factor_1 = MPolynomial::new(dict_1);
+    let is_gpu = true;
 
-    let mut dict_2 = HashMap::new();
-    dict_2.insert(vec![0, 0, 0], F::from_value(2));
-    dict_2.insert(vec![0, 1, 0], F::from_value(3));
-    let factor_2 = MPolynomial::new(dict_2);
+    let num_vars = 8;
+    let num_factors = 3;
+    let max_degree = num_factors;
 
-    let mut dict_3 = HashMap::new();
-    dict_3.insert(vec![0, 0, 0], F::from_value(3));
-    dict_3.insert(vec![0, 0, 1], F::from_value(4));
-    let factor_3 = MPolynomial::new(dict_3);
+    let mut factors = vec![];
+    let mut rng = StdRng::seed_from_u64(42);
+    for _ in 0..num_factors {
+        let mut dict = HashMap::new();
+        let comb = BitCombinationsDictOrder::new(num_vars);
+        for c in comb {
+            let c_casted: Vec<usize> = c.iter().map(|&b| b as usize).collect();
+            dict.insert(c_casted, F::from_value(rng.random_range(0..256)));
+        }
+        factors.push(MPolynomial::new(dict));
+    }
 
-    let factors = vec![factor_1, factor_2, factor_3];
-
-    let max_degree = 3;
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
 
@@ -48,15 +50,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cuda_backend = CudaBackend::new(0)?;
     println!("    ✅ CUDA Backend initialized.");
 
-    let prover = SumCheckProverGPU::new(
-        num_blocks_per_poly,
-        num_threads_per_block,
-        &cuda_backend,
-    );
     println!("    Prover created. Generating proof...");
-    let (claimed_sum, mut proof) = prover.prove(max_degree, &factors)?;
+    let start_time = time::Instant::now();    
+    let (claimed_sum, mut proof) = {
+        if is_gpu {
+            let prover = SumCheckProverGPU::new(
+                num_blocks_per_poly,
+                num_threads_per_block,
+                &cuda_backend,
+            );
+            prover.prove(max_degree, &factors)?
+        } else {
+            let prover = SumCheckProverCPU::new();
+            prover.prove(max_degree, &factors)?
+        }
+    };
     println!("    ✅ Proof generated!");
-    println!("    Prover's Claimed Sum (C1): {}", claimed_sum);
+    println!("        - Prover's Claimed Sum (C1): {}", claimed_sum);
+    println!("        - Proving Time: {:?}", start_time.elapsed());
 
     debug_assert_eq!(sum_over_boolean_hypercube(&factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p)), claimed_sum);
     
