@@ -90,13 +90,6 @@ fn evals_over_boolean_hypercube(f: &MPolynomial<F>, result: &mut Vec<F>) {
 }
 
 fn fold_factors_pointwise_cpu(evals: &mut [F], domain_size: usize, num_factors: usize) {
-    if num_factors == 0 {
-        for i in 0..domain_size {
-            evals[i] = F::zero();
-        }
-        return;
-    }
-
     for i in 0..domain_size {
         let mut product = evals[i].clone();
         for j in 1..num_factors {
@@ -110,7 +103,7 @@ fn fold_factors_pointwise_cpu(evals: &mut [F], domain_size: usize, num_factors: 
 ///
 /// Performs one round of folding by binding the current variable to a challenge.
 /// The update rule is `p'(x) = p(0,x) + r * (p(1,x) - p(0,x))`.
-fn fold_evaluations_cpu(
+fn fold_into_half_cpu(
     evals: &mut [F],
     num_factors: usize,
     domain_size: usize, // Original domain size for offset calculation
@@ -163,6 +156,14 @@ fn eval_folded_poly_cpu(
     result
 }
 
+fn sum(data: &[F], len: usize) -> F {
+    let mut result = F::zero();
+    for i in 0..len {
+        result = result.add_ref(&data[i]);
+    }
+    result
+}
+
 /// A CPU-based implementation of the Sum-Check protocol prover.
 pub struct SumCheckProverCPU;
 
@@ -199,7 +200,7 @@ impl SumCheckProverCPU {
             fold_factors_pointwise_cpu(&mut folded_evals, current_domain_size, num_factors);
 
             // Step 3: Sum the results to get the evaluation s_i(eval_point).
-            let round_sum: F = F::one(); //folded_evals.iter().take(current_domain_size).sum();
+            let round_sum: F = sum(&folded_evals, current_domain_size); //folded_evals.iter().take(current_domain_size).sum();
             s_i_evaluations.push(round_sum);
         }
 
@@ -244,8 +245,7 @@ impl SumCheckProverCPU {
         let claimed_sum = {
             let mut temp_evals = evaluation_table.clone();
             fold_factors_pointwise_cpu(&mut temp_evals, domain_size, num_factors);
-            //temp_evals.iter().take(domain_size).sum()
-            F::zero()
+            sum(&temp_evals, domain_size)
         };
 
         // --- Start Proving Rounds ---
@@ -273,7 +273,7 @@ impl SumCheckProverCPU {
             challenges.push(challenge.clone());
 
             // Step 4: Fold the evaluation tables using the challenge for the next round.
-            fold_evaluations_cpu(
+            fold_into_half_cpu(
                 &mut current_evals,
                 num_factors,
                 domain_size,
@@ -293,13 +293,21 @@ struct SumCheckVerifier;
 impl SumCheckVerifier {
     pub fn verify(
         max_degree: usize,
-        num_vars: usize,
-        polynomial_product: &MPolynomial<F>,
+        polynomial_factors: &[MPolynomial<F>],
         claimed_sum: F,
-        transcript: &mut FiatShamirTransformer,
+        proof: &Vec<u8>,
     ) -> Result<bool, Box<dyn std::error::Error>> {
-        //let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
+        let mut transcript = FiatShamirTransformer::deserialize(&proof);
 
+        let num_variables = polynomial_factors
+            .iter()
+            .map(|p| p.get_num_vars())
+            .max()
+            .unwrap_or(0);
+        let polynomial_product = polynomial_factors
+            .iter()
+            .skip(1)
+            .fold(polynomial_factors[0].clone(), |acc, p| &acc * p);
         let s_eval_point: Vec<F> = (0..(max_degree + 1)).map(|d| F::from_value(d)).collect();
 
         let recovered_max_degree = transcript.pull();
@@ -307,20 +315,20 @@ impl SumCheckVerifier {
             vec![bincode::serialize(&max_degree).expect("Serialization failed")],
             recovered_max_degree
         );
-        let recovered_num_vars = transcript.pull();
-        assert_eq!(
-            vec![bincode::serialize(&num_vars).expect("Serialization failed")],
-            recovered_num_vars
-        );
-        let recovered_g = transcript.pull();
-        assert_eq!(
-            vec![bincode::serialize(&polynomial_product).expect("Serialization failed")],
-            recovered_g
-        );
+        let recovered_num_factors = bincode::deserialize::<usize>(&transcript.pull()[0])?;
+        assert_eq!(recovered_num_factors, polynomial_factors.len());
+        let recovered_num_variables = bincode::deserialize::<usize>(&transcript.pull()[0])?;
+        assert_eq!(recovered_num_variables, num_variables);
+        for i in 0..recovered_num_factors {
+            assert_eq!(
+                vec![bincode::serialize(&polynomial_factors[i]).expect("Serialization failed")],
+                transcript.pull()
+            );
+        }
 
         let mut s_polys = vec![];
         let mut challenges: Vec<F> = vec![];
-        for i in 0..num_vars {
+        for i in 0..num_variables {
             let mut s_evals = vec![];
             for d in 0..(max_degree + 1) {
                 let tmp_bytes = transcript.pull();
@@ -345,8 +353,8 @@ impl SumCheckVerifier {
         }
         assert_eq!(
             polynomial_product.evaluate(&challenges),
-            s_polys[num_vars - 1]
-                .eval(&challenges[num_vars - 1])
+            s_polys[num_variables - 1]
+                .eval(&challenges[num_variables - 1])
                 .sanitize()
         );
 
@@ -355,5 +363,54 @@ impl SumCheckVerifier {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Starting Sumcheck Protocol Example (CPU)...");
+    println!("-------------------------------------------");
+
+    let mut dict_1 = HashMap::new();
+    dict_1.insert(vec![0, 0, 0], F::from_value(1));
+    dict_1.insert(vec![1, 0, 0], F::from_value(2));
+    let factor_1 = MPolynomial::new(dict_1);
+
+    let mut dict_2 = HashMap::new();
+    dict_2.insert(vec![0, 0, 0], F::from_value(2));
+    dict_2.insert(vec![0, 1, 0], F::from_value(3));
+    let factor_2 = MPolynomial::new(dict_2);
+
+    let mut dict_3 = HashMap::new();
+    dict_3.insert(vec![0, 0, 0], F::from_value(3));
+    dict_3.insert(vec![0, 0, 1], F::from_value(4));
+    let factor_3 = MPolynomial::new(dict_3);
+
+    let factors = vec![factor_1, factor_2, factor_3];
+
+    let max_degree = 3;
+
+    let prover = SumCheckProverCPU::new();
+    println!("    Prover created. Generating proof...");
+    let (claimed_sum, mut proof) = prover.prove(max_degree, &factors)?;
+    println!("    ✅ Proof generated!");
+    println!("    Prover's Claimed Sum (C1): {}", claimed_sum);
+
+    debug_assert_eq!(
+        sum_over_boolean_hypercube(
+            &factors
+                .iter()
+                .skip(1)
+                .fold(factors[0].clone(), |acc, p| &acc * p)
+        ),
+        claimed_sum
+    );
+
+    println!("    Verifier is now checking the proof interactively...");
+    let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &proof)?;
+    println!("    ✅ Verification complete.");
+
+    if is_valid {
+        println!("\n🎉 SUCCESS: Proof is valid! 🎉");
+    } else {
+        // This branch will cause a panic due to the assert! above
+        println!("\n❌ FAILURE: Proof is invalid! ❌");
+    }
+
     Ok(())
 }
