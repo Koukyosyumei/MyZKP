@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("-------------------------------------------");
     let is_gpu = true;
 
-    let num_vars = 11;
+    let num_vars = 8;
     let num_factors = 2;
     let max_degree = num_factors;
 
