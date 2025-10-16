@@ -17,11 +17,14 @@ extern "C" __global__ void eval_all_binary_combinations(
     unsigned int stride = gridDim.x * blockDim.x;
     for (unsigned int idx = tid; idx < num_combinations; idx += stride) {
         fr_t point[32];
+	for (unsigned int i = 0; i < 32; ++i) {
+	    point[i] = fr_zero();
+	}
         for (unsigned int i = 0; i < el; ++i) {
             point[i] = (idx & (1u << (el - 1 - i))) ? fr_one() : fr_zero();
         }
         fr_t val = evaluate_mpolynomial(num_sub_mpolys, coeffs, expo_flat, offsets, lens, point, el);
-        results[offset + idx] = val;
+	results[offset + idx] = val;
     }
 }
 

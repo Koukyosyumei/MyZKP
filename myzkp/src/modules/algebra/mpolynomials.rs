@@ -20,7 +20,7 @@ impl<F: Field> MPolynomial<F> {
         // Filter out zero coefficients
         let filtered: HashMap<Vec<usize>, F> = dictionary
             .into_iter()
-            .filter(|(_, v)| !v.is_zero())
+            //.filter(|(_, v)| !v.is_zero())
             .collect();
 
         MPolynomial {
