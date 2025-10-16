@@ -19,7 +19,7 @@ use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
 use crate::utils::{fold_factors_pointwise_cpu, fold_into_half_cpu, eval_folded_poly_cpu, sum_cpu, field_to_bytes, fields_to_bytes, fields_from_bytes, evals_over_boolean_hypercube, F};
 
-struct CudaBackend {
+pub struct CudaBackend {
     stream: Arc<CudaStream>,
     fold_factors_pointwise_kernel: CudaFunction,
     fold_into_half_kernel: CudaFunction,
@@ -44,7 +44,7 @@ impl CudaBackend {
     }
 }
 
-struct SumCheckProverGPU<'a> {
+pub struct SumCheckProverGPU<'a> {
     num_blocks_per_poly: usize,
     num_threads_per_block: usize,
     cuda_backend: &'a CudaBackend,

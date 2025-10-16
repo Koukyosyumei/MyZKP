@@ -17,7 +17,7 @@ use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
 use crate::utils::{F};
 
-struct SumCheckVerifier;
+pub struct SumCheckVerifier;
 
 impl SumCheckVerifier {
     pub fn verify(
