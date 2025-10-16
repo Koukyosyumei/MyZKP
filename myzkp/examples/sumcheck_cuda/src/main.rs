@@ -196,8 +196,8 @@ impl<'a> SumCheckProver<'a> {
             .cuda_backend
             .stream
             .launch_builder(&self.cuda_backend.sum_kernel);
-        builder.arg(&tmp_evals_dev);
         builder.arg(&mut sum_result_dev);
+        builder.arg(&tmp_evals_dev);
         builder.arg(&half_domain_size);
         builder.arg(&0);
         unsafe { builder.launch(launch_config) }?;
@@ -277,20 +277,20 @@ impl<'a> SumCheckProver<'a> {
                 .cuda_backend
                 .stream
                 .launch_builder(&self.cuda_backend.eval_folded_poly_kernel);
+            builder.arg(&mut buf_dev);
+            builder.arg(evals_dev);
+            builder.arg(&eval_point_dev);
             builder.arg(&num_remaining_vars);
             builder.arg(&domain_size);
             builder.arg(&self.num_blocks_per_poly);
-            builder.arg(evals_dev);
-            builder.arg(&mut buf_dev);
-            builder.arg(&eval_point_dev);
             unsafe { builder.launch(*launch_config) }?;
 
             let mut builder = self
                 .cuda_backend
                 .stream
                 .launch_builder(&self.cuda_backend.fold_factors_pointwise_kernel);
-            builder.arg(&mut buf_dev);
             let half_domain_size: usize = 1 << (num_remaining_vars - 1);
+            builder.arg(&mut buf_dev);
             builder.arg(&half_domain_size);
             builder.arg(&num_factors);
             unsafe { builder.launch(*launch_config) }?;
@@ -300,8 +300,8 @@ impl<'a> SumCheckProver<'a> {
                 .cuda_backend
                 .stream
                 .launch_builder(&self.cuda_backend.sum_kernel);
-            builder.arg(&buf_dev);
             builder.arg(&mut *s_evals_dev);
+            builder.arg(&buf_dev);
             builder.arg(&half_half_domain_size);
             builder.arg(&idx);
             unsafe { builder.launch(*launch_config) }?;
@@ -328,11 +328,11 @@ impl<'a> SumCheckProver<'a> {
             .cuda_backend
             .stream
             .launch_builder(&self.cuda_backend.fold_into_half_kernel);
-        builder.arg(&num_remaining_vars);
-        builder.arg(&domain_size);
-        builder.arg(&self.num_blocks_per_poly);
         builder.arg(evals_dev);
+        builder.arg(&domain_size);
+        builder.arg(&num_remaining_vars);
         builder.arg(&challenge_dev);
+        builder.arg(&self.num_blocks_per_poly);
         unsafe { builder.launch(*launch_config) }?;
         Ok(())
     }
