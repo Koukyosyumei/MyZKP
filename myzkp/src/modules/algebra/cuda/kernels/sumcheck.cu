@@ -117,10 +117,12 @@ extern "C" __global__ void sum(fr_t* result, fr_t* data, unsigned int stride, un
     const int tid = threadIdx.x;
     for (unsigned int s = stride; s > 0; s >>= 1) {
         int idx = tid;
-        while (idx < s) {
+        //while (idx < s) {
+	if (tid < s) {
             data[idx] = fr_add(data[idx], data[idx + s]);
-            idx += blockDim.x;
-        }
+	}
+        //    idx += blockDim.x;
+        //}
         __syncthreads();
     }
     if (tid == 0) result[index] = data[0];
