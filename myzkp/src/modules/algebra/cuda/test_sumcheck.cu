@@ -92,7 +92,7 @@ void test_fold_into_half() {
 
     const int block_size = 256;
     const int grid_size = (stride + block_size - 1) / block_size;
-    fold_into_half<<<grid_size, block_size>>>(num_remaining_vars, domain_size, grid_size, d_evals, d_challenge);
+    fold_into_half<<<grid_size, block_size>>>(d_evals, domain_size, num_remaining_vars, d_challenge, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     std::vector<fr_t> h_result(stride);
@@ -130,7 +130,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_0(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_0[i] = to_fr(i);
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_0, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_0(stride);
     CUDA_CHECK(cudaMemcpy(h_result_0.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -141,7 +141,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_1(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_1[i] = to_fr(i + stride);
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_1, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_1(stride);
     CUDA_CHECK(cudaMemcpy(h_result_1.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -152,7 +152,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_5(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_5[i] = to_fr(i + 5 * stride); // i + 5 * 128
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_5, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_5(stride);
     CUDA_CHECK(cudaMemcpy(h_result_5.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -178,7 +178,7 @@ void test_sum() {
     CUDA_CHECK(cudaMalloc(&d_result, sizeof(fr_t)));
     CUDA_CHECK(cudaMemcpy(d_data, h_data.data(), stride * sizeof(fr_t), cudaMemcpyHostToDevice));
 
-    sum<<<1, stride>>>(d_data, d_result, stride, 0);
+    sum<<<1, stride>>>(d_result, d_data, stride, 0);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     fr_t h_result;
