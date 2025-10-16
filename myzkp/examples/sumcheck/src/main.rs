@@ -25,9 +25,9 @@ use sumcheck_cuda::utils::{F, BitCombinationsDictOrder};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example...");
     println!("-------------------------------------------");
-    let is_gpu = false;
+    let is_gpu = true;
 
-    let num_vars = 4;
+    let num_vars = 11;
     let num_factors = 2;
     let max_degree = num_factors;
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         factors.push(MPolynomial::new(dict));
     }
 
-    let num_blocks_per_poly = 4;
+    let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
 
     println!("    Prover created. Generating proof...");
