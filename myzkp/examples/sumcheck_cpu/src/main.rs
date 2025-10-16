@@ -7,6 +7,8 @@ use std::time;
 use num_bigint::{BigInt, Sign};
 use num_traits::identities::One;
 use num_traits::Zero;
+use rand::Rng;
+use rand::{rngs::StdRng, SeedableRng};
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
 use myzkp::modules::algebra::field::Field;
@@ -367,6 +369,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example (CPU)...");
     println!("-------------------------------------------");
 
+    let num_vars = 5;
+    let num_factors = 3;
+    let max_degree = num_factors;
+
+    let mut factors = vec![];
+    let mut rng = StdRng::seed_from_u64(42);
+    for _ in 0..num_factors {
+        let mut dict = HashMap::new();
+        let comb = BitCombinationsDictOrder::new(num_vars);
+        for c in comb {
+            let c_casted: Vec<usize> = c.iter().map(|&b| b as usize).collect();
+            dict.insert(c_casted, F::from_value(rng.random_range(0..256)));
+        }
+        factors.push(MPolynomial::new(dict));
+    }
+
+    /*
     let mut dict_1 = HashMap::new();
     dict_1.insert(vec![0, 0, 0], F::from_value(1));
     dict_1.insert(vec![1, 0, 0], F::from_value(2));
@@ -383,8 +402,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let factor_3 = MPolynomial::new(dict_3);
 
     let factors = vec![factor_1, factor_2, factor_3];
-
-    let max_degree = 3;
+    */
 
     let prover = SumCheckProverCPU::new();
     println!("    Prover created. Generating proof...");
