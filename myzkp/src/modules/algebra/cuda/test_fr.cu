@@ -51,8 +51,6 @@ __global__ void test_kernel(bool *results) {
     unsigned int point_len = 2;
 
     fr_t m_result = evaluate_mpolynomial(num_sub_mpolys, coeffs, expo_flat, offsets, lens, point, point_len);
-    fr_print(m_result);
-    printf("\n");
     results[8] = fr_eq(f_29, m_result);
 }
 
