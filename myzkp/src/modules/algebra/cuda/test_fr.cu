@@ -6,10 +6,12 @@ __global__ void test_kernel(bool *results) {
     fr_t f_o   = fr_one();
     fr_t f_mo  = fr_minus_one();
     fr_t f_2   = {{2, 0, 0, 0}};
+    fr_t f_3   = {{3, 0, 0, 0}};
     fr_t f_5   = {{5, 0, 0, 0}};
     fr_t f_7   = {{7, 0, 0, 0}};
     fr_t f_12  = {{12, 0, 0, 0}};
     fr_t f_24  = {{24, 0, 0, 0}};
+    fr_t f_29  = {{29, 0, 0, 0}};
     fr_t f_35  = {{35, 0, 0, 0}};
     fr_t f_m2  = {{0x43e1f593efffffffULL, 0x2833e84879b97091ULL, 0xb85045b68181585dULL, 0x30644e72e131a029ULL}};
     fr_t f_m12 = {{0x43e1f593effffff5ULL, 0x2833e84879b97091ULL, 0xb85045b68181585dULL, 0x30644e72e131a029ULL}};
@@ -37,29 +39,43 @@ __global__ void test_kernel(bool *results) {
 
     fr_t f_m12_mul_2_add_24 = fr_mul(f_m12, f_2);
     f_m12_mul_2_add_24 = fr_add(f_m12_mul_2_add_24, f_24);
-    results[7] = fr_eq(f_m12_mul_2_add_24, f_24);
+    results[7] = fr_eq(f_m12_mul_2_add_24, f_z);
+
+    // Polynomial: x^2 + 2xy + y^3
+    const unsigned int num_sub_mpolys = 3;
+    fr_t coeffs[3] = {f_o, f_2, f_o};       // 1*x^2, 2*xy, 1*y^3
+    unsigned int expo_flat[5] = {2, 1, 1, 0, 3}; // x^2, x^1 y^1, y^3
+    unsigned int offsets[3] = {0, 1, 3};
+    unsigned int lens[3] = {1, 2, 2};
+    fr_t point[2] = {f_3, f_2}; // x=3, y=2
+    unsigned int point_len = 2;
+
+    fr_t m_result = evaluate_mpolynomial(num_sub_mpolys, coeffs, expo_flat, offsets, lens, point, point_len);
+    fr_print(m_result);
+    printf("\n");
+    results[8] = fr_eq(f_29, m_result);
 }
 
 int main() {
-    bool host_results[7];
+    bool host_results[9];
     bool *dev_results;
-    cudaMalloc(&dev_results, sizeof(bool) * 8);
+    cudaMalloc(&dev_results, sizeof(bool) * 9);
 
     test_kernel<<<1, 1>>>(dev_results);
-    cudaMemcpy(host_results, dev_results, sizeof(bool) * 7, cudaMemcpyDeviceToHost);
+    cudaMemcpy(host_results, dev_results, sizeof(bool) * 9, cudaMemcpyDeviceToHost);
     cudaFree(dev_results);
 
-    const char *names[8] = {
-        "fr_add", "fr_sub", "fr_sub_wrap", "fr_mul", "fr_add_wrap", "fr_sub_wrap", "f_mul_wrap", "f_mul_wrap1"
+    const char *names[9] = {
+        "fr_add", "fr_sub", "fr_sub_wrap", "fr_mul", "fr_add_wrap", "fr_sub_wrap", "f_mul_wrap", "f_mul_wrap1", "f_mpoly"
     };
 
     int pass_count = 0;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 9; i++) {
         printf("%-15s : %s\n", names[i], host_results[i] ? "PASS" : "FAIL");
         if (host_results[i]) pass_count++;
     }
 
-    printf("\n%d / 8 tests passed.\n", pass_count);
+    printf("\n%d / 9 tests passed.\n", pass_count);
     return 0;
 }
 
