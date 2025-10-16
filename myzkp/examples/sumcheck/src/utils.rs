@@ -1,14 +1,10 @@
-use std::collections::HashMap;
-use std::sync::Arc;
 
 use num_bigint::{BigInt, Sign};
 use num_traits::Zero;
 
-use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
+use myzkp::modules::algebra::field::{FiniteFieldElement, ModEIP197};
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
-use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
-use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
 #[derive(Debug)]
 pub struct BitCombinationsDictOrder {

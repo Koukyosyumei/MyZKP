@@ -1,20 +1,11 @@
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::time;
 
 use cudarc;
-use cudarc::driver::CudaStream;
-use cudarc::driver::LaunchConfig;
-use cudarc::driver::{PushKernelArg, CudaFunction, CudaSlice};
-use cudarc::nvrtc::Ptx;
-use num_bigint::{BigInt, Sign};
 use rand::Rng;
 use rand::{rngs::StdRng, SeedableRng};
 
-use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
-use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
-use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
 use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
@@ -54,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("    Generating proof...");
     let start_time = time::Instant::now();    
-    let (claimed_sum, mut proof) = {
+    let (claimed_sum, proof) = {
         if is_gpu {    
             println!("    Initializing CUDA Backend...");
             let cuda_backend = CudaBackend::new(0)?;

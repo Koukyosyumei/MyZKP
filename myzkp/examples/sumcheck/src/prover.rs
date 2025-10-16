@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use cudarc;
@@ -6,18 +5,14 @@ use cudarc::driver::CudaStream;
 use cudarc::driver::LaunchConfig;
 use cudarc::driver::{PushKernelArg, CudaFunction, CudaSlice};
 use cudarc::nvrtc::Ptx;
-use num_bigint::{BigInt, Sign};
-use num_traits::identities::One;
-use num_traits::Zero;
 
 use myzkp::modules::algebra::fiat_shamir::FiatShamirTransformer;
-use myzkp::modules::algebra::field::{Field, FiniteFieldElement, ModEIP197};
+use myzkp::modules::algebra::field::Field;
 use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
-use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
-use crate::utils::{fold_factors_pointwise_cpu, fold_into_half_cpu, eval_folded_poly_cpu, sum_cpu, field_to_bytes, fields_to_bytes, fields_from_bytes, evals_over_boolean_hypercube, F};
+use crate::utils::{fold_factors_pointwise_cpu, fold_into_half_cpu, eval_folded_poly_cpu, sum_cpu, field_to_bytes, fields_to_bytes, fields_from_bytes, F};
 
 pub struct CudaBackend {
     stream: Arc<CudaStream>,
