@@ -20,7 +20,7 @@ use myzkp::modules::algebra::sumcheck::sum_over_boolean_hypercube;
 
 use sumcheck_cuda::prover::{CudaBackend, SumCheckProverCPU, SumCheckProverGPU};
 use sumcheck_cuda::verifier::SumCheckVerifier;
-use sumcheck_cuda::utils::{F, BitCombinationsDictOrder};
+use sumcheck_cuda::utils::{F, BitCombinationsDictOrder, evals_over_boolean_hypercube};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example...");
@@ -46,7 +46,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let num_blocks_per_poly = 1;
     let num_threads_per_block = 256;
 
-    println!("    Prover created. Generating proof...");
+    println!("    Evaluating each polynomial factor...");
+    let mut evaluation_table = vec![];
+    for f in &factors {
+        evals_over_boolean_hypercube(f, &mut evaluation_table);
+    }
+
+    println!("    Generating proof...");
     let start_time = time::Instant::now();    
     let (claimed_sum, mut proof) = {
         if is_gpu {    
@@ -58,10 +64,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 num_threads_per_block,
                 &cuda_backend,
             );
-            prover.prove(max_degree, &factors)?
+            prover.prove(&mut evaluation_table, max_degree, &factors)?
         } else {
             let prover = SumCheckProverCPU::new();
-            prover.prove(max_degree, &factors)?
+            prover.prove(&mut evaluation_table, max_degree, &factors)?
         }
     };
     println!("    ✅ Proof generated!");

@@ -63,13 +63,15 @@ impl<'a> SumCheckProverGPU<'a> {
         }
     }
 
-    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
+    pub fn prove(&self, evaluation_table: &mut Vec<F>, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
         let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
         let num_factors = polynomial_factors.len();
+        /*
         let mut evaluation_table = vec![];
         for f in polynomial_factors {
             evals_over_boolean_hypercube(&f, &mut evaluation_table);
         }
+        */
 
         let mut transcript = FiatShamirTransformer::new();
         transcript.push(&vec![
@@ -314,8 +316,9 @@ impl SumCheckProverCPU {
     /// Executes the Sum-Check proving algorithm.
     pub fn prove(
         &self,
+        evaluation_table: &mut Vec<F>,
         max_degree: usize,
-        polynomial_factors: &[MPolynomial<F>],
+        polynomial_factors: &[MPolynomial<F>]
     ) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
         let num_variables = polynomial_factors
             .iter()
@@ -324,11 +327,13 @@ impl SumCheckProverCPU {
             .unwrap_or(0);
         let num_factors = polynomial_factors.len();
 
+        /*
         // Generate the full evaluation table for all factors over the boolean hypercube.
         let mut evaluation_table = vec![];
         for f in polynomial_factors {
             evals_over_boolean_hypercube(f, &mut evaluation_table);
         }
+        */
 
         // Initialize transcript and add public parameters.
         let mut transcript = FiatShamirTransformer::new();
