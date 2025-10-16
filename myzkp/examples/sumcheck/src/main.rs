@@ -16,14 +16,14 @@ use sumcheck_cuda::utils::{F, BitCombinationsDictOrder, evals_over_boolean_hyper
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example...");
     println!("-------------------------------------------");
-    let is_gpu = false;
+    let is_gpu = true;
 
     let num_vars = 10;
     let num_factors = 2;
     let max_degree = num_factors;
 
     let mut factors = vec![];
-    let mut rng = StdRng::seed_from_u64(42);
+    let mut rng = StdRng::seed_from_u64(45);
     
     for _ in 0..num_factors {
         let mut dict = HashMap::new();
@@ -58,13 +58,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             );
             prover.prove(max_degree, &factors)?
         } else {
-            println!("    Evaluating each polynomial factor...");
-            let mut evaluation_table = vec![];
-            for f in &factors {
-                evals_over_boolean_hypercube(f, &mut evaluation_table);
-            }
             let prover = SumCheckProverCPU::new();
-            prover.prove(&mut evaluation_table, max_degree, &factors)?
+            prover.prove(max_degree, &factors)?
         }
     };
     println!("    ✅ Proof generated!");

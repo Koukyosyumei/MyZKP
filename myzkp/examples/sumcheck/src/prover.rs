@@ -12,6 +12,7 @@ use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
 
+use crate::utils::evals_over_boolean_hypercube;
 use crate::utils::{fold_factors_pointwise_cpu, fold_into_half_cpu, eval_folded_poly_cpu, sum_cpu, field_to_bytes, fields_to_bytes, fields_from_bytes, F};
 
 pub struct CudaBackend {
@@ -378,7 +379,6 @@ impl SumCheckProverCPU {
     /// Executes the Sum-Check proving algorithm.
     pub fn prove(
         &self,
-        evaluation_table: &mut Vec<F>,
         max_degree: usize,
         polynomial_factors: &[MPolynomial<F>]
     ) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
@@ -389,13 +389,11 @@ impl SumCheckProverCPU {
             .unwrap_or(0);
         let num_factors = polynomial_factors.len();
 
-        /*
         // Generate the full evaluation table for all factors over the boolean hypercube.
         let mut evaluation_table = vec![];
         for f in polynomial_factors {
             evals_over_boolean_hypercube(f, &mut evaluation_table);
         }
-        */
 
         // Initialize transcript and add public parameters.
         let mut transcript = FiatShamirTransformer::new();
