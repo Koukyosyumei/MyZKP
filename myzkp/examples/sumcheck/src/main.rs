@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let is_gpu = true;
 
     let num_vars = 8;
-    let num_factors = 2;
+    let num_factors = 3;
     let max_degree = num_factors;
 
     let mut factors = vec![];
