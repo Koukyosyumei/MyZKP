@@ -40,15 +40,14 @@ extern "C" __global__ void fold_factors_pointwise(fr_t* buf, unsigned int domain
  * The update rule is `p(r, x) = p(0, x) + r * (p(1, x) - p(0, x))`.
  * This operation is performed in-place on the `evals` buffer.
  *
- * @param num_remaining_vars The number of variables remaining in the polynomial.
- * @param domain_size The total domain size for a single factor polynomial (e.g., 2^l).
- * @param num_blocks_per_factor The number of thread blocks assigned to process a single polynomial factor.
  * @param evals The buffer of polynomial evaluations.
+ * @param domain_size The total domain size for a single factor polynomial (e.g., 2^l).
+ * @param num_remaining_vars The number of variables remaining in the polynomial.
  * @param challenge A pointer to the random challenge `r` for the current round.
+ * @param num_blocks_per_factor The number of thread blocks assigned to process a single polynomial factor.
  */
 extern "C" __global__ void fold_into_half(
-    unsigned int num_remaining_vars, unsigned int domain_size, unsigned int num_blocks_per_factor, fr_t* evals, const fr_t* challenge
-) {
+    fr_t* evals, unsigned int domain_size, unsigned int num_remaining_vars, const fr_t* challenge, unsigned int num_blocks_per_factor) {
     // Calculate the thread's ID within the set of threads assigned to this factor.
     int tid = (blockIdx.x % num_blocks_per_factor) * blockDim.x + threadIdx.x;
     // evals[idx] corresponds to p(..., 0, x'), and evals[idx + stride] to p(..., 1, x').
@@ -74,15 +73,15 @@ extern "C" __global__ void fold_into_half(
  * @details This is similar to `fold_into_half`, but instead of using a random challenge,
  * it uses a specific evaluation point.
  *
+ * @param result Output buffer to store the evaluated polynomial.
+ * @param evals The buffer of polynomial evaluations.
+ * @param eval_point The point at which to evaluate the first variable of the polynomial.
  * @param num_vars The number of variables in the current polynomial representation.
  * @param domain_size The domain size of the original, unfolded polynomial.
  * @param num_blocks_per_poly The number of thread blocks assigned to process a single polynomial.
- * @param evals The buffer of polynomial evaluations.
- * @param result Output buffer to store the evaluated polynomial.
- * @param eval_point The point at which to evaluate the first variable of the polynomial.
  */
 extern "C" __global__ void eval_folded_poly(
-    unsigned int num_vars, unsigned int domain_size, unsigned int num_blocks_per_poly, fr_t* evals, fr_t* result, const fr_t* eval_point
+    fr_t* result, fr_t* evals, const fr_t* eval_point, unsigned int num_vars, unsigned int domain_size, unsigned int num_blocks_per_poly
 ) {
     const int tid = (blockIdx.x % num_blocks_per_poly) * blockDim.x + threadIdx.x;
     const int stride = 1 << (num_vars - 1);
@@ -114,13 +113,13 @@ extern "C" __global__ void eval_folded_poly(
     }
 }
 
-extern "C" __global__ void sum(fr_t* data, fr_t* result, unsigned int stride, unsigned int index) {
+extern "C" __global__ void sum(fr_t* result, fr_t* data, unsigned int stride, unsigned int index) {
     const int tid = threadIdx.x;
     for (unsigned int s = stride; s > 0; s >>= 1) {
         int idx = tid;
         while (idx < s) {
-            data[idx] = fr_add(data[idx], data[idx + s]);
-            idx += blockDim.x;
+		data[idx] = fr_add(data[idx], data[idx + s]);
+		idx += blockDim.x;
         }
         __syncthreads();
     }

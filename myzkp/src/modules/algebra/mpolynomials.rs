@@ -5,7 +5,7 @@ use std::fmt::Debug;
 use std::ops::{Add, Mul, Neg, Sub};
 
 use num_traits::Zero;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::modules::algebra::field::Field;
 use crate::modules::algebra::polynomial::Polynomial;

@@ -1087,11 +1087,11 @@ $L__BB0_38:
 }
 	// .globl	fold_into_half
 .visible .entry fold_into_half(
-	.param .u32 fold_into_half_param_0,
+	.param .u64 fold_into_half_param_0,
 	.param .u32 fold_into_half_param_1,
 	.param .u32 fold_into_half_param_2,
 	.param .u64 fold_into_half_param_3,
-	.param .u64 fold_into_half_param_4
+	.param .u32 fold_into_half_param_4
 )
 {
 	.reg .pred 	%p<42>;
@@ -1099,11 +1099,11 @@ $L__BB0_38:
 	.reg .b64 	%rd<1029>;
 
 
-	ld.param.u32 	%r11, [fold_into_half_param_0];
+	ld.param.u64 	%rd122, [fold_into_half_param_0];
 	ld.param.u32 	%r9, [fold_into_half_param_1];
-	ld.param.u32 	%r10, [fold_into_half_param_2];
-	ld.param.u64 	%rd122, [fold_into_half_param_3];
-	ld.param.u64 	%rd123, [fold_into_half_param_4];
+	ld.param.u32 	%r11, [fold_into_half_param_2];
+	ld.param.u64 	%rd123, [fold_into_half_param_3];
+	ld.param.u32 	%r10, [fold_into_half_param_4];
 	mov.u32 	%r1, %ctaid.x;
 	rem.u32 	%r12, %r1, %r10;
 	mov.u32 	%r2, %ntid.x;
@@ -2229,12 +2229,12 @@ $L__BB1_46:
 }
 	// .globl	eval_folded_poly
 .visible .entry eval_folded_poly(
-	.param .u32 eval_folded_poly_param_0,
-	.param .u32 eval_folded_poly_param_1,
-	.param .u32 eval_folded_poly_param_2,
-	.param .u64 eval_folded_poly_param_3,
-	.param .u64 eval_folded_poly_param_4,
-	.param .u64 eval_folded_poly_param_5
+	.param .u64 eval_folded_poly_param_0,
+	.param .u64 eval_folded_poly_param_1,
+	.param .u64 eval_folded_poly_param_2,
+	.param .u32 eval_folded_poly_param_3,
+	.param .u32 eval_folded_poly_param_4,
+	.param .u32 eval_folded_poly_param_5
 )
 {
 	.reg .pred 	%p<52>;
@@ -2246,12 +2246,12 @@ $L__BB1_46:
 	// demoted variable
 	.shared .align 1 .u8 _ZZ16eval_folded_polyE6is_one;
 
-	ld.param.u32 	%r13, [eval_folded_poly_param_0];
-	ld.param.u32 	%r11, [eval_folded_poly_param_1];
-	ld.param.u32 	%r12, [eval_folded_poly_param_2];
-	ld.param.u64 	%rd143, [eval_folded_poly_param_3];
-	ld.param.u64 	%rd144, [eval_folded_poly_param_4];
-	ld.param.u64 	%rd145, [eval_folded_poly_param_5];
+	ld.param.u64 	%rd143, [eval_folded_poly_param_0];
+	ld.param.u64 	%rd144, [eval_folded_poly_param_1];
+	ld.param.u64 	%rd145, [eval_folded_poly_param_2];
+	ld.param.u32 	%r13, [eval_folded_poly_param_3];
+	ld.param.u32 	%r11, [eval_folded_poly_param_4];
+	ld.param.u32 	%r12, [eval_folded_poly_param_5];
 	mov.u32 	%r1, %ctaid.x;
 	rem.u32 	%r14, %r1, %r12;
 	mov.u32 	%r2, %ntid.x;
@@ -2307,8 +2307,8 @@ $L__BB2_10:
 	setp.ge.s32 	%p9, %r21, %r5;
 	@%p9 bra 	$L__BB2_57;
 
-	cvta.to.global.u64 	%rd3, %rd144;
-	cvta.to.global.u64 	%rd4, %rd143;
+	cvta.to.global.u64 	%rd3, %rd143;
+	cvta.to.global.u64 	%rd4, %rd144;
 	div.u32 	%r17, %r1, %r12;
 	ld.shared.u8 	%rs5, [_ZZ16eval_folded_polyE7is_zero];
 	ld.shared.u8 	%rs6, [_ZZ16eval_folded_polyE6is_one];
@@ -3508,7 +3508,7 @@ $L__BB3_2:
 
 $L__BB3_4:
 	add.s32 	%r9, %r13, %r12;
-	cvta.to.global.u64 	%rd20, %rd18;
+	cvta.to.global.u64 	%rd20, %rd19;
 	mul.wide.s32 	%rd21, %r13, 32;
 	add.s64 	%rd5, %rd20, %rd21;
 	ld.global.u64 	%rd22, [%rd5];
@@ -3605,12 +3605,12 @@ $L__BB3_14:
 	setp.ne.s32 	%p15, %r11, 0;
 	@%p15 bra 	$L__BB3_16;
 
-	cvta.to.global.u64 	%rd49, %rd18;
+	cvta.to.global.u64 	%rd49, %rd19;
 	ld.global.u64 	%rd50, [%rd49];
 	ld.global.u64 	%rd51, [%rd49+8];
 	ld.global.u64 	%rd52, [%rd49+16];
 	ld.global.u64 	%rd53, [%rd49+24];
-	cvta.to.global.u64 	%rd54, %rd19;
+	cvta.to.global.u64 	%rd54, %rd18;
 	mul.wide.u32 	%rd55, %r7, 32;
 	add.s64 	%rd56, %rd54, %rd55;
 	st.global.u64 	[%rd56], %rd50;
