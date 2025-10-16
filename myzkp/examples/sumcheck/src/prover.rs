@@ -12,10 +12,12 @@ use myzkp::modules::algebra::mpolynomials::MPolynomial;
 use myzkp::modules::algebra::polynomial::Polynomial;
 use myzkp::modules::algebra::ring::Ring;
 
+use crate::utils::evals_over_boolean_hypercube;
 use crate::utils::{fold_factors_pointwise_cpu, fold_into_half_cpu, eval_folded_poly_cpu, sum_cpu, field_to_bytes, fields_to_bytes, fields_from_bytes, F};
 
 pub struct CudaBackend {
     stream: Arc<CudaStream>,
+    eval_all_binary_combinations_kernel: CudaFunction,
     fold_factors_pointwise_kernel: CudaFunction,
     fold_into_half_kernel: CudaFunction,
     eval_folded_poly_kernel: CudaFunction,
@@ -31,11 +33,46 @@ impl CudaBackend {
 
         Ok(Self {
             stream,
+            eval_all_binary_combinations_kernel: module.load_function("eval_all_binary_combinations")?,
             fold_factors_pointwise_kernel: module.load_function("fold_factors_pointwise")?,
             fold_into_half_kernel: module.load_function("fold_into_half")?,
             eval_folded_poly_kernel: module.load_function("eval_folded_poly")?,
             sum_kernel: module.load_function("sum")?,
         })
+    }
+}
+
+pub struct MPolyKernelInput {
+    pub coeffs: Vec<F>,
+    pub expo_flat: Vec<u32>,
+    pub offsets: Vec<u32>,
+    pub lens: Vec<u32>,
+}
+
+pub fn convert_mpoly_to_kernel_format(mpoly: &MPolynomial<F>) -> MPolyKernelInput {
+    let mut coeffs = Vec::new();
+    let mut expo_flat = Vec::new();
+    let mut offsets = Vec::new();
+    let mut lens = Vec::new();
+    let mut current_offset = 0u32;
+
+    for (exponents, coeff) in &mpoly.dictionary {
+        coeffs.push(coeff.clone());
+        offsets.push(current_offset);
+        lens.push(exponents.len() as u32);
+
+        for &e in exponents {
+            expo_flat.push(e as u32);
+        }
+
+        current_offset += exponents.len() as u32;
+    }
+
+    MPolyKernelInput {
+        coeffs,
+        expo_flat,
+        offsets,
+        lens,
     }
 }
 
@@ -58,7 +95,7 @@ impl<'a> SumCheckProverGPU<'a> {
         }
     }
 
-    pub fn prove(&self, evaluation_table: &mut Vec<F>, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
+    pub fn prove(&self, max_degree: usize, polynomial_factors: &[MPolynomial<F>]) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
         let num_variables = polynomial_factors.iter().map(|p| p.get_num_vars()).max().unwrap_or(0);
         let num_factors = polynomial_factors.len();
         /*
@@ -100,8 +137,39 @@ impl<'a> SumCheckProverGPU<'a> {
             shared_mem_bytes: 128,
         };
 
-        let all_evals_bytes = fields_to_bytes(&evaluation_table);
 
+        // Evaluation Table
+        let mut evaluation_table_dev_p = self
+            .cuda_backend
+            .stream
+            .alloc_zeros::<u8>(32 * domain_size * num_factors)?;
+        for i in 0..num_factors {
+            let mpoly_info = convert_mpoly_to_kernel_format(&polynomial_factors[i]);
+            let coeffs_bytes = fields_to_bytes(&mpoly_info.coeffs);
+            let coeffs_bytes_dev = self.cuda_backend.stream.memcpy_stod(&coeffs_bytes)?;
+            let expo_flat_dev = self.cuda_backend.stream.memcpy_stod(&mpoly_info.expo_flat)?;
+            let offsets_dev = self.cuda_backend.stream.memcpy_stod(&mpoly_info.offsets)?;
+            let lens_dev = self.cuda_backend.stream.memcpy_stod(&mpoly_info.lens)?;
+            let offset_p = (i * domain_size) as usize;        
+
+            let mut builder = self
+                .cuda_backend
+                .stream
+                .launch_builder(&self.cuda_backend.eval_all_binary_combinations_kernel);
+            builder.arg(&mut evaluation_table_dev_p);
+            builder.arg(&offset_p);
+            builder.arg(&num_variables);
+            builder.arg(&domain_size);
+            builder.arg(&coeffs_bytes_dev);
+            builder.arg(&expo_flat_dev);
+            builder.arg(&offsets_dev);
+            builder.arg(&lens_dev);
+            unsafe { builder.launch(launch_config) }?;
+        }
+        let evaluation_table: Vec<F> =
+            fields_from_bytes(&self.cuda_backend.stream.memcpy_dtov(&evaluation_table_dev_p)?);
+        let all_evals_bytes = fields_to_bytes(&evaluation_table);
+        
         // Calculate Sum
         let mut tmp_evals_dev = self.cuda_backend.stream.memcpy_stod(&all_evals_bytes)?;
         let mut sum_result_dev = self
@@ -311,7 +379,6 @@ impl SumCheckProverCPU {
     /// Executes the Sum-Check proving algorithm.
     pub fn prove(
         &self,
-        evaluation_table: &mut Vec<F>,
         max_degree: usize,
         polynomial_factors: &[MPolynomial<F>]
     ) -> Result<(F, Vec<u8>), Box<dyn std::error::Error>> {
@@ -322,13 +389,11 @@ impl SumCheckProverCPU {
             .unwrap_or(0);
         let num_factors = polynomial_factors.len();
 
-        /*
         // Generate the full evaluation table for all factors over the boolean hypercube.
         let mut evaluation_table = vec![];
         for f in polynomial_factors {
             evals_over_boolean_hypercube(f, &mut evaluation_table);
         }
-        */
 
         // Initialize transcript and add public parameters.
         let mut transcript = FiatShamirTransformer::new();

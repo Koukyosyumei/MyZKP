@@ -31,6 +31,64 @@ bool compare_arrays(const std::vector<fr_t>& result, const std::vector<fr_t>& ex
     return true;
 }
 
+void test_eval_all_binary_combinations() {
+    const unsigned int el = 3;
+    const unsigned int num_sub_mpolys = 1;
+    const unsigned int offset = 0;
+
+    fr_t h_coeffs[1] = { to_fr(1) };
+    unsigned int h_expo_flat[1] = { 1 };
+    unsigned int h_offsets[1] = {0};
+    unsigned int h_lens[1] = {1};
+
+    const unsigned int num_combinations = 1 << el; // 8
+    std::vector<fr_t> h_result(num_combinations, fr_zero());
+
+    fr_t* d_result;
+    fr_t* d_coeffs;
+    unsigned int* d_expo_flat;
+    unsigned int* d_offsets;
+    unsigned int* d_lens;
+
+    CUDA_CHECK(cudaMalloc(&d_result, num_combinations * sizeof(fr_t)));
+    CUDA_CHECK(cudaMalloc(&d_coeffs, sizeof(h_coeffs)));
+    CUDA_CHECK(cudaMalloc(&d_expo_flat, sizeof(h_expo_flat)));
+    CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(h_offsets)));
+    CUDA_CHECK(cudaMalloc(&d_lens, sizeof(h_lens)));
+
+    CUDA_CHECK(cudaMemcpy(d_coeffs, h_coeffs, sizeof(h_coeffs), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_expo_flat, h_expo_flat, sizeof(h_expo_flat), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets, sizeof(h_offsets), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_lens, h_lens, sizeof(h_lens), cudaMemcpyHostToDevice));
+
+    const int block_size = 4;
+    const int grid_size = (num_combinations + block_size - 1) / block_size;
+
+    eval_all_binary_combinations<<<grid_size, block_size>>>(
+        d_result, offset, el, num_sub_mpolys, d_coeffs, d_expo_flat, d_offsets, d_lens
+    );
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    CUDA_CHECK(cudaMemcpy(h_result.data(), d_result, num_combinations * sizeof(fr_t), cudaMemcpyDeviceToHost));
+
+    std::vector<fr_t> h_expected(num_combinations);
+    for (unsigned int i = 0; i < num_combinations; ++i) {
+	if (i < 4) {
+        	h_expected[i] = fr_zero();
+	} else {
+		h_expected[i] = fr_one();
+	}
+    }
+
+    check("eval_all_binary_combinations", compare_arrays(h_result, h_expected));
+
+    CUDA_CHECK(cudaFree(d_result));
+    CUDA_CHECK(cudaFree(d_coeffs));
+    CUDA_CHECK(cudaFree(d_expo_flat));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_lens));
+}
+
 void test_fold_factors_pointwise() {
     const unsigned int domain_size = 256;
     const unsigned int num_factors = 3;
@@ -92,7 +150,7 @@ void test_fold_into_half() {
 
     const int block_size = 256;
     const int grid_size = (stride + block_size - 1) / block_size;
-    fold_into_half<<<grid_size, block_size>>>(num_remaining_vars, domain_size, grid_size, d_evals, d_challenge);
+    fold_into_half<<<grid_size, block_size>>>(d_evals, domain_size, num_remaining_vars, d_challenge, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     std::vector<fr_t> h_result(stride);
@@ -130,7 +188,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_0(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_0[i] = to_fr(i);
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_0, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_0(stride);
     CUDA_CHECK(cudaMemcpy(h_result_0.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -141,7 +199,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_1(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_1[i] = to_fr(i + stride);
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_1, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_1(stride);
     CUDA_CHECK(cudaMemcpy(h_result_1.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -152,7 +210,7 @@ void test_eval_folded_poly() {
     std::vector<fr_t> h_expected_5(stride);
     for(unsigned int i=0; i<stride; ++i) h_expected_5[i] = to_fr(i + 5 * stride); // i + 5 * 128
     CUDA_CHECK(cudaMemcpy(d_eval_point, &eval_point_5, sizeof(fr_t), cudaMemcpyHostToDevice));
-    eval_folded_poly<<<grid_size, block_size>>>(num_vars, initial_poly_size, grid_size, d_evals, d_result, d_eval_point);
+    eval_folded_poly<<<grid_size, block_size>>>(d_result, d_evals, d_eval_point, num_vars, initial_poly_size, grid_size);
     CUDA_CHECK(cudaDeviceSynchronize());
     std::vector<fr_t> h_result_5(stride);
     CUDA_CHECK(cudaMemcpy(h_result_5.data(), d_result, stride * sizeof(fr_t), cudaMemcpyDeviceToHost));
@@ -178,7 +236,7 @@ void test_sum() {
     CUDA_CHECK(cudaMalloc(&d_result, sizeof(fr_t)));
     CUDA_CHECK(cudaMemcpy(d_data, h_data.data(), stride * sizeof(fr_t), cudaMemcpyHostToDevice));
 
-    sum<<<1, stride>>>(d_data, d_result, stride, 0);
+    sum<<<1, stride>>>(d_result, d_data, stride, 0);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     fr_t h_result;
@@ -192,6 +250,7 @@ void test_sum() {
 
 int main() {
     printf("Running Sum-Check Kernel Unit Tests...\n\n");
+    test_eval_all_binary_combinations();
     test_fold_factors_pointwise();
     test_fold_into_half();
     test_eval_folded_poly();

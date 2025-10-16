@@ -19,11 +19,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let is_gpu = true;
 
     let num_vars = 8;
-    let num_factors = 2;
+    let num_factors = 3;
     let max_degree = num_factors;
 
     let mut factors = vec![];
-    let mut rng = StdRng::seed_from_u64(42);
+    let mut rng = StdRng::seed_from_u64(45);
+    
     for _ in 0..num_factors {
         let mut dict = HashMap::new();
         let comb = BitCombinationsDictOrder::new(num_vars);
@@ -55,10 +56,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 num_threads_per_block,
                 &cuda_backend,
             );
-            prover.prove(&mut evaluation_table, max_degree, &factors)?
+            prover.prove(max_degree, &factors)?
         } else {
             let prover = SumCheckProverCPU::new();
-            prover.prove(&mut evaluation_table, max_degree, &factors)?
+            prover.prove(max_degree, &factors)?
         }
     };
     println!("    ✅ Proof generated!");

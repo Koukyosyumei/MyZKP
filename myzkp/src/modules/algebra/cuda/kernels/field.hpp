@@ -310,3 +310,37 @@ __host__ __device__ fr_t fr_mul(const fr_t &a, const fr_t &b) {
     
     return mont_reduce(zero_ext_res);
 }
+
+__host__ __device__ fr_t fr_pow_uint(fr_t base, unsigned int exp) {
+    fr_t res = fr_one();
+    fr_t cur = base;
+    while (exp > 0) {
+        if (exp & 1u) res = fr_mul(res, cur);
+        cur = fr_mul(cur, cur);
+        exp >>= 1;
+    }
+    return res;
+}
+
+__host__ __device__ fr_t evaluate_mpolynomial(
+    unsigned int num_sub_mpolys,
+    const fr_t* coeffs,
+    const unsigned int* expo_flat,
+    const unsigned int* offsets,
+    const unsigned int* lens,
+    const fr_t* point,
+    unsigned int point_len
+) {
+    fr_t acc = fr_zero();
+    for (unsigned int i = 0; i < num_sub_mpolys; ++i) {
+        fr_t prod = coeffs[i];
+        unsigned int off = offsets[i];
+        unsigned int len = lens[i];
+        for (unsigned int j = 0; j < len; ++j) {
+            if (j >= point_len) continue;
+            prod = fr_mul(prod, fr_pow_uint(point[j], expo_flat[off + j]));
+        }
+        acc = fr_add(acc, prod);
+    }
+    return acc;
+}

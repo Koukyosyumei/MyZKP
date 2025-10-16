@@ -1,6 +1,33 @@
 #include <cstdint>
 #include "field.hpp"
 
+extern "C" __global__ void eval_all_binary_combinations(
+    fr_t* results,
+    unsigned int offset,
+    unsigned int el,
+    unsigned int num_sub_mpolys,
+    const fr_t* coeffs,
+    const unsigned int* expo_flat,
+    const unsigned int* offsets,
+    const unsigned int* lens
+) {
+    unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned int num_combinations = 1 << el; // 2^el
+
+    unsigned int stride = gridDim.x * blockDim.x;
+    for (unsigned int idx = tid; idx < num_combinations; idx += stride) {
+        fr_t point[32];
+	for (unsigned int i = 0; i < 32; ++i) {
+	    point[i] = fr_zero();
+	}
+        for (unsigned int i = 0; i < el; ++i) {
+            point[i] = (idx & (1u << (el - 1 - i))) ? fr_one() : fr_zero();
+        }
+        fr_t val = evaluate_mpolynomial(num_sub_mpolys, coeffs, expo_flat, offsets, lens, point, el);
+	results[offset + idx] = val;
+    }
+}
+
 /**
  * @brief CUDA kernel to fold multiple polynomial factors into one by computing their pointwise product.
  *
