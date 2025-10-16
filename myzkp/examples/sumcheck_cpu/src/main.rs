@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::hash::Hash;
 use std::sync::Arc;
+use std::time;
 
 use num_bigint::{BigInt, Sign};
 use num_traits::identities::One;
@@ -387,9 +388,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let prover = SumCheckProverCPU::new();
     println!("    Prover created. Generating proof...");
+    let start_time = time::Instant::now();
     let (claimed_sum, mut proof) = prover.prove(max_degree, &factors)?;
     println!("    ✅ Proof generated!");
-    println!("    Prover's Claimed Sum (C1): {}", claimed_sum);
+    println!("        - Prover's Claimed Sum (C1): {}", claimed_sum);
+    println!("        - Proving Time: {:?}", start_time.elapsed());
 
     debug_assert_eq!(
         sum_over_boolean_hypercube(
