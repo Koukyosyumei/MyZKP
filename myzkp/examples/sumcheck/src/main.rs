@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("-------------------------------------------");
     let is_gpu = false;
 
-    let num_vars = 10;
+    let num_vars = 4;
     let num_factors = 2;
     let max_degree = num_factors;
 
@@ -71,8 +71,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     debug_assert_eq!(sum_over_boolean_hypercube(&factors.iter().skip(1).fold(factors[0].clone(), |acc, p| &acc * p)), claimed_sum);
     
     println!("    Verifier is now checking the proof interactively...");
+    let start_time = time::Instant::now();
     let is_valid = SumCheckVerifier::verify(max_degree, &factors, claimed_sum, &proof)?;
     println!("    ✅ Verification complete.");
+    println!("        - Verification Time: {:?}", start_time.elapsed());
 
     if is_valid {
         println!("\n🎉 SUCCESS: Proof is valid! 🎉");
