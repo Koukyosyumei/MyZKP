@@ -51,6 +51,7 @@ MyZKP is a growing library that provides:
 - ⚡ [Arithmetization](https://koukyosyumei.github.io/MyZKP/zksnark/subsec1.html)
 - 🛠️ [Proving Single Polynomial](https://koukyosyumei.github.io/MyZKP/zksnark/subsec2.html)
 - 🐍 [Bringing It All Together: SNARK](https://koukyosyumei.github.io/MyZKP/zksnark/subsec3.html)
+- ✅ [Sumcheck (CUDA)](https://github.com/Koukyosyumei/MyZKP/tree/main/myzkp/examples/sumcheck)
   
 **🌟 Basic of zk-STARKs**
 
