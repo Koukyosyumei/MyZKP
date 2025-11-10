@@ -13,6 +13,8 @@ use sumcheck_cuda::prover::{CudaBackend, SumCheckProverCPU, SumCheckProverGPU};
 use sumcheck_cuda::verifier::SumCheckVerifier;
 use sumcheck_cuda::utils::{F, BitCombinationsDictOrder, evals_over_boolean_hypercube};
 
+// Algorithm 1 proposed in 'Bagad, Suyash, Yuval Domb, and Justin Thaler. "The sum-check protocol over fields of small characteristic." Cryptology ePrint Archive (2024).'
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting Sumcheck Protocol Example...");
     println!("-------------------------------------------");
